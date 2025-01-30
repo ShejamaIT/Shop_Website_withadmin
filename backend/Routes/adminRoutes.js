@@ -430,6 +430,80 @@ router.get("/get-items-by-type", async (req, res) => {
     }
 });
 
+// Save category image
+router.post("/categoryimg", upload.single('img'), async (req, res) => {
+    const sql = `INSERT INTO category_img (category,subcategory,img) VALUES (?, ?, ?)`;
+
+    const values = [
+        req.body.category,
+        req.body.subcategory,
+        req.file.buffer,  // The image file is in `req.file.buffer`
+    ];
+
+    try {
+        const [result] = await db.query(sql, values);
+
+        return res.status(201).json({
+            success: true,
+            message: "Category image added successfully",
+            data: {
+                category: req.body.category,
+                subcategory: req.body.subcategory,
+                img: req.body.img,
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting image data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+//Get image of category
+router.get("/getcategoryimg", async (req, res) => {
+    const { category, subcategory } = req.query;
+
+    if (!category || !subcategory) {
+        return res.status(400).json({
+            success: false,
+            message: "Category and Subcategory are required",
+        });
+    }
+
+    const sql = "SELECT * FROM category_img WHERE category = ? AND subcategory = ?";
+
+    try {
+        const [rows] = await db.query(sql, [category, subcategory]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No images found for the given category and subcategory",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Category images retrieved successfully",
+            data: rows.map(row => ({
+                id: row.id,
+                category: row.category,
+                subcategory: row.subcategory,
+                img: row.img.toString("base64"), // Convert binary image to Base64
+            })),
+        });
+    } catch (err) {
+        console.error("Error fetching data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching data from database",
+            details: err.message,
+        });
+    }
+});
 
 
 

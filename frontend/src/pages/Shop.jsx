@@ -70,19 +70,10 @@ const Shop = () =>{
                                 <select onChange={handleFilter}>
                                 <option>Filter By Category</option>
                                     <option value="Home_Furniture">Home Furniture</option>
-                                    <option value="mobile">Mobile</option>
-                                    <option value="chair">Chair</option>
-                                    <option value="watch">Watch</option>
-                                    <option value="wireless">Wireless</option>
-                                </select>
-                            </div>
-                        </Col>
-                        <Col lg='3' md='6' className='text-end'>
-                            <div className="filter__widget">
-                                <select>
-                                    <option>Sort By</option>
-                                    <option value="ascending">Ascending</option>
-                                    <option value="descending">Descending</option>
+                                    <option value="mobile">Kids Furniture</option>
+                                    <option value="chair">Hotel Furniture</option>
+                                    <option value="watch">Office Furniture</option>
+                                    <option value="wireless">Resturant Furniture</option>
                                 </select>
                             </div>
                         </Col>
