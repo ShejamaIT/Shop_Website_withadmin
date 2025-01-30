@@ -1,0 +1,48 @@
+CREATE TABLE Category (
+    Ca_Id VARCHAR(15) PRIMARY KEY,
+    name VARCHAR(40)
+);
+
+CREATE TABLE Type(
+    Ty_Id VARCHAR(15) PRIMARY KEY,
+     Ca_Id VARCHAR(15),
+      sub_cag VARCHAR(40),
+      oter_cag VARCHAR(40),
+	CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
+			ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE Item(
+      I_Id VARCHAR(15) PRIMARY KEY,
+      I_name TEXT ,
+      Ty_id VARCHAR(15),
+       descrip TEXT,
+       price DOUBLE,
+       qty INT,
+        img LONGBLOB NOT NULL,
+	CONSTRAINT FOREIGN KEY (Ty_id) REFERENCES Type (Ty_id)
+			ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE Employee(
+      E_Id VARCHAR(15) PRIMARY KEY,
+      name TEXT ,
+      address TEXT,
+       nic VARCHAR(12),
+       dob DATE,
+       contact VARCHAR(10)
+);
+CREATE TABLE Emp_Cupone(
+       Cp_Id VARCHAR(15) PRIMARY KEY,
+       E_Id VARCHAR(15) ,
+       discunt_price DOUBLE,
+     	 CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
+			ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE Promotion(
+       img LONGBLOB NOT NULL,
+       date DATE
+);
+CREATE TABLE Customer_log(
+       name TEXT,
+       email TEXT,
+       password VARCHAR(20)
+);
