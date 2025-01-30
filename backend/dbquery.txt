@@ -2,7 +2,23 @@ CREATE TABLE Category (
     Ca_Id VARCHAR(15) PRIMARY KEY,
     name VARCHAR(40)
 );
+CREATE TABLE subCat_one(
+      sb_c_id VARCHAR(15) PRIMARY KEY,
+      subcategory TEXT,
+      Ca_Id VARCHAR(15),
+      img LONGBLOB NOT NULL,
+        CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
+        			ON DELETE CASCADE ON UPDATE CASCADE
+);
 
+CREATE TABLE subCat_two(
+      sb_cc_id VARCHAR(15) PRIMARY KEY,
+      subcategory TEXT,
+      sb_c_id VARCHAR(15),
+      img LONGBLOB NOT NULL,
+        CONSTRAINT FOREIGN KEY (sb_c_id) REFERENCES subCat_one (sb_c_id)
+        			ON DELETE CASCADE ON UPDATE CASCADE
+);
 CREATE TABLE Type(
     Ty_Id VARCHAR(15) PRIMARY KEY,
      Ca_Id VARCHAR(15),
@@ -46,8 +62,4 @@ CREATE TABLE Customer_log(
        email TEXT,
        password VARCHAR(20)
 );
-CREATE TABLE category_img(
-      category TEXT,
-      subcategory TEXT
-      img LONGBLOB NOT NULL
-);
+

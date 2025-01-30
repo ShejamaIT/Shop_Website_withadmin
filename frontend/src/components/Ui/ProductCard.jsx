@@ -16,10 +16,10 @@ const ProductCard = ({item}) =>{
     const addToCart = ()=>{
         dispatch(
             cartActions.addItem({
-                id: item.id,
-                productName: item.productName,
+                I_Id: item.I_Id,
+                I_name: item.I_name,
                 price: item.price,
-                imgUrl : item.imgUrl,
+                img : item.img,
             })
         );
         toast.success('Product Added Successfully.')
@@ -28,11 +28,11 @@ const ProductCard = ({item}) =>{
         <Col lg='3' md='4' className="mb-2">
             <div className="product__item">
                 <div className="product__img">
-                    <motion.img whileHover={{scale: 0.9}} src={item.imgUrl}/>
+                    <motion.img whileHover={{scale: 0.9}} src={item.img}/>
                 </div>
                 <div className="p-2 product__info">
                     <h3 className="product__name">
-                        <Link to={`/shop/${item.id}`}>{item.productName}</Link></h3>
+                        <Link to={`/shop/${item.I_Id}`}>{item.I_name}</Link></h3>
                     <span>{item.category}</span>
                 </div>
                 <div

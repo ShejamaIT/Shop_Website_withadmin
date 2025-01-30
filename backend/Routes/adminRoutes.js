@@ -336,49 +336,6 @@ router.post("/custsignin", async (req, res) => {
     }
 });
 
-// Get item by type
-// router.get("/get-items-by-type", async (req, res) => {
-//     try {
-//         // Extract sub_cag and oter_cag from request query parameters
-//         const { sub_cag, oter_cag } = req.query;
-//
-//         if (!sub_cag || !oter_cag) {
-//             return res.status(400).json({ message: "sub_cag and oter_cag are required" });
-//         }
-//
-//         // SQL query to fetch items based on the type criteria
-//         const query = `
-//             SELECT Item.*
-//             FROM Item
-//             INNER JOIN Type ON Item.Ty_id = Type.Ty_Id
-//             WHERE Type.sub_cag = ? AND Type.oter_cag = ?
-//         `;
-//
-//         // Execute the query
-//         const [items] = await db.query(query, [sub_cag, oter_cag]);
-//
-//         if (items.length === 0) {
-//             return res.status(404).json({ message: "No items found for the given type" });
-//         }
-//
-//         // Format items to include Base64-encoded image
-//         const formattedItems = items.map(item => ({
-//             I_Id: item.I_Id,
-//             I_name: item.I_name,
-//             Ty_id: item.Ty_id,
-//             descrip: item.descrip,
-//             price: item.price,
-//             qty: item.qty,
-//             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB to Base64
-//         }));
-//
-//         return res.status(200).json(formattedItems);
-//     } catch (error) {
-//         console.error("Error fetching items by type:", error.message);
-//         return res.status(500).json({ message: "Error fetching items" });
-//     }
-// });
-
 router.get("/get-items-by-type", async (req, res) => {
     try {
         // Extract query parameters
@@ -430,13 +387,14 @@ router.get("/get-items-by-type", async (req, res) => {
     }
 });
 
-// Save category image
-router.post("/categoryimg", upload.single('img'), async (req, res) => {
-    const sql = `INSERT INTO category_img (category,subcategory,img) VALUES (?, ?, ?)`;
+// Save Sub category with image { Home Furniture -> Living Room furniture }
+router.post("/subcatone", upload.single('img'), async (req, res) => {
+    const sql = `INSERT INTO subCat_one (sb_c_id,subcategory,Ca_Id,img) VALUES (?, ?, ?,?)`;
 
     const values = [
-        req.body.category,
+        req.body.sb_c_id,
         req.body.subcategory,
+        req.body.Ca_Id,
         req.file.buffer,  // The image file is in `req.file.buffer`
     ];
 
@@ -447,8 +405,42 @@ router.post("/categoryimg", upload.single('img'), async (req, res) => {
             success: true,
             message: "Category image added successfully",
             data: {
-                category: req.body.category,
+                sb_c_id: req.body.sb_c_id,
                 subcategory: req.body.subcategory,
+                Ca_Id : req.body.Ca_Id,
+                img: req.body.img,
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting image data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+// Save Sub category with image { Home Furniture -> Living Room furniture }
+router.post("/subcattwo", upload.single('img'), async (req, res) => {
+    const sql = `INSERT INTO subCat_two (sb_cc_id,subcategory,sb_c_id,img) VALUES (?, ?, ?,?)`;
+
+    const values = [
+        req.body.sb_cc_id,
+        req.body.subcategory,
+        req.body.sb_c_id,
+        req.file.buffer,  // The image file is in `req.file.buffer`
+    ];
+
+    try {
+        const [result] = await db.query(sql, values);
+
+        return res.status(201).json({
+            success: true,
+            message: "Category image added successfully",
+            data: {
+                sb_cc_id: req.body.sb_cc_id,
+                subcategory: req.body.subcategory,
+                sb_c_id: req.body.sb_c_id,
                 img: req.body.img,
             },
         });
@@ -463,33 +455,42 @@ router.post("/categoryimg", upload.single('img'), async (req, res) => {
 });
 
 //Get image of category
+// Get image of category
 router.get("/getcategoryimg", async (req, res) => {
-    const { category, subcategory } = req.query;
+    const { category } = req.query;
 
-    if (!category || !subcategory) {
+    // Check if category is provided
+    if (!category) {
         return res.status(400).json({
             success: false,
-            message: "Category and Subcategory are required",
+            message: "Category is required",
         });
     }
 
-    const sql = "SELECT * FROM category_img WHERE category = ? AND subcategory = ?";
+    // SQL query to join Category and subCat_one based on category name
+    const sql = `
+        SELECT sc.sb_c_id, sc.subcategory, sc.img, c.name AS category 
+        FROM subCat_one sc
+        INNER JOIN Category c ON sc.Ca_Id = c.Ca_Id
+        WHERE c.name = ?
+    `;
 
     try {
-        const [rows] = await db.query(sql, [category, subcategory]);
+        const [rows] = await db.query(sql, [category]);
 
         if (rows.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "No images found for the given category and subcategory",
+                message: "No images found for the given category",
             });
         }
 
+        // Send back the response with image data
         return res.status(200).json({
             success: true,
             message: "Category images retrieved successfully",
             data: rows.map(row => ({
-                id: row.id,
+                id: row.sb_c_id,
                 category: row.category,
                 subcategory: row.subcategory,
                 img: row.img.toString("base64"), // Convert binary image to Base64
