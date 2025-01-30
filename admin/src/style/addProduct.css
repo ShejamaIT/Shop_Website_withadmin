@@ -1,0 +1,51 @@
+/* Styles for the form container */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 20px;
+}
+
+/* General form group styling */
+.form__group {
+    margin-bottom: 1.5rem;
+}
+
+/* Styling for the span elements */
+.form__group span {
+    display: block;
+    color: red;
+    margin-bottom: 0.5rem;
+}
+
+/* Styling for the input fields */
+.form__group input,
+.form__group select {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid ;
+    border-radius: 4px;
+}
+
+/* Styling for the select element */
+.form__group select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Styling for the button */
+.primary__btn {
+    border: none;
+    outline: none;
+    padding: 8px 8px;
+    border-radius: 5px;
+    background: var(--primary-color);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 40px;
+}
+.primary__btn:hover {
+    color: #fff;
+}

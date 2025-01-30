@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update frontend side">
+      <change afterPath="$PROJECT_DIR$/admin/public/logo.PNG" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/public/logo.PNG" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/assets/images/logo.PNG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/admin/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/Footer/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/Footer/Footer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/Helmet/Helmet.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/Helmet/Helmet.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AdminNav.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AdminNav.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/assets/data/serviceData.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/assets/data/serviceData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Footer/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Footer/Footer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Header/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Header/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Helmet/Helmet.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Helmet/Helmet.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Shop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Shop.jsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+        <option value="CSS File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2eX5SN8ZT20KsRJo9u8O7Jj8U9m" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Dell/Desktop/Shop_Mangement_Website/admin/public",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\public" />
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\public" />
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\src\assets\images" />
+      <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\pages" />
+      <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
+      <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\backend\models" />
+      <recent name="D:\Gdse\React_final\Wimalasiri-ecommerce\src\components\Footer" />
+      <recent name="D:\Gdse\React_final\Wimalasiri-ecommerce\src\components\Header" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="start" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="start" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.start" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="" />
+      <created>1712038085840</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1712038085840</updated>
+      <workItem from="1712038089559" duration="1254000" />
+      <workItem from="1712061815527" duration="42385000" />
+      <workItem from="1712683936144" duration="1185000" />
+      <workItem from="1712890621782" duration="16918000" />
+      <workItem from="1713154836527" duration="1959000" />
+      <workItem from="1713161444627" duration="9708000" />
+      <workItem from="1713191088279" duration="1372000" />
+      <workItem from="1714129071461" duration="6426000" />
+      <workItem from="1715076636336" duration="950000" />
+      <workItem from="1716695843344" duration="9861000" />
+      <workItem from="1717566900182" duration="39112000" />
+      <workItem from="1718040941935" duration="2024000" />
+      <workItem from="1718044332752" duration="37999000" />
+      <workItem from="1718599951129" duration="10909000" />
+      <workItem from="1719050971865" duration="693000" />
+      <workItem from="1719122181082" duration="23743000" />
+      <workItem from="1719211864565" duration="146000" />
+      <workItem from="1719217532390" duration="61214000" />
+      <workItem from="1719574122386" duration="23793000" />
+      <workItem from="1737533194050" duration="11167000" />
+      <workItem from="1737977134186" duration="829000" />
+      <workItem from="1738036813441" duration="761000" />
+      <workItem from="1738209924209" duration="2815000" />
+    </task>
+    <task id="LOCAL-00037" summary="update &amp; adding files">
+      <created>1718082775240</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1718082775240</updated>
+    </task>
+    <task id="LOCAL-00038" summary="update &amp; adding files 2">
+      <created>1718082935717</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1718082935717</updated>
+    </task>
+    <task id="LOCAL-00039" summary="update &amp; adding files 2">
+      <created>1718082986729</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1718082986729</updated>
+    </task>
+    <task id="LOCAL-00040" summary="update &amp; adding files 3">
+      <created>1718083080696</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1718083080696</updated>
+    </task>
+    <task id="LOCAL-00041" summary="update &amp; adding files 3">
+      <created>1718083170708</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1718083170708</updated>
+    </task>
+    <task id="LOCAL-00042" summary="update &amp; adding files 3">
+      <created>1718083284794</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1718083284794</updated>
+    </task>
+    <task id="LOCAL-00043" summary="update &amp; adding files 3">
+      <created>1718083449499</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1718083449499</updated>
+    </task>
+    <task id="LOCAL-00044" summary="update &amp; adding files 3">
+      <created>1718083580603</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1718083580603</updated>
+    </task>
+    <task id="LOCAL-00045" summary="update &amp; adding files 4">
+      <created>1718084500382</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1718084500382</updated>
+    </task>
+    <task id="LOCAL-00046" summary="update &amp; adding files 5">
+      <created>1718084616357</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1718084616357</updated>
+    </task>
+    <task id="LOCAL-00047" summary="update env file with database name">
+      <created>1718088683935</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1718088683935</updated>
+    </task>
+    <task id="LOCAL-00048" summary="finish user controller (work by postman)">
+      <created>1718093060485</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1718093060485</updated>
+    </task>
+    <task id="LOCAL-00049" summary="update user controller (work by postman)">
+      <created>1718110630419</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1718110630419</updated>
+    </task>
+    <task id="LOCAL-00050" summary="update env file with jwt token">
+      <created>1718168364244</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1718168364245</updated>
+    </task>
+    <task id="LOCAL-00051" summary="update auth controller">
+      <created>1718351322542</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1718351322542</updated>
+    </task>
+    <task id="LOCAL-00052" summary="update auth controller with login function">
+      <created>1718360079288</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1718360079288</updated>
+    </task>
+    <task id="LOCAL-00053" summary="update auth controller with token verify">
+      <created>1718367937549</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1718367937549</updated>
+    </task>
+    <task id="LOCAL-00054" summary="update index file">
+      <created>1718374615817</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1718374615818</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Add document file">
+      <created>1718702679013</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1718702679014</updated>
+    </task>
+    <task id="LOCAL-00056" summary="update item controller">
+      <created>1718702713695</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1718702713695</updated>
+    </task>
+    <task id="LOCAL-00057" summary="making connection">
+      <created>1719125656708</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1719125656709</updated>
+    </task>
+    <task id="LOCAL-00058" summary="drop some files">
+      <created>1719161303058</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1719161303058</updated>
+    </task>
+    <task id="LOCAL-00059" summary="finish signup and signin">
+      <created>1719163046476</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1719163046476</updated>
+    </task>
+    <task id="LOCAL-00060" summary="add cookies file and set with it">
+      <created>1719168997290</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1719168997290</updated>
+    </task>
+    <task id="LOCAL-00061" summary="add resources">
+      <created>1719222656272</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1719222656273</updated>
+    </task>
+    <task id="LOCAL-00062" summary="update auth controller">
+      <created>1719222697934</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1719222697934</updated>
+    </task>
+    <task id="LOCAL-00063" summary="update index file">
+      <created>1719222736063</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1719222736063</updated>
+    </task>
+    <task id="LOCAL-00064" summary="update header file">
+      <created>1719222924506</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1719222924506</updated>
+    </task>
+    <task id="LOCAL-00065" summary="add admin panel">
+      <created>1719376850285</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1719376850285</updated>
+    </task>
+    <task id="LOCAL-00066" summary="update files">
+      <created>1719379661520</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1719379661520</updated>
+    </task>
+    <task id="LOCAL-00067" summary="add admin files">
+      <created>1719379686448</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1719379686448</updated>
+    </task>
+    <task id="LOCAL-00068" summary="updateand drop some admin files">
+      <created>1719399750720</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1719399750720</updated>
+    </task>
+    <task id="LOCAL-00069" summary="update admin nav bar">
+      <created>1719399780075</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1719399780075</updated>
+    </task>
+    <task id="LOCAL-00070" summary="update files">
+      <created>1719483687402</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1719483687402</updated>
+    </task>
+    <task id="LOCAL-00071" summary="update add-product file">
+      <created>1719484370664</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1719484370664</updated>
+    </task>
+    <task id="LOCAL-00072" summary="add yml and another new files">
+      <created>1719484424274</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1719484424274</updated>
+    </task>
+    <task id="LOCAL-00073" summary="add all-product files">
+      <created>1719503170298</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1719503170298</updated>
+    </task>
+    <task id="LOCAL-00074" summary="update css file">
+      <created>1719503230575</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1719503230576</updated>
+    </task>
+    <task id="LOCAL-00075" summary="update admin user files">
+      <created>1719578513632</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1719578513633</updated>
+    </task>
+    <task id="LOCAL-00076" summary="update admin login &amp; signup">
+      <created>1719580260916</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1719580260916</updated>
+    </task>
+    <task id="LOCAL-00077" summary="update adminNav File">
+      <created>1719581387041</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1719581387041</updated>
+    </task>
+    <task id="LOCAL-00078" summary="update admin logout function">
+      <created>1719588408398</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1719588408398</updated>
+    </task>
+    <task id="LOCAL-00079" summary="update admin user delete  function">
+      <created>1719675853100</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1719675853100</updated>
+    </task>
+    <task id="LOCAL-00080" summary="add dashboard frame and function">
+      <created>1719679207458</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1719679207458</updated>
+    </task>
+    <task id="LOCAL-00081" summary="add order controller in backend">
+      <created>1719681437504</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1719681437505</updated>
+    </task>
+    <task id="LOCAL-00082" summary="add place order function">
+      <created>1719684630270</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1719684630270</updated>
+    </task>
+    <task id="LOCAL-00083" summary="add order display frame on admin">
+      <created>1719686346601</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1719686346601</updated>
+    </task>
+    <task id="LOCAL-00084" summary="update admin side toast message">
+      <created>1737538101633</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1737538101634</updated>
+    </task>
+    <task id="LOCAL-00085" summary="update frontend side">
+      <created>1737541298371</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1737541298371</updated>
+    </task>
+    <option name="localTasksCounter" value="86" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add resources" />
+    <MESSAGE value="update auth controller" />
+    <MESSAGE value="update index file" />
+    <MESSAGE value="update header file" />
+    <MESSAGE value="add admin panel" />
+    <MESSAGE value="add admin files" />
+    <MESSAGE value="updateand drop some admin files" />
+    <MESSAGE value="update admin nav bar" />
+    <MESSAGE value="update files" />
+    <MESSAGE value="update add-product file" />
+    <MESSAGE value="add yml and another new files" />
+    <MESSAGE value="add all-product files" />
+    <MESSAGE value="update css file" />
+    <MESSAGE value="update admin user files" />
+    <MESSAGE value="update admin login &amp; signup" />
+    <MESSAGE value="update adminNav File" />
+    <MESSAGE value="update admin logout function" />
+    <MESSAGE value="update admin user delete  function" />
+    <MESSAGE value="add dashboard frame and function" />
+    <MESSAGE value="add order controller in backend" />
+    <MESSAGE value="add place order function" />
+    <MESSAGE value="add order display frame on admin" />
+    <MESSAGE value="update admin side toast message" />
+    <MESSAGE value="update admin side" />
+    <MESSAGE value="update frontend side" />
+    <option name="LAST_COMMIT_MESSAGE" value="update frontend side" />
+  </component>
+</project>
