@@ -32,6 +32,8 @@ const Cart = () =>  {
                                             <th>Title</th>
                                             <th>Price</th>
                                             <th>Qty</th>
+                                            <th>Changes</th>
+                                            <th>Total</th>
                                             <th>Delete</th>
                                         </tr>
                                         </thead>
@@ -68,25 +70,50 @@ const Cart = () =>  {
     );
 };
 
-const Tr = ({item}) =>{
-    const dispatch = useDispatch()
-    const deleteProduct = () =>{
-        dispatch(cartActions.deleteItem(item.id))
-    }
+const Tr = ({ item }) => {
+    const dispatch = useDispatch();
+
+    const deleteProduct = () => {
+        dispatch(cartActions.deleteItem(item.id));
+    };
+
+    const addProducts = () => {
+        dispatch(cartActions.addItem(item));
+    };
+
+    const subtractProduct = () => {
+        dispatch(cartActions.subtractItem(item.id));
+    };
+
     return (
         <tr>
-            <td><img src={item.imgUrl} alt={''}/></td>
+            <td><img src={item.imgUrl} alt='' style={{ width: "50px" }} /></td>
             <td>{item.productName}</td>
-            <td>{item.price}</td>
-            <td>{item.quantity}px</td>
+            <td>${item.price}</td>
+            <td>{item.quantity}</td>
             <td>
                 <motion.i
-                    whileTap={{scale:1.2}}
+                    whileTap={{ scale: 1.2 }}
+                    onClick={addProducts}
+                    className='ri-add-line'
+                ></motion.i>
+                <motion.i
+                    whileTap={{ scale: 1.2 }}
+                    onClick={subtractProduct}
+                    className='ri-subtract-line'
+                ></motion.i>
+            </td>
+            <td>{(item.price)*(item.quantity)}</td>
+            <td>
+                <motion.i
+                    whileTap={{ scale: 1.2 }}
                     onClick={deleteProduct}
-                    className='ri-delete-bin-line'></motion.i>
+                    className='ri-delete-bin-line'
+                ></motion.i>
             </td>
         </tr>
-    )
-}
+    );
+};
+
 
 export default Cart;

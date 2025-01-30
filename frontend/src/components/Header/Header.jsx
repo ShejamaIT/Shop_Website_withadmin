@@ -82,7 +82,7 @@ const Header = () => {
                                 <span className="badge">1</span>
                             </span>
                             <span className="cart_icon" onClick={navigateToCart}>
-                                <i className="ri-shopping-bag-line"></i>
+                                <i className="ri-shopping-cart-2-line"></i>
                                 <span className="badge">{totalQuantity}</span>
                             </span>
                             <div className="mobile__menu">
