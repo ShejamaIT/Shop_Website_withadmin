@@ -42,12 +42,12 @@ router.post("/category", async (req, res) => {
 });
 // Save New Type
 router.post("/type", async (req, res) => {
-    const sql = `INSERT INTO type (Ty_Id,Ca_Id,sub_cag,oter_cag) VALUES (?, ?,?,?)`;
+    const sql = `INSERT INTO type (Ty_Id,Ca_Id,sub_one,sub_two) VALUES (?, ?,?,?)`;
     const values = [
         req.body.Ty_Id,
         req.body.Ca_Id,
-        req.body.sub_cag,
-        req.body.oter_cag
+        req.body.sub_one,
+        req.body.sub_two
     ];
     try {
         // Execute the query and retrieve the result
@@ -60,8 +60,8 @@ router.post("/type", async (req, res) => {
             data: {
                 Ty_Id : req.body. Ty_Id,
                 Ca_Id: req.body.Ca_Id,
-                sub_cag: req.body.sub_cag,
-                oter_cag: req.body.oter_cag
+                sub_one: req.body.sub_one,
+                sub_two: req.body.sub_two
             },
         });
     } catch (err) {
@@ -506,9 +506,64 @@ router.get("/getcategoryimg", async (req, res) => {
     }
 });
 
+router.get("/getitembycategory", async (req, res) => {
+    const { category, subcategory } = req.query;
 
+    // Check if both category and subcategory are provided
+    if (!category || !subcategory) {
+        return res.status(400).json({
+            success: false,
+            message: "Both category and subcategory are required",
+        });
+    }
 
+    // SQL query to join Item, Type, Category, and subCat_one based on category and subcategory
+    const sql = `
+        SELECT 
+            i.I_Id, i.I_name, i.descrip, i.price, i.qty, i.img, 
+            c.name AS category, sc.subcategory, t.sub_one AS type
+        FROM Item i
+        INNER JOIN Type t ON i.Ty_id = t.Ty_Id
+        INNER JOIN Category c ON t.Ca_Id = c.Ca_Id
+        INNER JOIN subCat_one sc ON sc.sb_c_id = t.sub_one
+        WHERE c.name = ? AND sc.subcategory = ?
+    `;
 
+    try {
+        const [rows] = await db.query(sql, [category, subcategory]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No items found for the given category and subcategory",
+            });
+        }
+
+        // Send back the response with item data
+        return res.status(200).json({
+            success: true,
+            message: "Items retrieved successfully",
+            data: rows.map(row => ({
+                id: row.I_Id,
+                name: row.I_name,
+                description: row.descrip,
+                price: row.price,
+                quantity: row.qty,
+                category: row.category,
+                subcategory: row.subcategory,
+                type: row.type,
+                img: row.img.toString("base64"), // Convert binary image to Base64
+            })),
+        });
+    } catch (err) {
+        console.error("Error fetching data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching data from database",
+            details: err.message,
+        });
+    }
+});
 
 
 export default router;

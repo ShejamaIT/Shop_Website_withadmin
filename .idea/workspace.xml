@@ -4,15 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update backend project">
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryList.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductDisplay.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="load item from main category">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dbquery.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Shop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Shop.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,14 +117,7 @@
       <workItem from="1738036813441" duration="761000" />
       <workItem from="1738209924209" duration="2815000" />
       <workItem from="1738215694249" duration="2155000" />
-      <workItem from="1738217914412" duration="14998000" />
-    </task>
-    <task id="LOCAL-00041" summary="update &amp; adding files 3">
-      <created>1718083170708</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1718083170708</updated>
+      <workItem from="1738217914412" duration="19742000" />
     </task>
     <task id="LOCAL-00042" summary="update &amp; adding files 3">
       <created>1718083284794</created>
@@ -466,7 +455,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738221688739</updated>
     </task>
-    <option name="localTasksCounter" value="90" />
+    <task id="LOCAL-00090" summary="load item from main category">
+      <created>1738234683783</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1738234683783</updated>
+    </task>
+    <option name="localTasksCounter" value="91" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -484,7 +480,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add admin panel" />
     <MESSAGE value="add admin files" />
     <MESSAGE value="updateand drop some admin files" />
     <MESSAGE value="update admin nav bar" />
@@ -509,6 +504,7 @@
     <MESSAGE value="delete unwant files" />
     <MESSAGE value="addding backend project" />
     <MESSAGE value="update backend project" />
-    <option name="LAST_COMMIT_MESSAGE" value="update backend project" />
+    <MESSAGE value="load item from main category" />
+    <option name="LAST_COMMIT_MESSAGE" value="load item from main category" />
   </component>
 </project>

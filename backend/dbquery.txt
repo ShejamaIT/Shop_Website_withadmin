@@ -22,8 +22,8 @@ CREATE TABLE subCat_two(
 CREATE TABLE Type(
     Ty_Id VARCHAR(15) PRIMARY KEY,
      Ca_Id VARCHAR(15),
-      sub_cag VARCHAR(40),
-      oter_cag VARCHAR(40),
+     sub_one VARCHAR(40),
+     sub_two VARCHAR(40),
 	CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
 			ON DELETE CASCADE ON UPDATE CASCADE
 );
