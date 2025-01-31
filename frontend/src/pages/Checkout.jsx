@@ -92,7 +92,7 @@ const Checkout = () => {
 
         const orderDetails = {
             customerName: name,
-            customerAddress: delivery ? address : "Pick Up",
+            customerAddress: delivery ? address : "N/A",
             city: delivery ? city : "N/A",
             postalCode: delivery ? postalcode : "N/A",
             email: email,
