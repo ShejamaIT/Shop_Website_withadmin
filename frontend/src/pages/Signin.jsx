@@ -4,6 +4,7 @@ import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/Ui/CommonSection";
 import "../style/Signup.css"; // Import the CSS file
 
+
 const Signin = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -24,7 +25,7 @@ const Signin = () => {
 
         try {
             // Send POST request to the backend API
-            const response = await fetch("http://localhost:5000/api/auth/custsignin", {
+            const response = await fetch("http://localhost:5000/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
@@ -35,6 +36,9 @@ const Signin = () => {
             // Check if login was successful
             if (result.success) {
                 alert("✅ Login successful! Redirecting...");
+                // Save token to local storage
+                localStorage.setItem("token", result.data.token);
+                localStorage.setItem("email", result.data.email);
                 window.location.href = "/"; // Redirect to the homepage after successful login
             } else {
                 alert("❌ Login failed: " + result.message);

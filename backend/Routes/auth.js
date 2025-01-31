@@ -6,7 +6,7 @@ import db from '../utils/db.js';
 const router = express.Router();
 
 // Login Route
-router.post('/custsignin', async (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password} = req.body;
 
     try {
@@ -54,7 +54,8 @@ router.post('/custsignin', async (req, res) => {
             message: "Customer found successfully",
             data: {
                 name: user.name,
-                email: user.email, // Do NOT send password
+                email: user.email,
+                token : token,
             },
         });
     } catch (err) {

@@ -294,49 +294,6 @@ router.post("/custsignup", async (req, res) => {
         });
     }
 });
-// Get saved customer login
-router.post("/custsignin", async (req, res) => {
-    const { email, password } = req.body;
-    console.log(email , password);
-    try {
-        // Fetch user from database
-        const [users] = await db.query("SELECT * FROM customer_log WHERE email=?", [email]);
-
-        if (users.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Customer not found",
-            });
-        }
-
-        const user = users[0];
-        // Compare hashed password
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-            return res.status(401).json({
-                success: false,
-                message: "Invalid password",
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: "Customer found successfully",
-            data: {
-                name: user.name,
-                email: user.email, // Do NOT send password
-            },
-        });
-    } catch (err) {
-        console.error("Error finding customer data:", err.message);
-        return res.status(500).json({
-            success: false,
-            message: "Error finding data in database",
-            details: err.message,
-        });
-    }
-});
-
 router.get("/get-items-by-type", async (req, res) => {
     try {
         // Extract query parameters

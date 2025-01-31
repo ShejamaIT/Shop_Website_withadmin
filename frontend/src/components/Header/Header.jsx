@@ -1,11 +1,13 @@
-import React, { useRef, useEffect } from "react";
+import React, {useRef, useEffect, useState} from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import './Header.css';
 import { motion } from "framer-motion";
 import logo from '../../assets/images/logo.PNG';
 import userIcon from '../../assets/images/user-icon.png';
+import logoutIcon from '../../assets/images/logout.png';
 import { Container, Row } from "reactstrap";
 import { useSelector } from "react-redux";
+import Swal from 'sweetalert2';
 
 const nav__link = [
     { path: 'home', display: 'Home' },
@@ -16,6 +18,7 @@ const nav__link = [
 const Header = () => {
     const headerRef = useRef(null);
     const menuRef = useRef(null);
+    const [logoutError, setLogoutError] = useState(null);
     const navigate = useNavigate();
     const totalQuantity = useSelector(state => state.cart.totalQuantity);
 
@@ -49,6 +52,53 @@ const Header = () => {
 
     const navigateToLogin = () => {
         navigate('/signin');
+    };
+    const logout = async () => {
+        const result = await Swal.fire({
+            imageUrl: logoutIcon,
+            imageWidth: 50,
+            imageHeight: 50,
+            title: 'Do you want to logout?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            confirmButtonColor: '#24757e',
+            cancelButtonColor: '#D3D3D3',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-popup',
+            },
+        });
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:5000/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                localStorage.clear();
+
+                if (response.ok) {
+                    navigate('/');
+                } else {
+                    const data = await response.json();
+                    setLogoutError(data.message);
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+                setLogoutError('An unexpected error occurred.');
+            }
+        }
+
     };
 
     return (
@@ -87,6 +137,9 @@ const Header = () => {
                             </span>
                             <span className="cart_icon" onClick={navigateToLogin}>
                                 <i className="ri-user-3-line"></i>
+                            </span>
+                            <span className="cart_icon" onClick={logout}>
+                                <i className="ri-logout-box-r-line"></i>
                             </span>
                             <div className="mobile__menu">
                                 <span onClick={menuToggle}>
