@@ -3,6 +3,7 @@ import ProductCard from "./ProductCard";
 
 
 const ProductList = ({data}) =>{
+    console.log(data);
     return (
         <>
             {

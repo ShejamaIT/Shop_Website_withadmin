@@ -97,8 +97,7 @@ const Checkout = () => {
                                 <h6>Subtotal: <span>{totalAmount}</span></h6>
                                 <h6>
                                     <span>
-                                        Shipping: <br/>
-                                        (free shipping)
+                                        Shipping:
                                     </span>
                                     <span>$0</span>
                                 </h6>

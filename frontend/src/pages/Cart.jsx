@@ -53,7 +53,7 @@ const Cart = () =>  {
                             <div>
                                 <h6 className='d-flex align-items-center justify-content-between'>
                                     Subtotal
-                                    <span className={'fs-4 fw-bold'}>${totalAmount}</span>
+                                    <span className={'fs-4 fw-bold'}>Rs.{totalAmount}</span>
                                 </h6>
 
                             </div>
@@ -71,6 +71,7 @@ const Cart = () =>  {
 };
 
 const Tr = ({ item }) => {
+    console.log(item);
     const dispatch = useDispatch();
 
     const deleteProduct = () => {
@@ -89,7 +90,7 @@ const Tr = ({ item }) => {
         <tr>
             <td><img src={item.imgUrl} alt='' style={{ width: "50px" }} /></td>
             <td>{item.productName}</td>
-            <td>${item.price}</td>
+            <td>Rs.{item.price}</td>
             <td>{item.quantity}</td>
             <td>
                 <motion.i
@@ -103,7 +104,7 @@ const Tr = ({ item }) => {
                     className='ri-subtract-line'
                 ></motion.i>
             </td>
-            <td>{(item.price)*(item.quantity)}</td>
+            <td>Rs.{(item.price)*(item.quantity)}</td>
             <td>
                 <motion.i
                     whileTap={{ scale: 1.2 }}
