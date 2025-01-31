@@ -60,6 +60,12 @@ CREATE TABLE Promotion(
 CREATE TABLE Customer_log(
        name TEXT,
        email TEXT,
-       password VARCHAR(20)
+       password TEXT
 );
-
+CREATE TABLE sessionlogs (
+  SessionID int(11) NOT NULL,
+  email TEXT NOT NULL,
+  LoginTime datetime DEFAULT current_timestamp(),
+  LogoutTime datetime DEFAULT NULL,
+  Token varchar(255) DEFAULT NULL
+);
