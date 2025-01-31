@@ -1,25 +1,54 @@
-.billing__form .form__group input{
+/* Styling for input fields */
+.billing__form .form__group input {
     border: 1px solid var(--card-bg-02);
 }
-.checkout__cart{
+
+/* Checkout cart styling */
+.checkout__cart {
     padding: 20px;
     background: var(--primary-color);
     color: #ffffff;
     border-radius: 5px;
 }
-.checkout__cart h6,h4{
+
+.checkout__cart h6, .checkout__cart h4 {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-.checkout__cart h6{
+
+.checkout__cart h6 {
     margin-bottom: 20px;
 }
-.checkout__cart h4{
-    border: 1px solid rgba(221,221,221,0.253);
-    padding-top: 20px;
 
+.checkout__cart h4 {
+    border: 1px solid rgba(221, 221, 221, 0.253);
+    padding-top: 20px;
 }
+
+/* Align checkboxes in the same style as input fields */
+.delivery-options {
+    display: flex;
+    align-items: center;
+    width: 50%;
+    padding: 10px;
+    border: 1px solid var(--card-bg-02);
+    border-radius: 5px;
+    background: #fff;
+    gap: 50px;
+}
+
+/* Ensure checkboxes are properly aligned with labels */
+.delivery-options label {
+    font-size: 16px;
+}
+
+/* Ensure spacing between checkboxes */
+.delivery-options input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
 /*.auth__btn{*/
 /*    border: none;*/
 /*    outline: none;*/

@@ -4,15 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update db">
-      <change afterPath="$PROJECT_DIR$/frontend/src/assets/images/logout.png" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed footer">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Routes/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Header/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Header/Header.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Signin.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Signin.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/style/checkout.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/style/checkout.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,21 +118,7 @@
       <workItem from="1738215694249" duration="2155000" />
       <workItem from="1738217914412" duration="20565000" />
       <workItem from="1738245070725" duration="14660000" />
-      <workItem from="1738309279987" duration="3020000" />
-    </task>
-    <task id="LOCAL-00047" summary="update env file with database name">
-      <created>1718088683935</created>
-      <option name="number" value="00047" />
-      <option name="presentableId" value="LOCAL-00047" />
-      <option name="project" value="LOCAL" />
-      <updated>1718088683935</updated>
-    </task>
-    <task id="LOCAL-00048" summary="finish user controller (work by postman)">
-      <created>1718093060485</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1718093060485</updated>
+      <workItem from="1738309279987" duration="8097000" />
     </task>
     <task id="LOCAL-00049" summary="update user controller (work by postman)">
       <created>1718110630419</created>
@@ -468,7 +449,21 @@
       <option name="project" value="LOCAL" />
       <updated>1738310683529</updated>
     </task>
-    <option name="localTasksCounter" value="96" />
+    <task id="LOCAL-00096" summary="fixed logout function">
+      <created>1738313496025</created>
+      <option name="number" value="00096" />
+      <option name="presentableId" value="LOCAL-00096" />
+      <option name="project" value="LOCAL" />
+      <updated>1738313496025</updated>
+    </task>
+    <task id="LOCAL-00097" summary="fixed footer">
+      <created>1738315407568</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1738315407568</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -486,8 +481,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add yml and another new files" />
-    <MESSAGE value="add all-product files" />
     <MESSAGE value="update css file" />
     <MESSAGE value="update admin user files" />
     <MESSAGE value="update admin login &amp; signup" />
@@ -511,6 +504,8 @@
     <MESSAGE value="fixed signin and sign up pages" />
     <MESSAGE value="fixed shop load subcategory one" />
     <MESSAGE value="update db" />
-    <option name="LAST_COMMIT_MESSAGE" value="update db" />
+    <MESSAGE value="fixed logout function" />
+    <MESSAGE value="fixed footer" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed footer" />
   </component>
 </project>
