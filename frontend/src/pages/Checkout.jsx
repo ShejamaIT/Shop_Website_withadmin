@@ -75,7 +75,7 @@ const Checkout = () => {
             const response = await fetch("http://localhost:5000/api/admin/coupone", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ cpID: code }), // Sending coupon code in request body
+                body: JSON.stringify({ cpID: coupon }), // Sending coupon code in request body
             });
 
             const result = await response.json();

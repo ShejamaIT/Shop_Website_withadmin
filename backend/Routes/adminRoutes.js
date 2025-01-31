@@ -647,7 +647,7 @@ router.post("/getcategorytwoimg", async (req, res) => {
 });
 
 // get coupone details
-router.get("/coupone", async (req, res) => {
+router.post("/coupone", async (req, res) => {
     const { cpID } = req.body; // Get cpID from query parameters
 
     try {

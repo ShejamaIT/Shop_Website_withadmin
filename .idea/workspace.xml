@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed checkout page with out place order function">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update 01/31 work">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dbquery.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -119,14 +117,7 @@
       <workItem from="1738215694249" duration="2155000" />
       <workItem from="1738217914412" duration="20565000" />
       <workItem from="1738245070725" duration="14660000" />
-      <workItem from="1738309279987" duration="14834000" />
-    </task>
-    <task id="LOCAL-00052" summary="update auth controller with login function">
-      <created>1718360079288</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1718360079288</updated>
+      <workItem from="1738309279987" duration="15236000" />
     </task>
     <task id="LOCAL-00053" summary="update auth controller with token verify">
       <created>1718367937549</created>
@@ -464,7 +455,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738323776794</updated>
     </task>
-    <option name="localTasksCounter" value="101" />
+    <task id="LOCAL-00101" summary="update 01/31 work">
+      <created>1738326281495</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1738326281495</updated>
+    </task>
+    <option name="localTasksCounter" value="102" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -482,7 +480,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="update admin user files" />
     <MESSAGE value="update admin login &amp; signup" />
     <MESSAGE value="update adminNav File" />
     <MESSAGE value="update admin logout function" />
@@ -507,6 +504,7 @@
     <MESSAGE value="fixed logout function" />
     <MESSAGE value="fixed footer" />
     <MESSAGE value="fixed checkout page with out place order function" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed checkout page with out place order function" />
+    <MESSAGE value="update 01/31 work" />
+    <option name="LAST_COMMIT_MESSAGE" value="update 01/31 work" />
   </component>
 </project>
