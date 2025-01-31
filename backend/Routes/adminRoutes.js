@@ -297,6 +297,7 @@ router.post("/custsignup", async (req, res) => {
 // Get saved customer login
 router.post("/custsignin", async (req, res) => {
     const { email, password } = req.body;
+    console.log(email , password);
     try {
         // Fetch user from database
         const [users] = await db.query("SELECT * FROM customer_log WHERE email=?", [email]);
@@ -508,7 +509,7 @@ router.get("/getcategoryimg", async (req, res) => {
 
 router.get("/getitembycategory", async (req, res) => {
     const { category, subcategory } = req.query;
-
+    console.log(category + " "+ subcategory);
     // Check if both category and subcategory are provided
     if (!category || !subcategory) {
         return res.status(400).json({
@@ -516,6 +517,7 @@ router.get("/getitembycategory", async (req, res) => {
             message: "Both category and subcategory are required",
         });
     }
+
 
     // SQL query to join Item, Type, Category, and subCat_one based on category and subcategory
     const sql = `
@@ -564,6 +566,131 @@ router.get("/getitembycategory", async (req, res) => {
         });
     }
 });
+
+// Fetch Type ID & Items by Category and Subcategories
+router.post("/gettypeid", async (req, res) => {
+    try {
+        const { category, sub_one, sub_two } = req.body;
+
+        console.log(`Category: ${category}, Sub One: ${sub_one}, Sub Two: ${sub_two}`);
+
+        // Validate input parameters
+        if (!category || !sub_one || !sub_two) {
+            return res.status(400).json({
+                success: false,
+                message: "Category, Sub One, and Sub Two are required",
+            });
+        }
+
+        // SQL query to fetch Ty_Id based on category, sub_one, and sub_two
+        const typeQuery = `
+            SELECT Ty_Id FROM Type t
+            INNER JOIN Category c ON t.Ca_Id = c.Ca_Id
+            WHERE c.name = ? AND t.sub_one = ? AND t.sub_two = ?
+        `;
+
+        const [typeResult] = await db.query(typeQuery, [category, sub_one, sub_two]);
+
+        if (typeResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No type found for the given category and subcategories",
+            });
+        }
+
+        const typeId = typeResult[0].Ty_Id;
+
+        // Fetch Items Based on Type ID
+        const itemQuery = `
+            SELECT I_Id, I_name, descrip, price, qty, img 
+            FROM Item 
+            WHERE Ty_id = ?
+        `;
+
+        const [items] = await db.query(itemQuery, [typeId]);
+
+        if (items.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No items found for the given type",
+            });
+        }
+
+        // Send Response
+        return res.status(200).json({
+            success: true,
+            message: "Items retrieved successfully",
+            typeId: typeId,
+            data: items.map(item => ({
+                id: item.I_Id,
+                name: item.I_name,
+                description: item.descrip,
+                price: item.price,
+                quantity: item.qty,
+                img: item.img ? `data:image/png;base64,${item.img.toString("base64")}` : null,
+            })),
+        });
+    } catch (err) {
+        console.error("Error fetching data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching data from database",
+            details: err.message,
+        });
+    }
+});
+
+// Fetch Images for Subcategory
+router.post("/getcategorytwoimg", async (req, res) => {
+    try {
+        const { category } = req.body;
+        console.log(`Fetching images for category: ${category}`);
+
+        if (!category) {
+            return res.status(400).json({
+                success: false,
+                message: "Category is required",
+            });
+        }
+
+        // Fetch images for the given category
+        const sql = `
+            SELECT sc.sb_cc_id, sc.subcategory, sc.img, c.subcategory AS subcat_one 
+            FROM subCat_two sc
+            INNER JOIN subCat_one c ON sc.sb_c_id = c.sb_c_id
+            WHERE c.subcategory = ?
+        `;
+
+        const [rows] = await db.query(sql, [category]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No images found for the given category",
+            });
+        }
+
+        // Send response
+        return res.status(200).json({
+            success: true,
+            message: "Category images retrieved successfully",
+            data: rows.map(row => ({
+                id: row.sb_cc_id,
+                category: row.subcat_one,
+                subcategory: row.subcategory,
+                img: row.img ? `data:image/png;base64,${row.img.toString("base64")}` : null,
+            })),
+        });
+    } catch (err) {
+        console.error("Error fetching data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching data from database",
+            details: err.message,
+        });
+    }
+});
+
 
 
 export default router;

@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 
 import adminRoutes from './Routes/AdminRoutes.js';
+import auth from "./Routes/auth.js";
 
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/api/admin', adminRoutes);
+app.use('/api/auth', auth);
 
 
 // Default route
