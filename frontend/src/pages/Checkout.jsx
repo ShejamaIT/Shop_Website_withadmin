@@ -63,16 +63,43 @@ const Checkout = () => {
     // Function to validate and apply a discount using a coupon code
     const handleCouponChange = async (e) => {
         const code = e.target.value;
+        console.log(coupon);
         setCoupon(code);
 
+        if (!code) {
+            setDiscount(0);
+            return;
+        }
+
         try {
-            setDiscount(1000);
+            const response = await fetch("http://localhost:5000/api/admin/coupone", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cpID: code }), // Sending coupon code in request body
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Invalid coupon code");
+            }
+
+            // If coupon is found, apply discount
+            if (result.success && result.data.length > 0) {
+                setDiscount(result.data[0].discount); // Set discount amount from API response
+                toast.success(`Coupon applied! Discount: Rs. ${result.data[0].discount}`);
+            } else {
+                setDiscount(0);
+                toast.error("Invalid or expired coupon.");
+            }
         } catch (error) {
             console.error("Coupon validation error:", error);
             setDiscount(0);
-            toast.error("Failed to validate coupon.");
+            toast.error(error.message || "Failed to validate coupon.");
         }
     };
+
+
 
     const placeOrder = () => {
         // Check if user is logged in

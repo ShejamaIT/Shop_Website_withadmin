@@ -171,8 +171,6 @@ router.get("/promotions", async (req, res) => {
         return res.status(500).json({ message: "Error fetching promotions" });
     }
 });
-
-
 //get all items
 router.get("/items", async (req, res) => {
     try {
@@ -413,7 +411,6 @@ router.post("/subcattwo", upload.single('img'), async (req, res) => {
 });
 
 //Get image of category
-// Get image of category
 router.get("/getcategoryimg", async (req, res) => {
     const { category } = req.query;
 
@@ -464,6 +461,7 @@ router.get("/getcategoryimg", async (req, res) => {
     }
 });
 
+// Fetch Images for Subcategory one
 router.get("/getitembycategory", async (req, res) => {
     const { category, subcategory } = req.query;
     console.log(category + " "+ subcategory);
@@ -597,7 +595,7 @@ router.post("/gettypeid", async (req, res) => {
     }
 });
 
-// Fetch Images for Subcategory
+// Fetch Images for Subcategory two
 router.post("/getcategorytwoimg", async (req, res) => {
     try {
         const { category } = req.body;
@@ -648,6 +646,38 @@ router.post("/getcategorytwoimg", async (req, res) => {
     }
 });
 
+// get coupone details
+router.get("/coupone", async (req, res) => {
+    const { cpID } = req.body; // Get cpID from query parameters
 
+    try {
+        let query;
+        let params = [];
+
+        if (cpID) {
+            // If cpID is provided, fetch that specific coupon
+            query = "SELECT * FROM sales_coupon WHERE cpID = ?";
+            params = [cpID];
+        } else {
+            // If no cpID is provided, fetch all coupons
+            query = "SELECT * FROM sales_coupon";
+        }
+
+        const [coupone] = await db.query(query, params);
+
+        if (coupone.length === 0) {
+            return res.status(404).json({ message: "No coupon found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Coupon(s) retrieved successfully",
+            data: coupone,
+        });
+    } catch (error) {
+        console.error("Error fetching coupons:", error.message);
+        return res.status(500).json({ message: "Error fetching coupons", error: error.message });
+    }
+});
 
 export default router;

@@ -42,16 +42,11 @@ CREATE TABLE Employee(
       E_Id VARCHAR(15) PRIMARY KEY,
       name TEXT ,
       address TEXT,
-       nic VARCHAR(12),
-       dob DATE,
-       contact VARCHAR(10)
-);
-CREATE TABLE Emp_Cupone(
-       Cp_Id VARCHAR(15) PRIMARY KEY,
-       E_Id VARCHAR(15) ,
-       discunt_price DOUBLE,
-     	 CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
-			ON DELETE CASCADE ON UPDATE CASCADE
+      nic VARCHAR(12),
+      dob DATE,
+      contact VARCHAR(15),
+      job VARCHAR(15),
+      basic DOUBLE
 );
 CREATE TABLE Promotion(
        img LONGBLOB NOT NULL,
@@ -68,4 +63,73 @@ CREATE TABLE sessionlogs (
   LoginTime datetime DEFAULT current_timestamp(),
   LogoutTime datetime DEFAULT NULL,
   Token varchar(255) DEFAULT NULL
+);
+CREATE TABLE Orders (
+    OrID VARCHAR(25) PRIMARY KEY,
+    orDate DATE,
+    orStatus VARCHAR(15),
+    dvStatus VARCHAR(10),
+    dvPrice DOUBLE,
+    disPrice DOUBLE,
+    totPrice DOUBLE
+);
+CREATE TABLE Order_Detail(
+    orID VARCHAR(25) PRIMARY KEY,
+    I_Id VARCHAR(15) PRIMARY KEY,
+    qty INT ,
+    price DOUBLE,
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                    ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+        			ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE rejected_orders(
+    rid VARCHAR(25) PRIMARY KEY,
+    OrID VARCHAR(25),
+    detail TEXT,
+       CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                           ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE delivery(
+    dv_id VARCHAR(25) PRIMARY KEY,
+    orID VARCHAR(25),
+    address TEXT,
+    postalcode INT NOT NULL,
+    contact VARCHAR(15) NOT NULL,
+    status VARCHAR(15),
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE canceled_delivery(
+    d_id VARCHAR(25) PRIMARY KEY,
+    dv_id VARCHAR(25),
+    detail VARCHAR(15),
+        CONSTRAINT FOREIGN KEY (dv_id) REFERENCES delivery (dv_id)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE sales_team(
+    stID VARCHAR(25) PRIMARY KEY,
+    E_Id VARCHAR(15),
+    target DOUBLE,
+    currentRate DOUBLE,
+        CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE sales_coupon(
+    cpID VARCHAR(25) PRIMARY KEY,
+    stID VARCHAR(25),
+    discount DOUBLE,
+        CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE order_coupon(
+    ocID VARCHAR(25) PRIMARY KEY,
+    orID VARCHAR(25),
+    cpID VARCHAR(25),
+    discount DOUBLE,
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (cpID) REFERENCES sales_coupon (cpID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+
 );
