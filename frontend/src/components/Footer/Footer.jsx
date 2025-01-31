@@ -13,7 +13,7 @@ const Footer = () =>{
                 <Col lg='4' className='mb-4' md='6'>
                     <div className="logo">
                         <div>
-                            <h1 className="text-white">Furniture Shop</h1>
+                            <h1 className="text-white">Shejama Group</h1>
                         </div>
                     </div>
                     <p className="footer__text mt-4">
@@ -26,19 +26,19 @@ const Footer = () =>{
                         <ListGroup className="mb-3">
                             <ListGroupItem
                                 className='ps-0 border-0'>
-                                <Link to="#">Mobiles Phones</Link>
+                                <Link to="#">Home Furniture</Link>
                             </ListGroupItem>
                             <ListGroupItem
                                 className='ps-0 border-0 '>
-                                <Link to="#">Modern Sofa</Link>
+                                <Link to="#">Office Furniture</Link>
                             </ListGroupItem>
                             <ListGroupItem
                                 className='ps-0 border-0 '>
-                                <Link to="#">Arm Chair</Link>
+                                <Link to="#">Kids Furniture</Link>
                             </ListGroupItem>
                             <ListGroupItem
                                 className='ps-0 border-0 '>
-                                <Link to="#">Smart Watches</Link>
+                                <Link to="#">Hotel Furniture</Link>
                             </ListGroupItem>
                         </ListGroup>
                     </div>
@@ -54,7 +54,7 @@ const Footer = () =>{
                                 <Link to="/cart">Cart</Link>
                             </ListGroupItem>
                             <ListGroupItem className='ps-0 border-0'>
-                                <Link to="/login">Login</Link>
+                                <Link to="/signin">Login</Link>
                             </ListGroupItem>
                             <ListGroupItem className='ps-0 border-0'>
                                 <Link to="#">Privacy Policy</Link>
@@ -70,17 +70,17 @@ const Footer = () =>{
                             <ListGroupItem
                                 className='ps-0 border-0 d-flex align-items-center gap-2'>
                                 <span><i className="ri-map-pin-line"></i></span>
-                                <p>94/A , frist lane, galle</p>
+                                <p>No75,<br/>Sri Premarathana Mw,<br/>Moratumulla,Moratuwa</p>
                             </ListGroupItem>
                             <ListGroupItem
                                 className='ps-0 border-0 d-flex align-items-center gap-2'>
                                 <span><i className="ri-phone-line"></i></span>
-                                <p>+94-75 60 44 872</p>
+                                <p>+94-77 3 608 108 <br/>+94-71 3 608 108<br/>+94-71 81 422 52</p>
                             </ListGroupItem>
                             <ListGroupItem
                                 className='ps-0 border-0 d-flex align-items-center gap-2'>
                                 <span><i className="ri-mail-line"></i></span>
-                                <p>jemalfurniture@gmail.com</p>
+                                <p>manjulafonseka@yahoo.com</p>
                             </ListGroupItem>
                         </ListGroup>
                     </div>
