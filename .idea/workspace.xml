@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed the bugged temporary">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Login.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update admin side routes">
+      <change beforePath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +15,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JavaScript File" />
         <option value="CSS File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -119,28 +118,7 @@
       <workItem from="1738245070725" duration="14660000" />
       <workItem from="1738309279987" duration="32872000" />
       <workItem from="1738400628957" duration="239000" />
-      <workItem from="1738400997305" duration="11351000" />
-    </task>
-    <task id="LOCAL-00061" summary="add resources">
-      <created>1719222656272</created>
-      <option name="number" value="00061" />
-      <option name="presentableId" value="LOCAL-00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1719222656273</updated>
-    </task>
-    <task id="LOCAL-00062" summary="update auth controller">
-      <created>1719222697934</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1719222697934</updated>
-    </task>
-    <task id="LOCAL-00063" summary="update index file">
-      <created>1719222736063</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1719222736063</updated>
+      <workItem from="1738400997305" duration="12022000" />
     </task>
     <task id="LOCAL-00064" summary="update header file">
       <created>1719222924506</created>
@@ -464,7 +442,28 @@
       <option name="project" value="LOCAL" />
       <updated>1738411686502</updated>
     </task>
-    <option name="localTasksCounter" value="110" />
+    <task id="LOCAL-00110" summary="start to update admin side">
+      <created>1738412689535</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1738412689535</updated>
+    </task>
+    <task id="LOCAL-00111" summary="add admin side backend route">
+      <created>1738412796526</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1738412796526</updated>
+    </task>
+    <task id="LOCAL-00112" summary="update admin side routes">
+      <created>1738412920683</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1738412920683</updated>
+    </task>
+    <option name="localTasksCounter" value="113" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -482,9 +481,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add place order function" />
-    <MESSAGE value="add order display frame on admin" />
-    <MESSAGE value="update admin side toast message" />
     <MESSAGE value="update admin side" />
     <MESSAGE value="update frontend side" />
     <MESSAGE value="done the cart add and subtract function" />
@@ -507,6 +503,9 @@
     <MESSAGE value="temporary profile files (not finished)" />
     <MESSAGE value="fixed frist category with dropdown" />
     <MESSAGE value="fixed the bugged temporary" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed the bugged temporary" />
+    <MESSAGE value="start to update admin side" />
+    <MESSAGE value="add admin side backend route" />
+    <MESSAGE value="update admin side routes" />
+    <option name="LAST_COMMIT_MESSAGE" value="update admin side routes" />
   </component>
 </project>
