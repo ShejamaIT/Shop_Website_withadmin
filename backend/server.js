@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 
 import adminRoutes from './Routes/AdminRoutes.js';
+import mainRoutes from "./Routes/mainRoutes.js";
 import auth from "./Routes/auth.js";
 
 
@@ -23,6 +24,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/main',mainRoutes);
 app.use('/api/auth', auth);
 
 
