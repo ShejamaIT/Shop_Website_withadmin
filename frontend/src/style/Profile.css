@@ -1,0 +1,57 @@
+.profile-section {
+    padding: 40px 0;
+}
+
+.profile-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.profile-info {
+    padding: 20px;
+}
+
+.profile-image {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #fff;
+}
+
+.profile-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-profile {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: #007bff;
+    color: #fff;
+    padding: 5px;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.hidden-input {
+    display: none;
+}
+
+.my-orders {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.my-orders h3 {
+    font-size: 20px;
+    font-weight: bold;
+}
