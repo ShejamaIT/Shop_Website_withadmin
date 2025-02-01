@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed the place order function">
-      <change afterPath="$PROJECT_DIR$/frontend/src/assets/images/cover-01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/assets/images/user-06.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/Profile.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/style/Profile.css" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="temporary profile files (not finished)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dbquery.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Header/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Header/Header.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryList.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" afterDir="false" />
@@ -133,28 +126,7 @@
       <workItem from="1738245070725" duration="14660000" />
       <workItem from="1738309279987" duration="32872000" />
       <workItem from="1738400628957" duration="239000" />
-      <workItem from="1738400997305" duration="6121000" />
-    </task>
-    <task id="LOCAL-00055" summary="Add document file">
-      <created>1718702679013</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1718702679014</updated>
-    </task>
-    <task id="LOCAL-00056" summary="update item controller">
-      <created>1718702713695</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1718702713695</updated>
-    </task>
-    <task id="LOCAL-00057" summary="making connection">
-      <created>1719125656708</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1719125656709</updated>
+      <workItem from="1738400997305" duration="9412000" />
     </task>
     <task id="LOCAL-00058" summary="drop some files">
       <created>1719161303058</created>
@@ -478,7 +450,28 @@
       <option name="project" value="LOCAL" />
       <updated>1738392365370</updated>
     </task>
-    <option name="localTasksCounter" value="104" />
+    <task id="LOCAL-00104" summary="update backend">
+      <created>1738407419811</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1738407419811</updated>
+    </task>
+    <task id="LOCAL-00105" summary="temporary profile files (not finished)">
+      <created>1738407544298</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1738407544298</updated>
+    </task>
+    <task id="LOCAL-00106" summary="temporary profile files (not finished)">
+      <created>1738407561907</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1738407561908</updated>
+    </task>
+    <option name="localTasksCounter" value="107" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -496,8 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="update admin logout function" />
-    <MESSAGE value="update admin user delete  function" />
     <MESSAGE value="add dashboard frame and function" />
     <MESSAGE value="add order controller in backend" />
     <MESSAGE value="add place order function" />
@@ -521,6 +512,8 @@
     <MESSAGE value="update 01/31 work" />
     <MESSAGE value="update 01/31 work (fixed errors)" />
     <MESSAGE value="fixed the place order function" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed the place order function" />
+    <MESSAGE value="update backend" />
+    <MESSAGE value="temporary profile files (not finished)" />
+    <option name="LAST_COMMIT_MESSAGE" value="temporary profile files (not finished)" />
   </component>
 </project>

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CommonSection from "../components/Ui/CommonSection";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col } from "reactstrap";
 import "../style/shop.css";
-import ProductDisplay from "../components/Ui/ProductDisplay";
 import ProductList from "../components/Ui/ProductList"; // Component for random products
 
 const Shop = () => {
-    const [selectedCategory, setSelectedCategory] = useState('');
     const [randomProducts, setRandomProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // Initialize navigate hook
 
     // Fetch 12 random products when the page loads
     useEffect(() => {
@@ -31,10 +31,13 @@ const Shop = () => {
         fetchRandomProducts();
     }, []);
 
-    // Handle category filter change
-    const handleFilter = (e) => {
-        const newCategory = e.target.value === "Filter By Category" ? "" : e.target.value;
-        setSelectedCategory(newCategory);
+    // Handle category selection and redirect to new page
+    const handleCategorySelect = (e) => {
+        const selectedCategory = e.target.value;
+        console.log(selectedCategory);
+        if (selectedCategory !== "Filter By Category") {
+            navigate(`/products/${selectedCategory}`); // Redirects to category-specific page
+        }
     };
 
     return (
@@ -47,7 +50,7 @@ const Shop = () => {
                     <Row>
                         <Col lg='3' md='6'>
                             <div className="filter__widget">
-                                <select onChange={handleFilter}>
+                                <select onChange={handleCategorySelect}>
                                     <option>Filter By Category</option>
                                     <option value="Home Furniture">Home Furniture</option>
                                     <option value="Kids Furniture">Kids Furniture</option>
@@ -61,19 +64,15 @@ const Shop = () => {
                 </Container>
             </section>
 
-            {/* Show either random products OR filtered products */}
+            {/* Show random products on this page */}
             <section className="pt-0">
                 <Container>
                     <Row>
                         {loading ? (
                             <h1 className="text-center fs-4">Loading...</h1>
-                        ) : selectedCategory ? (
-                            // Show filtered products only
-                            <ProductDisplay category={selectedCategory} />
                         ) : randomProducts.length === 0 ? (
                             <h1 className="text-center fs-4">No Products are found!</h1>
                         ) : (
-                            // Show random products when no category is selected
                             <ProductList data={randomProducts} />
                         )}
                     </Row>
