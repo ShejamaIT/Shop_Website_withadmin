@@ -4,6 +4,7 @@ import { Col, Container, Row } from "reactstrap";
 import CategoryList from "../Ui/CategoryList";
 import Helmet from "../Helmet/Helmet";
 import CommonSection from "./CommonSection";
+import ProductList from "./ProductList";
 
 const ProductDisplay = () => {
     const { category } = useParams();
@@ -17,28 +18,36 @@ const ProductDisplay = () => {
     const [subCategoriesTwoOptions, setSubCategoriesTwoOptions] = useState([]);
     const [showSubCategoryTwo, setShowSubCategoryTwo] = useState(false); // Controls visibility
 
-    // Fetch products based on category
+    // Fetch products based on category and subcategory
+    const fetchProducts = async (category, subCategoryOne, subCategoryTwo) => {
+        setLoading(true);
+        try {
+            let url = `http://localhost:5000/api/admin/getcategoryimg?category=${category}`;
+            if (subCategoryOne) {
+                url += `&subcategoryOne=${subCategoryOne}`;
+            }
+            if (subCategoryTwo) {
+                url += `&subcategoryTwo=${subCategoryTwo}`;
+            }
+            const response = await fetch(url);
+            const data = await response.json();
+            setProductsData(data.success ? data.data : []);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setProductsData([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch products when main category, subcategoryOne, or subcategoryTwo changes
     useEffect(() => {
         if (!decodedCategory) return;
 
-        const fetchProducts = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`http://localhost:5000/api/admin/getcategoryimg?category=${decodedCategory}`);
-                const data = await response.json();
-                setProductsData(data.success ? data.data : []);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                setProductsData([]);
-            } finally {
-                setLoading(false);
-            }
-        };
+        fetchProducts(decodedCategory, subCategoryOne, subCategoryTwo);
+    }, [decodedCategory, subCategoryOne, subCategoryTwo]);
 
-        fetchProducts();
-    }, [decodedCategory]);
-
-    // Fetch subcategories when category changes
+    // Fetch subcategories when main category changes
     useEffect(() => {
         if (!decodedCategory) return;
 
@@ -111,6 +120,7 @@ const ProductDisplay = () => {
                                 {/* Subcategory One Dropdown */}
                                 {subCategoriesOneOptions.length > 0 && (
                                     <select value={subCategoryOne} onChange={(e) => setSubCategoryOne(e.target.value)}>
+                                        <option value="">Filter By Subcategory One</option>
                                         {subCategoriesOneOptions.map((sub) => (
                                             <option key={sub.sb_c_id} value={sub.subcategory}>
                                                 {sub.subcategory}
@@ -122,6 +132,7 @@ const ProductDisplay = () => {
                                 {/* Subcategory Two Dropdown (Hidden Initially) */}
                                 {showSubCategoryTwo && (
                                     <select value={subCategoryTwo} onChange={(e) => setSubCategoryTwo(e.target.value)}>
+                                        <option value="">Filter By Subcategory Two</option>
                                         {subCategoriesTwoOptions.map((sub) => (
                                             <option key={sub.sb_cc_id} value={sub.subcategory}>
                                                 {sub.subcategory}

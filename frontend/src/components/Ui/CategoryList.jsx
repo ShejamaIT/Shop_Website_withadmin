@@ -2,7 +2,6 @@ import React from "react";
 import CategoryCard from "./CategoryCard";
 
 const CategoryList = ({ data }) => {
-    console.log(data);
     return (
         <>
             {

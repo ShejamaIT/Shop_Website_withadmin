@@ -4,16 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="temporary profile files (not finished)">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed frist category with dropdown">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryList.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductDisplay.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductDisplay.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductList.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Shop.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Shop.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/router/Router.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/style/shop.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/style/shop.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -126,21 +123,7 @@
       <workItem from="1738245070725" duration="14660000" />
       <workItem from="1738309279987" duration="32872000" />
       <workItem from="1738400628957" duration="239000" />
-      <workItem from="1738400997305" duration="9412000" />
-    </task>
-    <task id="LOCAL-00058" summary="drop some files">
-      <created>1719161303058</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1719161303058</updated>
-    </task>
-    <task id="LOCAL-00059" summary="finish signup and signin">
-      <created>1719163046476</created>
-      <option name="number" value="00059" />
-      <option name="presentableId" value="LOCAL-00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1719163046476</updated>
+      <workItem from="1738400997305" duration="10221000" />
     </task>
     <task id="LOCAL-00060" summary="add cookies file and set with it">
       <created>1719168997290</created>
@@ -471,7 +454,21 @@
       <option name="project" value="LOCAL" />
       <updated>1738407561908</updated>
     </task>
-    <option name="localTasksCounter" value="107" />
+    <task id="LOCAL-00107" summary="fixed frist category with dropdown">
+      <created>1738410694004</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1738410694004</updated>
+    </task>
+    <task id="LOCAL-00108" summary="fixed frist category with dropdown">
+      <created>1738410726614</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1738410726614</updated>
+    </task>
+    <option name="localTasksCounter" value="109" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -489,7 +486,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add dashboard frame and function" />
     <MESSAGE value="add order controller in backend" />
     <MESSAGE value="add place order function" />
     <MESSAGE value="add order display frame on admin" />
@@ -514,6 +510,7 @@
     <MESSAGE value="fixed the place order function" />
     <MESSAGE value="update backend" />
     <MESSAGE value="temporary profile files (not finished)" />
-    <option name="LAST_COMMIT_MESSAGE" value="temporary profile files (not finished)" />
+    <MESSAGE value="fixed frist category with dropdown" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed frist category with dropdown" />
   </component>
 </project>
