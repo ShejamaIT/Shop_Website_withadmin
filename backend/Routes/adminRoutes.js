@@ -764,7 +764,87 @@ router.post("/orders", async (req, res) => {
     }
 });
 
+// API Endpoint to get subcategories by category name
+router.get("/categories", async (req, res) => {
+    const categoryName = req.query.name;
 
+    if (!categoryName) {
+        return res.status(400).json({ message: "Category name is required" });
+    }
 
+    try {
+        // Query the Category table to find the Ca_Id based on the category name
+        const [category] = await db.query("SELECT Ca_Id FROM Category WHERE name = ?", [categoryName]);
+
+        // If category is not found, return a 404
+        if (category.length === 0) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+
+        // Get the Ca_Id of the found category
+        const Ca_Id = category[0].Ca_Id;
+
+        // Now, query the subCat_one table to get all subcategories for this category
+        const [subcategories] = await db.query("SELECT sb_c_id, subcategory FROM subCat_one WHERE Ca_Id = ?", [Ca_Id]);
+
+        // If no subcategories found for this category, return a 404
+        if (subcategories.length === 0) {
+            return res.status(404).json({ message: "No subcategories found for this category" });
+        }
+
+        // Convert the binary image data (LONGBLOB) to Base64 format
+        const formattedSubcategories = subcategories.map(subcategory => ({
+            sb_c_id: subcategory.sb_c_id, // Assuming you have a subcategory ID
+            subcategory: subcategory.subcategory,
+        }));
+
+        // Send the formatted subcategories as a JSON response
+        return res.status(200).json(formattedSubcategories);
+    } catch (error) {
+        console.error("Error fetching subcategories:", error.message);
+        return res.status(500).json({ message: "Error fetching subcategories" });
+    }
+});
+
+//get second subcategories by category subcategorie name
+router.get("/subcategories", async (req, res) => {
+    const subcategoryName = req.query.name;
+
+    if (!subcategoryName) {
+        return res.status(400).json({ message: "Subcategory name is required" });
+    }
+
+    try {
+        // Query the subCat_one table to find sb_c_id based on the subcategory name
+        const [subCatOne] = await db.query("SELECT sb_c_id, subcategory FROM subCat_one WHERE subcategory = ?", [subcategoryName]);
+
+        // If the subcategory is not found, return a 404
+        if (subCatOne.length === 0) {
+            return res.status(404).json({ message: "Subcategory not found" });
+        }
+
+        // Get the sb_c_id of the found subcategory in subCat_one
+        const sb_c_id = subCatOne[0].sb_c_id;
+
+        // Now, query the subCat_two table to get all subcategories related to this sb_c_id
+        const [subcategoriesTwo] = await db.query("SELECT sb_cc_id, subcategory FROM subCat_two WHERE sb_c_id = ?", [sb_c_id]);
+
+        // If no related subcategories are found, return a 404
+        if (subcategoriesTwo.length === 0) {
+            return res.status(404).json({ message: "No subcategories found for this subcategory" });
+        }
+
+        // Send the formatted subcategories as a JSON response
+        return res.status(200).json({
+            subcategories: subcategoriesTwo.map(sub => ({
+                sb_cc_id: sub.sb_cc_id,
+                subcategory: sub.subcategory,
+            }))
+        });
+    } catch (error) {
+        console.error("Error fetching subcategories:", error.message);
+        return res.status(500).json({ message: "Error fetching subcategories" });
+    }
+});
 
 export default router;

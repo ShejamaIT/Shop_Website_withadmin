@@ -67,6 +67,7 @@ CREATE TABLE sessionlogs (
 CREATE TABLE Orders (
     OrID VARCHAR(25) PRIMARY KEY,
     orDate DATE,
+    customerEmail TEXT,
     orStatus VARCHAR(15),
     dvStatus VARCHAR(10),
     dvPrice DOUBLE,
@@ -126,7 +127,47 @@ CREATE TABLE order_coupon(
     ocID VARCHAR(25) PRIMARY KEY,
     orID VARCHAR(25),
     cpID VARCHAR(25),
-    discount DOUBLE,
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (cpID) REFERENCES sales_coupon (cpID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+
+);
+
+CREATE TABLE Orders (
+    OrID VARCHAR(25) PRIMARY KEY,
+    orDate DATE,
+    customerEmail TEXT,
+    orStatus VARCHAR(15),
+    dvStatus VARCHAR(10),
+    dvPrice DOUBLE,
+    disPrice DOUBLE,
+    totPrice DOUBLE
+);
+CREATE TABLE Order_Detail(
+    orID VARCHAR(25) PRIMARY KEY,
+    I_Id VARCHAR(15) PRIMARY KEY,
+    qty INT ,
+    price DOUBLE,
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                    ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+        			ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE delivery(
+    dv_id VARCHAR(25) PRIMARY KEY,
+    orID VARCHAR(25),
+    address TEXT,
+    postalcode INT NOT NULL,
+    contact VARCHAR(15) NOT NULL,
+    status VARCHAR(15),
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE order_coupon(
+    ocID VARCHAR(25) PRIMARY KEY,
+    orID VARCHAR(25),
+    cpID VARCHAR(25),
         CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                                    ON DELETE CASCADE ON UPDATE CASCADE,
         CONSTRAINT FOREIGN KEY (cpID) REFERENCES sales_coupon (cpID)
