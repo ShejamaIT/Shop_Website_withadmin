@@ -680,4 +680,91 @@ router.post("/coupone", async (req, res) => {
     }
 });
 
+
+// Save a order
+router.post("/orders", async (req, res) => {
+    try {
+        const {
+            customerName,
+            deliveryMethod,
+            customerAddress,
+            city,
+            postalCode,
+            email,
+            phoneNumber,
+            cartItems,
+            totalAmount,
+            deliveryCharge,
+            discount,
+            coupon,
+        } = req.body;
+
+        // Generate unique order ID
+        const orID = `ORD_${Date.now()}`;
+        const orderDate = new Date().toISOString().split("T")[0]; // Get current date
+        const dvStatus = deliveryMethod === "Delivery" ? "Delivery" : "Pick up"; // Set delivery status based on method
+
+        // Insert Order
+        let orderQuery = `
+            INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus, dvPrice, disPrice, totPrice)
+            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?)`;
+        let orderParams = [orID, orderDate, email, dvStatus, deliveryCharge, discount, totalAmount];
+
+        await db.query(orderQuery, orderParams);
+
+        // Insert Order Details
+        for (const item of cartItems) {
+            let orderDetailQuery = `
+                INSERT INTO Order_Detail (orID, I_Id, qty, price)
+                VALUES (?, ?, ?, ?)`;
+            let orderDetailParams = [orID, item.I_Id, item.qty, item.price];
+
+            await db.query(orderDetailQuery, orderDetailParams);
+        }
+
+        // Insert Delivery Info if delivery is selected
+        if (deliveryMethod === "Delivery") {
+            const dvID = `DLV_${Date.now()}`;
+            let deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, postalcode, contact, status)
+                VALUES (?, ?, ?, ?, ?, 'Pending')`;
+            let deliveryParams = [dvID, orID, customerAddress, postalCode, phoneNumber];
+
+            await db.query(deliveryQuery, deliveryParams);
+        }
+
+        // Insert Coupon Info if a coupon is used
+        if (coupon) {
+            const ocID = `OCP_${Date.now()}`;
+            let couponQuery = `
+                INSERT INTO order_coupon (ocID, orID, cpID)
+                VALUES (?, ?, ?)`;
+            let couponParams = [ocID, orID, coupon];
+
+            await db.query(couponQuery, couponParams);
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            data: {
+                orID: orID,
+                orderDate: orderDate,
+            },
+        });
+
+    } catch (error) {
+        console.error("Error inserting order data:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: error.message,
+        });
+    }
+});
+
+
+
+
 export default router;
