@@ -25,25 +25,25 @@ const Login = () => {
     }
 
     const submitLogin = () => {
-
-        const headers = {'Content-Type': 'application/json'}
-
-        let body = {
-            email: email,
-            password: password
-        }
-        console.log(body);
-
-        axios.post("http://localhost:4000/auth/login", body, {headers: headers}).then(r => {
-            Cookies.set("token", r.data.token);
-            Cookies.set("user_email", r.data.data.email);
-            navigate("/dashboard");
-            toast.success('Login Sucessfully..')
-
-        }).catch(err => {
-            toast.error('Something went wrong...')
-            console.log(err)
-        })
+        navigate("/dashboard");
+        // const headers = {'Content-Type': 'application/json'}
+        //
+        // let body = {
+        //     email: email,
+        //     password: password
+        // }
+        // console.log(body);
+        //
+        // axios.post("http://localhost:4000/auth/login", body, {headers: headers}).then(r => {
+        //     Cookies.set("token", r.data.token);
+        //     Cookies.set("user_email", r.data.data.email);
+        //     navigate("/dashboard");
+        //     toast.success('Login Sucessfully..')
+        //
+        // }).catch(err => {
+        //     toast.error('Something went wrong...')
+        //     console.log(err)
+        // })
 
     }
 

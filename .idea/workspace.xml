@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed frist category with dropdown">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed the bugged temporary">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/CategoryList.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductDisplay.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductDisplay.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Ui/ProductList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Ui/ProductList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Login.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,14 +119,7 @@
       <workItem from="1738245070725" duration="14660000" />
       <workItem from="1738309279987" duration="32872000" />
       <workItem from="1738400628957" duration="239000" />
-      <workItem from="1738400997305" duration="10221000" />
-    </task>
-    <task id="LOCAL-00060" summary="add cookies file and set with it">
-      <created>1719168997290</created>
-      <option name="number" value="00060" />
-      <option name="presentableId" value="LOCAL-00060" />
-      <option name="project" value="LOCAL" />
-      <updated>1719168997290</updated>
+      <workItem from="1738400997305" duration="11351000" />
     </task>
     <task id="LOCAL-00061" summary="add resources">
       <created>1719222656272</created>
@@ -468,7 +457,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738410726614</updated>
     </task>
-    <option name="localTasksCounter" value="109" />
+    <task id="LOCAL-00109" summary="fixed the bugged temporary">
+      <created>1738411686502</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1738411686502</updated>
+    </task>
+    <option name="localTasksCounter" value="110" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -486,7 +482,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add order controller in backend" />
     <MESSAGE value="add place order function" />
     <MESSAGE value="add order display frame on admin" />
     <MESSAGE value="update admin side toast message" />
@@ -511,6 +506,7 @@
     <MESSAGE value="update backend" />
     <MESSAGE value="temporary profile files (not finished)" />
     <MESSAGE value="fixed frist category with dropdown" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed frist category with dropdown" />
+    <MESSAGE value="fixed the bugged temporary" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed the bugged temporary" />
   </component>
 </project>

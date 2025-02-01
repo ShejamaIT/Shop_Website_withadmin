@@ -13,38 +13,38 @@ const Dashboard = () =>{
     const [orders, setOrders] = useState([]);
 
     const getAllItems = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get("http://localhost:4000/item", { withCredentials: true });
-            setItem(response.data.data);
-        } catch (err) {
-            console.log(err);
-            toast.error('Something went wrong...');
-        } finally {
-            setLoading(false);
-        }
+        // setLoading(true);
+        // try {
+        //     const response = await axios.get("http://localhost:4000/item", { withCredentials: true });
+        //     setItem(response.data.data);
+        // } catch (err) {
+        //     console.log(err);
+        //     toast.error('Something went wrong...');
+        // } finally {
+        //     setLoading(false);
+        // }
     };
     const getAllUsers = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get("http://localhost:4000/users", { withCredentials: true });
-            setUsers(response.data.data);
-        } catch (err) {
-            toast.error('Something went wrong...');
-        } finally {
-            setLoading(false);
-        }
+        // setLoading(true);
+        // try {
+        //     const response = await axios.get("http://localhost:4000/users", { withCredentials: true });
+        //     setUsers(response.data.data);
+        // } catch (err) {
+        //     toast.error('Something went wrong...');
+        // } finally {
+        //     setLoading(false);
+        // }
     };
     const getAllOrders = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get("http://localhost:4000/order", { withCredentials: true });
-            setOrders(response.data.data);
-        } catch (err) {
-            toast.error('Something went wrong...');
-        } finally {
-            setLoading(false);
-        }
+        // setLoading(true);
+        // try {
+        //     const response = await axios.get("http://localhost:4000/order", { withCredentials: true });
+        //     setOrders(response.data.data);
+        // } catch (err) {
+        //     toast.error('Something went wrong...');
+        // } finally {
+        //     setLoading(false);
+        // }
     };
 
     useEffect(() => {
