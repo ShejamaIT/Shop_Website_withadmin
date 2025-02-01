@@ -51,7 +51,7 @@ const Header = () => {
     };
 
     const navigateToLogin = () => {
-        navigate('/signin');
+        navigate('/profile');
     };
     const logout = async () => {
         const result = await Swal.fire({
