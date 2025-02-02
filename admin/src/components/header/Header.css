@@ -34,6 +34,9 @@
     font-weight: 500;
     cursor: pointer;
 }
+.nav__item:hover{
+    color: #6C4D02FF;
+}
 .nav__icons{
     display: flex;
     align-items: center;
@@ -102,6 +105,7 @@
 }
 .nav__active{
     font-weight: 700 !important;
+    color: white;
 }
 .sticky__header{
     width: 100%;

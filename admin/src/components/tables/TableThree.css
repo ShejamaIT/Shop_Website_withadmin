@@ -19,9 +19,36 @@
     border-collapse: collapse;
 }
 
+/* Limit table height to show max 4 rows, then scroll */
+.table-wrapper {
+    max-height: 280px; /* Adjust height as needed */
+    overflow-y: auto;
+    display: block;
+}
+
+/* Hide the scrollbar but allow scrolling */
+.table-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+}
+
+/* Table headers */
+.styled-table thead {
+    position: sticky;
+    top: 0;
+    background-color: #2c3e50;
+    color: white;
+    z-index: 10;
+}
+
 /* Table headers */
 .styled-table th {
-    background-color: #f4f4f4;
+    background-color: #2c3e50;
+    color: white;
     padding: 12px;
     text-align: left;
     font-weight: bold;
@@ -39,20 +66,9 @@
     font-size: 14px;
 }
 
-/* Package info styling */
-.package-info h5 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.package-info .price {
-    font-size: 14px;
-    color: #555;
-}
-
 /* Status labels */
 .status {
+    display: inline-block;
     padding: 6px 12px;
     border-radius: 15px;
     font-size: 12px;
@@ -75,10 +91,29 @@
     color: #f39c12;
 }
 
+.status.delivered {
+    background-color: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+}
+
+.status.processing {
+    background-color: rgba(155, 89, 182, 0.2);
+    color: #9b59b6;
+}
+
+/* No data message */
+.no-data {
+    text-align: center;
+    color: #888;
+    font-weight: bold;
+    padding: 20px;
+}
+
 /* Action buttons */
 .action-buttons {
     display: flex;
     gap: 10px;
+    justify-content: center;
 }
 
 .action-buttons button {
@@ -100,4 +135,12 @@
 
 .delete-btn:hover {
     color: #e74c3c;
+}
+
+/* Loading and error messages */
+.loading-text, .error-text {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #555;
 }

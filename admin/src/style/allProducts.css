@@ -1,3 +1,6 @@
+.all-products{
+    padding: 60px 0px;
+}
 .table tbody tr td img{
     width: 80px !important;
     height: 80px !important;

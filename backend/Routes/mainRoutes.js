@@ -43,6 +43,37 @@ router.get("/orders", async (req, res) => {
     }
 });
 
+//get all items
+router.get("/allitems", async (req, res) => {
+    try {
+        // Query the database to fetch all items
+        const [items] = await db.query("SELECT * FROM Item");
+
+        // If no items found, return a 404 status
+        if (items.length === 0) {
+            return res.status(404).json({ message: "No items found" });
+        }
+
+        // Format the items data
+        const formattedItems = items.map(item => ({
+            I_Id: item.I_Id, // Item ID
+            I_name: item.I_name, // Item name
+            Ty_id: item.Ty_id, // Type ID (foreign key)
+            descrip: item.descrip, // Item description
+            price: item.price, // Price
+            qty: item.qty, // Quantity
+            img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB image to Base64
+        }));
+
+        // Send the formatted items as a JSON response
+        return res.status(200).json(formattedItems);
+    } catch (error) {
+        console.error("Error fetching items:", error.message);
+        return res.status(500).json({ message: "Error fetching items" });
+    }
+});
+
+
 
 
 
