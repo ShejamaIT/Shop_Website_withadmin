@@ -9,49 +9,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const admin_nav = [
-    {
-        display: 'Dashboard',
-        path: '/dashboard'
-    },
-    {
-        display: 'All-Products',
-        path: '/dashboard/all-products'
-    },
-    {
-        display: 'Orders',
-        path: '/dashboard/orders'
-    },
-    {
-        display: 'Users',
-        path: '/dashboard/users'
-    },
-];
-
 const AdminNav = () => {
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        const headers = { 'Content-Type': 'application/json' };
-        console.log(Cookies.get("user_email"))
-        const body = {
-            email: Cookies.get("user_email"), // Assuming the email is stored in a cookie named 'user_email'
-        };
-
-        axios.post("http://localhost:4000/auth/logout", body, { headers: headers, withCredentials: true })
-            .then(response => {
-                console.log(response);
-                Cookies.remove("token");
-                Cookies.remove("user");
-                Cookies.remove("user_email");
-                navigate("/login");
-                toast.success('Logged out successfully.');
-            })
-            .catch(err => {
-                toast.error('Failed to logout.');
-                console.log(err);
-            });
-    };
 
     return (
         <>
@@ -65,20 +23,8 @@ const AdminNav = () => {
                                     <h2>Shejama Group</h2>
                                 </div>
                             </div>
-
-                            {/*<div className='search__box'>*/}
-                            {/*    <input type='text' placeholder='Search...' />*/}
-                            {/*    <span><i className='ri-search-line'></i></span>*/}
-                            {/*</div>*/}
                             <div className="admin__nav-top-right">
-                                <span><i className='ri-notification-3-line'></i></span>
                                 <span><i className='ri-settings-2-line'></i></span>
-                                <span onClick={handleLogout} style={{ cursor: "pointer" }}><i className='ri-logout-box-line'></i></span>
-                                <motion.img
-                                    whileTap={{ scale: 1.2 }}
-                                    src={userIcon}
-                                    alt="usericon"
-                                />
                             </div>
                         </div>
                     </Container>
