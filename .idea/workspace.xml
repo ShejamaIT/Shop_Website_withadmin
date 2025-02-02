@@ -4,24 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed navbars">
-      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/product/product-01.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/product/product-02.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/product/product-03.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/product/product-04.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/product/product-thumb.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="load all orders and items">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/assets/images/logout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/header/Header.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/header/Header.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/allProducts.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/allProducts.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,14 +122,7 @@
       <workItem from="1738309279987" duration="32872000" />
       <workItem from="1738400628957" duration="239000" />
       <workItem from="1738400997305" duration="12193000" />
-      <workItem from="1738465288391" duration="12508000" />
-    </task>
-    <task id="LOCAL-00067" summary="add admin files">
-      <created>1719379686448</created>
-      <option name="number" value="00067" />
-      <option name="presentableId" value="LOCAL-00067" />
-      <option name="project" value="LOCAL" />
-      <updated>1719379686448</updated>
+      <workItem from="1738465288391" duration="15153000" />
     </task>
     <task id="LOCAL-00068" summary="updateand drop some admin files">
       <created>1719399750720</created>
@@ -481,7 +460,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738476516791</updated>
     </task>
-    <option name="localTasksCounter" value="116" />
+    <task id="LOCAL-00116" summary="load all orders and items">
+      <created>1738480482946</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1738480482946</updated>
+    </task>
+    <option name="localTasksCounter" value="117" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -499,7 +485,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="done the cart add and subtract function" />
     <MESSAGE value="delete unwant files" />
     <MESSAGE value="addding backend project" />
     <MESSAGE value="update backend project" />
@@ -524,6 +509,7 @@
     <MESSAGE value="update admin side routes" />
     <MESSAGE value="final upload 02/01" />
     <MESSAGE value="fixed navbars" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed navbars" />
+    <MESSAGE value="load all orders and items" />
+    <option name="LAST_COMMIT_MESSAGE" value="load all orders and items" />
   </component>
 </project>
