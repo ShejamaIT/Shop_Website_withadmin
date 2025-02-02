@@ -19,15 +19,24 @@ router.get("/orders", async (req, res) => {
             return res.status(404).json({ message: "No Orders found" });
         }
 
-        // Convert the binary image data (LONGBLOB) to Base64
-        // const formattedPromotions = orders.map(order => ({
-        //     id: order.OrID, // Assuming you have an id column
-        //     date: order.date,
-        // }));
-        console.log(orders);
+
+        const formattedOrders = orders.map(order => ({
+            OrID : order.OrID, // Assuming you have an id column
+            orDate : order.orDate,
+            customerEmail : order.customerEmail,
+            orStatus : order.orStatus,
+            dvStatus : order.dvStatus,
+            dvPrice : order.dvPrice,
+            disPrice : order.disPrice,
+            totPrice : order.totPrice
+        }));
+        console.log(formattedOrders);
 
         // Send the formatted promotions as a JSON response
-        return res.status(200).json({ message: "founed" });
+        return res.status(200).json({
+            message: "Orders are founded.",
+            data : formattedOrders,
+        });
     } catch (error) {
         console.error("Error fetching promotions:", error.message);
         return res.status(500).json({ message: "Error fetching promotions" });

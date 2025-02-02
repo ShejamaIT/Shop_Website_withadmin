@@ -5,11 +5,11 @@ import Routers from "../../router/Router";
 
 const Layout = () =>{
     return <>
-        <AdminNav/>
+        {/*<AdminNav/>*/}
         <div>
             <Routers/>
         </div>
-        <Footer/>
+        {/*<Footer/>*/}
     </>
 };
 

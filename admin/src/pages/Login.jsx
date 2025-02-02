@@ -1,5 +1,6 @@
 import React,{useState} from "react";
 import Helmet from "../components/Helmet/Helmet";
+import AdminNav from "./AdminNav";
 import { Container, Row, Col, Form,FormGroup} from "reactstrap";
 import { Link , useNavigate } from "react-router-dom";
 import '../style/login.css';
@@ -51,6 +52,7 @@ const Login = () => {
     return (
         <Helmet title={'Login'}>
             <section>
+                <AdminNav/>
                 <Container>
                     <Row>
                         <Col lg={6} className={'m-auto text-center'}>

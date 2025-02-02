@@ -129,14 +129,25 @@
 }
 
 .admin__nav-top-right span i {
-    color: whitesmoke;
+    color: #dea30e;
     cursor: pointer;
+}
+
+.admin-nav-wrapper-top .logo{
+    display: flex;
+    align-items: center;
+    column-gap: 8px;
 }
 
 .admin-nav-wrapper-top .logo h2 {
     font-size: 1.2rem;
     font-weight: 700;
-    color: whitesmoke;
+    color: #dea30e;
+}
+
+.admin-nav-wrapper-top .logo img{
+    width: 1.5rem;
+    height: 1.5rem;
 }
 
 .admin__menu {

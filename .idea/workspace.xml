@@ -4,8 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update admin side routes">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="final upload 02/01">
+      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/logo.PNG" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/logout.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/components/header/Header.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/TableThree.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/Footer/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/Footer/Footer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/Footer/footer.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/Footer/footer.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/Layout/Layout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/Layout/Layout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AdminNav.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AdminNav.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/Dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/Dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/adminNav.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/adminNav.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/login.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/login.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Layout/Layout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Layout/Layout.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,32 +48,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Dell/Desktop/Shop_Mangement_Website/frontend/src/assets/images&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Dell/Desktop/Shop_Mangement_Website/admin/src/assets/images",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\assets\images" />
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\header" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\src\assets\images" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\backend\Routes" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\src\components\Ui" />
-      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website" />
-      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\public" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
@@ -118,14 +135,8 @@
       <workItem from="1738245070725" duration="14660000" />
       <workItem from="1738309279987" duration="32872000" />
       <workItem from="1738400628957" duration="239000" />
-      <workItem from="1738400997305" duration="12022000" />
-    </task>
-    <task id="LOCAL-00064" summary="update header file">
-      <created>1719222924506</created>
-      <option name="number" value="00064" />
-      <option name="presentableId" value="LOCAL-00064" />
-      <option name="project" value="LOCAL" />
-      <updated>1719222924506</updated>
+      <workItem from="1738400997305" duration="12193000" />
+      <workItem from="1738465288391" duration="8256000" />
     </task>
     <task id="LOCAL-00065" summary="add admin panel">
       <created>1719376850285</created>
@@ -463,7 +474,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738412920683</updated>
     </task>
-    <option name="localTasksCounter" value="113" />
+    <task id="LOCAL-00113" summary="final upload 02/01">
+      <created>1738413285107</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1738413285107</updated>
+    </task>
+    <option name="localTasksCounter" value="114" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -481,7 +499,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="update admin side" />
     <MESSAGE value="update frontend side" />
     <MESSAGE value="done the cart add and subtract function" />
     <MESSAGE value="delete unwant files" />
@@ -506,6 +523,7 @@
     <MESSAGE value="start to update admin side" />
     <MESSAGE value="add admin side backend route" />
     <MESSAGE value="update admin side routes" />
-    <option name="LAST_COMMIT_MESSAGE" value="update admin side routes" />
+    <MESSAGE value="final upload 02/01" />
+    <option name="LAST_COMMIT_MESSAGE" value="final upload 02/01" />
   </component>
 </project>
