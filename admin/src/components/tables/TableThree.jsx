@@ -54,9 +54,11 @@ const TableThree = () => {
                         <tr>
                             <th>Order ID</th>
                             <th>Order Date</th>
+                            <th>Expected Date</th>
                             <th>Customer Email</th>
                             <th>Order Status</th>
                             <th>Total Price</th>
+                            <th>Sales By</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -70,6 +72,7 @@ const TableThree = () => {
                                 <tr key={order.OrID}>
                                     <td>{order.OrID}</td>
                                     <td>{formatDate(order.orDate)}</td>
+                                    <td>{formatDate(order.expectedDeliveryDate)}</td>
                                     <td>{order.customerEmail}</td>
                                     <td>
                                         <span className={`status ${order.orStatus.toLowerCase()}`}>
@@ -77,6 +80,7 @@ const TableThree = () => {
                                         </span>
                                     </td>
                                     <td>Rs.{order.totPrice.toFixed(2)}</td>
+                                    <td>{order.stID}</td>
                                     <td className="action-buttons">
                                         <button
                                             className="view-btn"

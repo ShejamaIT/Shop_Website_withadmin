@@ -1,31 +1,61 @@
+/* Order Details Container */
 .order-details {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
     background: white;
-    padding: 20px;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+/* General Order Info & Sales Team in One Line */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    background: #f8f9fa;
+    padding: 15px;
     border-radius: 8px;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
 }
 
-.order-info p {
+.order-general, .sales-team {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.order-general p, .sales-team p {
+    margin: 5px 15px;
     font-size: 16px;
-    color: #333;
-    margin-bottom: 10px;
+    color: #2c3e50;
 }
 
-.order-info strong {
-    font-weight: bold;
-    color: #000;
+/* Order Summary */
+.order-summary {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    background: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
 }
 
-/* Order Status Styling */
+.order-summary p {
+    margin: 5px 15px;
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+/* Status Badges */
 .status {
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: 5px;
     font-weight: bold;
+    display: inline-block;
+    text-transform: capitalize;
 }
 
+/* Different Order Status Styles */
 .status.pending {
     background-color: rgba(241, 196, 15, 0.2);
     color: #f39c12;
@@ -44,4 +74,42 @@
 .status.cancelled {
     background-color: rgba(189, 195, 199, 0.3);
     color: #7f8c8d;
+}
+
+/* Ordered Items List */
+.order-items {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.order-items li {
+    background: #f8f9fa;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease-in-out;
+}
+
+.order-items li:hover {
+    transform: scale(1.02);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .order-header, .order-summary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .order-general p, .sales-team p, .order-summary p {
+        font-size: 14px;
+        margin: 5px 0;
+    }
+
+    .status {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
 }

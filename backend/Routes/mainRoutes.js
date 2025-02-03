@@ -28,9 +28,11 @@ router.get("/orders", async (req, res) => {
             dvStatus : order.dvStatus,
             dvPrice : order.dvPrice,
             disPrice : order.disPrice,
-            totPrice : order.totPrice
+            totPrice : order.totPrice,
+            stID:  order.stID,
+            expectedDeliveryDate: order.expectedDate
         }));
-        console.log(formattedOrders);
+        // console.log(formattedOrders);
 
         // Send the formatted promotions as a JSON response
         return res.status(200).json({
@@ -149,7 +151,183 @@ router.post("/item", upload.single('img'), async (req, res) => {
         });
     }
 });
+router.post("/orders", async (req, res) => {
+    try {
+        const {
+            customerName,
+            deliveryMethod,
+            customerAddress,
+            district, // Sending district instead of postal code
+            email,
+            phoneNumber,
+            cartItems,
+            totalAmount,
+            deliveryCharge,
+            discount,
+            coupon,
+            expectedDate,
+            specialNote
+        } = req.body;
 
+        // Validate required fields
+        if (!customerName || !email || !phoneNumber || cartItems.length === 0 || !totalAmount) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields."
+            });
+        }
+
+        // Generate unique order ID
+        const orID = `ORD_${Date.now()}`;
+        const orderDate = new Date().toISOString().split("T")[0]; // Get current date
+        const dvStatus = deliveryMethod === "Delivery" ? "Delivery" : "Pick up"; // Set delivery status
+
+        // Initialize stID to null
+        let stID = null;
+
+        // If a coupon is provided, fetch the associated sales team ID (stID)
+        if (coupon) {
+            const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
+            const [couponResult] = await db.query(couponQuery, [coupon]);
+
+            if (couponResult.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid coupon code"
+                });
+            }
+
+            // Set the stID from the coupon
+            stID = couponResult[0].stID;
+        }
+
+        // Insert Order into the database
+        const orderQuery = `
+            INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote)
+            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?)`;
+        const orderParams = [orID, orderDate, email, dvStatus, deliveryCharge, discount, totalAmount, stID, expectedDate, specialNote];
+
+        await db.query(orderQuery, orderParams);
+
+        // Insert each cart item into Order_Detail
+        for (const item of cartItems) {
+            const orderDetailQuery = `
+                INSERT INTO Order_Detail (orID, I_Id, qty, price)
+                VALUES (?, ?, ?, ?)`;
+            const orderDetailParams = [orID, item.I_Id, item.qty, item.price];
+
+            await db.query(orderDetailQuery, orderDetailParams);
+        }
+
+        // Insert Delivery Info if delivery is selected
+        if (deliveryMethod === "Delivery") {
+            const dvID = `DLV_${Date.now()}`;
+            const deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, district, contact, status, schedule_Date, delivery_Date)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?, 'none')`;
+            const deliveryParams = [dvID, orID, customerAddress, district, phoneNumber, expectedDate];
+
+            await db.query(deliveryQuery, deliveryParams);
+        }
+
+        // Insert Coupon Info if a coupon is used
+        if (coupon) {
+            const ocID = `OCP_${Date.now()}`;
+            const couponQuery = `
+                INSERT INTO order_coupon (ocID, orID, cpID)
+                VALUES (?, ?, ?)`;
+            const couponParams = [ocID, orID, coupon];
+
+            await db.query(couponQuery, couponParams);
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            data: {
+                orID: orID,
+                orderDate: orderDate,
+            },
+        });
+
+    } catch (error) {
+        console.error("Error inserting order data:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: error.message,
+        });
+    }
+});
+
+router.get("/order-details", async (req, res) => {
+    try {
+        const { orID } = req.query;
+        console.log(orID);
+        if (!orID) {
+            return res.status(400).json({ success: false, message: "Order ID is required" });
+        }
+
+        // Fetch Order Info
+        const orderQuery = `
+            SELECT 
+                o.OrID, o.orDate, o.customerEmail, o.orStatus, o.dvStatus, 
+                o.dvPrice, o.disPrice, o.totPrice, o.expectedDate, o.specialNote, 
+                s.stID, s.E_Id AS salesEmployee
+            FROM Orders o
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            WHERE o.OrID = ?`;
+
+        const [orderResult] = await db.query(orderQuery, [orID]);
+
+        if (orderResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        const orderData = orderResult[0];
+
+        // Fetch Ordered Items
+        const itemsQuery = `
+            SELECT od.I_Id, i.I_name, od.qty, od.price
+            FROM Order_Detail od
+            JOIN Item i ON od.I_Id = i.I_Id
+            WHERE od.orID = ?`;
+
+        const [itemsResult] = await db.query(itemsQuery, [orID]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Order details fetched successfully",
+            order: {
+                orderId: orderData.OrID,
+                orderDate: orderData.orDate,
+                customerEmail: orderData.customerEmail,
+                orderStatus: orderData.orStatus,
+                deliveryStatus: orderData.dvStatus,
+                deliveryCharge: orderData.dvPrice,
+                discount: orderData.disPrice,
+                totalPrice: orderData.totPrice,
+                expectedDeliveryDate: orderData.expectedDate,
+                specialNote: orderData.specialNote,
+                salesTeam: orderData.stID ? { stID: orderData.stID, employeeID: orderData.salesEmployee } : null,
+                items: itemsResult.map(item => ({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    quantity: item.qty,
+                    price: item.price
+                }))
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching order details:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching order details",
+            details: error.message,
+        });
+    }
+});
 
 
 
