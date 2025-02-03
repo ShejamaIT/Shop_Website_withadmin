@@ -8,6 +8,7 @@ import NavBar from "../components/header/navBar";
 const OrderDetails = () => {
     const { id } = useParams(); // Get order ID from URL
     const [order, setOrder] = useState(null);
+    const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -19,18 +20,21 @@ const OrderDetails = () => {
                 if (!response.ok) {
                     throw new Error("Failed to fetch order details.");
                 }
-
                 const data = await response.json();
                 setOrder(data.order); // Set only the order object from API response
+                // const response1 = await fetch(`http://localhost:5000/api/admin/item-details?I_Id=${order.itemId}`);
                 setLoading(false);
             } catch (err) {
                 console.error("Error fetching order details:", err);
                 setError(err.message);
                 setLoading(false);
             }
+
         };
 
+
         fetchOrder();
+        // fetchItemDetails();
     }, [id]);
 
     if (loading) return <p>Loading...</p>;
@@ -46,7 +50,7 @@ const OrderDetails = () => {
                 <Container>
                     <Row>
                         <Col lg="12">
-                            <h4 className="mb-5 text-center">Order #{order.orderId} Details</h4>
+                            <h4 className="mb-3 text-center">Order #{order.orderId} Details</h4>
                             <div className="order-details">
 
                                 {/* General Order Info & Sales Team in One Line */}
@@ -63,8 +67,7 @@ const OrderDetails = () => {
                                     </div>
                                     {order.salesTeam && (
                                         <div className="sales-team">
-                                            <p><strong>Sales Team ID:</strong> {order.salesTeam.stID}</p>
-                                            <p><strong>Employee ID:</strong> {order.salesTeam.employeeID}</p>
+                                            <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
                                         </div>
                                     )}
                                 </div>
@@ -85,7 +88,11 @@ const OrderDetails = () => {
                                         {order.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
-                                                <p><strong>Quantity:</strong> {item.quantity}</p>
+                                                <p>
+                                                    <strong>Requested Quantity:</strong> {item.quantity}
+                                                    <strong>Quantity On Stock:</strong>
+                                                </p>
+
                                                 <p><strong>Price:</strong> Rs. {item.price}</p>
                                             </li>
                                         ))}
