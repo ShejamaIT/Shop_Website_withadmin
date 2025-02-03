@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./TableThree.css"; // Importing the stylesheet
 
 const TableThree = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -26,11 +28,17 @@ const TableThree = () => {
 
         fetchOrders();
     }, []);
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1)
             .toString()
             .padStart(2, "0")}-${date.getFullYear()}`;
+    };
+
+    // Function to navigate to order details page
+    const handleViewOrder = (orderId) => {
+        navigate(`/order-detail/${orderId}`); // Navigate to OrderDetails page
     };
 
     return (
@@ -64,13 +72,18 @@ const TableThree = () => {
                                     <td>{formatDate(order.orDate)}</td>
                                     <td>{order.customerEmail}</td>
                                     <td>
-                                            <span className={`status ${order.orStatus.toLowerCase()}`}>
-                                                {order.orStatus}
-                                            </span>
+                                        <span className={`status ${order.orStatus.toLowerCase()}`}>
+                                            {order.orStatus}
+                                        </span>
                                     </td>
                                     <td>Rs.{order.totPrice.toFixed(2)}</td>
                                     <td className="action-buttons">
-                                        <button className="view-btn">👁️</button>
+                                        <button
+                                            className="view-btn"
+                                            onClick={() => handleViewOrder(order.OrID)}
+                                        >
+                                            👁️
+                                        </button>
                                         <button className="edit-btn">✏️</button>
                                     </td>
                                 </tr>

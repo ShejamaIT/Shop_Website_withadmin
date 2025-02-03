@@ -1,0 +1,47 @@
+.order-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.order-info p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.order-info strong {
+    font-weight: bold;
+    color: #000;
+}
+
+/* Order Status Styling */
+.status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.status.pending {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #f39c12;
+}
+
+.status.paid {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+}
+
+.status.unpaid {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.status.cancelled {
+    background-color: rgba(189, 195, 199, 0.3);
+    color: #7f8c8d;
+}

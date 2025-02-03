@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="load all orders and items">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/orderDetails.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,14 +124,7 @@
       <workItem from="1738309279987" duration="32872000" />
       <workItem from="1738400628957" duration="239000" />
       <workItem from="1738400997305" duration="12193000" />
-      <workItem from="1738465288391" duration="15153000" />
-    </task>
-    <task id="LOCAL-00068" summary="updateand drop some admin files">
-      <created>1719399750720</created>
-      <option name="number" value="00068" />
-      <option name="presentableId" value="LOCAL-00068" />
-      <option name="project" value="LOCAL" />
-      <updated>1719399750720</updated>
+      <workItem from="1738465288391" duration="20532000" />
     </task>
     <task id="LOCAL-00069" summary="update admin nav bar">
       <created>1719399780075</created>
@@ -467,7 +462,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738480482946</updated>
     </task>
-    <option name="localTasksCounter" value="117" />
+    <task id="LOCAL-00117" summary="load all orders and items">
+      <created>1738499555822</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1738499555822</updated>
+    </task>
+    <option name="localTasksCounter" value="118" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

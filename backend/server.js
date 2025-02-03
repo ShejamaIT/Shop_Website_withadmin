@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 6000; // If port is not defined then default to
 // Middleware
 // app.use(cors());
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3001',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
