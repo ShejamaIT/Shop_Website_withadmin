@@ -76,45 +76,50 @@ router.post("/type", async (req, res) => {
     }
 });
 
-// Save New Item
-router.post("/item", upload.single('img'), async (req, res) => {
-    const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-
-    const values = [
-        req.body.I_Id,
-        req.body.I_name,
-        req.body.Ty_id,
-        req.body.descrip,
-        req.body.price,
-        req.body.qty,
-        req.file.buffer,  // The image file is in `req.file.buffer`
-    ];
-
-    try {
-        const [result] = await db.query(sql, values);
-
-        return res.status(201).json({
-            success: true,
-            message: "Item added successfully",
-            data: {
-                I_Id: req.body.I_Id,
-                I_name: req.body.I_name,
-                Ty_id: req.body.Ty_id,
-                descrip: req.body.descrip,
-                price: req.body.price,
-                qty: req.body.qty,
-                img: req.body.img,
-            },
-        });
-    } catch (err) {
-        console.error("Error inserting item data:", err.message);
-        return res.status(500).json({
-            success: false,
-            message: "Error inserting data into database",
-            details: err.message,
-        });
-    }
-});
+// // Save New Item
+// router.post("/item", upload.single('img'), async (req, res) => {
+//     const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img,s_ID,warrantyPeriod,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`;
+//
+//     const values = [
+//         req.body.I_Id,
+//         req.body.I_name,
+//         req.body.Ty_id,
+//         req.body.descrip,
+//         req.body.price,
+//         req.body.qty,
+//         req.file.buffer,  // The image file is in `req.file.buffer`
+//         req.body.s_ID,
+//         req.body.warrantyPeriod,
+//         req.body.cost
+//     ];
+//
+//     try {
+//         const [result] = await db.query(sql, values);
+//
+//         return res.status(201).json({
+//             success: true,
+//             message: "Item added successfully",
+//             data: {
+//                 I_Id: req.body.I_Id,
+//                 I_name: req.body.I_name,
+//                 Ty_id: req.body.Ty_id,
+//                 descrip: req.body.descrip,
+//                 price: req.body.price,
+//                 qty: req.body.qty,
+//                 warrantyPeriod : req.body.warrantyPeriod,
+//                 cost : req.body.cost,
+//                 s_ID: req.body.s_ID
+//             },
+//         });
+//     } catch (err) {
+//         console.error("Error inserting item data:", err.message);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Error inserting data into database",
+//             details: err.message,
+//         });
+//     }
+// });
 
 // Save New Promotion
 router.post("/promotion", upload.single('img'), async (req, res) => {
