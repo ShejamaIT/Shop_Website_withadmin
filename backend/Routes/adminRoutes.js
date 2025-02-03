@@ -76,50 +76,6 @@ router.post("/type", async (req, res) => {
     }
 });
 
-// // Save New Item
-// router.post("/item", upload.single('img'), async (req, res) => {
-//     const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img,s_ID,warrantyPeriod,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`;
-//
-//     const values = [
-//         req.body.I_Id,
-//         req.body.I_name,
-//         req.body.Ty_id,
-//         req.body.descrip,
-//         req.body.price,
-//         req.body.qty,
-//         req.file.buffer,  // The image file is in `req.file.buffer`
-//         req.body.s_ID,
-//         req.body.warrantyPeriod,
-//         req.body.cost
-//     ];
-//
-//     try {
-//         const [result] = await db.query(sql, values);
-//
-//         return res.status(201).json({
-//             success: true,
-//             message: "Item added successfully",
-//             data: {
-//                 I_Id: req.body.I_Id,
-//                 I_name: req.body.I_name,
-//                 Ty_id: req.body.Ty_id,
-//                 descrip: req.body.descrip,
-//                 price: req.body.price,
-//                 qty: req.body.qty,
-//                 warrantyPeriod : req.body.warrantyPeriod,
-//                 cost : req.body.cost,
-//                 s_ID: req.body.s_ID
-//             },
-//         });
-//     } catch (err) {
-//         console.error("Error inserting item data:", err.message);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Error inserting data into database",
-//             details: err.message,
-//         });
-//     }
-// });
 
 // Save New Promotion
 router.post("/promotion", upload.single('img'), async (req, res) => {
@@ -694,7 +650,7 @@ router.post("/orders", async (req, res) => {
             deliveryMethod,
             customerAddress,
             city,
-            postalCode,
+            district,
             email,
             phoneNumber,
             cartItems,
@@ -702,6 +658,8 @@ router.post("/orders", async (req, res) => {
             deliveryCharge,
             discount,
             coupon,
+            expectedDate,
+            specialNote
         } = req.body;
 
         // Generate unique order ID
@@ -709,11 +667,31 @@ router.post("/orders", async (req, res) => {
         const orderDate = new Date().toISOString().split("T")[0]; // Get current date
         const dvStatus = deliveryMethod === "Delivery" ? "Delivery" : "Pick up"; // Set delivery status based on method
 
+        // Initialize stID to null
+        let stID = null;
+
+        // Check if a coupon is provided, if yes fetch associated stID
+        if (coupon) {
+            // Fetch the stID associated with the provided coupon ID (cpID)
+            const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
+            const [couponResult] = await db.query(couponQuery, [coupon]);
+
+            if (couponResult.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid coupon code"
+                });
+            }
+
+            // Set the sales team ID (stID) from the coupon
+            stID = couponResult[0].stID;
+        }
+
         // Insert Order
         let orderQuery = `
-            INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus, dvPrice, disPrice, totPrice)
-            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?)`;
-        let orderParams = [orID, orderDate, email, dvStatus, deliveryCharge, discount, totalAmount];
+            INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote)
+            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?)`;
+        let orderParams = [orID, orderDate, email, dvStatus, deliveryCharge, discount, totalAmount, stID, expectedDate, specialNote];
 
         await db.query(orderQuery, orderParams);
 
@@ -731,9 +709,9 @@ router.post("/orders", async (req, res) => {
         if (deliveryMethod === "Delivery") {
             const dvID = `DLV_${Date.now()}`;
             let deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, postalcode, contact, status)
-                VALUES (?, ?, ?, ?, ?, 'Pending')`;
-            let deliveryParams = [dvID, orID, customerAddress, postalCode, phoneNumber];
+                INSERT INTO delivery (dv_id, orID, address, district, contact, status,schedule_Date,delivery_Date)
+                VALUES (?, ?, ?, ?, ?, 'Pending',?,'none')`;
+            let deliveryParams = [dvID, orID, customerAddress, district, phoneNumber,expectedDate];
 
             await db.query(deliveryQuery, deliveryParams);
         }
@@ -851,5 +829,84 @@ router.get("/subcategories", async (req, res) => {
         return res.status(500).json({ message: "Error fetching subcategories" });
     }
 });
+
+// GET API to fetch delivery amount by district
+router.get("/delivery-rate", async (req, res) => {
+    const { district } = req.query; // Get district from query parameter
+
+    if (!district) {
+        return res.status(400).json({ message: "District is required" });
+    }
+
+    try {
+        const [result] = await db.query(
+            "SELECT amount FROM deli_Rates WHERE district = ?",
+            [district]
+        );
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: "District not found" });
+        }
+
+        return res.status(200).json({
+            message: "Delivery rate found",
+            district: district,
+            amount: result[0].amount,
+        });
+    } catch (error) {
+        console.error("Error fetching delivery rate:", error.message);
+        return res.status(500).json({ message: "Error fetching delivery rate" });
+    }
+});
+// GET API to fetch delivery schedule by district
+router.get("/delivery-schedule", async (req, res) => {
+    const { district } = req.query; // Get district from query parameter
+    console.log(district);
+
+    if (!district) {
+        return res.status(400).json({ message: "District is required" });
+    }
+
+    try {
+        // Fetch all delivery dates for the given district
+        const [result] = await db.query(
+            "SELECT ds_date FROM delivery_schedule WHERE district = ?",
+            [district]
+        );
+        console.log(result);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: "District not found" });
+        }
+
+        // Get the current date (yyyy-mm-dd format)
+        const currentDate = new Date().toISOString().split("T")[0];
+
+        // Filter and sort dates
+        const upcomingDates = result
+            .map(row => {
+                // Convert ds_date to a string in yyyy-mm-dd format (ignoring time part)
+                const date = new Date(row.ds_date).toISOString().split("T")[0];
+                return date;
+            })
+            .filter(date => date >= currentDate) // Keep only upcoming dates
+            .sort((a, b) => new Date(a) - new Date(b)); // Sort in ascending order
+
+        if (upcomingDates.length === 0) {
+            return res.status(404).json({ message: "No upcoming delivery dates available" });
+        }
+
+        return res.status(200).json({
+            message: "Upcoming delivery dates found",
+            district: district,
+            upcomingDates: upcomingDates,
+        });
+    } catch (error) {
+        console.error("Error fetching delivery schedule:", error.message);
+        return res.status(500).json({ message: "Error fetching delivery schedule" });
+    }
+});
+
+
 
 export default router;

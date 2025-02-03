@@ -19,47 +19,73 @@ const Checkout = () => {
     const [email, setEmail] = useState("");
     const [number, setNumber] = useState("");
     const [address, setAddress] = useState("");
-    const [city, setCity] = useState("");
-    const [postalcode, setPostalcode] = useState("");
+    const [district, setDistrict] = useState("");
+    const [specialNote, setSpecialNote] = useState("");
     const [coupon, setCoupon] = useState("");
     const [deliveryCharge, setDeliveryCharge] = useState(0);
     const [discount, setDiscount] = useState(0);
+    const [expectedDate, setExpectedDate] = useState("");
+    const [deliveryDates, setDeliveryDates] = useState([]);
+    const districts = ["Colombo", "Gampaha", "Kalutara", "Kandy"];
 
-    // Handle checkbox selection for delivery and pickup
+    // Handle checkbox selection
     const handleDeliveryChange = (e) => {
         setDelivery(e.target.checked);
-        setPickup(false); // Ensure pickup is unselected
-        setDeliveryCharge(0); // Reset delivery charge
+        setPickup(false);
+        setDeliveryCharge(0);
+        setExpectedDate("");
     };
 
     const handlePickupChange = (e) => {
         setPickup(e.target.checked);
-        setDelivery(false); // Ensure delivery is unselected
-        setDeliveryCharge(0); // No delivery charge for pickup
+        setDelivery(false);
+        setDeliveryCharge(0);
         setAddress("");
-        setCity("");
-        setPostalcode("");
+        setDistrict("");
+        setExpectedDate("");
     };
 
-    // Calculate delivery price based on postal code
-    const handlePostalCodeChange = (e) => {
-        const code = e.target.value;
-        setPostalcode(code);
+    // Fetch delivery charge & schedule when district changes
+    const handleDistrictChange = async (e) => {
+        const selectedDistrict = e.target.value;
+        setDistrict(selectedDistrict);
+        setExpectedDate("");
 
-        if (delivery) {
-            if (code.startsWith("12500")) {
-                setDeliveryCharge(500);
-            } else if (code.startsWith("16700")) {
-                setDeliveryCharge(800);
-            } else {
-                setDeliveryCharge(1000);
-            }
-        } else {
+        if (!selectedDistrict || !delivery) {
             setDeliveryCharge(0);
+            setDeliveryDates([]);
+            return;
+        }
+
+        try {
+            // Fetch delivery charge
+            const chargeResponse = await fetch(`http://localhost:5000/api/admin/delivery-rate?district=${selectedDistrict}`);
+            const chargeData = await chargeResponse.json();
+            if (!chargeResponse.ok) throw new Error(chargeData.message || "Failed to fetch delivery rate");
+
+            setDeliveryCharge(chargeData.amount);
+
+            // Fetch delivery schedule
+            const scheduleResponse = await fetch(`http://localhost:5000/api/admin/delivery-schedule?district=${selectedDistrict}`);
+            const scheduleData = await scheduleResponse.json();
+            if (!scheduleResponse.ok) throw new Error(scheduleData.message || "Failed to fetch schedule");
+
+            if (scheduleData.upcomingDates.length > 0) {
+                setDeliveryDates(scheduleData.upcomingDates);
+                setExpectedDate(scheduleData.upcomingDates[0]); // Auto-fill first available date
+            } else {
+                setDeliveryDates([]);
+                setExpectedDate("No available dates");
+            }
+
+        } catch (error) {
+            toast.error(error.message || "Failed to fetch delivery details.");
+            setDeliveryCharge(0);
+            setDeliveryDates([]);
         }
     };
 
-    // Validate and apply discount using a coupon code (only when user finishes typing)
+    // Validate and apply discount
     const handleCouponBlur = async () => {
         if (!coupon.trim()) {
             setDiscount(0);
@@ -74,12 +100,10 @@ const Checkout = () => {
             });
 
             const result = await response.json();
-
             if (!response.ok) {
                 throw new Error(result.message || "Invalid coupon code");
             }
 
-            // If coupon is valid, apply discount
             if (result.success && result.data.length > 0) {
                 setDiscount(result.data[0].discount);
                 toast.success(`Coupon applied! Discount: Rs. ${result.data[0].discount}`);
@@ -88,70 +112,59 @@ const Checkout = () => {
                 toast.error("Invalid or expired coupon.");
             }
         } catch (error) {
-            console.error("Coupon validation error:", error);
-            setDiscount(0);
             toast.error(error.message || "Failed to validate coupon.");
+            setDiscount(0);
         }
     };
 
     const placeOrder = async () => {
-        const token = localStorage.getItem("token"); // Check if user is logged in
+        const token = localStorage.getItem("token");
         if (!token) {
             toast.warning("Please log in to place an order.");
             navigate("/signin");
             return;
         }
 
-        const headers = {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Include token for authentication
-        };
-
-        const finalTotal = totalAmount + deliveryCharge - discount; // Calculate final total
+        const finalTotal = totalAmount + deliveryCharge - discount;
 
         const orderDetails = {
             customerName: name,
             deliveryMethod: delivery ? "Delivery" : "Pick Up",
             customerAddress: delivery ? address : "N/A",
-            city: delivery ? city : "N/A",
-            postalCode: delivery ? postalcode : "N/A",
+            district: delivery ? district : "N/A",
             email: email,
             phoneNumber: number,
             cartItems: cartItems.map(item => ({
                 I_Id: item.id,
                 qty: item.quantity,
                 price: item.price
-            })), // Ensure correct format for API
+            })),
             totalAmount: finalTotal,
             deliveryCharge: delivery ? deliveryCharge : 0,
             discount: discount,
-            coupon: coupon || null, // Send null if no coupon is applied
+            coupon: coupon || null,
+            expectedDate: delivery ? expectedDate : "N/A",
+            specialNote: specialNote,
         };
-
-        console.log("Sending order details:", orderDetails);
 
         try {
             const response = await fetch("http://localhost:5000/api/admin/orders", {
                 method: "POST",
-                headers: headers,
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(orderDetails),
             });
 
-            const result = await response.json(); // Parse JSON response
-
+            const result = await response.json();
             if (!response.ok) {
                 throw new Error(result.message || "Failed to place order.");
             }
 
             toast.success("Order placed successfully!");
-            navigate("/home"); // Redirect to homepage after order placement
+            navigate("/home");
         } catch (error) {
-            console.error("Error placing order:", error);
             toast.error(error.message || "An error occurred while placing the order.");
         }
     };
-
-
 
     return (
         <Helmet title={"Checkout"}>
@@ -171,28 +184,52 @@ const Checkout = () => {
                                         <label htmlFor="pickup" className="text-small">Pick Up</label>
                                     </div>
                                 </FormGroup>
+
                                 <FormGroup className="form__group">
                                     <input type="text" placeholder="Enter your name" onChange={(e) => setName(e.target.value)} />
                                 </FormGroup>
+
                                 <FormGroup className="form__group">
                                     <input type="email" placeholder="Enter your email" onChange={(e) => setEmail(e.target.value)} />
                                 </FormGroup>
+
                                 <FormGroup className="form__group">
                                     <input type="number" placeholder="Phone number" onChange={(e) => setNumber(e.target.value)} />
                                 </FormGroup>
+
                                 {delivery && (
                                     <>
                                         <FormGroup className="form__group">
                                             <input type="text" placeholder="Address" onChange={(e) => setAddress(e.target.value)} />
                                         </FormGroup>
+
                                         <FormGroup className="form__group">
-                                            <input type="text" placeholder="City" onChange={(e) => setCity(e.target.value)} />
-                                        </FormGroup>
-                                        <FormGroup className="form__group">
-                                            <input type="text" placeholder="Postal code" value={postalcode} onChange={handlePostalCodeChange} />
+                                            <Row>
+                                                <Col lg={6}>
+                                                    <select onChange={handleDistrictChange} className="form-control">
+                                                        <option value="">Select District</option>
+                                                        {districts.map((dist, index) => (
+                                                            <option key={index} value={dist}>{dist}</option>
+                                                        ))}
+                                                    </select>
+                                                </Col>
+                                                {deliveryDates.length > 0 && (
+                                                    <Col lg={6}>
+                                                        <select onChange={(e) => setExpectedDate(e.target.value)} className="form-control">
+                                                            <option value="">Scheduled Delivery dates to your city</option>
+                                                            {deliveryDates.map((date, index) => (
+                                                                <option key={index} value={date}>{date}</option>
+                                                            ))}
+                                                        </select>
+                                                    </Col>
+                                                )}
+                                            </Row>
                                         </FormGroup>
                                     </>
                                 )}
+                                <FormGroup className="form__group">
+                                    <input type="text" placeholder="Special Note" onChange={(e) => setSpecialNote(e.target.value)} />
+                                </FormGroup>
                                 <FormGroup className="form__group">
                                     <input
                                         type="text"
@@ -204,6 +241,7 @@ const Checkout = () => {
                                 </FormGroup>
                             </Form>
                         </Col>
+
                         <Col lg={4}>
                             <div className="checkout__cart">
                                 <h6>Total Qty: <span>{totalQty} items</span></h6>
