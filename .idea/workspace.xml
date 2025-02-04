@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="load order details">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update order details">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/orderDetails.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/orderDetails.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,14 +125,8 @@
       <workItem from="1738400628957" duration="239000" />
       <workItem from="1738400997305" duration="12193000" />
       <workItem from="1738465288391" duration="20532000" />
-      <workItem from="1738552817007" duration="23676000" />
-    </task>
-    <task id="LOCAL-00074" summary="update css file">
-      <created>1719503230575</created>
-      <option name="number" value="00074" />
-      <option name="presentableId" value="LOCAL-00074" />
-      <option name="project" value="LOCAL" />
-      <updated>1719503230576</updated>
+      <workItem from="1738552817007" duration="35841000" />
+      <workItem from="1738673646568" duration="1424000" />
     </task>
     <task id="LOCAL-00075" summary="update admin user files">
       <created>1719578513632</created>
@@ -468,7 +464,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738581818994</updated>
     </task>
-    <option name="localTasksCounter" value="123" />
+    <task id="LOCAL-00123" summary="update order details">
+      <created>1738584242936</created>
+      <option name="number" value="00123" />
+      <option name="presentableId" value="LOCAL-00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1738584242936</updated>
+    </task>
+    <option name="localTasksCounter" value="124" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -486,7 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="update with api in sub catogery" />
     <MESSAGE value="update with session handle" />
     <MESSAGE value="fixed signin and sign up pages" />
     <MESSAGE value="fixed shop load subcategory one" />
@@ -511,6 +513,7 @@
     <MESSAGE value="update backend" />
     <MESSAGE value="fixed placed order" />
     <MESSAGE value="load order details" />
-    <option name="LAST_COMMIT_MESSAGE" value="load order details" />
+    <MESSAGE value="update order details" />
+    <option name="LAST_COMMIT_MESSAGE" value="update order details" />
   </component>
 </project>

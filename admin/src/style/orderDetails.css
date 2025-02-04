@@ -56,25 +56,25 @@
 }
 
 /* Different Order Status Styles */
-.status.pending {
-    background-color: rgba(241, 196, 15, 0.2);
-    color: #f39c12;
-}
+/*.status.pending {*/
+/*    background-color: rgba(241, 196, 15, 0.2);*/
+/*    color: #f39c12;*/
+/*}*/
 
-.status.paid {
-    background-color: rgba(46, 204, 113, 0.2);
-    color: #27ae60;
-}
+/*.status.Processingd {*/
+/*    background-color: rgba(46, 204, 113, 0.2);*/
+/*    color: #27ae60;*/
+/*}*/
 
-.status.unpaid {
-    background-color: rgba(231, 76, 60, 0.2);
-    color: #e74c3c;
-}
+/*.status.Cancelled {*/
+/*    background-color: rgba(231, 76, 60, 0.2);*/
+/*    color: #e74c3c;*/
+/*}*/
 
-.status.cancelled {
-    background-color: rgba(189, 195, 199, 0.3);
-    color: #7f8c8d;
-}
+/*.status.cancelled {*/
+/*    background-color: rgba(189, 195, 199, 0.3);*/
+/*    color: #7f8c8d;*/
+/*}*/
 
 /* Ordered Items List */
 .order-items {

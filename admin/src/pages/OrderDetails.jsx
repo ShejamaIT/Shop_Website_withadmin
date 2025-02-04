@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Helmet from "../components/Helmet/Helmet";
-import { Container, Row, Col } from "reactstrap";
-import "../style/orderDetails.css";
+import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
+import "../style/orderDetails.css";
 
 const OrderDetails = () => {
     const { id } = useParams(); // Get order ID from URL
     const [order, setOrder] = useState(null);
-    const [item, setItem] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({}); // Stores editable fields
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,26 +17,43 @@ const OrderDetails = () => {
         const fetchOrder = async () => {
             try {
                 const response = await fetch(`http://localhost:5000/api/admin/main/order-details?orID=${id}`);
+                if (!response.ok) throw new Error("Failed to fetch order details.");
 
-                if (!response.ok) {
-                    throw new Error("Failed to fetch order details.");
-                }
                 const data = await response.json();
-                setOrder(data.order); // Set only the order object from API response
-                // const response1 = await fetch(`http://localhost:5000/api/admin/item-details?I_Id=${order.itemId}`);
+                setOrder(data.order);
+                setFormData(data.order); // Copy order details for editing
                 setLoading(false);
             } catch (err) {
                 console.error("Error fetching order details:", err);
                 setError(err.message);
                 setLoading(false);
             }
-
         };
 
-
         fetchOrder();
-        // fetchItemDetails();
     }, [id]);
+
+    // Handle input changes for edit mode
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name.startsWith("itemQuantity_")) {
+            // Update the specific item quantity
+            const index = name.split("_")[1]; // Extract index from the name attribute
+            const updatedItems = [...formData.items];
+            updatedItems[index].orderedQuantity = value;
+            setFormData({ ...formData, items: updatedItems });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+
+    // Save changes (API request needed)
+    // Simulate the Save Changes behavior
+    const handleSave = async () => {
+        // Directly update the order with the formData (no API call)
+        setOrder({ ...order, ...formData });
+        setIsEditing(false);
+    };
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -53,53 +71,132 @@ const OrderDetails = () => {
                             <h4 className="mb-3 text-center">Order #{order.orderId} Details</h4>
                             <div className="order-details">
 
-                                {/* General Order Info & Sales Team in One Line */}
+                                {/* General Order Info */}
                                 <div className="order-header">
                                     <div className="order-general">
                                         <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
-                                        <p><strong>Customer:</strong> {order.customerEmail}</p>
-                                        <p><strong>Order Status:</strong>
-                                            <span className={`status ${order.orderStatus.toLowerCase()}`}>
-                                                {order.orderStatus}
-                                            </span>
-                                        </p>
-                                        <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
+                                        <p><strong>Customer Email:</strong> {order.customerEmail}</p>
+
+                                        {/* Order Status */}
+                                        {!isEditing ? (
+                                            <p><strong>Order Status:</strong>
+                                                <span className={`status ${order.orderStatus.toLowerCase()}`}>
+                                                    {order.orderStatus}
+                                                </span>
+                                            </p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Order Status:</strong></Label>
+                                                <Input
+                                                    type="select"
+                                                    name="orderStatus"
+                                                    value={formData.orderStatus}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Processing">Processing</option>
+                                                    <option value="Completed">Completed</option>
+                                                    <option value="Cancelled">Cancelled</option>
+                                                </Input>
+                                            </FormGroup>
+                                        )}
+
+                                        {/* Delivery Status */}
+                                        {!isEditing ? (
+                                            order.deliveryStatus === "Pick up" ? (
+                                                <p><strong>Delivery Status:</strong>
+                                                    <span className="status pickup">
+                                                        {order.deliveryStatus} {/* Show as text if it's "Pickup" */}
+                                                    </span>
+                                                </p>
+                                            ) : (
+                                                <p><strong>Delivery Status:</strong>
+                                                    <span className={`status ${order.deliveryStatus.toLowerCase()}`}>
+                                                        {order.deliveryStatus}
+                                                    </span>
+                                                </p>
+                                            )
+                                        ) : (
+                                            order.deliveryStatus === "Pick up" ? (
+                                                <p><strong>Delivery Status:</strong>
+                                                    <span className="status pickup">
+                                                        {order.deliveryStatus} {/* Show as text if it's "Pickup" */}
+                                                    </span>
+                                                </p>
+                                            ) : (
+                                                <FormGroup>
+                                                    <Label><strong>Delivery Status:</strong></Label>
+                                                    <Input
+                                                        type="select"
+                                                        name="deliveryStatus"
+                                                        value={formData.deliveryStatus}
+                                                        onChange={handleChange}
+                                                    >
+                                                        <option value="Not Shipped">Not Shipped</option>
+                                                        <option value="Shipped">Shipped</option>
+                                                        <option value="Delivered">Delivered</option>
+                                                        <option value="Pickup">Pickup</option>
+                                                    </Input>
+                                                </FormGroup>
+                                            )
+                                        )}
                                     </div>
-                                    {order.salesTeam && (
-                                        <div className="sales-team">
-                                            <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
-                                        </div>
-                                    )}
                                 </div>
 
                                 {/* Order Summary */}
                                 <div className="order-summary">
-                                    <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString() || "Not Available"}</p>
-                                    <p><strong>Special Note:</strong> {order.specialNote || "None"}</p>
-                                    <p><strong>Delivery Price:</strong> Rs. {order.deliveryCharge}</p>
-                                    <p><strong>Discount:</strong> Rs. {order.discount}</p>
+                                    <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
+                                    <p><strong>Special Note:</strong> {order.specialNote}</p>
                                     <p><strong>Total Price:</strong> Rs. {order.totalPrice}</p>
                                 </div>
 
+                                {/* Delivery Details */}
+                                {order.deliveryInfo && (
+                                    <div className="order-delivery">
+                                        <h5>Delivery Details</h5>
+                                        <p><strong>Address:</strong> {order.deliveryInfo.address}</p>
+                                        <p><strong>District:</strong> {order.deliveryInfo.district}</p>
+                                        <p><strong>Contact:</strong> {order.deliveryInfo.contact}</p>
+                                        <p><strong>Status:</strong> {order.deliveryInfo.status}</p>
+                                    </div>
+                                )}
+
                                 {/* Ordered Items */}
                                 <h5 className="mt-4">Ordered Items</h5>
-                                {order.items.length > 0 ? (
-                                    <ul className="order-items">
-                                        {order.items.map((item, index) => (
-                                            <li key={index}>
-                                                <p><strong>Item:</strong> {item.itemName}</p>
-                                                <p>
-                                                    <strong>Requested Quantity:</strong> {item.quantity}
-                                                    <strong>Quantity On Stock:</strong>
-                                                </p>
+                                <ul className="order-items">
+                                    {order.items.map((item, index) => (
+                                        <li key={index}>
+                                            <p><strong>Item:</strong> {item.itemName}</p>
+                                            <p><strong>Requested Quantity:</strong>
+                                                {!isEditing ? (
+                                                    item.orderedQuantity
+                                                ) : (
+                                                    <Input
+                                                        type="number"
+                                                        name={`itemQuantity_${index}`}
+                                                        value={formData.items[index].orderedQuantity}
+                                                        onChange={handleChange}
+                                                        min="1"
+                                                    />
+                                                )}
+                                            </p>
+                                            <p><strong>Stock Quantity:</strong> {item.stockQuantity}</p>
+                                            <p><strong>Price:</strong> Rs. {item.price}</p>
+                                        </li>
+                                    ))}
+                                </ul>
 
-                                                <p><strong>Price:</strong> Rs. {item.price}</p>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No items found in this order.</p>
-                                )}
+                                {/* Buttons */}
+                                <div className="text-center mt-4">
+                                    {!isEditing ? (
+                                        <Button color="primary" onClick={() => setIsEditing(true)}>Edit Order</Button>
+                                    ) : (
+                                        <>
+                                            <Button color="success" onClick={handleSave}>Save Changes</Button>
+                                            <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)}>Cancel</Button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </Col>
                     </Row>
