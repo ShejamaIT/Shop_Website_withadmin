@@ -57,6 +57,7 @@ const TableThree = () => {
                             <th>Expected Date</th>
                             <th>Customer Email</th>
                             <th>Order Status</th>
+                            <th>Delivery Status</th>
                             <th>Total Price</th>
                             <th>Sales By</th>
                             <th>Actions</th>
@@ -79,6 +80,12 @@ const TableThree = () => {
                                             {order.orStatus}
                                         </span>
                                     </td>
+                                    {/*<td>*/}
+                                    {/*    <span className={`delivery ${order.dvStatus.toLowerCase()}`}>*/}
+                                    {/*        {order.orStatus}*/}
+                                    {/*    </span>*/}
+                                    {/*</td>*/}
+                                    <td>{order.dvStatus}</td>
                                     <td>Rs.{order.totPrice.toFixed(2)}</td>
                                     <td>{order.stID}</td>
                                     <td className="action-buttons">

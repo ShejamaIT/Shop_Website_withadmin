@@ -48,11 +48,23 @@ const OrderDetails = () => {
     };
 
     // Save changes (API request needed)
-    // Simulate the Save Changes behavior
     const handleSave = async () => {
-        // Directly update the order with the formData (no API call)
-        setOrder({ ...order, ...formData });
-        setIsEditing(false);
+        try {
+            const response = await fetch(`http://localhost:5000/api/admin/main/update-order`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) throw new Error("Failed to update order.");
+
+            const updatedOrder = await response.json();
+            setOrder(updatedOrder.order);
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Error updating order:", err);
+            alert("Failed to update order!");
+        }
     };
 
     if (loading) return <p>Loading...</p>;
@@ -103,42 +115,25 @@ const OrderDetails = () => {
 
                                         {/* Delivery Status */}
                                         {!isEditing ? (
-                                            order.deliveryStatus === "Pick up" ? (
-                                                <p><strong>Delivery Status:</strong>
-                                                    <span className="status pickup">
-                                                        {order.deliveryStatus} {/* Show as text if it's "Pickup" */}
-                                                    </span>
-                                                </p>
-                                            ) : (
-                                                <p><strong>Delivery Status:</strong>
-                                                    <span className={`status ${order.deliveryStatus.toLowerCase()}`}>
-                                                        {order.deliveryStatus}
-                                                    </span>
-                                                </p>
-                                            )
+                                            <p><strong>Delivery Status:</strong>
+                                                <span className={`status ${order.deliveryStatus.toLowerCase()}`}>
+                                                    {order.deliveryStatus}
+                                                </span>
+                                            </p>
                                         ) : (
-                                            order.deliveryStatus === "Pick up" ? (
-                                                <p><strong>Delivery Status:</strong>
-                                                    <span className="status pickup">
-                                                        {order.deliveryStatus} {/* Show as text if it's "Pickup" */}
-                                                    </span>
-                                                </p>
-                                            ) : (
-                                                <FormGroup>
-                                                    <Label><strong>Delivery Status:</strong></Label>
-                                                    <Input
-                                                        type="select"
-                                                        name="deliveryStatus"
-                                                        value={formData.deliveryStatus}
-                                                        onChange={handleChange}
-                                                    >
-                                                        <option value="Not Shipped">Not Shipped</option>
-                                                        <option value="Shipped">Shipped</option>
-                                                        <option value="Delivered">Delivered</option>
-                                                        <option value="Pickup">Pickup</option>
-                                                    </Input>
-                                                </FormGroup>
-                                            )
+                                            <FormGroup>
+                                                <Label><strong>Delivery Status:</strong></Label>
+                                                <Input
+                                                    type="select"
+                                                    name="deliveryStatus"
+                                                    value={formData.deliveryStatus}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="Not Shipped">Not Shipped</option>
+                                                    <option value="Shipped">Shipped</option>
+                                                    <option value="Delivered">Delivered</option>
+                                                </Input>
+                                            </FormGroup>
                                         )}
                                     </div>
                                 </div>
@@ -150,14 +145,16 @@ const OrderDetails = () => {
                                     <p><strong>Total Price:</strong> Rs. {order.totalPrice}</p>
                                 </div>
 
-                                {/* Delivery Details */}
-                                {order.deliveryInfo && (
+                                {/* Delivery Details - Show only if dvStatus is "Delivery" */}
+                                {order.deliveryStatus === "Delivery" && order.deliveryInfo && (
                                     <div className="order-delivery">
                                         <h5>Delivery Details</h5>
                                         <p><strong>Address:</strong> {order.deliveryInfo.address}</p>
                                         <p><strong>District:</strong> {order.deliveryInfo.district}</p>
                                         <p><strong>Contact:</strong> {order.deliveryInfo.contact}</p>
                                         <p><strong>Status:</strong> {order.deliveryInfo.status}</p>
+                                        <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
+                                        <p><strong>Delivery Date:</strong> {order.deliveryInfo.deliveryDate !== "none" ? new Date(order.deliveryInfo.deliveryDate).toLocaleDateString() : "Not delivered yet"}</p>
                                     </div>
                                 )}
 

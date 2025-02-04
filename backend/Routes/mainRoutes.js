@@ -276,8 +276,8 @@ router.get("/order-details", async (req, res) => {
                 o.dvPrice, o.disPrice, o.totPrice, o.expectedDate, o.specialNote,
                 s.stID, e.name AS salesEmployeeName
             FROM Orders o
-                     LEFT JOIN sales_team s ON o.stID = s.stID
-                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            LEFT JOIN Employee e ON s.E_Id = e.E_Id
             WHERE o.OrID = ?`;
 
         const [orderResult] = await db.query(orderQuery, [orID]);
@@ -292,33 +292,59 @@ router.get("/order-details", async (req, res) => {
         const itemsQuery = `
             SELECT od.I_Id, i.I_name, od.qty, od.price
             FROM Order_Detail od
-                     JOIN Item i ON od.I_Id = i.I_Id
+            JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
+        // Initialize order response
+        const orderResponse = {
+            orderId: orderData.OrID,
+            orderDate: orderData.orDate,
+            customerEmail: orderData.customerEmail,
+            orderStatus: orderData.orStatus,
+            deliveryStatus: orderData.dvStatus,
+            deliveryCharge: orderData.dvPrice,
+            discount: orderData.disPrice,
+            totalPrice: orderData.totPrice,
+            expectedDeliveryDate: orderData.expectedDate,
+            specialNote: orderData.specialNote,
+            salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
+            items: itemsResult.map(item => ({
+                itemId: item.I_Id,
+                itemName: item.I_name,
+                quantity: item.qty,
+                price: item.price
+            }))
+        };
+
+        // If it's a delivery order, fetch delivery details
+        if (orderData.dvStatus === "Delivery") {
+            const deliveryQuery = `
+                SELECT dv_id, address, district, contact, status, schedule_Date, delivery_Date
+                FROM delivery
+                WHERE orID = ?`;
+
+            const [deliveryResult] = await db.query(deliveryQuery, [orID]);
+
+            if (deliveryResult.length > 0) {
+                const deliveryData = deliveryResult[0];
+                orderResponse.deliveryInfo = {
+                    deliveryId: deliveryData.dv_id,
+                    address: deliveryData.address,
+                    district: deliveryData.district,
+                    contact: deliveryData.contact,
+                    status: deliveryData.status,
+                    scheduleDate: deliveryData.schedule_Date,
+                    deliveryDate: deliveryData.delivery_Date || "Not delivered yet"
+                };
+            }
+        }
+
         return res.status(200).json({
             success: true,
             message: "Order details fetched successfully",
-            order: {
-                orderId: orderData.OrID,
-                orderDate: orderData.orDate,
-                customerEmail: orderData.customerEmail,
-                orderStatus: orderData.orStatus,
-                deliveryStatus: orderData.dvStatus,
-                deliveryCharge: orderData.dvPrice,
-                discount: orderData.disPrice,
-                totalPrice: orderData.totPrice,
-                expectedDeliveryDate: orderData.expectedDate,
-                specialNote: orderData.specialNote,
-                salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
-                items: itemsResult.map(item => ({
-                    itemId: item.I_Id,
-                    itemName: item.I_name,
-                    quantity: item.qty,
-                    price: item.price
-                }))
-            }
+            order: orderResponse
         });
 
     } catch (error) {
@@ -330,6 +356,7 @@ router.get("/order-details", async (req, res) => {
         });
     }
 });
+
 
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {

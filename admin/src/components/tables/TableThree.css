@@ -91,11 +91,6 @@
     color: #f39c12;
 }
 
-.status.delivered {
-    background-color: rgba(52, 152, 219, 0.2);
-    color: #3498db;
-}
-
 .status.processing {
     background-color: rgba(155, 89, 182, 0.2);
     color: #9b59b6;
