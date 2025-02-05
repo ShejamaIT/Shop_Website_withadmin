@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="finish order detail page">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/admin/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/admin/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-    </list>
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="finish order detail page with order status" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -132,14 +126,7 @@
       <workItem from="1738552817007" duration="35841000" />
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
-      <workItem from="1738727679950" duration="26415000" />
-    </task>
-    <task id="LOCAL-00086" summary="done the cart add and subtract function">
-      <created>1738217959653</created>
-      <option name="number" value="00086" />
-      <option name="presentableId" value="LOCAL-00086" />
-      <option name="project" value="LOCAL" />
-      <updated>1738217959653</updated>
+      <workItem from="1738727679950" duration="26743000" />
     </task>
     <task id="LOCAL-00087" summary="delete unwant files">
       <created>1738217996370</created>
@@ -477,7 +464,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738754679851</updated>
     </task>
-    <option name="localTasksCounter" value="135" />
+    <task id="LOCAL-00135" summary="finish order detail page with order status">
+      <created>1738757910611</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1738757910611</updated>
+    </task>
+    <option name="localTasksCounter" value="136" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -496,7 +490,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update 01/31 work (fixed errors)" />
     <MESSAGE value="fixed the place order function" />
     <MESSAGE value="temporary profile files (not finished)" />
     <MESSAGE value="fixed frist category with dropdown" />
@@ -521,6 +514,7 @@
     <MESSAGE value="update cart handle" />
     <MESSAGE value="update checkout" />
     <MESSAGE value="finish order detail page" />
-    <option name="LAST_COMMIT_MESSAGE" value="finish order detail page" />
+    <MESSAGE value="finish order detail page with order status" />
+    <option name="LAST_COMMIT_MESSAGE" value="finish order detail page with order status" />
   </component>
 </project>
