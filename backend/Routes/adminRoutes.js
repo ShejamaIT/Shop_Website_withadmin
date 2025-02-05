@@ -697,7 +697,7 @@ router.post("/orders", async (req, res) => {
         // Insert Order Details
         for (const item of cartItems) {
             let orderDetailQuery = `
-                INSERT INTO Order_Detail (orID, I_Id, qty, price)
+                INSERT INTO Order_Detail (orID, I_Id, qty, tprice)
                 VALUES (?, ?, ?, ?)`;
             let orderDetailParams = [orID, item.I_Id, item.qty, item.price];
 

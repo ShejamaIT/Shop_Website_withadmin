@@ -125,7 +125,7 @@ CREATE TABLE Order_Detail (
     orID VARCHAR(25),
     I_Id VARCHAR(25),
     qty INT,
-    price DOUBLE,
+    tprice DOUBLE,
     PRIMARY KEY (orID, I_Id),
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
         ON DELETE CASCADE ON UPDATE CASCADE,

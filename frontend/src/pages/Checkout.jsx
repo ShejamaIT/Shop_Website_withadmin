@@ -180,7 +180,7 @@ const Checkout = () => {
             cartItems: cartItems.map(item => ({
                 I_Id: item.id,
                 qty: item.quantity,
-                price: item.price
+                price: (item.price) * (item.quantity)
             })),
             totalAmount: finalTotal,
             deliveryCharge: delivery ? deliveryCharge : 0,
