@@ -389,9 +389,10 @@ const Checkout = () => {
             deliveryCharge: delivery ? deliveryCharge : 0,
             discount: discount,
             coupon: coupon || null,
-            expectedDate: delivery ? expectedDate : "N/A",
+            expectedDate: expectedDate,
             specialNote: specialNote,
         };
+        console.log(orderDetails);
 
         try {
             const response = await fetch("http://localhost:5000/api/admin/orders", {

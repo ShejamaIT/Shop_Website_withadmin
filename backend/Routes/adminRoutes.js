@@ -666,16 +666,6 @@ router.post("/orders", async (req, res) => {
         const orderDate = new Date().toISOString().split("T")[0]; // Get current date
         const dvStatus = deliveryMethod === "Delivery" ? "Delivery" : "Pick up"; // Set delivery status based on method
 
-        // If delivery method is pick up and expectedDate is "N/A", set expectedDate to two weeks after orderDate
-        // let calculatedExpectedDate = expectedDate;
-        // if (deliveryMethod === "Pick up" && expectedDate === "N/A") {
-        //     const orderDateObj = new Date(orderDate);
-        //     // Calculate the expected date as 14 days from the order date
-        //     orderDateObj.setDate(orderDateObj.getDate() + 14);
-        //     calculatedExpectedDate = orderDateObj.toISOString().split("T")[0]; // Format to yyyy-mm-dd
-        // }
-        // console.log(calculatedExpectedDate);
-
         // Initialize stID to null
         let stID = null;
 
@@ -695,7 +685,6 @@ router.post("/orders", async (req, res) => {
             // Set the sales team ID (stID) from the coupon
             stID = couponResult[0].stID;
         }
-
         // Insert Order
         let orderQuery = `
             INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus,city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote)
