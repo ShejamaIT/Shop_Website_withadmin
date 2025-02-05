@@ -59,7 +59,7 @@ const Checkout = () => {
 
         try {
             // Fetch delivery charge
-            const chargeResponse = await fetch(`http://localhost:5000/api/admin/delivery-rate?district=${selectedDistrict}`);
+            const chargeResponse = await fetch(`http://localhost:5000/api/admin/delivery-schedule?district=${selectedDistrict}`);
             const chargeData = await chargeResponse.json();
             if (!chargeResponse.ok) throw new Error(chargeData.message || "Failed to fetch delivery rate");
 
@@ -212,6 +212,17 @@ const Checkout = () => {
                                                             <option key={index} value={dist}>{dist}</option>
                                                         ))}
                                                     </select>
+                                                </Col>
+                                                <Col lg={6}>
+                                                    <FormGroup className="form__group">
+                                                        <input type="text" placeholder="Address" onChange={(e) => setAddress(e.target.value)} />
+                                                    </FormGroup>
+                                                    {/*<select className="form-control">*/}
+                                                    {/*    <option value="">Select District</option>*/}
+                                                    {/*    {districts.map((dist, index) => (*/}
+                                                    {/*        <option key={index} value={dist}>{dist}</option>*/}
+                                                    {/*    ))}*/}
+                                                    {/*</select>*/}
                                                 </Col>
                                                 {deliveryDates.length > 0 && (
                                                     <Col lg={6}>
