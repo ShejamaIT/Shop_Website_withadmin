@@ -11,7 +11,7 @@ const TableThree = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await fetch("http://localhost:5000/api/admin/main/orders"); // Adjust API URL if needed
+                const response = await fetch("http://localhost:5001/api/admin/main/orders"); // Adjust API URL if needed
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -80,11 +80,6 @@ const TableThree = () => {
                                             {order.orStatus}
                                         </span>
                                     </td>
-                                    {/*<td>*/}
-                                    {/*    <span className={`delivery ${order.dvStatus.toLowerCase()}`}>*/}
-                                    {/*        {order.orStatus}*/}
-                                    {/*    </span>*/}
-                                    {/*</td>*/}
                                     <td>{order.dvStatus}</td>
                                     <td>Rs.{order.totPrice.toFixed(2)}</td>
                                     <td>{order.stID}</td>

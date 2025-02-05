@@ -707,8 +707,8 @@ router.post("/orders", async (req, res) => {
         if (deliveryMethod === "Delivery") {
             const dvID = `DLV_${Date.now()}`;
             let deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, contact, status,schedule_Date,delivery_Date)
-                VALUES (?, ?, ?, ?, ?, 'Pending',?,'none')`;
+                INSERT INTO delivery (dv_id, orID, address, district, contact, status,schedule_Date)
+                VALUES (?, ?, ?, ?, ?, 'Pending',?)`;
             let deliveryParams = [dvID, orID, customerAddress, district, phoneNumber, expectedDate];
 
             await db.query(deliveryQuery, deliveryParams);

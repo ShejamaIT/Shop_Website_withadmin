@@ -112,6 +112,7 @@ CREATE TABLE Orders (
     orStatus VARCHAR(15),
     dvStatus VARCHAR(10),
     dvPrice DOUBLE,
+    city TEXT,
     disPrice DOUBLE,
     totPrice DOUBLE,
     stID VARCHAR(25),
@@ -146,7 +147,6 @@ CREATE TABLE delivery(
     contact VARCHAR(15) NOT NULL,
     status VARCHAR(15),
     schedule_Date DATE,
-    delivery_Date DATE,
         CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                                    ON DELETE CASCADE ON UPDATE CASCADE
 );

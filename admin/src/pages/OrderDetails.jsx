@@ -16,7 +16,7 @@ const OrderDetails = () => {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/admin/main/order-details?orID=${id}`);
+                const response = await fetch(`http://localhost:5001/api/admin/main/order-details?orID=${id}`);
                 if (!response.ok) throw new Error("Failed to fetch order details.");
 
                 const data = await response.json();
@@ -144,17 +144,18 @@ const OrderDetails = () => {
                                     <p><strong>Special Note:</strong> {order.specialNote}</p>
                                     <p><strong>Total Price:</strong> Rs. {order.totalPrice}</p>
                                 </div>
-
+                                <h5>Delivery Details</h5>
                                 {/* Delivery Details - Show only if dvStatus is "Delivery" */}
                                 {order.deliveryStatus === "Delivery" && order.deliveryInfo && (
-                                    <div className="order-delivery">
-                                        <h5>Delivery Details</h5>
+
+                                    <div className="order-general">
+                                        {/*<h5>Delivery Details</h5><br/>*/}
                                         <p><strong>Address:</strong> {order.deliveryInfo.address}</p>
                                         <p><strong>District:</strong> {order.deliveryInfo.district}</p>
                                         <p><strong>Contact:</strong> {order.deliveryInfo.contact}</p>
                                         <p><strong>Status:</strong> {order.deliveryInfo.status}</p>
                                         <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
-                                        <p><strong>Delivery Date:</strong> {order.deliveryInfo.deliveryDate !== "none" ? new Date(order.deliveryInfo.deliveryDate).toLocaleDateString() : "Not delivered yet"}</p>
+                                        {/*<p><strong>Delivery Date:</strong> {order.deliveryInfo.deliveryDate !== "none" ? new Date(order.deliveryInfo.deliveryDate).toLocaleDateString() : "Not delivered yet"}</p>*/}
                                     </div>
                                 )}
 
@@ -162,22 +163,23 @@ const OrderDetails = () => {
                                 <h5 className="mt-4">Ordered Items</h5>
                                 <ul className="order-items">
                                     {order.items.map((item, index) => (
+
                                         <li key={index}>
                                             <p><strong>Item:</strong> {item.itemName}</p>
                                             <p><strong>Requested Quantity:</strong>
                                                 {!isEditing ? (
-                                                    item.orderedQuantity
+                                                    item.quantity
                                                 ) : (
                                                     <Input
                                                         type="number"
                                                         name={`itemQuantity_${index}`}
-                                                        value={formData.items[index].orderedQuantity}
+                                                        value={formData.items[index].quantity}
                                                         onChange={handleChange}
                                                         min="1"
                                                     />
                                                 )}
                                             </p>
-                                            <p><strong>Stock Quantity:</strong> {item.stockQuantity}</p>
+                                            <p><strong>Stock Quantity:</strong> {item.quantity}</p>
                                             <p><strong>Price:</strong> Rs. {item.price}</p>
                                         </li>
                                     ))}
