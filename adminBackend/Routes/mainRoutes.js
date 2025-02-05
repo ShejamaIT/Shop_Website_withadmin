@@ -44,7 +44,6 @@ router.get("/orders", async (req, res) => {
         return res.status(500).json({ message: "Error fetching promotions" });
     }
 });
-
 //get all items
 router.get("/allitems", async (req, res) => {
     try {
@@ -151,116 +150,6 @@ router.post("/item", upload.single('img'), async (req, res) => {
         });
     }
 });
-
-// router.post("/orders", async (req, res) => {
-//     try {
-//         const {
-//             customerName,
-//             deliveryMethod,
-//             customerAddress,
-//             district, // Sending district instead of postal code
-//             email,
-//             phoneNumber,
-//             cartItems,
-//             totalAmount,
-//             deliveryCharge,
-//             discount,
-//             coupon,
-//             expectedDate,
-//             specialNote
-//         } = req.body;
-//
-//         // Validate required fields
-//         if (!customerName || !email || !phoneNumber || cartItems.length === 0 || !totalAmount) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Missing required fields."
-//             });
-//         }
-//
-//         // Generate unique order ID
-//         const orID = `ORD_${Date.now()}`;
-//         const orderDate = new Date().toISOString().split("T")[0]; // Get current date
-//         const dvStatus = deliveryMethod === "Delivery" ? "Delivery" : "Pick up"; // Set delivery status
-//
-//         // Initialize stID to null
-//         let stID = null;
-//
-//         // If a coupon is provided, fetch the associated sales team ID (stID)
-//         if (coupon) {
-//             const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
-//             const [couponResult] = await db.query(couponQuery, [coupon]);
-//
-//             if (couponResult.length === 0) {
-//                 return res.status(400).json({
-//                     success: false,
-//                     message: "Invalid coupon code"
-//                 });
-//             }
-//
-//             // Set the stID from the coupon
-//             stID = couponResult[0].stID;
-//         }
-//
-//         // Insert Order into the database
-//         const orderQuery = `
-//             INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote)
-//             VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?)`;
-//         const orderParams = [orID, orderDate, email, dvStatus, deliveryCharge, discount, totalAmount, stID, expectedDate, specialNote];
-//
-//         await db.query(orderQuery, orderParams);
-//
-//         // Insert each cart item into Order_Detail
-//         for (const item of cartItems) {
-//             const orderDetailQuery = `
-//                 INSERT INTO Order_Detail (orID, I_Id, qty, price)
-//                 VALUES (?, ?, ?, ?)`;
-//             const orderDetailParams = [orID, item.I_Id, item.qty, item.price];
-//
-//             await db.query(orderDetailQuery, orderDetailParams);
-//         }
-//
-//         // Insert Delivery Info if delivery is selected
-//         if (deliveryMethod === "Delivery") {
-//             const dvID = `DLV_${Date.now()}`;
-//             const deliveryQuery = `
-//                 INSERT INTO delivery (dv_id, orID, address, district, contact, status, schedule_Date, delivery_Date)
-//                 VALUES (?, ?, ?, ?, ?, 'Pending', ?, 'none')`;
-//             const deliveryParams = [dvID, orID, customerAddress, district, phoneNumber, expectedDate];
-//
-//             await db.query(deliveryQuery, deliveryParams);
-//         }
-//
-//         // Insert Coupon Info if a coupon is used
-//         if (coupon) {
-//             const ocID = `OCP_${Date.now()}`;
-//             const couponQuery = `
-//                 INSERT INTO order_coupon (ocID, orID, cpID)
-//                 VALUES (?, ?, ?)`;
-//             const couponParams = [ocID, orID, coupon];
-//
-//             await db.query(couponQuery, couponParams);
-//         }
-//
-//         return res.status(201).json({
-//             success: true,
-//             message: "Order placed successfully",
-//             data: {
-//                 orID: orID,
-//                 orderDate: orderDate,
-//             },
-//         });
-//
-//     } catch (error) {
-//         console.error("Error inserting order data:", error.message);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Error inserting data into database",
-//             details: error.message,
-//         });
-//     }
-// });
-
 //get one order in-detail
 router.get("/order-details", async (req, res) => {
     try {
@@ -356,8 +245,6 @@ router.get("/order-details", async (req, res) => {
         });
     }
 });
-
-
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {
     try {

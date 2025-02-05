@@ -646,7 +646,6 @@ router.post("/coupone", async (req, res) => {
 router.post("/orders", async (req, res) => {
     try {
         const {
-            customerName,
             deliveryMethod,
             customerAddress,
             city,
@@ -668,14 +667,14 @@ router.post("/orders", async (req, res) => {
         const dvStatus = deliveryMethod === "Delivery" ? "Delivery" : "Pick up"; // Set delivery status based on method
 
         // If delivery method is pick up and expectedDate is "N/A", set expectedDate to two weeks after orderDate
-        let calculatedExpectedDate = expectedDate;
-        if (deliveryMethod === "Pick up" && expectedDate === "N/A") {
-            const orderDateObj = new Date(orderDate);
-            // Calculate the expected date as 14 days from the order date
-            orderDateObj.setDate(orderDateObj.getDate() + 14);
-            calculatedExpectedDate = orderDateObj.toISOString().split("T")[0]; // Format to yyyy-mm-dd
-        }
-        console.log(calculatedExpectedDate);
+        // let calculatedExpectedDate = expectedDate;
+        // if (deliveryMethod === "Pick up" && expectedDate === "N/A") {
+        //     const orderDateObj = new Date(orderDate);
+        //     // Calculate the expected date as 14 days from the order date
+        //     orderDateObj.setDate(orderDateObj.getDate() + 14);
+        //     calculatedExpectedDate = orderDateObj.toISOString().split("T")[0]; // Format to yyyy-mm-dd
+        // }
+        // console.log(calculatedExpectedDate);
 
         // Initialize stID to null
         let stID = null;
@@ -699,9 +698,9 @@ router.post("/orders", async (req, res) => {
 
         // Insert Order
         let orderQuery = `
-            INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote)
-            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?)`;
-        let orderParams = [orID, orderDate, email, dvStatus, deliveryCharge, discount, totalAmount, stID, calculatedExpectedDate, specialNote];
+            INSERT INTO Orders (OrID, orDate, customerEmail, orStatus, dvStatus,city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote)
+            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?)`;
+        let orderParams = [orID, orderDate, email, dvStatus,city, deliveryCharge, discount, totalAmount, stID, expectedDate, specialNote];
 
         await db.query(orderQuery, orderParams);
 
@@ -743,7 +742,7 @@ router.post("/orders", async (req, res) => {
             data: {
                 orID: orID,
                 orderDate: orderDate,
-                expectedDate: calculatedExpectedDate // Returning the calculated expected date
+                expectedDate: expectedDate
             },
         });
 
