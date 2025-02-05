@@ -266,6 +266,7 @@ router.put("/update-order", async (req, res) => {
             specialNote,
             salesTeam,
             items,
+            booked,
         } = req.body;
 
         // Generate query to check if order exists
@@ -304,13 +305,24 @@ router.put("/update-order", async (req, res) => {
 
         // Update the order details (items)
         for (const item of items) {
+            console.log(item);
             const orderDetailUpdateQuery = `
                 UPDATE Order_Detail
                 SET qty = ?, tprice = ?
                 WHERE orID = ? AND I_Id = ?`;
             const orderDetailUpdateParams = [item.quantity, item.price, orderId, item.itemId];
-
             await db.query(orderDetailUpdateQuery, orderDetailUpdateParams);
+            console.log(booked);
+            // If the "Booked" field is "Yes", reduce stock in the Item table
+            if (booked === "Yes") {
+                const itemUpdateQuery = `
+                    UPDATE Item
+                    SET qty = qty - ?
+                    WHERE I_Id = ?`;
+                const itemUpdateParams = [item.quantity, item.itemId];
+
+                await db.query(itemUpdateQuery, itemUpdateParams);
+            }
         }
 
         // If delivery status is "Delivery", you may want to update delivery info
@@ -349,6 +361,7 @@ router.put("/update-order", async (req, res) => {
         });
     }
 });
+
 
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {

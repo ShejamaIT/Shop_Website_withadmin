@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
 import { useParams } from "react-router-dom";
@@ -12,11 +14,9 @@ const OrderDetails = () => {
     const [formData, setFormData] = useState({}); // Stores editable fields
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     useEffect(() => {
         fetchOrder();
     }, [id]);
-
     const fetchOrder = async () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/order-details?orID=${id}`);
@@ -31,11 +31,43 @@ const OrderDetails = () => {
             setError(err.message);
             setLoading(false);
         }
-    };
+    }
 
     const handleChange = (e, index) => {
         const { name, value } = e.target;
+        const stockCount = order.items[index]?.stockCount; // Get stock count for the item
 
+        // Check if the status is being changed to "Accepted"
+        if (name === "orderStatus" && value === "Accepted") {
+            // Show a SweetAlert to confirm if the items have been received
+            Swal.fire({
+                title: 'Have you received the items?',
+                text: "Please confirm if the items have been received before marking the order as accepted.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If user confirms "Yes", set the booked field to "Yes" and update the order status
+                    setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        orderStatus: "Accepted", // Update the order status to "Accepted"
+                        booked: "Yes", // Add a new field booked and set it to "Yes"
+                    }));
+                } else {
+                    // If user selects "No", set the booked field to "No" and update the order status to "Accepted"
+                    setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        orderStatus: "Accepted", // Ensure status is set to "Accepted"
+                        booked: "No", // Set booked to "No"
+                    }));
+                }
+            });
+
+
+            return; // Prevent the form update from continuing until user responds
+        }
         setFormData((prevFormData) => {
             const updatedItems = [...prevFormData.items];
 
@@ -60,6 +92,22 @@ const OrderDetails = () => {
                 // If it's an item quantity update
                 const newQuantity = value === "" ? 0 : parseInt(value, 10);
 
+                // Validate if the new quantity exceeds the available stock
+                if (newQuantity > stockCount) {
+                    // Show SweetAlert to notify user about stock limit
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Quantity Exceeds Stock!',
+                        text: `The quantity you selected exceeds the available stock for ${order.items[index].itemName}. Please choose a quantity less than or equal to ${stockCount}.`,
+                        confirmButtonText: 'Okay',
+                    }).then(() => {
+                        // Focus the quantity input back after user acknowledges the message
+                        document.getElementsByName("quantity")[index].focus();
+                    });
+
+                    return prevFormData; // Don't update the form if quantity exceeds stock
+                }
+
                 if (!isNaN(newQuantity) && newQuantity >= 0) {
                     updatedItems[index] = {
                         ...updatedItems[index],
@@ -83,11 +131,10 @@ const OrderDetails = () => {
             return prevFormData;
         });
     };
-
-
     // Save changes (API request needed)
     const handleSave = async () => {
         try {
+            console.log(JSON.stringify(formData));
             const response = await fetch(`http://localhost:5001/api/admin/main/update-order`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -109,10 +156,10 @@ const OrderDetails = () => {
             alert("Failed to update order!");
         }
     };
-
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
+
 
     return (
         <Helmet title={`Order Details - ${order.orderId}`}>
@@ -150,6 +197,7 @@ const OrderDetails = () => {
                                                     onChange={handleChange}
                                                 >
                                                     <option value="Pending">Pending</option>
+                                                    <option value="Accepted">Accepted</option>
                                                     <option value="Processing">Processing</option>
                                                     <option value="Completed">Completed</option>
                                                     <option value="Cancelled">Cancelled</option>
