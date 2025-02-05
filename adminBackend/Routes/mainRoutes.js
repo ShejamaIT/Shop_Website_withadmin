@@ -161,7 +161,7 @@ router.get("/order-details", async (req, res) => {
         // Fetch Order Info along with Sales Team details (Employee Name)
         const orderQuery = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.orStatus, o.dvStatus,
+                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.orStatus, o.dvStatus,
                 o.dvPrice, o.disPrice, o.totPrice, o.expectedDate, o.specialNote,
                 s.stID, e.name AS salesEmployeeName
             FROM Orders o
@@ -177,20 +177,23 @@ router.get("/order-details", async (req, res) => {
 
         const orderData = orderResult[0];
 
-        // Fetch Ordered Items with Stock Count
+        // Fetch Ordered Items with Stock Count and Unit Price from Item table
         const itemsQuery = `
-            SELECT od.I_Id, i.I_name, od.qty, od.price, i.qty AS stockCount
+            SELECT 
+                od.I_Id, i.I_name, od.qty, od.tprice, i.price AS unitPrice, i.qty AS stockCount
             FROM Order_Detail od
             JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
-        // console.log(salesEmployeeName);
+
         // Initialize order response
         const orderResponse = {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
+            phoneNumber: orderData.contact1,
+            optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
             deliveryStatus: orderData.dvStatus,
             deliveryCharge: orderData.dvPrice,
@@ -203,8 +206,9 @@ router.get("/order-details", async (req, res) => {
                 itemId: item.I_Id,
                 itemName: item.I_name,
                 quantity: item.qty,
-                price: item.price,
-                stockCount: item.stockCount // Add stock count
+                price: item.tprice,
+                unitPrice: item.unitPrice, // Corrected to fetch from the Item table
+                stockCount: item.stockCount
             }))
         };
 
@@ -223,7 +227,6 @@ router.get("/order-details", async (req, res) => {
                     deliveryId: deliveryData.dv_id,
                     address: deliveryData.address,
                     district: deliveryData.district,
-                    contact: deliveryData.contact,
                     status: deliveryData.status,
                     scheduleDate: deliveryData.schedule_Date,
                 };
@@ -241,6 +244,107 @@ router.get("/order-details", async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Error fetching order details",
+            details: error.message,
+        });
+    }
+});
+//update order
+router.put("/update-order", async (req, res) => {
+    try {
+        const {
+            orderId,
+            orderDate,
+            customerEmail,
+            phoneNumber,
+            optionalNumber,
+            orderStatus,
+            deliveryStatus,
+            deliveryCharge,
+            discount,
+            totalPrice,
+            expectedDeliveryDate,
+            specialNote,
+            salesTeam,
+            items,
+        } = req.body;
+
+        // Generate query to check if order exists
+        const orderCheckQuery = `SELECT * FROM Orders WHERE OrID = ?`;
+        const [orderResult] = await db.query(orderCheckQuery, [orderId]);
+
+        if (orderResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found",
+            });
+        }
+
+        // Begin updating the order
+        const orderUpdateQuery = `
+            UPDATE Orders
+            SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?, 
+                dvStatus = ?, dvPrice = ?, disPrice = ?, totPrice = ?, expectedDate = ?, specialNote = ?
+            WHERE OrID = ?`;
+        const orderUpdateParams = [
+            orderDate,
+            customerEmail,
+            phoneNumber,
+            optionalNumber,
+            orderStatus,
+            deliveryStatus,
+            deliveryCharge,
+            discount,
+            totalPrice,
+            expectedDeliveryDate,
+            specialNote,
+            orderId,
+        ];
+
+        await db.query(orderUpdateQuery, orderUpdateParams);
+
+        // Update the order details (items)
+        for (const item of items) {
+            const orderDetailUpdateQuery = `
+                UPDATE Order_Detail
+                SET qty = ?, tprice = ?
+                WHERE orID = ? AND I_Id = ?`;
+            const orderDetailUpdateParams = [item.quantity, item.price, orderId, item.itemId];
+
+            await db.query(orderDetailUpdateQuery, orderDetailUpdateParams);
+        }
+
+        // If delivery status is "Delivery", you may want to update delivery info
+        if (deliveryStatus === "Delivery") {
+            const deliveryUpdateQuery = `
+                UPDATE delivery
+                SET address = ?, district = ?, contact = ?, schedule_Date = ?
+                WHERE orID = ?`;
+            const deliveryUpdateParams = [
+                req.body.customerAddress, // Assuming customer address is part of the request
+                req.body.district, // Assuming district is part of the request
+                phoneNumber,
+                expectedDeliveryDate,
+                orderId,
+            ];
+
+            await db.query(deliveryUpdateQuery, deliveryUpdateParams);
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Order updated successfully",
+            data: {
+                orderId: orderId,
+                orderDate: orderDate,
+                expectedDeliveryDate: expectedDeliveryDate,
+            },
+        });
+
+    } catch (error) {
+        console.error("Error updating order data:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error updating data in database",
             details: error.message,
         });
     }

@@ -4,14 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update delivery in place order">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update checkout">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/style/orderDetails.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/orderDetails.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Cart.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Cart.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/redux/slices/cartSlice.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/slices/cartSlice.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,35 +131,7 @@
       <workItem from="1738552817007" duration="35841000" />
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
-      <workItem from="1738727679950" duration="10553000" />
-    </task>
-    <task id="LOCAL-00081" summary="add order controller in backend">
-      <created>1719681437504</created>
-      <option name="number" value="00081" />
-      <option name="presentableId" value="LOCAL-00081" />
-      <option name="project" value="LOCAL" />
-      <updated>1719681437505</updated>
-    </task>
-    <task id="LOCAL-00082" summary="add place order function">
-      <created>1719684630270</created>
-      <option name="number" value="00082" />
-      <option name="presentableId" value="LOCAL-00082" />
-      <option name="project" value="LOCAL" />
-      <updated>1719684630270</updated>
-    </task>
-    <task id="LOCAL-00083" summary="add order display frame on admin">
-      <created>1719686346601</created>
-      <option name="number" value="00083" />
-      <option name="presentableId" value="LOCAL-00083" />
-      <option name="project" value="LOCAL" />
-      <updated>1719686346601</updated>
-    </task>
-    <task id="LOCAL-00084" summary="update admin side toast message">
-      <created>1737538101633</created>
-      <option name="number" value="00084" />
-      <option name="presentableId" value="LOCAL-00084" />
-      <option name="project" value="LOCAL" />
-      <updated>1737538101634</updated>
+      <workItem from="1738727679950" duration="23313000" />
     </task>
     <task id="LOCAL-00085" summary="update frontend side">
       <created>1737541298371</created>
@@ -479,7 +448,35 @@
       <option name="project" value="LOCAL" />
       <updated>1738733842686</updated>
     </task>
-    <option name="localTasksCounter" value="130" />
+    <task id="LOCAL-00130" summary="update cart handle">
+      <created>1738740609906</created>
+      <option name="number" value="00130" />
+      <option name="presentableId" value="LOCAL-00130" />
+      <option name="project" value="LOCAL" />
+      <updated>1738740609906</updated>
+    </task>
+    <task id="LOCAL-00131" summary="update checkout">
+      <created>1738741850523</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1738741850523</updated>
+    </task>
+    <task id="LOCAL-00132" summary="update checkout">
+      <created>1738745171643</created>
+      <option name="number" value="00132" />
+      <option name="presentableId" value="LOCAL-00132" />
+      <option name="project" value="LOCAL" />
+      <updated>1738745171644</updated>
+    </task>
+    <task id="LOCAL-00133" summary="update checkout">
+      <created>1738752936278</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1738752936279</updated>
+    </task>
+    <option name="localTasksCounter" value="134" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -498,8 +495,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="fixed footer" />
-    <MESSAGE value="fixed checkout page with out place order function" />
     <MESSAGE value="update 01/31 work" />
     <MESSAGE value="update 01/31 work (fixed errors)" />
     <MESSAGE value="fixed the place order function" />
@@ -523,6 +518,8 @@
     <MESSAGE value="update place order" />
     <MESSAGE value="update place order second time" />
     <MESSAGE value="update delivery in place order" />
-    <option name="LAST_COMMIT_MESSAGE" value="update delivery in place order" />
+    <MESSAGE value="update cart handle" />
+    <MESSAGE value="update checkout" />
+    <option name="LAST_COMMIT_MESSAGE" value="update checkout" />
   </component>
 </project>
