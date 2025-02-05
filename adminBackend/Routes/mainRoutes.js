@@ -177,15 +177,15 @@ router.get("/order-details", async (req, res) => {
 
         const orderData = orderResult[0];
 
-        // Fetch Ordered Items
+        // Fetch Ordered Items with Stock Count
         const itemsQuery = `
-            SELECT od.I_Id, i.I_name, od.qty, od.price
+            SELECT od.I_Id, i.I_name, od.qty, od.price, i.qty AS stockCount
             FROM Order_Detail od
             JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
-
+        // console.log(salesEmployeeName);
         // Initialize order response
         const orderResponse = {
             orderId: orderData.OrID,
@@ -203,14 +203,15 @@ router.get("/order-details", async (req, res) => {
                 itemId: item.I_Id,
                 itemName: item.I_name,
                 quantity: item.qty,
-                price: item.price
+                price: item.price,
+                stockCount: item.stockCount // Add stock count
             }))
         };
 
         // If it's a delivery order, fetch delivery details
         if (orderData.dvStatus === "Delivery") {
             const deliveryQuery = `
-                SELECT dv_id, address, district, contact, status, schedule_Date, delivery_Date
+                SELECT dv_id, address, district, contact, status, schedule_Date
                 FROM delivery
                 WHERE orID = ?`;
 
@@ -225,7 +226,6 @@ router.get("/order-details", async (req, res) => {
                     contact: deliveryData.contact,
                     status: deliveryData.status,
                     scheduleDate: deliveryData.schedule_Date,
-                    deliveryDate: deliveryData.delivery_Date || "Not delivered yet"
                 };
             }
         }
@@ -245,6 +245,7 @@ router.get("/order-details", async (req, res) => {
         });
     }
 });
+
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {
     try {

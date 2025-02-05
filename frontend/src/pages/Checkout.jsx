@@ -62,7 +62,9 @@ const Checkout = () => {
         try {
             // Fetch delivery charge
             const chargeResponse = await fetch(`http://localhost:5000/api/admin/delivery-rate?district=${selectedDistrict}`);
+            console.log(chargeResponse);
             const chargeData = await chargeResponse.json();
+            console.log(chargeData);
             if (!chargeResponse.ok) throw new Error(chargeData.message || "Failed to fetch delivery rate");
 
             setDeliveryCharge(chargeData.amount);
@@ -78,6 +80,7 @@ const Checkout = () => {
             setDeliveryCharge(0);
             setDeliveryDates([]);
         }
+        console.log(deliveryCharge);
     };
 
     // Validate and apply discount
@@ -111,12 +114,55 @@ const Checkout = () => {
             setDiscount(0);
         }
     };
+    const validateForm = () => {
+        if (!name.trim()) {
+            toast.error("Please enter your name.");
+            return false;
+        }
+
+        if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+            toast.error("Please enter a valid email.");
+            return false;
+        }
+
+        if (!number.trim() || number.length < 10 || isNaN(number)) {
+            toast.error("Please enter a valid phone number (at least 10 digits).");
+            return false;
+        }
+
+        if (!delivery && !pickup) {
+            toast.error("Please select either Delivery or Pickup.");
+            return false;
+        }
+
+        if (delivery) {
+            if (!district) {
+                toast.error("Please select a district for delivery.");
+                return false;
+            }
+
+            if (!address.trim()) {
+                toast.error("Please enter a delivery address.");
+                return false;
+            }
+
+            if (!expectedDate) {
+                toast.error("Please select an expected delivery date.");
+                return false;
+            }
+        }
+
+        return true;
+    };
 
     const placeOrder = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
             toast.warning("Please log in to place an order.");
             navigate("/signin");
+            return;
+        }
+        if (!validateForm()) {
             return;
         }
 
@@ -211,39 +257,31 @@ const Checkout = () => {
                                 {/* Delivery-Specific Fields */}
                                 {delivery && (
                                     <>
-                                        <Row>
-                                            <Col lg={6}>
-                                                <FormGroup className="form__group">
-                                                    <select onChange={handleDistrictChange} className="form-control">
-                                                        <option value="">Select District</option>
-                                                        {districts.map((dist, index) => (
-                                                            <option key={index} value={dist}>{dist}</option>
-                                                        ))}
-                                                    </select>
-                                                </FormGroup>
-                                            </Col>
-                                            <Col lg={6}>
-                                                <FormGroup className="form__group">
-                                                    <input type="text" placeholder="Address" onChange={(e) => setAddress(e.target.value)} />
-                                                </FormGroup>
-                                            </Col>
-                                        </Row>
+                                        <FormGroup className="form__group">
+                                            <select onChange={handleDistrictChange} className="form-control">
+                                                <option value="">Select District</option>
+                                                {districts.map((dist, index) => (
+                                                    <option key={index} value={dist}>{dist}</option>
+                                                ))}
+                                            </select>
+                                        </FormGroup>
 
                                         {deliveryDates.length > 0 && (
                                             <FormGroup className="form__group">
-                                                <label>Scheduled Delivery Dates to your City:</label>
-                                                <ul>
+                                                <label>Scheduled Delivery Dates:</label>
+                                                <select className="form-control" onChange={(e) => setExpectedDate(e.target.value)}>
+                                                    <option value="">Select Date</option>
                                                     {deliveryDates.map((date, index) => (
-                                                        <li key={index}>{date}</li>
+                                                        <option key={index} value={date}>{date}</option>
                                                     ))}
-                                                </ul>
+                                                </select>
                                             </FormGroup>
                                         )}
                                     </>
                                 )}
 
                                 {/* Expected Date for Delivery or Pickup */}
-                                {(delivery || pickup) && (
+                                {(pickup) && (
                                     <FormGroup className="form__group">
                                         <input type="date" value={expectedDate} onChange={(e) => setExpectedDate(e.target.value)} />
                                         <small>Select Expected Date for Delivery or Pickup</small>
