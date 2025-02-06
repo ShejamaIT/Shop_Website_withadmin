@@ -566,6 +566,38 @@ router.get("/orders-accepting", async (req, res) => {
         return res.status(500).json({ message: "Error fetching pending orders", error: error.message });
     }
 });
+//Get all orders by status= inproduction
+router.get("/orders-inproduction", async (req, res) => {
+    try {
+        // Query the database to fetch all pending Orders
+        const [suporders] = await db.query("SELECT * FROM production");
+
+        // If no orders found, return a 404 status
+        if (suporders.length === 0) {
+            return res.status(404).json({ message: "No supplier orders found" });
+        }
+
+        // Format orders
+        const formattedOrders = suporders.map(order => ({
+            p_ID : order.p_ID,
+            I_Id : order.I_Id,
+            qty : order.qty,
+            s_ID : order.s_ID,
+            expectedDate : order.expectedDate,
+            specialNote: order.specialNote
+        }));
+
+        // Send the formatted orders as a JSON response
+        return res.status(200).json({
+            message: "Pending orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching pending orders:", error.message);
+        return res.status(500).json({ message: "Error fetching pending orders", error: error.message });
+    }
+});
 
 // Get all items where stock count is less than or equal to one
 router.get("/allitemslessone", async (req, res) => {
@@ -685,7 +717,6 @@ router.get("/item-detail", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
-
 //save in production
 router.post('/add-production', async (req, res) => {
     const {itemId, qty, supplierId, expectedDate, specialnote} = req.body;

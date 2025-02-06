@@ -5,13 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update place supplier order">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/style/suppierDetail.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,14 +132,7 @@
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
-      <workItem from="1738813731373" duration="23159000" />
-    </task>
-    <task id="LOCAL-00090" summary="load item from main category">
-      <created>1738234683783</created>
-      <option name="number" value="00090" />
-      <option name="presentableId" value="LOCAL-00090" />
-      <option name="project" value="LOCAL" />
-      <updated>1738234683783</updated>
+      <workItem from="1738813731373" duration="25045000" />
     </task>
     <task id="LOCAL-00091" summary="update with api in sub catogery">
       <created>1738239550157</created>
@@ -480,7 +470,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738826037313</updated>
     </task>
-    <option name="localTasksCounter" value="139" />
+    <task id="LOCAL-00139" summary="update place supplier order">
+      <created>1738838943232</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1738838943232</updated>
+    </task>
+    <option name="localTasksCounter" value="140" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

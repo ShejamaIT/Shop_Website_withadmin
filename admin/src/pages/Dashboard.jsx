@@ -4,6 +4,7 @@ import Helmet from "../components/Helmet/Helmet";
 import TableThree from "../components/tables/TableThree";
 import TablePending from "../components/tables/TablePending";
 import TableAccepting from "../components/tables/TableAccepting";
+import TableInproduction from "../components/tables/TableInProduction";
 import NavBar from "../components/header/navBar";
 import '../style/Dashboard.css';
 import classnames from "classnames";
@@ -47,6 +48,15 @@ const Dashboard = () => {
                                 Accepted Orders
                             </NavLink>
                         </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={classnames({ active: activeTab === "4" })}
+                                onClick={() => setActiveTab("4")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                In Production
+                            </NavLink>
+                        </NavItem>
                     </Nav>
 
                     {/* Tab Content */}
@@ -64,6 +74,11 @@ const Dashboard = () => {
                         <TabPane tabId="3">
                             <Row>
                                 <TableAccepting />
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="4">
+                            <Row>
+                                <TableInproduction />
                             </Row>
                         </TabPane>
                     </TabContent>
