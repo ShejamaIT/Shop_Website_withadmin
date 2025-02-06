@@ -5,6 +5,7 @@ import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import TableTwo from "../components/tables/TableTwo";
 import Tableforproduction from "../components/tables/Tableforproduction";
+import TableInProduction from "../components/tables/TableInProduction";
 
 const AllProducts = () => {
     const [activeTab, setActiveTab] = useState("1"); // Manage active tab
@@ -35,6 +36,14 @@ const AllProducts = () => {
                                 For Production
                             </NavLink>
                         </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={activeTab === "3" ? "active" : ""}
+                                onClick={() => setActiveTab("3")}
+                            >
+                                In Production
+                            </NavLink>
+                        </NavItem>
                     </Nav>
 
                     {/* Tab Content */}
@@ -51,6 +60,13 @@ const AllProducts = () => {
                             <Row>
                                 <Col>
                                     <Tableforproduction />
+                                </Col>
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="3">
+                            <Row>
+                                <Col>
+                                    <TableInProduction />
                                 </Col>
                             </Row>
                         </TabPane>
