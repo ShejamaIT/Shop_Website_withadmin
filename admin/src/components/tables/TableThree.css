@@ -91,7 +91,7 @@
     color: #f39c12;
 }
 
-.status.processing {
+.status.accepted {
     background-color: rgba(155, 89, 182, 0.2);
     color: #9b59b6;
 }

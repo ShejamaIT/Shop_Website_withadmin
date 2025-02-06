@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 // import Swal from 'sweetalert2';
 
 const nav__link = [
+    { path: '/dashboard' , display: 'Dashboard'},
     { path: '/home', display: 'Orders' },
     { path: '/all-products', display: 'Items' },
     { path: '/cart', display: 'Employees' },

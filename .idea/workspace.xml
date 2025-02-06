@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="finish order detail page with order status" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="finish order detail page with order status">
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/server.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,7 +49,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Dell/Desktop/Shop_Mangement_Website/admin/src/assets/images",
+    "last_opened_file_path": "C:/Users/Dell/Desktop/Shop_Mangement_Website/admin/src/components/tables",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -54,11 +63,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\tables" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\assets\images" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\header" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\src\assets\images" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\backend\Routes" />
-      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\src\components\Ui" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\tables" />
@@ -127,6 +136,7 @@
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
+      <workItem from="1738813731373" duration="2927000" />
     </task>
     <task id="LOCAL-00087" summary="delete unwant files">
       <created>1738217996370</created>
