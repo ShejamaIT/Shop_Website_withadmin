@@ -1,3 +1,8 @@
+CREATE TABLE Supplier(
+    s_ID VARCHAR(25) PRIMARY KEY,
+    name VARCHAR(45),
+    contact VARCHAR(10)
+);
 CREATE TABLE Category (
     Ca_Id VARCHAR(15) PRIMARY KEY,
     name VARCHAR(40)
@@ -27,11 +32,6 @@ CREATE TABLE Type(
 	CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
 			ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE Supplier(
-    s_ID VARCHAR(25) PRIMARY KEY,
-    name VARCHAR(45),
-    contact VARCHAR(10)
-);
 CREATE TABLE Item(
       I_Id VARCHAR(25) PRIMARY KEY,
       I_name TEXT ,
@@ -40,13 +40,10 @@ CREATE TABLE Item(
       price DOUBLE,
       qty INT,
       warrantyPeriod VARCHAR(25),
-      s_ID VARCHAR(25),
       cost DOUBLE,
       img LONGBLOB NOT NULL,
 	        CONSTRAINT FOREIGN KEY (Ty_id) REFERENCES Type (Ty_id)
 			    ON DELETE CASCADE ON UPDATE CASCADE,
-			CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
-            			    ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE Employee(
       E_Id VARCHAR(15) PRIMARY KEY,

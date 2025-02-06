@@ -75,8 +75,6 @@ router.post("/type", async (req, res) => {
         });
     }
 });
-
-
 // Save New Promotion
 router.post("/promotion", upload.single('img'), async (req, res) => {
     const sql = `INSERT INTO Promotion (img, date ) VALUES (?, ?)`;

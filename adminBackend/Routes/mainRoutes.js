@@ -659,7 +659,56 @@ router.post('/add-production', async (req, res) => {
         result: Result
     });
 });
+// Get category namees
+router.get("/getcategory", async (req, res) => {
+    const { category } = req.query;
 
+    // Check if category is provided
+    if (!category) {
+        return res.status(400).json({
+            success: false,
+            message: "Category is required",
+        });
+    }
+
+    // SQL query to join Category and subCat_one based on category name
+    const sql = `
+        SELECT sc.sb_c_id, sc.subcategory, sc.img, c.name AS category 
+        FROM subCat_one sc
+        INNER JOIN Category c ON sc.Ca_Id = c.Ca_Id
+        WHERE c.name = ?
+    `;
+
+    try {
+        const [rows] = await db.query(sql, [category]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No images found for the given category",
+            });
+        }
+
+        // Send back the response with image data
+        return res.status(200).json({
+            success: true,
+            message: "Category images retrieved successfully",
+            data: rows.map(row => ({
+                id: row.sb_c_id,
+                category: row.category,
+                subcategory: row.subcategory,
+                img: row.img.toString("base64"), // Convert binary image to Base64
+            })),
+        });
+    } catch (err) {
+        console.error("Error fetching data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching data from database",
+            details: err.message,
+        });
+    }
+});
 
 
 export default router;
