@@ -362,7 +362,6 @@ router.put("/update-order", async (req, res) => {
     }
 });
 
-
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {
     try {
@@ -372,32 +371,127 @@ router.get("/item-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "Item ID is required" });
         }
 
-        // Query to get item details
-        const query = `
+        // Step 1: Fetch Item details
+        const itemQuery = `
             SELECT 
-                I_Id, I_name, Ty_id, descrip, price, qty, 
-                warrantyPeriod, s_ID, cost, img
-            FROM Item 
-            WHERE I_Id = ?
-        `;
+                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.qty, 
+                I.warrantyPeriod, I.s_ID, I.cost, I.img
+            FROM Item I
+            WHERE I.I_Id = ?`;
 
-        const [result] = await db.query(query, [I_Id]);
+        const [itemResult] = await db.query(itemQuery, [I_Id]);
 
-        if (result.length === 0) {
+        if (itemResult.length === 0) {
             return res.status(404).json({ success: false, message: "Item not found" });
         }
 
-        // Convert image from BLOB to Base64 (to send as JSON response)
-        const item = result[0];
-        item.img = item.img.toString("base64");
+        const itemData = itemResult[0];
 
-        return res.status(200).json({ success: true, item });
+        // Step 2: Fetch Type details
+        const typeQuery = `
+            SELECT 
+                T.Ty_Id, T.sub_one, T.sub_two, T.Ca_Id
+            FROM Type T
+            WHERE T.Ty_Id = ?`;
+
+        const [typeResult] = await db.query(typeQuery, [itemData.Ty_id]);
+
+        if (typeResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Type not found" });
+        }
+
+        const typeData = typeResult[0];
+
+        // Log the sub_one and sub_two for debugging
+        console.log("sub_one from Type table:", typeData.sub_one);
+        console.log("sub_two from Type table:", typeData.sub_two);
+
+        // Step 3: Fetch Category details
+        const categoryQuery = `
+            SELECT 
+                C.name AS category_name
+            FROM Category C
+            WHERE C.Ca_Id = ?`;
+
+        const [categoryResult] = await db.query(categoryQuery, [typeData.Ca_Id]);
+
+        if (categoryResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Category not found" });
+        }
+
+        const categoryData = categoryResult[0];
+
+        // Step 4: Fetch Subcategory One details by name (not ID)
+        const subCatOneQuery = `
+            SELECT 
+                S1.subcategory AS subcategory_one
+            FROM subCat_one S1
+            WHERE S1.subcategory = ?`;
+
+        console.log("Executing query for Subcategory One with subcategory name:", typeData.sub_one);
+
+        const [subCatOneResult] = await db.query(subCatOneQuery, [typeData.sub_one]);
+
+        if (subCatOneResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Subcategory One not found" });
+        }
+
+        const subCatOneData = subCatOneResult[0];
+
+        // Step 5: Fetch Subcategory Two details only if subcategory_one is one of the specific categories
+        let subCatTwoData = null;
+
+        const subcategoryOneValues = ["Dining Room", "Living Room", "Bedroom", "Kitchen"];
+
+        // Check if subcategory_one matches any of the values in subcategoryOneValues
+        if (subcategoryOneValues.includes(typeData.sub_one)) {
+            const subCatTwoQuery = `
+                SELECT 
+                    S2.subcategory AS subcategory_two
+                FROM subCat_two S2
+                WHERE S2.subcategory = ?`;
+
+            console.log("Executing query for Subcategory Two with subcategory name:", typeData.sub_two);
+
+            const [subCatTwoResult] = await db.query(subCatTwoQuery, [typeData.sub_two]);
+
+            if (subCatTwoResult.length === 0) {
+                return res.status(404).json({ success: false, message: "Subcategory Two not found" });
+            }
+
+            subCatTwoData = subCatTwoResult[0];
+        }
+
+        // Step 6: Construct final response
+        const responseData = {
+            success: true,
+            item: {
+                I_Id: itemData.I_Id,
+                I_name: itemData.I_name,
+                Ty_id: itemData.Ty_id,
+                descrip: itemData.descrip,
+                price: itemData.price,
+                qty: itemData.qty,
+                warrantyPeriod: itemData.warrantyPeriod,
+                s_ID: itemData.s_ID,
+                cost: itemData.cost,
+                img: itemData.img ? itemData.img.toString("base64") : null,  // Convert image to Base64 if available
+                type_name: subCatOneData.subcategory_one,  // Type name based on subcategory one
+                category_name: categoryData.category_name,  // Category name
+                subcategory_one: subCatOneData.subcategory_one,  // Subcategory one name
+                subcategory_two: subCatTwoData ? subCatTwoData.subcategory_two : null  // Subcategory two name (optional)
+            }
+        };
+
+        return res.status(200).json(responseData);
 
     } catch (error) {
         console.error("Error fetching item details:", error.message);
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
+
 
 //Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
@@ -470,6 +564,38 @@ router.get("/orders-accepting", async (req, res) => {
     } catch (error) {
         console.error("Error fetching pending orders:", error.message);
         return res.status(500).json({ message: "Error fetching pending orders", error: error.message });
+    }
+});
+
+// Get all items where stock count is less than or equal to one
+router.get("/allitemslessone", async (req, res) => {
+    try {
+        // Query the database to fetch items with qty <= 1
+        const [items] = await db.query(
+            "SELECT I_Id, I_name, Ty_id, descrip, price, qty, img FROM Item WHERE qty <= 1"
+        );
+
+        // If no items found, return a 404 status with a descriptive message
+        if (items.length === 0) {
+            return res.status(404).json({ message: "No items found with stock count less than or equal to 1" });
+        }
+
+        // Format the items data with necessary fields
+        const formattedItems = items.map(item => ({
+            I_Id: item.I_Id,
+            I_name: item.I_name,
+            Ty_id: item.Ty_id,
+            descrip: item.descrip,
+            price: item.price,
+            qty: item.qty,
+            img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert image to base64
+        }));
+
+        // Send the formatted items as a JSON response
+        return res.status(200).json(formattedItems);
+    } catch (error) {
+        console.error("Error fetching items:", error.message);
+        return res.status(500).json({ message: "Error fetching items" });
     }
 });
 

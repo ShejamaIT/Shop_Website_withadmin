@@ -6,6 +6,7 @@ import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
 import ProductDetails from "../pages/ProductDetails";
 import OrderDetails from "../pages/OrderDetails";
+import ItemDetails from "../pages/ItemDetails";
 import User from "../pages/User";
 import SignUp from "../pages/SignUp";
 import Orders from "../pages/Orders";
@@ -22,6 +23,7 @@ const Router = () => {
             <Route path='dashboard/orders' element={<Orders/>}/>
             <Route path="dashboard/product-detail/:id" element={<ProductDetails />} />
             <Route path="order-detail/:id" element={<OrderDetails />} />
+            <Route path="item-detail/:id" element={<ItemDetails />} />
         </Routes>
     ) ;
 };

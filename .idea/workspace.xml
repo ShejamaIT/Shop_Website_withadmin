@@ -4,15 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="finish order detail page with order status">
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update backend">
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/ItemDetails.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/orderDetails.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/orderDetails.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,21 +139,7 @@
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
-      <workItem from="1738813731373" duration="2927000" />
-    </task>
-    <task id="LOCAL-00087" summary="delete unwant files">
-      <created>1738217996370</created>
-      <option name="number" value="00087" />
-      <option name="presentableId" value="LOCAL-00087" />
-      <option name="project" value="LOCAL" />
-      <updated>1738217996370</updated>
-    </task>
-    <task id="LOCAL-00088" summary="addding backend project">
-      <created>1738218126705</created>
-      <option name="number" value="00088" />
-      <option name="presentableId" value="LOCAL-00088" />
-      <option name="project" value="LOCAL" />
-      <updated>1738218126705</updated>
+      <workItem from="1738813731373" duration="11523000" />
     </task>
     <task id="LOCAL-00089" summary="update backend project">
       <created>1738221688739</created>
@@ -481,7 +470,21 @@
       <option name="project" value="LOCAL" />
       <updated>1738757910611</updated>
     </task>
-    <option name="localTasksCounter" value="136" />
+    <task id="LOCAL-00136" summary="update orders with table tab pane">
+      <created>1738817286892</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1738817286893</updated>
+    </task>
+    <task id="LOCAL-00137" summary="update backend">
+      <created>1738817410299</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1738817410299</updated>
+    </task>
+    <option name="localTasksCounter" value="138" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -500,7 +503,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="fixed the place order function" />
     <MESSAGE value="temporary profile files (not finished)" />
     <MESSAGE value="fixed frist category with dropdown" />
     <MESSAGE value="fixed the bugged temporary" />
@@ -512,7 +514,6 @@
     <MESSAGE value="load all orders and items" />
     <MESSAGE value="backup 02/02 works" />
     <MESSAGE value="save db query(updated)" />
-    <MESSAGE value="update backend" />
     <MESSAGE value="fixed placed order" />
     <MESSAGE value="load order details" />
     <MESSAGE value="update order details" />
@@ -525,6 +526,8 @@
     <MESSAGE value="update checkout" />
     <MESSAGE value="finish order detail page" />
     <MESSAGE value="finish order detail page with order status" />
-    <option name="LAST_COMMIT_MESSAGE" value="finish order detail page with order status" />
+    <MESSAGE value="update orders with table tab pane" />
+    <MESSAGE value="update backend" />
+    <option name="LAST_COMMIT_MESSAGE" value="update backend" />
   </component>
 </project>

@@ -90,7 +90,6 @@ const TableThree = () => {
                                         >
                                             👁️
                                         </button>
-                                        <button className="edit-btn">✏️</button>
                                     </td>
                                 </tr>
                             ))

@@ -1,3 +1,8 @@
+CREATE TABLE Supplier(
+    s_ID VARCHAR(25) PRIMARY KEY,
+    name VARCHAR(45),
+    contact VARCHAR(10)
+);
 CREATE TABLE Category (
     Ca_Id VARCHAR(15) PRIMARY KEY,
     name VARCHAR(40)
@@ -10,7 +15,6 @@ CREATE TABLE subCat_one(
         CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
         			ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 CREATE TABLE subCat_two(
       sb_cc_id VARCHAR(15) PRIMARY KEY,
       subcategory TEXT,
@@ -19,6 +23,7 @@ CREATE TABLE subCat_two(
         CONSTRAINT FOREIGN KEY (sb_c_id) REFERENCES subCat_one (sb_c_id)
         			ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 CREATE TABLE Type(
     Ty_Id VARCHAR(15) PRIMARY KEY,
      Ca_Id VARCHAR(15),
@@ -26,11 +31,6 @@ CREATE TABLE Type(
      sub_two VARCHAR(40),
 	CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
 			ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE Supplier(
-    s_ID VARCHAR(25) PRIMARY KEY,
-    name VARCHAR(45),
-    contact VARCHAR(10)
 );
 CREATE TABLE Item(
       I_Id VARCHAR(25) PRIMARY KEY,

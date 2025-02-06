@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
 import "./TableTwo.css"; // Import the stylesheet
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
 
-const TableTwo = () => {
+const TableForProduction = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         // Fetch all items from API
         const fetchItems = async () => {
             try {
-                const response = await axios.get("http://localhost:5001/api/admin/main/allitems");
+                const response = await axios.get("http://localhost:5001/api/admin/main/allitemslessone");
                 setItems(response.data);
             } catch (error) {
                 setError("Error fetching items.");
@@ -25,10 +23,6 @@ const TableTwo = () => {
 
         fetchItems();
     }, []);
-    // Function to navigate to order details page
-    const handleViewItem = (itemId) => {
-        navigate(`/item-detail/${itemId}`); // Navigate to OrderDetails page
-    };
 
     return (
         <div className="table-container">
@@ -48,7 +42,6 @@ const TableTwo = () => {
                             <th>Price</th>
                             <th>Quantity</th>
                             <th>Description</th>
-                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -68,14 +61,6 @@ const TableTwo = () => {
                                     <td>Rs.{item.price}</td>
                                     <td>{item.qty}</td>
                                     <td>{item.descrip}</td>
-                                    <td className="action-buttons">
-                                        <button
-                                            className="view-btn"
-                                             onClick={() => handleViewItem(item.I_Id)}
-                                        >
-                                            👁️
-                                        </button>
-                                    </td>
                                 </tr>
                             ))
                         )}
@@ -87,4 +72,4 @@ const TableTwo = () => {
     );
 };
 
-export default TableTwo;
+export default TableForProduction;
