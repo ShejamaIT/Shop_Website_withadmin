@@ -4,16 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update backend">
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/style/ItemDetails.css" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update place supplier order">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/suppierDetail.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/orderDetails.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/orderDetails.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/dbquery.txt" afterDir="false" />
     </list>
@@ -139,14 +135,7 @@
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
-      <workItem from="1738813731373" duration="11523000" />
-    </task>
-    <task id="LOCAL-00089" summary="update backend project">
-      <created>1738221688739</created>
-      <option name="number" value="00089" />
-      <option name="presentableId" value="LOCAL-00089" />
-      <option name="project" value="LOCAL" />
-      <updated>1738221688739</updated>
+      <workItem from="1738813731373" duration="23159000" />
     </task>
     <task id="LOCAL-00090" summary="load item from main category">
       <created>1738234683783</created>
@@ -484,7 +473,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738817410299</updated>
     </task>
-    <option name="localTasksCounter" value="138" />
+    <task id="LOCAL-00138" summary="update item page">
+      <created>1738826037313</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1738826037313</updated>
+    </task>
+    <option name="localTasksCounter" value="139" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -503,8 +499,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="temporary profile files (not finished)" />
-    <MESSAGE value="fixed frist category with dropdown" />
     <MESSAGE value="fixed the bugged temporary" />
     <MESSAGE value="start to update admin side" />
     <MESSAGE value="add admin side backend route" />
@@ -528,6 +522,8 @@
     <MESSAGE value="finish order detail page with order status" />
     <MESSAGE value="update orders with table tab pane" />
     <MESSAGE value="update backend" />
-    <option name="LAST_COMMIT_MESSAGE" value="update backend" />
+    <MESSAGE value="update item page" />
+    <MESSAGE value="update place supplier order" />
+    <option name="LAST_COMMIT_MESSAGE" value="update place supplier order" />
   </component>
 </project>

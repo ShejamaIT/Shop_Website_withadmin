@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "./TableTwo.css"; // Import the stylesheet
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const TableForProduction = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         // Fetch all items from API
@@ -23,7 +25,9 @@ const TableForProduction = () => {
 
         fetchItems();
     }, []);
-
+    const handleViewSuppliers = (itemId) => {
+        navigate(`/supplier-detail/${itemId}`); // Navigate to OrderDetails page
+    };
     return (
         <div className="table-container">
             <h4 className="table-title">All Items</h4>
@@ -42,6 +46,7 @@ const TableForProduction = () => {
                             <th>Price</th>
                             <th>Quantity</th>
                             <th>Description</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -61,6 +66,14 @@ const TableForProduction = () => {
                                     <td>Rs.{item.price}</td>
                                     <td>{item.qty}</td>
                                     <td>{item.descrip}</td>
+                                    <td className="action-buttons">
+                                        <button
+                                            className="view-btn"
+                                             onClick={() => handleViewSuppliers(item.I_Id)}
+                                        >
+                                            👁️ Get Suppliers
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         )}

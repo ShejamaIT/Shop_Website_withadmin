@@ -598,6 +598,113 @@ router.get("/allitemslessone", async (req, res) => {
         return res.status(500).json({ message: "Error fetching items" });
     }
 });
+//get all suppliers for the item
+router.get("/item-suppliers", async (req, res) => {
+    try {
+        const { I_Id } = req.query;
+
+        // Validate the input
+        if (!I_Id) {
+            return res.status(400).json({ success: false, message: "Item ID is required" });
+        }
+
+        // Step 1: Fetch the suppliers associated with the item from item_supplier table
+        const itemSuppliersQuery = `
+            SELECT s_ID
+            FROM item_supplier
+            WHERE I_Id = ?`;
+
+        const [itemSuppliersResult] = await db.query(itemSuppliersQuery, [I_Id]);
+
+        if (itemSuppliersResult.length === 0) {
+            return res.status(404).json({ success: false, message: "No suppliers found for the given item" });
+        }
+
+        // Step 2: Extract the supplier IDs from the result
+        const supplierIds = itemSuppliersResult.map(row => row.s_ID);
+
+        // Step 3: Fetch the supplier details using the supplier IDs
+        const suppliersQuery = `
+            SELECT s_ID, name, contact
+            FROM Supplier
+            WHERE s_ID IN (?)`;
+
+        const [suppliersResult] = await db.query(suppliersQuery, [supplierIds]);
+
+        // Step 4: Return the supplier details
+        return res.status(200).json({
+            success: true,
+            suppliers: suppliersResult,
+        });
+
+    } catch (error) {
+        console.error("Error fetching item suppliers:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+//get item detail in item table only
+router.get("/item-detail", async (req, res) => {
+    try {
+        const { Id } = req.query;
+
+        if (!Id) {
+            return res.status(400).json({ success: false, message: "Item ID is required" });
+        }
+
+        // Step 1: Fetch Item details
+        const itemQuery = `
+            SELECT 
+                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.qty, 
+                I.warrantyPeriod, I.s_ID, I.cost, I.img
+            FROM Item I
+            WHERE I.I_Id = ?`;
+
+        const [itemResult] = await db.query(itemQuery, [Id]);
+
+        if (itemResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Item not found" });
+        }
+
+        const itemData1 = itemResult[0];
+        // Step 2: Construct final response
+        const responseData = {
+            success: true,
+            item: {
+                I_Id: itemData1.I_Id,
+                I_name: itemData1.I_name,
+                price: itemData1.price,
+                qty: itemData1.qty,
+            }
+        };
+
+        return res.status(200).json(responseData);
+
+    } catch (error) {
+        console.error("Error fetching item details:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+//save in production
+router.post('/add-production', async (req, res) => {
+    const {itemId, qty, supplierId, expectedDate, specialnote} = req.body;
+
+    if (!itemId || !qty || !supplierId || !expectedDate) {
+        return res.status(400).json({error: 'All fields are required'});
+    }
+
+    const p_ID = `InP_${Date.now()}`;
+
+    const sql = `INSERT INTO production (p_ID, I_Id, qty, s_ID, expectedDate, specialNote)
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+    const [Result] = await db.query(sql, [p_ID, itemId, qty, supplierId, expectedDate, specialnote]);
+    return res.status(200).json({
+        success: true,
+        message: "Order details fetched successfully",
+        result: Result
+    });
+});
 
 
 
