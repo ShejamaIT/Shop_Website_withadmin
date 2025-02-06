@@ -399,5 +399,80 @@ router.get("/item-details", async (req, res) => {
     }
 });
 
+//Get all orders by status= pending
+router.get("/orders-pending", async (req, res) => {
+    try {
+        // Query the database to fetch all pending Orders
+        const [orders] = await db.query("SELECT * FROM Orders WHERE orStatus = 'pending'");
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No pending orders found" });
+        }
+
+        // Format orders
+        const formattedOrders = orders.map(order => ({
+            OrID: order.OrID, // Order ID
+            orDate: order.orDate, // Order Date
+            customerEmail: order.customerEmail, // Customer Email
+            orStatus: order.orStatus, // Order Status
+            dvStatus: order.dvStatus, // Delivery Status
+            dvPrice: order.dvPrice, // Delivery Price
+            disPrice: order.disPrice, // Discount Price
+            totPrice: order.totPrice, // Total Price
+            stID: order.stID, // Sales Team ID
+            expectedDeliveryDate: order.expectedDate, // Expected Delivery Date
+        }));
+
+        // Send the formatted orders as a JSON response
+        return res.status(200).json({
+            message: "Pending orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching pending orders:", error.message);
+        return res.status(500).json({ message: "Error fetching pending orders", error: error.message });
+    }
+});
+
+//Get all orders by status= accepting
+router.get("/orders-accepting", async (req, res) => {
+    try {
+        // Query the database to fetch all pending Orders
+        const [orders] = await db.query("SELECT * FROM Orders WHERE orStatus = 'Accepted'");
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No Accepted orders found" });
+        }
+
+        // Format orders
+        const formattedOrders = orders.map(order => ({
+            OrID: order.OrID, // Order ID
+            orDate: order.orDate, // Order Date
+            customerEmail: order.customerEmail, // Customer Email
+            orStatus: order.orStatus, // Order Status
+            dvStatus: order.dvStatus, // Delivery Status
+            dvPrice: order.dvPrice, // Delivery Price
+            disPrice: order.disPrice, // Discount Price
+            totPrice: order.totPrice, // Total Price
+            stID: order.stID, // Sales Team ID
+            expectedDeliveryDate: order.expectedDate, // Expected Delivery Date
+        }));
+
+        // Send the formatted orders as a JSON response
+        return res.status(200).json({
+            message: "Pending orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching pending orders:", error.message);
+        return res.status(500).json({ message: "Error fetching pending orders", error: error.message });
+    }
+});
+
+
 
 export default router;
