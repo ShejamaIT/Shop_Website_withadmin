@@ -1,24 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import "./TableThree.css"; // Importing the stylesheet
+import { useNavigate } from "react-router-dom";
+import EditOrderModal from "../../pages/EditOrderModal"; // Import the modal component
+import "../../style/inproduction.css"; // Import CSS
 
 const TableInproduction = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await fetch("http://localhost:5001/api/admin/main/orders-inproduction"); // Adjust API URL if needed
+                const response = await fetch("http://localhost:5001/api/admin/main/orders-inproduction");
                 const data = await response.json();
 
                 if (!response.ok) {
                     throw new Error(data.message || "Failed to fetch orders");
                 }
 
-                setOrders(data.data); // Assuming `data.data` contains the array of orders
+                setOrders(data.data);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -31,14 +35,41 @@ const TableInproduction = () => {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1)
-            .toString()
-            .padStart(2, "0")}-${date.getFullYear()}`;
+        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
     };
 
-    // Function to navigate to order details page
-    const handleViewOrder = (orderId) => {
-        navigate(`/order-detail/${orderId}`); // Navigate to OrderDetails page
+    // Open modal and set selected order
+    const handleEditClick = (order) => {
+        setSelectedOrder(order);
+        setShowModal(true);
+    };
+
+    // Handle form submission (Update order status)
+    const handleSubmit = async (formData) => {
+        console.log(formData);
+        // try {
+        //     const response = await fetch(`http://localhost:5001/api/admin/main/update-order/${selectedOrder.p_ID}`, {
+        //         method: "PUT",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify(formData),
+        //     });
+        //
+        //     const data = await response.json();
+        //
+        //     if (response.ok) {
+        //         alert("Order status updated successfully!");
+        //         setOrders((prevOrders) =>
+        //             prevOrders.map((order) =>
+        //                 order.p_ID === selectedOrder.p_ID ? { ...order, ...formData } : order
+        //             )
+        //         );
+        //         setShowModal(false);
+        //     } else {
+        //         alert(data.message || "Failed to update status.");
+        //     }
+        // } catch (error) {
+        //     alert("Server error. Please try again.");
+        // }
     };
 
     return (
@@ -55,9 +86,11 @@ const TableInproduction = () => {
                             <th>Order ID</th>
                             <th>Item ID</th>
                             <th>Supplier ID</th>
-                            <th>Quantity </th>
+                            <th>Quantity</th>
                             <th>Expected Date</th>
                             <th>Special Note</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -74,6 +107,10 @@ const TableInproduction = () => {
                                     <td>{order.qty}</td>
                                     <td>{formatDate(order.expectedDate)}</td>
                                     <td>{order.specialNote}</td>
+                                    <td>{order.status}</td>
+                                    <td className="action-buttons">
+                                        <button className="edit-btn" onClick={() => handleEditClick(order)}>✏️</button>
+                                    </td>
                                 </tr>
                             ))
                         )}
@@ -81,6 +118,15 @@ const TableInproduction = () => {
                     </table>
                 )}
             </div>
+
+            {/* Popup Modal */}
+            {showModal && selectedOrder && (
+                <EditOrderModal
+                    selectedOrder={selectedOrder}
+                    setShowModal={setShowModal}
+                    handleSubmit={handleSubmit}
+                />
+            )}
         </div>
     );
 };

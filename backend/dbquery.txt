@@ -172,16 +172,21 @@ CREATE TABLE production(
     s_ID VARCHAR(25),
     expectedDate DATE,
     specialNote TEXT,
+    status VARCHAR(12),
         CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
                 			ON DELETE CASCADE ON UPDATE CASCADE,
         CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
                     			    ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE production_received(
-    p_ID VARCHAR(25),
-    rDate DATE,
+CREATE TABLE stock_received (
+    sr_ID INT AUTO_INCREMENT PRIMARY KEY,
+    p_ID VARCHAR(25) NOT NULL,
+    rDate DATE NOT NULL,
+    rec_count INT,
     detail TEXT,
-    PRIMARY KEY (p_ID, rDate)
+    CONSTRAINT FOREIGN KEY (p_ID) REFERENCES production (p_ID)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 
 

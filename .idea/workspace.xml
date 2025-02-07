@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update fetch item detail">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update receive product pop without api">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/EditOrderModal.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/inproduction.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -66,11 +70,11 @@
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\backend\Routes" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\style" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\tables" />
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\backend\models" />
       <recent name="D:\Gdse\React_final\Wimalasiri-ecommerce\src\components\Footer" />
-      <recent name="D:\Gdse\React_final\Wimalasiri-ecommerce\src\components\Header" />
     </key>
   </component>
   <component name="RunManager">
@@ -132,14 +136,7 @@
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
-      <workItem from="1738813731373" duration="27927000" />
-    </task>
-    <task id="LOCAL-00093" summary="fixed signin and sign up pages">
-      <created>1738310620715</created>
-      <option name="number" value="00093" />
-      <option name="presentableId" value="LOCAL-00093" />
-      <option name="project" value="LOCAL" />
-      <updated>1738310620715</updated>
+      <workItem from="1738813731373" duration="36532000" />
     </task>
     <task id="LOCAL-00094" summary="fixed shop load subcategory one">
       <created>1738310660471</created>
@@ -477,7 +474,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738842568780</updated>
     </task>
-    <option name="localTasksCounter" value="142" />
+    <task id="LOCAL-00142" summary="final update in 02/06">
+      <created>1738843884988</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1738843884988</updated>
+    </task>
+    <option name="localTasksCounter" value="143" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -496,8 +500,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add admin side backend route" />
-    <MESSAGE value="update admin side routes" />
     <MESSAGE value="final upload 02/01" />
     <MESSAGE value="fixed navbars" />
     <MESSAGE value="load all orders and items" />
@@ -521,6 +523,8 @@
     <MESSAGE value="update place supplier order" />
     <MESSAGE value="update in production table" />
     <MESSAGE value="update fetch item detail" />
-    <option name="LAST_COMMIT_MESSAGE" value="update fetch item detail" />
+    <MESSAGE value="final update in 02/06" />
+    <MESSAGE value="update receive product pop without api" />
+    <option name="LAST_COMMIT_MESSAGE" value="update receive product pop without api" />
   </component>
 </project>

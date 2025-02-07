@@ -494,7 +494,7 @@ router.get("/orders-accepting", async (req, res) => {
 router.get("/orders-inproduction", async (req, res) => {
     try {
         // Query the database to fetch all pending Orders
-        const [suporders] = await db.query("SELECT * FROM production");
+        const [suporders] = await db.query("SELECT * FROM production WHERE status= 'Incomplete'");
 
         // If no orders found, return a 404 status
         if (suporders.length === 0) {
@@ -508,7 +508,8 @@ router.get("/orders-inproduction", async (req, res) => {
             qty : order.qty,
             s_ID : order.s_ID,
             expectedDate : order.expectedDate,
-            specialNote: order.specialNote
+            specialNote: order.specialNote,
+            status: order.status
         }));
 
         // Send the formatted orders as a JSON response
@@ -650,8 +651,8 @@ router.post('/add-production', async (req, res) => {
 
     const p_ID = `InP_${Date.now()}`;
 
-    const sql = `INSERT INTO production (p_ID, I_Id, qty, s_ID, expectedDate, specialNote)
-                 VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO production (p_ID, I_Id, qty, s_ID, expectedDate, specialNote,status)
+                 VALUES (?, ?, ?, ?, ?, ?,'Incomplete')`;
     const [Result] = await db.query(sql, [p_ID, itemId, qty, supplierId, expectedDate, specialnote]);
     return res.status(200).json({
         success: true,
