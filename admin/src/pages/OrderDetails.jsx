@@ -14,9 +14,11 @@ const OrderDetails = () => {
     const [formData, setFormData] = useState({}); // Stores editable fields
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
     useEffect(() => {
         fetchOrder();
     }, [id]);
+
     const fetchOrder = async () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/order-details?orID=${id}`);
@@ -31,106 +33,103 @@ const OrderDetails = () => {
             setError(err.message);
             setLoading(false);
         }
-    }
+    };
 
     const handleChange = (e, index) => {
         const { name, value } = e.target;
         const stockCount = order.items[index]?.stockCount; // Get stock count for the item
 
-        // Check if the status is being changed to "Accepted"
-        if (name === "orderStatus" && value === "Accepted") {
-            // Show a SweetAlert to confirm if the items have been received
-            Swal.fire({
-                title: 'Have you received the items?',
-                text: "Please confirm if the items have been received before marking the order as accepted.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // If user confirms "Yes", set the booked field to "Yes" and update the order status
-                    setFormData((prevFormData) => ({
-                        ...prevFormData,
-                        orderStatus: "Accepted", // Update the order status to "Accepted"
-                        booked: "Yes", // Add a new field booked and set it to "Yes"
-                    }));
+        // Handle the 'orderStatus' field
+        if (name === "orderStatus") {
+            // If the user is changing the order status to "Accepted"
+            if (value === "Accepted") {
+                Swal.fire({
+                    title: 'Have you received the items?',
+                    text: "Please confirm if the items have been received before marking the order as accepted.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If user confirms "Yes", set the booked field to "Yes" and update the order status
+                        setFormData((prevFormData) => ({
+                            ...prevFormData,
+                            orderStatus: "Accepted", // Update the order status to "Accepted"
+                            booked: "Yes", // Add a new field 'booked' and set it to "Yes"
+                        }));
+                    } else {
+                        // If user selects "No", set the booked field to "No" and update the order status to "Accepted"
+                        setFormData((prevFormData) => ({
+                            ...prevFormData,
+                            orderStatus: "Accepted", // Ensure status is set to "Accepted"
+                            booked: "No", // Set booked to "No"
+                        }));
+                    }
+                });
+            } else {
+                // If the status is not being changed to "Accepted", simply update the order status
+                setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    orderStatus: value, // Update the order status when it's changed
+                }));
+            }
+        } else {
+            setFormData((prevFormData) => {
+                const updatedItems = [...prevFormData.items];
+
+                if (name === "discount" || name === "deliveryCharge") {
+                    const updatedValue = value === "" ? 0 : parseFloat(value);
+                    if (!isNaN(updatedValue) && updatedValue >= 0) {
+                        const updatedFormData = {
+                            ...prevFormData,
+                            [name]: updatedValue
+                        };
+
+                        updatedFormData.totalPrice = updatedFormData.items.reduce((total, item) => {
+                            return total + item.price;
+                        }, 0) + updatedFormData.deliveryCharge - updatedFormData.discount;
+
+                        return updatedFormData;
+                    }
                 } else {
-                    // If user selects "No", set the booked field to "No" and update the order status to "Accepted"
-                    setFormData((prevFormData) => ({
+                    const newQuantity = value === "" ? 0 : parseInt(value, 10);
+
+                    if (newQuantity > stockCount) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Quantity Exceeds Stock!',
+                            text: `The quantity you selected exceeds the available stock for ${order.items[index].itemName}. Please choose a quantity less than or equal to ${stockCount}.`,
+                            confirmButtonText: 'Okay',
+                        }).then(() => {
+                            document.getElementsByName("quantity")[index].focus();
+                        });
+                        return prevFormData; // Don't update the form if quantity exceeds stock
+                    }
+
+                    if (!isNaN(newQuantity) && newQuantity >= 0) {
+                        updatedItems[index] = {
+                            ...updatedItems[index],
+                            quantity: newQuantity,
+                            price: newQuantity * updatedItems[index].unitPrice,
+                        };
+                    }
+
+                    const newTotalPrice = updatedItems.reduce((total, item) => {
+                        return total + item.price;
+                    }, 0) + (prevFormData.deliveryCharge || 0) - (prevFormData.discount || 0);
+
+                    return {
                         ...prevFormData,
-                        orderStatus: "Accepted", // Ensure status is set to "Accepted"
-                        booked: "No", // Set booked to "No"
-                    }));
+                        items: updatedItems,
+                        totalPrice: newTotalPrice
+                    };
                 }
             });
-
-
-            return; // Prevent the form update from continuing until user responds
         }
-        setFormData((prevFormData) => {
-            const updatedItems = [...prevFormData.items];
-
-            if (name === "discount" || name === "deliveryCharge") {
-                // If it's the discount or delivery charge, update the respective field
-                const updatedValue = value === "" ? 0 : parseFloat(value);
-
-                if (!isNaN(updatedValue) && updatedValue >= 0) {
-                    const updatedFormData = {
-                        ...prevFormData,
-                        [name]: updatedValue
-                    };
-
-                    // Recalculate the total price
-                    updatedFormData.totalPrice = updatedFormData.items.reduce((total, item) => {
-                        return total + item.price;
-                    }, 0) + updatedFormData.deliveryCharge - updatedFormData.discount;
-
-                    return updatedFormData;
-                }
-            } else {
-                // If it's an item quantity update
-                const newQuantity = value === "" ? 0 : parseInt(value, 10);
-
-                // Validate if the new quantity exceeds the available stock
-                if (newQuantity > stockCount) {
-                    // Show SweetAlert to notify user about stock limit
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Quantity Exceeds Stock!',
-                        text: `The quantity you selected exceeds the available stock for ${order.items[index].itemName}. Please choose a quantity less than or equal to ${stockCount}.`,
-                        confirmButtonText: 'Okay',
-                    }).then(() => {
-                        // Focus the quantity input back after user acknowledges the message
-                        document.getElementsByName("quantity")[index].focus();
-                    });
-
-                    return prevFormData; // Don't update the form if quantity exceeds stock
-                }
-
-                if (!isNaN(newQuantity) && newQuantity >= 0) {
-                    updatedItems[index] = {
-                        ...updatedItems[index],
-                        quantity: newQuantity, // Update the item quantity
-                        price: newQuantity * updatedItems[index].unitPrice, // Recalculate the item price
-                    };
-                }
-
-                // Recalculate the total price based on the updated items, discount, and delivery charge
-                const newTotalPrice = updatedItems.reduce((total, item) => {
-                    return total + item.price;
-                }, 0) + (prevFormData.deliveryCharge || 0) - (prevFormData.discount || 0);
-
-                return {
-                    ...prevFormData,
-                    items: updatedItems,
-                    totalPrice: newTotalPrice
-                };
-            }
-
-            return prevFormData;
-        });
     };
+
+
     // Save changes (API request needed)
     const handleSave = async () => {
         try {
@@ -156,6 +155,7 @@ const OrderDetails = () => {
             alert("Failed to update order!");
         }
     };
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
@@ -193,8 +193,8 @@ const OrderDetails = () => {
                                                 <Input
                                                     type="select"
                                                     name="orderStatus"
-                                                    value={formData.orderStatus}
-                                                    onChange={handleChange}
+                                                    value={formData.orderStatus} // Bind order status to formData
+                                                    onChange={handleChange} // Ensure handleChange updates formData correctly
                                                 >
                                                     <option value="Pending">Pending</option>
                                                     <option value="Accepted">Accepted</option>
@@ -237,76 +237,6 @@ const OrderDetails = () => {
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
                                     </div>
                                 </div>
-
-                                {/* Delivery Details - Show only if dvStatus is "Delivery" */}
-                                {order.deliveryStatus === "Delivery" && order.deliveryInfo && (
-                                    <div>
-                                        <h5 className="mt-4">Delivery Details</h5>
-                                        <div className="order-general">
-                                            {!isEditing ? (
-                                                <p><strong>Address:</strong> {order.deliveryInfo.address}</p>
-                                            ) : (
-                                                <FormGroup>
-                                                    <Label><strong>Address:</strong></Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="address"
-                                                        value={formData.address ?? order.deliveryInfo.address}
-                                                        onChange={handleChange}
-                                                    />
-                                                </FormGroup>
-                                            )}
-
-                                            {!isEditing ? (
-                                                <p><strong>District:</strong> {order.deliveryInfo.district}</p>
-                                            ) : (
-                                                <FormGroup>
-                                                    <Label><strong>District:</strong></Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="district"
-                                                        value={formData.district ?? order.deliveryInfo.district}
-                                                        onChange={handleChange}
-                                                    />
-                                                </FormGroup>
-                                            )}
-
-
-                                            {/* Delivery Status */}
-                                            {!isEditing ? (
-                                                <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
-                                            ) : (
-                                                <FormGroup>
-                                                    <Label><strong>Delivery Status:</strong></Label>
-                                                    <Input
-                                                        type="select"
-                                                        name="deliveryStatus"
-                                                        value={formData.deliveryStatus}
-                                                        onChange={handleChange}
-                                                    >
-                                                        <option value="Pending">Pending</option>
-                                                        <option value="Delivered">Delivered</option>
-                                                    </Input>
-                                                </FormGroup>
-                                            )}
-                                            {!isEditing ? (
-                                                <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
-                                            ) : (
-                                                <FormGroup>
-                                                    <Label><strong>Scheduled Date:</strong></Label>
-                                                    <Input
-                                                        type="date"
-                                                        name="scheduleDate"
-                                                        value={formData.scheduleDate ?? new Date(order.deliveryInfo.scheduleDate).toISOString().split('T')[0]}
-                                                        onChange={handleChange}
-                                                    />
-                                                </FormGroup>
-                                            )}
-
-                                        </div>
-                                    </div>
-
-                                )}
 
                                 {/* Ordered Items */}
                                 <h5 className="mt-4">Ordered Items</h5>
@@ -368,7 +298,6 @@ const OrderDetails = () => {
 
                                     <p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>
                                 </div>
-
 
                                 {/* Buttons */}
                                 <div className="text-center mt-4">

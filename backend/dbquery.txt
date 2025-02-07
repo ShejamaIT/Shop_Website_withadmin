@@ -187,6 +187,15 @@ CREATE TABLE stock_received (
     CONSTRAINT FOREIGN KEY (p_ID) REFERENCES production (p_ID)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
-
+CREATE TABLE booked_item (
+    bi_ID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    I_Id VARCHAR(25),
+    qty INT,
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                           ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                        			ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 

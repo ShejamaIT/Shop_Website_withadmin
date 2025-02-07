@@ -10,21 +10,22 @@ const TableTwo = () => {
     const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
-        // Fetch all items from API
-        const fetchItems = async () => {
-            try {
-                const response = await axios.get("http://localhost:5001/api/admin/main/allitems");
-                setItems(response.data);
-            } catch (error) {
-                setError("Error fetching items.");
-                console.error("Error fetching items:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchItems();
     }, []);
+
+    // Fetch all items from API
+    const fetchItems = async () => {
+        try {
+            const response = await axios.get("http://localhost:5001/api/admin/main/allitems");
+            setItems(response.data);
+        } catch (error) {
+            setError("Error fetching items.");
+            console.error("Error fetching items:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Function to navigate to order details page
     const handleViewItem = (itemId) => {
         navigate(`/item-detail/${itemId}`); // Navigate to OrderDetails page

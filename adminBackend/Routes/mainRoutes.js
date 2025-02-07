@@ -280,7 +280,31 @@ router.put("/update-order", async (req, res) => {
             });
         }
 
-        // Begin updating the order
+        // Check if the order status is being changed to "Pending"
+        if (orderStatus === "Pending") {
+            // If order status is "Pending", we need to check if there are any booked items
+            const bookedItemsQuery = `SELECT * FROM booked_item WHERE orID = ?`;
+            const [bookedItems] = await db.query(bookedItemsQuery, [orderId]);
+
+            if (bookedItems.length > 0) {
+                // For each booked item, return the stock in the Item table and delete from booked_item
+                for (const bookedItem of bookedItems) {
+                    // Return stock to the Item table
+                    const itemUpdateQuery = `
+                        UPDATE Item
+                        SET qty = qty + ?
+                        WHERE I_Id = ?`;
+                    const itemUpdateParams = [bookedItem.qty, bookedItem.I_Id];
+                    await db.query(itemUpdateQuery, itemUpdateParams);
+
+                    // Delete the booked item record
+                    const bookedItemDeleteQuery = `DELETE FROM booked_item WHERE bi_ID = ?`;
+                    await db.query(bookedItemDeleteQuery, [bookedItem.bi_ID]);
+                }
+            }
+        }
+
+        // Update the order details (items) only if the status is not "Pending"
         const orderUpdateQuery = `
             UPDATE Orders
             SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?, 
@@ -303,7 +327,7 @@ router.put("/update-order", async (req, res) => {
 
         await db.query(orderUpdateQuery, orderUpdateParams);
 
-        // Update the order details (items)
+        // Update the order details (items) for non-pending orders
         for (const item of items) {
             console.log(item);
             const orderDetailUpdateQuery = `
@@ -312,20 +336,26 @@ router.put("/update-order", async (req, res) => {
                 WHERE orID = ? AND I_Id = ?`;
             const orderDetailUpdateParams = [item.quantity, item.price, orderId, item.itemId];
             await db.query(orderDetailUpdateQuery, orderDetailUpdateParams);
-            console.log(booked);
-            // If the "Booked" field is "Yes", reduce stock in the Item table
-            if (booked === "Yes") {
+
+            // If the "Booked" field is "Yes" (and the status isn't "Pending"), reduce stock in the Item table and insert into booked_item table
+            if (booked === "Yes" && orderStatus !== "Pending") {
                 const itemUpdateQuery = `
                     UPDATE Item
                     SET qty = qty - ?
                     WHERE I_Id = ?`;
                 const itemUpdateParams = [item.quantity, item.itemId];
-
                 await db.query(itemUpdateQuery, itemUpdateParams);
+
+                // Insert into booked_item table
+                const bookedItemInsertQuery = `
+                    INSERT INTO booked_item (orID, I_Id, qty)
+                    VALUES (?, ?, ?)`;
+                const bookedItemInsertParams = [orderId, item.itemId, item.quantity];
+                await db.query(bookedItemInsertQuery, bookedItemInsertParams);
             }
         }
 
-        // If delivery status is "Delivery", you may want to update delivery info
+        // If delivery status is "Delivery", update delivery info
         if (deliveryStatus === "Delivery") {
             const deliveryUpdateQuery = `
                 UPDATE delivery
@@ -361,6 +391,7 @@ router.put("/update-order", async (req, res) => {
         });
     }
 });
+
 
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {
