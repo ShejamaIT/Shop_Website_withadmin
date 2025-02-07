@@ -4,15 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update receive product pop without api">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/style/EditOrderModal.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/style/inproduction.css" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update receive product pop with api">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableThree.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,14 +132,7 @@
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
-      <workItem from="1738813731373" duration="36532000" />
-    </task>
-    <task id="LOCAL-00094" summary="fixed shop load subcategory one">
-      <created>1738310660471</created>
-      <option name="number" value="00094" />
-      <option name="presentableId" value="LOCAL-00094" />
-      <option name="project" value="LOCAL" />
-      <updated>1738310660471</updated>
+      <workItem from="1738813731373" duration="38306000" />
     </task>
     <task id="LOCAL-00095" summary="update db">
       <created>1738310683529</created>
@@ -481,7 +470,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738843884988</updated>
     </task>
-    <option name="localTasksCounter" value="143" />
+    <task id="LOCAL-00143" summary="update receive product pop without api">
+      <created>1738906347877</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1738906347878</updated>
+    </task>
+    <option name="localTasksCounter" value="144" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -500,7 +496,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="final upload 02/01" />
     <MESSAGE value="fixed navbars" />
     <MESSAGE value="load all orders and items" />
     <MESSAGE value="backup 02/02 works" />
@@ -525,6 +520,7 @@
     <MESSAGE value="update fetch item detail" />
     <MESSAGE value="final update in 02/06" />
     <MESSAGE value="update receive product pop without api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update receive product pop without api" />
+    <MESSAGE value="update receive product pop with api" />
+    <option name="LAST_COMMIT_MESSAGE" value="update receive product pop with api" />
   </component>
 </project>

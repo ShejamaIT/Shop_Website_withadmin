@@ -712,4 +712,61 @@ router.get("/getcategory", async (req, res) => {
 });
 
 
+// Check and update stock receive
+router.post('/update-stock', async (req, res) => {
+    const { p_ID, rDate, recCount, detail } = req.body;
+
+    // Validate input fields
+    if (!p_ID || !rDate || !recCount) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    try {
+        // Get the current quantity for the production order
+        const [rows] = await db.query("SELECT qty, I_Id FROM production WHERE p_ID = ?", [p_ID]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: "Production order not found" });
+        }
+
+        const currentQty = rows[0].qty;
+        const itemId = rows[0].I_Id;
+        const receivedQty = parseInt(recCount, 10); // Convert received count to integer
+
+        // Insert received stock details into the stock_received table
+        const sqlInsert = `INSERT INTO stock_received (p_ID, rDate, rec_count, detail) VALUES (?, ?, ?, ?)`;
+        await db.query(sqlInsert, [p_ID, rDate, receivedQty, detail]);
+
+        // Determine the new status and remaining quantity
+        let newStatus = "Incomplete";
+        let newQty = currentQty - receivedQty;
+
+        if (receivedQty >= currentQty) {
+            // Mark order as complete if received qty is equal or more than the order qty
+            newStatus = "Complete";
+            newQty = 0;
+        }
+
+        // Update the production table with the new status and remaining quantity
+        const sqlUpdate = `UPDATE production SET qty = ?, status = ? WHERE p_ID = ?`;
+        await db.query(sqlUpdate, [newQty, newStatus, p_ID]);
+
+        // Update the Item table stock quantity
+        const sqlUpdateItem = `UPDATE Item SET qty = qty + ? WHERE I_Id = ?`;
+        await db.query(sqlUpdateItem, [receivedQty, itemId]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Stock received updated successfully",
+            updatedStatus: newStatus,
+            remainingQty: newQty
+        });
+
+    } catch (error) {
+        console.error("Error updating stock received:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
 export default router;

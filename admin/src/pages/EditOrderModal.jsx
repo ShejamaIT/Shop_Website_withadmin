@@ -46,7 +46,6 @@ const EditOrderModal = ({ selectedOrder, setShowModal, handleSubmit }) => {
 
         handleSubmit({ newStatus, isOrderComplete, rDate, recCount, detail });
 
-        console.log("Final Submitted Data:", { newStatus, isOrderComplete, rDate, recCount, detail });
     };
 
     const formatDate = (dateString) => {

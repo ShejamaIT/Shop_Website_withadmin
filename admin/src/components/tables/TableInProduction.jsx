@@ -46,31 +46,47 @@ const TableInproduction = () => {
 
     // Handle form submission (Update order status)
     const handleSubmit = async (formData) => {
-        console.log(formData);
-        // try {
-        //     const response = await fetch(`http://localhost:5001/api/admin/main/update-order/${selectedOrder.p_ID}`, {
-        //         method: "PUT",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify(formData),
-        //     });
-        //
-        //     const data = await response.json();
-        //
-        //     if (response.ok) {
-        //         alert("Order status updated successfully!");
-        //         setOrders((prevOrders) =>
-        //             prevOrders.map((order) =>
-        //                 order.p_ID === selectedOrder.p_ID ? { ...order, ...formData } : order
-        //             )
-        //         );
-        //         setShowModal(false);
-        //     } else {
-        //         alert(data.message || "Failed to update status.");
-        //     }
-        // } catch (error) {
-        //     alert("Server error. Please try again.");
-        // }
+        console.log("Submitting form data:", formData);
+
+        const { newStatus, isOrderComplete, rDate, recCount, detail } = formData;
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/update-stock", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    p_ID: selectedOrder.p_ID,
+                    rDate,
+                    recCount,
+                    detail
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Stock updated successfully!");
+
+                // Update the order list to reflect changes
+                setOrders((prevOrders) =>
+                    prevOrders.map((order) =>
+                        order.p_ID === selectedOrder.p_ID
+                            ? { ...order, status: data.updatedStatus, qty: data.remainingQty }
+                            : order
+                    )
+                );
+
+                setShowModal(false); // Close the modal
+            } else {
+                alert(data.error || "Failed to update stock.");
+            }
+        } catch (error) {
+            console.error("Error updating stock:", error);
+            alert("Server error. Please try again.");
+        }
     };
+
 
     return (
         <div className="table-container">
