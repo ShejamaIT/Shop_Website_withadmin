@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Card, CardBody, CardTitle, CardText, Form, FormGroup, Label, Input } from "reactstrap";
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/suppierDetail.css";
 
@@ -90,7 +90,6 @@ const SupplierDetails = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
-            console.log(response);
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -122,6 +121,14 @@ const SupplierDetails = () => {
     if (suppliers.length === 0) return <p>No suppliers found for this item.</p>;
     if (!item) return <p>No item details available.</p>;
 
+    // Handle supplier card click
+    const handleSupplierCardClick = (supplierId) => {
+        setFormData({
+            ...formData,
+            supplierId: supplierId // Update supplierId when a card is clicked
+        });
+    };
+
     return (
         <Helmet title="Supplier Details">
             <section>
@@ -138,7 +145,11 @@ const SupplierDetails = () => {
                                 <Row>
                                     {suppliers.map((supplier) => (
                                         <Col key={supplier.s_ID} lg="4" md="6" sm="12">
-                                            <Card className="supplier-card">
+                                            <Card
+                                                className="supplier-card"
+                                                onClick={() => handleSupplierCardClick(supplier.s_ID)} // Handle card click
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <CardBody>
                                                     <CardTitle tag="h5">{supplier.name}</CardTitle>
                                                     <CardText><strong>Supplier ID:</strong> {supplier.s_ID}</CardText>
@@ -159,19 +170,13 @@ const SupplierDetails = () => {
                                                     <FormGroup>
                                                         <Label for="supplierId"><strong>Supplier ID</strong></Label>
                                                         <Input
-                                                            type="select"
+                                                            type="text"
                                                             name="supplierId"
                                                             id="supplierId"
                                                             value={formData.supplierId}
                                                             onChange={handleFormChange}
-                                                        >
-                                                            <option value="">Select Supplier</option>
-                                                            {suppliers.map((supplier) => (
-                                                                <option key={supplier.s_ID} value={supplier.s_ID}>
-                                                                    {supplier.name} (ID: {supplier.s_ID})
-                                                                </option>
-                                                            ))}
-                                                        </Input>
+                                                            disabled // Disable the input once a supplier is selected
+                                                        />
                                                     </FormGroup>
                                                     <FormGroup>
                                                         <Label for="qty"><strong>Order Quantity</strong></Label>

@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update receive product pop with api">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-    </list>
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update receive product pop with api" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -132,14 +127,7 @@
       <workItem from="1738673646568" duration="1424000" />
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
-      <workItem from="1738813731373" duration="38306000" />
-    </task>
-    <task id="LOCAL-00095" summary="update db">
-      <created>1738310683529</created>
-      <option name="number" value="00095" />
-      <option name="presentableId" value="LOCAL-00095" />
-      <option name="project" value="LOCAL" />
-      <updated>1738310683529</updated>
+      <workItem from="1738813731373" duration="38767000" />
     </task>
     <task id="LOCAL-00096" summary="fixed logout function">
       <created>1738313496025</created>
@@ -477,7 +465,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738906347878</updated>
     </task>
-    <option name="localTasksCounter" value="144" />
+    <task id="LOCAL-00144" summary="update receive product pop with api">
+      <created>1738908521446</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1738908521446</updated>
+    </task>
+    <option name="localTasksCounter" value="145" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
