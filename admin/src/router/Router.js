@@ -3,6 +3,7 @@ import {Route,Routes,Navigate} from "react-router-dom";
 import AddProduct from "../pages/AddProducts";
 import AllProducts from "../pages/AllProducts";
 import Dashboard from "../pages/Dashboard";
+import AllOrders from "../pages/AllOrders";
 import Login from "../pages/Login";
 import ProductDetails from "../pages/ProductDetails";
 import OrderDetails from "../pages/OrderDetails";
@@ -18,6 +19,7 @@ const Router = () => {
             <Route path='login' element={<Login/>}/>
             <Route path='signUp' element={<SignUp/>}/>
             <Route path='dashboard' element={<Dashboard/>}/>
+            <Route path='all-orders' element={<AllOrders/>}/>
             <Route path='dashboard/users' element={<User/>}/>
             <Route path='all-products' element={<AllProducts/>}/>
             <Route path='dashboard/add-products' element={<AddProduct/>}/>

@@ -59,7 +59,8 @@ const TableAccepting = () => {
                             <th>Order Status</th>
                             <th>Delivery Status</th>
                             <th>Total Price</th>
-                            <th>Sales By</th>
+                            <th>Item Received</th>
+                            <th>Acceptance Status</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -82,7 +83,8 @@ const TableAccepting = () => {
                                     </td>
                                     <td>{order.dvStatus}</td>
                                     <td>Rs.{order.totPrice.toFixed(2)}</td>
-                                    <td>{order.stID}</td>
+                                    <td>{order.itemReceived}</td>
+                                    <td>{order.acceptanceStatus}</td>
                                     <td className="action-buttons">
                                         <button
                                             className="view-btn"

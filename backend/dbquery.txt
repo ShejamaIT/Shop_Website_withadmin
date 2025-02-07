@@ -197,5 +197,16 @@ CREATE TABLE booked_item (
         CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
                         			ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE accept_orders (
+    ao_ID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    I_Id VARCHAR(25),
+    itemReceived VARCHAR(25),
+    status VARCHAR(25),
+    CONSTRAINT FK_accept_orders_orID FOREIGN KEY (orID) REFERENCES Orders (orID)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                                			ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 

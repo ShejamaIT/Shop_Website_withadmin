@@ -45,6 +45,7 @@ const TableTwo = () => {
                         <thead>
                         <tr>
                             <th>Image</th>
+                            <th>Item Id</th>
                             <th>Item Name</th>
                             <th>Price</th>
                             <th>Quantity</th>
@@ -65,6 +66,7 @@ const TableTwo = () => {
                                     <td>
                                         <img src={item.img} alt={item.I_name} className="product-image" />
                                     </td>
+                                    <td>{item.I_Id}</td>
                                     <td>{item.I_name}</td>
                                     <td>Rs.{item.price}</td>
                                     <td>{item.qty}</td>

@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 const nav__link = [
     { path: '/dashboard' , display: 'Dashboard'},
-    { path: '/home', display: 'Orders' },
+    { path: '/all-orders', display: 'Orders' },
     { path: '/all-products', display: 'Items' },
     { path: '/cart', display: 'Employees' },
 ];
