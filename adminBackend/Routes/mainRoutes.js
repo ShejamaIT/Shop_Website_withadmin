@@ -320,7 +320,7 @@ router.get("/order-details", async (req, res) => {
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
-        // Initialize order response
+        // Prepare the order response
         const orderResponse = {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
@@ -335,15 +335,55 @@ router.get("/order-details", async (req, res) => {
             expectedDeliveryDate: orderData.expectedDate,
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
-            items: itemsResult.map(item => ({
+            items: []
+        };
+
+        // If order is "Accepted", fetch booked items and accept_orders
+        if (orderData.orStatus === "Accepted") {
+            for (const item of itemsResult) {
+                let bookedQty = 0;
+                let itemReceived = "No";
+                let itemStatus = "Incomplete";
+
+                // Fetch booked quantity if exists
+                const bookedQuery = `SELECT qty FROM booked_item WHERE orID = ? AND I_Id = ?`;
+                const [bookedResult] = await db.query(bookedQuery, [orID, item.I_Id]);
+                if (bookedResult.length > 0) {
+                    bookedQty = bookedResult[0].qty;
+                }
+
+                // Fetch accept order data
+                const acceptQuery = `SELECT itemReceived, status FROM accept_orders WHERE orID = ? AND I_Id = ?`;
+                const [acceptResult] = await db.query(acceptQuery, [orID, item.I_Id]);
+                if (acceptResult.length > 0) {
+                    itemReceived = acceptResult[0].itemReceived;
+                    itemStatus = acceptResult[0].status;
+                }
+
+                orderResponse.items.push({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    quantity: item.qty,
+                    price: item.tprice,
+                    unitPrice: item.unitPrice,
+                    stockCount: item.stockCount,
+                    booked: bookedQty > 0, // true if the item is booked
+                    bookedQuantity: bookedQty,
+                    itemReceived: itemReceived,
+                    itemStatus: itemStatus
+                });
+            }
+        } else {
+            // If order is not "Accepted", return normal item details
+            orderResponse.items = itemsResult.map(item => ({
                 itemId: item.I_Id,
                 itemName: item.I_name,
                 quantity: item.qty,
                 price: item.tprice,
-                unitPrice: item.unitPrice, // Corrected to fetch from the Item table
+                unitPrice: item.unitPrice,
                 stockCount: item.stockCount
-            }))
-        };
+            }));
+        }
 
         // If it's a delivery order, fetch delivery details
         if (orderData.dvStatus === "Delivery") {
@@ -381,6 +421,7 @@ router.get("/order-details", async (req, res) => {
         });
     }
 });
+
 //update order
 router.put("/update-order", async (req, res) => {
     try {
@@ -523,8 +564,6 @@ router.put("/update-order", async (req, res) => {
         });
     }
 });
-
-
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {
     try {

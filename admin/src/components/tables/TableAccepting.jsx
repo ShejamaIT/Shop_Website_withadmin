@@ -38,7 +38,7 @@ const TableAccepting = () => {
 
     // Function to navigate to order details page
     const handleViewOrder = (orderId) => {
-        navigate(`/order-detail/${orderId}`); // Navigate to OrderDetails page
+        navigate(`/accept-order-detail/${orderId}`); // Navigate to OrderDetails page
     };
 
     return (

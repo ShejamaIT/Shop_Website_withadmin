@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update nav bar">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update">
       <change afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" afterDir="false" />
@@ -136,14 +136,7 @@
       <workItem from="1738676529600" duration="3595000" />
       <workItem from="1738727679950" duration="26743000" />
       <workItem from="1738813731373" duration="56200000" />
-      <workItem from="1738986011492" duration="6813000" />
-    </task>
-    <task id="LOCAL-00100" summary="fixed checkout page with out place order function">
-      <created>1738323776793</created>
-      <option name="number" value="00100" />
-      <option name="presentableId" value="LOCAL-00100" />
-      <option name="project" value="LOCAL" />
-      <updated>1738323776794</updated>
+      <workItem from="1738986011492" duration="9966000" />
     </task>
     <task id="LOCAL-00101" summary="update 01/31 work">
       <created>1738326281495</created>
@@ -481,7 +474,14 @@
       <option name="project" value="LOCAL" />
       <updated>1738923932054</updated>
     </task>
-    <option name="localTasksCounter" value="149" />
+    <task id="LOCAL-00149" summary="update order details with updating order">
+      <created>1738993819143</created>
+      <option name="number" value="00149" />
+      <option name="presentableId" value="LOCAL-00149" />
+      <option name="project" value="LOCAL" />
+      <updated>1738993819143</updated>
+    </task>
+    <option name="localTasksCounter" value="150" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -500,8 +500,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="save db query(updated)" />
-    <MESSAGE value="fixed placed order" />
     <MESSAGE value="load order details" />
     <MESSAGE value="update order details" />
     <MESSAGE value="update work 02/04" />
@@ -525,6 +523,8 @@
     <MESSAGE value="update supplier order" />
     <MESSAGE value="update order detail with status" />
     <MESSAGE value="update nav bar" />
-    <option name="LAST_COMMIT_MESSAGE" value="update nav bar" />
+    <MESSAGE value="update order details with updating order" />
+    <MESSAGE value="update" />
+    <option name="LAST_COMMIT_MESSAGE" value="update" />
   </component>
 </project>

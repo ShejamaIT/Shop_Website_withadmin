@@ -12,6 +12,7 @@ import SupplierDetails from "../pages/SupplierDetails";
 import User from "../pages/User";
 import SignUp from "../pages/SignUp";
 import Orders from "../pages/Orders";
+import AccepetOrderDetails from "../pages/AccepetOrder";
 const Router = () => {
     return(
         <Routes>
@@ -26,6 +27,7 @@ const Router = () => {
             <Route path='dashboard/orders' element={<Orders/>}/>
             <Route path="dashboard/product-detail/:id" element={<ProductDetails />} />
             <Route path="order-detail/:id" element={<OrderDetails />} />
+            <Route path="accept-order-detail/:id" element={<AccepetOrderDetails />} />
             <Route path="item-detail/:id" element={<ItemDetails />} />
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />
         </Routes>
