@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
-import Swal from 'sweetalert2';
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
 import { useParams } from "react-router-dom";
@@ -26,7 +25,13 @@ const OrderDetails = () => {
 
             const data = await response.json();
             setOrder(data.order);
-            setFormData(data.order); // Copy order details for editing
+            setFormData({
+                ...data.order,
+                items: data.order.items.map(item => ({
+                    ...item,
+                    booked: item.booked || false // Ensure booked field is included
+                }))
+            });
             setLoading(false);
         } catch (err) {
             console.error("Error fetching order details:", err);
@@ -36,102 +41,62 @@ const OrderDetails = () => {
     };
 
     const handleChange = (e, index) => {
-        const { name, value } = e.target;
-        const stockCount = order.items[index]?.stockCount; // Get stock count for the item
+        const { name, value, type, checked } = e.target;
 
-        // Handle the 'orderStatus' field
-        if (name === "orderStatus") {
-            // If the user is changing the order status to "Accepted"
-            if (value === "Accepted") {
-                Swal.fire({
-                    title: 'Have you received the items?',
-                    text: "Please confirm if the items have been received before marking the order as accepted.",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'No',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // If user confirms "Yes", set the booked field to "Yes" and update the order status
-                        setFormData((prevFormData) => ({
-                            ...prevFormData,
-                            orderStatus: "Accepted", // Update the order status to "Accepted"
-                            booked: "Yes", // Add a new field 'booked' and set it to "Yes"
-                        }));
-                    } else {
-                        // If user selects "No", set the booked field to "No" and update the order status to "Accepted"
-                        setFormData((prevFormData) => ({
-                            ...prevFormData,
-                            orderStatus: "Accepted", // Ensure status is set to "Accepted"
-                            booked: "No", // Set booked to "No"
-                        }));
-                    }
-                });
-            } else {
-                // If the status is not being changed to "Accepted", simply update the order status
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    orderStatus: value, // Update the order status when it's changed
-                }));
+        setFormData((prevFormData) => {
+            if (name in prevFormData) {
+                return { ...prevFormData, [name]: value };
             }
-        } else {
-            setFormData((prevFormData) => {
+
+            if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
+                return {
+                    ...prevFormData,
+                    deliveryInfo: {
+                        ...prevFormData.deliveryInfo,
+                        [name]: value,
+                    },
+                };
+            }
+
+            if (name === "booked") {
                 const updatedItems = [...prevFormData.items];
+                updatedItems[index] = {
+                    ...updatedItems[index],
+                    booked: checked
+                };
+                return { ...prevFormData, items: updatedItems };
+            }
 
-                if (name === "discount" || name === "deliveryCharge") {
-                    const updatedValue = value === "" ? 0 : parseFloat(value);
-                    if (!isNaN(updatedValue) && updatedValue >= 0) {
-                        const updatedFormData = {
-                            ...prevFormData,
-                            [name]: updatedValue
-                        };
-
-                        updatedFormData.totalPrice = updatedFormData.items.reduce((total, item) => {
-                            return total + item.price;
-                        }, 0) + updatedFormData.deliveryCharge - updatedFormData.discount;
-
-                        return updatedFormData;
-                    }
-                } else {
-                    const newQuantity = value === "" ? 0 : parseInt(value, 10);
-
-                    if (newQuantity > stockCount) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Quantity Exceeds Stock!',
-                            text: `The quantity you selected exceeds the available stock for ${order.items[index].itemName}. Please choose a quantity less than or equal to ${stockCount}.`,
-                            confirmButtonText: 'Okay',
-                        }).then(() => {
-                            document.getElementsByName("quantity")[index].focus();
-                        });
-                        return prevFormData; // Don't update the form if quantity exceeds stock
-                    }
-
-                    if (!isNaN(newQuantity) && newQuantity >= 0) {
-                        updatedItems[index] = {
-                            ...updatedItems[index],
-                            quantity: newQuantity,
-                            price: newQuantity * updatedItems[index].unitPrice,
-                        };
-                    }
-
-                    const newTotalPrice = updatedItems.reduce((total, item) => {
-                        return total + item.price;
-                    }, 0) + (prevFormData.deliveryCharge || 0) - (prevFormData.discount || 0);
-
-                    return {
-                        ...prevFormData,
-                        items: updatedItems,
-                        totalPrice: newTotalPrice
+            if (name === "quantity") {
+                const updatedItems = [...prevFormData.items];
+                const newQuantity = value === "" ? 0 : parseInt(value, 10);
+                if (!isNaN(newQuantity) && newQuantity >= 0) {
+                    updatedItems[index] = {
+                        ...updatedItems[index],
+                        quantity: newQuantity,
+                        price: newQuantity * updatedItems[index].unitPrice,
                     };
                 }
-            });
-        }
+                return { ...prevFormData, items: updatedItems };
+            }
+
+            if (name === "discount" || name === "deliveryCharge") {
+                const updatedValue = value === "" ? 0 : parseFloat(value);
+                if (!isNaN(updatedValue) && updatedValue >= 0) {
+                    return {
+                        ...prevFormData,
+                        [name]: updatedValue,
+                        totalPrice: prevFormData.items.reduce((total, item) => total + item.price, 0) + (prevFormData.deliveryCharge || 0) - (prevFormData.discount || 0)
+                    };
+                }
+            }
+
+            return prevFormData;
+        });
     };
 
-
-    // Save changes (API request needed)
     const handleSave = async () => {
+        console.log("Updated FormData:", JSON.stringify(formData));
         try {
             console.log(JSON.stringify(formData));
             const response = await fetch(`http://localhost:5001/api/admin/main/update-order`, {
@@ -160,7 +125,6 @@ const OrderDetails = () => {
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
 
-
     return (
         <Helmet title={`Order Details - ${order.orderId}`}>
             <section>
@@ -172,15 +136,12 @@ const OrderDetails = () => {
                         <Col lg="12">
                             <h4 className="mb-3 text-center topic">Order #{order.orderId} Details</h4>
                             <div className="order-details">
-
-                                {/* General Order Info */}
                                 <div className="order-header">
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="order-general">
                                         <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
                                         <p><strong>Customer Email:</strong> {order.customerEmail}</p>
 
-                                        {/* Order Status */}
                                         {!isEditing ? (
                                             <p><strong>Order Status:</strong>
                                                 <span className={`status ${order.orderStatus.toLowerCase()}`}>
@@ -193,8 +154,8 @@ const OrderDetails = () => {
                                                 <Input
                                                     type="select"
                                                     name="orderStatus"
-                                                    value={formData.orderStatus} // Bind order status to formData
-                                                    onChange={handleChange} // Ensure handleChange updates formData correctly
+                                                    value={formData.orderStatus}
+                                                    onChange={handleChange}
                                                 >
                                                     <option value="Pending">Pending</option>
                                                     <option value="Accepted">Accepted</option>
@@ -236,31 +197,85 @@ const OrderDetails = () => {
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
                                     </div>
+                                    {order.deliveryInfo && (
+                                        <>
+                                            <h5 className="mt-4">Delivery Details</h5>
+                                            <div className="order-general">
+                                                <p><strong>Delivery ID:</strong> {order.deliveryInfo.deliveryId}</p>
+                                                {!isEditing ? (
+                                                    <p><strong>Address:</strong> {order.deliveryInfo.address}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Address:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="address"
+                                                            value={formData.deliveryInfo.address ?? order.deliveryInfo.address}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>District:</strong> {order.deliveryInfo.district}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>District:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="district"
+                                                            value={formData.deliveryInfo.district ?? order.deliveryInfo.district}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Delivery Status:</strong></Label>
+                                                        <Input
+                                                            type="select"
+                                                            name="deliveryStatus"
+                                                            value={formData.deliveryInfo.status}
+                                                            onChange={handleChange}
+                                                        >
+                                                            <option value="Pending">Pending</option>
+                                                            <option value="Completed">Completed</option>
+                                                            <option value="Cancelled">Cancelled</option>
+                                                        </Input>
+                                                    </FormGroup>
+                                                )}
+                                                <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
+                                            </div>
+
+                                        </>
+                                    )}
                                 </div>
 
-                                {/* Ordered Items */}
                                 <h5 className="mt-4">Ordered Items</h5>
                                 <ul className="order-items">
                                     <div className="order-general">
                                         {order.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
-
-                                                <p><strong>Requested Quantity:</strong>
-                                                    {!isEditing ? (
-                                                        item.quantity
-                                                    ) : (
-                                                        <Input
-                                                            type="number"
-                                                            value={formData.items[index]?.quantity || ""}
-                                                            onChange={(e) => handleChange(e, index)}
-                                                            min="0"
-                                                        />
-                                                    )}
-                                                </p>
-                                                <p><strong>Amount:</strong> Rs. {formData.items[index]?.price || 0}</p>
+                                                <p><strong>Requested Quantity:</strong> {item.quantity}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.price}</p>
                                                 <p><strong>Stock Quantity:</strong> {item.stockCount}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
+                                                {isEditing && (
+                                                    <FormGroup check>
+                                                        <Label check>
+                                                            <Input
+                                                                type="checkbox"
+                                                                name="booked"
+                                                                checked={formData.items[index]?.booked || false}
+                                                                onChange={(e) => handleChange(e, index)}
+                                                            />
+                                                            Mark as Booked
+                                                        </Label>
+                                                    </FormGroup>
+                                                )}
+
                                             </li>
                                         ))}
                                     </div>
@@ -299,7 +314,6 @@ const OrderDetails = () => {
                                     <p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>
                                 </div>
 
-                                {/* Buttons */}
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
                                         <Button color="primary" onClick={() => setIsEditing(true)}>Edit Order</Button>

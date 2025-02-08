@@ -151,6 +151,139 @@ router.post("/item", upload.single('img'), async (req, res) => {
     }
 });
 //get one order in-detail
+
+router.get("/accept-order-details", async (req, res) => {
+    try {
+        const { orID } = req.query;
+        if (!orID) {
+            return res.status(400).json({ success: false, message: "Order ID is required" });
+        }
+
+        // 1️⃣ Fetch Order Info with Sales Team Details
+        const orderQuery = `
+            SELECT
+                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, 
+                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice, 
+                o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
+            FROM Orders o
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            WHERE o.OrID = ?`;
+
+        const [orderResult] = await db.query(orderQuery, [orID]);
+        if (orderResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        const orderData = orderResult[0];
+
+        // 2️⃣ Fetch Ordered Items with Stock Count and Unit Price
+        const itemsQuery = `
+            SELECT 
+                od.I_Id, i.I_name, od.qty, od.tprice, i.price AS unitPrice, i.qty AS stockCount
+            FROM Order_Detail od
+            JOIN Item i ON od.I_Id = i.I_Id
+            WHERE od.orID = ?`;
+
+        const [itemsResult] = await db.query(itemsQuery, [orID]);
+
+        // 3️⃣ Fetch Booked Items
+        const bookedItemsQuery = `
+            SELECT bi.I_Id, i.I_name, bi.qty
+            FROM booked_item bi
+            JOIN Item i ON bi.I_Id = i.I_Id
+            WHERE bi.orID = ?`;
+
+        const [bookedItemsResult] = await db.query(bookedItemsQuery, [orID]);
+
+        // 4️⃣ Fetch Accepted Orders
+        const acceptedOrdersQuery = `
+            SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
+            FROM accept_orders ao
+            JOIN Item i ON ao.I_Id = i.I_Id
+            WHERE ao.orID = ?`;
+
+        const [acceptedOrdersResult] = await db.query(acceptedOrdersQuery, [orID]);
+
+        // 5️⃣ Initialize Response Object
+        const orderResponse = {
+            orderId: orderData.OrID,
+            orderDate: orderData.orDate,
+            customerEmail: orderData.customerEmail,
+            phoneNumber: orderData.contact1,
+            optionalNumber: orderData.contact2,
+            orderStatus: orderData.orStatus,
+            deliveryStatus: orderData.dvStatus,
+            deliveryCharge: orderData.dvPrice,
+            discount: orderData.disPrice,
+            totalPrice: orderData.totPrice,
+            expectedDeliveryDate: orderData.expectedDate,
+            specialNote: orderData.specialNote,
+            salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
+            items: itemsResult.map(item => ({
+                itemId: item.I_Id,
+                itemName: item.I_name,
+                quantity: item.qty,
+                price: item.tprice,
+                unitPrice: item.unitPrice,
+                stockCount: item.stockCount
+            })),
+            bookedItems: bookedItemsResult.map(item => ({
+                itemId: item.I_Id,
+                itemName: item.I_name,
+                quantity: item.qty
+            })),
+            acceptedOrders: acceptedOrdersResult.map(item => ({
+                itemId: item.I_Id,
+                itemName: item.I_name,
+                itemReceived: item.itemReceived,
+                status: item.status
+            }))
+        };
+
+        // 6️⃣ Fetch Delivery Info If Order is for Delivery
+        if (orderData.dvStatus === "Delivery") {
+            const deliveryQuery = `
+                SELECT dv_id, address, district, contact, status, schedule_Date
+                FROM delivery
+                WHERE orID = ?`;
+
+            const [deliveryResult] = await db.query(deliveryQuery, [orID]);
+
+            if (deliveryResult.length > 0) {
+                const deliveryData = deliveryResult[0];
+                orderResponse.deliveryInfo = {
+                    deliveryId: deliveryData.dv_id,
+                    address: deliveryData.address,
+                    district: deliveryData.district,
+                    status: deliveryData.status,
+                    scheduleDate: deliveryData.schedule_Date,
+                };
+            }
+        }
+
+        // 7️⃣ If Order Status is "Accept", Call Another API
+        if (orderData.orStatus === "Accept") {
+            console.log(`Calling additional API for accepted order: ${orID}`);
+            // Add API call logic here if needed (e.g., send notification)
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Order details fetched successfully",
+            order: orderResponse
+        });
+
+    } catch (error) {
+        console.error("Error fetching order details:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching order details",
+            details: error.message,
+        });
+    }
+});
+
+//get one order in-detail
 router.get("/order-details", async (req, res) => {
     try {
         const { orID } = req.query;
@@ -266,7 +399,7 @@ router.put("/update-order", async (req, res) => {
             specialNote,
             salesTeam,
             items,
-            booked,
+            deliveryInfo // Updated field name
         } = req.body;
 
         // Check if the order exists
@@ -280,6 +413,15 @@ router.put("/update-order", async (req, res) => {
             });
         }
 
+        // Ensure order status is 'Accepted' if any item is booked
+        const isAnyItemBooked = items.some(item => item.booked);
+        if (isAnyItemBooked && orderStatus !== "Accepted") {
+            return res.status(400).json({
+                success: false,
+                message: "Order status must be 'Accepted' if any item is booked.",
+            });
+        }
+
         // Update the order details
         const orderUpdateQuery = `
             UPDATE orders
@@ -287,61 +429,41 @@ router.put("/update-order", async (req, res) => {
                 dvStatus = ?, dvPrice = ?, disPrice = ?, totPrice = ?, expectedDate = ?, specialNote = ?
             WHERE OrID = ?`;
         const orderUpdateParams = [
-            orderDate,
-            customerEmail,
-            phoneNumber,
-            optionalNumber,
-            orderStatus,
-            deliveryStatus,
-            deliveryCharge,
-            discount,
-            totalPrice,
-            expectedDeliveryDate,
-            specialNote,
-            orderId,
+            orderDate, customerEmail, phoneNumber, optionalNumber, orderStatus,
+            deliveryStatus, deliveryCharge, discount, totalPrice, expectedDeliveryDate, specialNote, orderId
         ];
-
         await db.query(orderUpdateQuery, orderUpdateParams);
 
-        // Handle accept_orders table based on order status
+        // Handle accept_orders table
         if (orderStatus === "Accepted" || orderStatus === "Pending") {
             for (const item of items) {
-                const stockQuery = `SELECT qty FROM Item WHERE I_Id = ?`;
-                const [stockResult] = await db.query(stockQuery, [item.itemId]);
-                const stockQty = stockResult[0]?.qty || 0;
+                const itemReceived = item.booked ? "Yes" : "No";
+                const itemStatus = item.booked ? "Complete" : "Incomplete";
 
-                let itemStatus = "None"; // Default status for unbooked items
-                if (item.quantity <= stockQty) {
-                    itemStatus = "Complete"; // Enough stock
-                } else {
-                    itemStatus = "In Production"; // Not enough stock
-                }
-
-                // Insert or update accept_orders if order is accepted
-                if (orderStatus === "Accepted") {
-                    const acceptOrderQuery = `
-                        INSERT INTO accept_orders (orID, I_Id, itemReceived, status)
-                        VALUES (?, ?, ?, ?)
-                        ON DUPLICATE KEY UPDATE itemReceived = ?, status = ?`;
-                    const acceptOrderParams = [orderId, item.itemId, "Yes", itemStatus, "Yes", itemStatus];
-                    await db.query(acceptOrderQuery, acceptOrderParams);
-                }
+                const acceptOrderQuery = `
+                    INSERT INTO accept_orders (orID, I_Id, itemReceived, status)
+                    VALUES (?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE itemReceived = ?, status = ?`;
+                await db.query(acceptOrderQuery, [
+                    orderId, item.itemId, itemReceived, itemStatus, itemReceived, itemStatus
+                ]);
             }
         }
 
-        // Handle booked_item table and stock reduction if order is "Accepted" and booked is "Yes"
-        if (orderStatus === "Accepted" && booked === "Yes") {
+        // Handle booked items (Only if booked is true)
+        if (isAnyItemBooked) {
             for (const item of items) {
-                // Insert into booked_item
-                const bookItemQuery = `
-                    INSERT INTO booked_item (orID, I_Id, qty)
-                    VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE qty = ?`;
-                await db.query(bookItemQuery, [orderId, item.itemId, item.quantity, item.quantity]);
+                if (item.booked) {
+                    const bookItemQuery = `
+                        INSERT INTO booked_item (orID, I_Id, qty)
+                        VALUES (?, ?, ?)
+                        ON DUPLICATE KEY UPDATE qty = ?`;
+                    await db.query(bookItemQuery, [orderId, item.itemId, item.quantity, item.quantity]);
 
-                // Reduce stock in Item table
-                const updateStockQuery = `UPDATE Item SET qty = qty - ? WHERE I_Id = ?`;
-                await db.query(updateStockQuery, [item.quantity, item.itemId]);
+                    // Reduce stock in Item table
+                    const updateStockQuery = `UPDATE Item SET qty = qty - ? WHERE I_Id = ?`;
+                    await db.query(updateStockQuery, [item.quantity, item.itemId]);
+                }
             }
         }
 
@@ -351,16 +473,13 @@ router.put("/update-order", async (req, res) => {
             const [bookedItems] = await db.query(bookedItemsQuery, [orderId]);
 
             for (const item of bookedItems) {
-                // Restore stock
                 const restoreStockQuery = `UPDATE Item SET qty = qty + ? WHERE I_Id = ?`;
                 await db.query(restoreStockQuery, [item.qty, item.I_Id]);
             }
 
-            // Delete from booked_item
             const deleteBookedItemsQuery = `DELETE FROM booked_item WHERE orID = ?`;
             await db.query(deleteBookedItemsQuery, [orderId]);
 
-            // Delete from accept_orders
             const deleteAcceptOrderQuery = `DELETE FROM accept_orders WHERE orID = ?`;
             await db.query(deleteAcceptOrderQuery, [orderId]);
         }
@@ -374,18 +493,14 @@ router.put("/update-order", async (req, res) => {
             await db.query(orderDetailUpdateQuery, [item.quantity, item.price, orderId, item.itemId]);
         }
 
-        // Handle delivery table update if status is "Delivery"
-        if (deliveryStatus === "Delivery") {
+        // Handle deliveryInfo table update if status is "Delivery"
+        if (deliveryStatus === "Delivery" && deliveryInfo) {
             const deliveryUpdateQuery = `
                 UPDATE delivery
                 SET address = ?, district = ?, contact = ?, schedule_Date = ?
                 WHERE orID = ?`;
             await db.query(deliveryUpdateQuery, [
-                req.body.customerAddress,
-                req.body.district,
-                phoneNumber,
-                expectedDeliveryDate,
-                orderId
+                deliveryInfo.address, deliveryInfo.district, phoneNumber, deliveryInfo.scheduleDate, orderId
             ]);
         }
 
@@ -408,7 +523,6 @@ router.put("/update-order", async (req, res) => {
         });
     }
 });
-
 
 
 // GET Item Details by Item ID
@@ -578,8 +692,6 @@ router.get("/orders-accepting", async (req, res) => {
         return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
     }
 });
-
-
 
 //Get all orders by status= inproduction
 router.get("/orders-inproduction", async (req, res) => {
