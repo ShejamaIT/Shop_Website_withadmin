@@ -15,11 +15,14 @@ const BillInvoice = ({ selectedOrder, setShowModal }) => {
     // Calculate Subtotal
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
 
-    // Calculate Net Total & Balance
+    // Calculate Net Total
     const netTotal = Number(subtotal) + Number(deliveryCharge) - Number(discount);
 
+    // Ensure advance is treated as 0 if it's empty or invalid
+    const validAdvance = advance ? Number(advance) : 0;
+
     // Calculate Balance
-    const balance = netTotal - Number(advance);
+    const balance = netTotal - validAdvance;
 
     return (
         <div className="modal-overlay">
@@ -92,7 +95,6 @@ const BillInvoice = ({ selectedOrder, setShowModal }) => {
 
                     <p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
                 </div>
-
 
                 {/* Print & Close Buttons */}
                 <div className="modal-buttons">
