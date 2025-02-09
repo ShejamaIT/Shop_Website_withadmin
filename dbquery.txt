@@ -45,6 +45,12 @@ CREATE TABLE Item(
 	        CONSTRAINT FOREIGN KEY (Ty_id) REFERENCES Type (Ty_id)
 			    ON DELETE CASCADE ON UPDATE CASCADE,
 );
+CREATE TABLE Item_qty(
+    I_Id VARCHAR(25) PRIMARY KEY,
+    stockQty INT,
+    bookedQty INT,
+
+);
 CREATE TABLE Employee(
       E_Id VARCHAR(15) PRIMARY KEY,
       name TEXT ,
