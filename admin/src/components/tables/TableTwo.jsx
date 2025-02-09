@@ -48,7 +48,8 @@ const TableTwo = () => {
                             <th>Item Id</th>
                             <th>Item Name</th>
                             <th>Price</th>
-                            <th>Quantity</th>
+                            <th>All Quantity</th>
+                            <th>Available Quantity</th>
                             <th>Description</th>
                             <th>Action</th>
                         </tr>
@@ -69,7 +70,8 @@ const TableTwo = () => {
                                     <td>{item.I_Id}</td>
                                     <td>{item.I_name}</td>
                                     <td>Rs.{item.price}</td>
-                                    <td>{item.qty}</td>
+                                    <td>{item.stockQty}</td>
+                                    <td>{item.availableQty}</td>
                                     <td>{item.descrip}</td>
                                     <td className="action-buttons">
                                         <button

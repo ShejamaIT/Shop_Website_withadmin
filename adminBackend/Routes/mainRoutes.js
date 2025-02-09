@@ -44,6 +44,7 @@ router.get("/orders", async (req, res) => {
         return res.status(500).json({ message: "Error fetching promotions" });
     }
 });
+
 //get all items
 router.get("/allitems", async (req, res) => {
     try {
@@ -62,7 +63,8 @@ router.get("/allitems", async (req, res) => {
             Ty_id: item.Ty_id, // Type ID (foreign key)
             descrip: item.descrip, // Item description
             price: item.price, // Price
-            qty: item.qty, // Quantity
+            stockQty: item.stockQty, // Quantity
+            availableQty : item.availableQty, // available stock
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB image to Base64
         }));
 
@@ -73,6 +75,7 @@ router.get("/allitems", async (req, res) => {
         return res.status(500).json({ message: "Error fetching items" });
     }
 });
+
 //Save Supplier
 router.post("/supplier", async (req, res) => {
     const sql = `INSERT INTO Supplier (s_ID,name,contact) VALUES (?, ?,?)`;
@@ -106,6 +109,7 @@ router.post("/supplier", async (req, res) => {
         });
     }
 });
+
 // Save New Item
 router.post("/item", upload.single('img'), async (req, res) => {
     const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img,s_ID,warrantyPeriod,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`;
@@ -150,8 +154,8 @@ router.post("/item", upload.single('img'), async (req, res) => {
         });
     }
 });
-//get one order in-detail
 
+//get one order in-detail
 router.get("/accept-order-details", async (req, res) => {
     try {
         const { orID } = req.query;
@@ -298,8 +302,8 @@ router.get("/order-details", async (req, res) => {
                 o.dvPrice, o.disPrice, o.totPrice, o.expectedDate, o.specialNote,
                 s.stID, e.name AS salesEmployeeName
             FROM Orders o
-            LEFT JOIN sales_team s ON o.stID = s.stID
-            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+                     LEFT JOIN sales_team s ON o.stID = s.stID
+                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
             WHERE o.OrID = ?`;
 
         const [orderResult] = await db.query(orderQuery, [orID]);
@@ -310,12 +314,13 @@ router.get("/order-details", async (req, res) => {
 
         const orderData = orderResult[0];
 
-        // Fetch Ordered Items with Stock Count and Unit Price from Item table
+        // Fetch Ordered Items with Updated Stock Fields
         const itemsQuery = `
-            SELECT 
-                od.I_Id, i.I_name, od.qty, od.tprice, i.price AS unitPrice, i.qty AS stockCount
+            SELECT
+                od.I_Id, i.I_name, od.qty, od.tprice, i.price AS unitPrice,
+                i.bookedQty, i.availableQty , i.stockQty
             FROM Order_Detail od
-            JOIN Item i ON od.I_Id = i.I_Id
+                     JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
@@ -341,16 +346,8 @@ router.get("/order-details", async (req, res) => {
         // If order is "Accepted", fetch booked items and accept_orders
         if (orderData.orStatus === "Accepted") {
             for (const item of itemsResult) {
-                let bookedQty = 0;
                 let itemReceived = "No";
                 let itemStatus = "Incomplete";
-
-                // Fetch booked quantity if exists
-                const bookedQuery = `SELECT qty FROM booked_item WHERE orID = ? AND I_Id = ?`;
-                const [bookedResult] = await db.query(bookedQuery, [orID, item.I_Id]);
-                if (bookedResult.length > 0) {
-                    bookedQty = bookedResult[0].qty;
-                }
 
                 // Fetch accept order data
                 const acceptQuery = `SELECT itemReceived, status FROM accept_orders WHERE orID = ? AND I_Id = ?`;
@@ -363,12 +360,13 @@ router.get("/order-details", async (req, res) => {
                 orderResponse.items.push({
                     itemId: item.I_Id,
                     itemName: item.I_name,
-                    quantity: item.qty,
                     price: item.tprice,
+                    quantity: item.qty,
                     unitPrice: item.unitPrice,
-                    stockCount: item.stockCount,
-                    booked: bookedQty > 0, // true if the item is booked
-                    bookedQuantity: bookedQty,
+                    booked: item.bookedQty > 0, // true if the item is booked
+                    bookedQuantity: item.bookedQty,
+                    availableQuantity: item.availableQty, // Updated field from Item table
+                    stockQuantity : item.stockQty,
                     itemReceived: itemReceived,
                     itemStatus: itemStatus
                 });
@@ -381,7 +379,9 @@ router.get("/order-details", async (req, res) => {
                 quantity: item.qty,
                 price: item.tprice,
                 unitPrice: item.unitPrice,
-                stockCount: item.stockCount
+                bookedQuantity: item.bookedQty,
+                availableQuantity: item.availableQty, // Updated field
+                stockQuantity : item.stockQty
             }));
         }
 
@@ -466,7 +466,7 @@ router.put("/update-order", async (req, res) => {
         // Update the order details
         const orderUpdateQuery = `
             UPDATE orders
-            SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?, 
+            SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?,
                 dvStatus = ?, dvPrice = ?, disPrice = ?, totPrice = ?, expectedDate = ?, specialNote = ?
             WHERE OrID = ?`;
         const orderUpdateParams = [
@@ -484,7 +484,7 @@ router.put("/update-order", async (req, res) => {
                 const acceptOrderQuery = `
                     INSERT INTO accept_orders (orID, I_Id, itemReceived, status)
                     VALUES (?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE itemReceived = ?, status = ?`;
+                        ON DUPLICATE KEY UPDATE itemReceived = ?, status = ?`;
                 await db.query(acceptOrderQuery, [
                     orderId, item.itemId, itemReceived, itemStatus, itemReceived, itemStatus
                 ]);
@@ -501,9 +501,12 @@ router.put("/update-order", async (req, res) => {
                         ON DUPLICATE KEY UPDATE qty = ?`;
                     await db.query(bookItemQuery, [orderId, item.itemId, item.quantity, item.quantity]);
 
-                    // Reduce stock in Item table
-                    const updateStockQuery = `UPDATE Item SET qty = qty - ? WHERE I_Id = ?`;
-                    await db.query(updateStockQuery, [item.quantity, item.itemId]);
+                    // 🔹 Update `bookedQty` and `availableQty` in Item table
+                    const updateItemQtyQuery = `
+                        UPDATE Item
+                        SET bookedQty = bookedQty + ?, availableQty = availableQty - ?
+                        WHERE I_Id = ?`;
+                    await db.query(updateItemQtyQuery, [item.quantity, item.quantity, item.itemId]);
                 }
             }
         }
@@ -514,8 +517,12 @@ router.put("/update-order", async (req, res) => {
             const [bookedItems] = await db.query(bookedItemsQuery, [orderId]);
 
             for (const item of bookedItems) {
-                const restoreStockQuery = `UPDATE Item SET qty = qty + ? WHERE I_Id = ?`;
-                await db.query(restoreStockQuery, [item.qty, item.I_Id]);
+                // 🔹 Restore `bookedQty` and `availableQty` in Item table
+                const restoreStockQuery = `
+                    UPDATE Item
+                    SET bookedQty = bookedQty - ?, availableQty = availableQty + ?
+                    WHERE I_Id = ?`;
+                await db.query(restoreStockQuery, [item.qty, item.qty, item.I_Id]);
             }
 
             const deleteBookedItemsQuery = `DELETE FROM booked_item WHERE orID = ?`;
@@ -564,6 +571,7 @@ router.put("/update-order", async (req, res) => {
         });
     }
 });
+
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {
     try {
@@ -576,7 +584,7 @@ router.get("/item-details", async (req, res) => {
         // Step 1: Fetch Item details along with Type and Category information
         const itemQuery = `
             SELECT 
-                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.qty, 
+                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty,I.bookedQty,I.availableQty,
                 I.warrantyPeriod, I.s_ID, I.cost, I.img, 
                 T.sub_one, T.sub_two, C.name AS category_name
             FROM Item I
@@ -601,7 +609,9 @@ router.get("/item-details", async (req, res) => {
                 Ty_id: itemData.Ty_id,
                 descrip: itemData.descrip,
                 price: itemData.price,
-                qty: itemData.qty,
+                stockQty: itemData.stockQty,
+                availableQty: itemData.availableQty,
+                bookedQty: itemData.bookedQty,
                 warrantyPeriod: itemData.warrantyPeriod,
                 s_ID: itemData.s_ID,
                 cost: itemData.cost,
@@ -765,12 +775,13 @@ router.get("/orders-inproduction", async (req, res) => {
         return res.status(500).json({ message: "Error fetching pending orders", error: error.message });
     }
 });
+
 // Get all items where stock count is less than or equal to one
 router.get("/allitemslessone", async (req, res) => {
     try {
         // Query the database to fetch items with qty <= 1
         const [items] = await db.query(
-            "SELECT I_Id, I_name, Ty_id, descrip, price, qty, img FROM Item WHERE qty <= 1"
+            "SELECT I_Id, I_name, Ty_id, descrip, price,stockQty, availableQty, img FROM Item WHERE availableQty <= 1"
         );
 
         // If no items found, return a 404 status with a descriptive message
@@ -785,7 +796,8 @@ router.get("/allitemslessone", async (req, res) => {
             Ty_id: item.Ty_id,
             descrip: item.descrip,
             price: item.price,
-            qty: item.qty,
+            availableQty: item.availableQty,
+            stockQty: item.stockQty,
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert image to base64
         }));
 
@@ -796,6 +808,7 @@ router.get("/allitemslessone", async (req, res) => {
         return res.status(500).json({ message: "Error fetching items" });
     }
 });
+
 //get all suppliers for the item
 router.get("/item-suppliers", async (req, res) => {
     try {
@@ -853,7 +866,7 @@ router.get("/item-detail", async (req, res) => {
         // Step 1: Fetch Item details
         const itemQuery = `
             SELECT 
-                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.qty, 
+                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty,I.bookedQty,I.availableQty,
                 I.warrantyPeriod, I.s_ID, I.cost, I.img
             FROM Item I
             WHERE I.I_Id = ?`;
@@ -872,7 +885,9 @@ router.get("/item-detail", async (req, res) => {
                 I_Id: itemData1.I_Id,
                 I_name: itemData1.I_name,
                 price: itemData1.price,
-                qty: itemData1.qty,
+                stockQty: itemData1.stockQty,
+                bookedQty: itemData1.bookedQty,
+                availableQty: itemData1.availableQty,
             }
         };
 
@@ -883,6 +898,7 @@ router.get("/item-detail", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
 //save in production
 router.post('/add-production', async (req, res) => {
     const {itemId, qty, supplierId, expectedDate, specialnote} = req.body;
@@ -902,6 +918,7 @@ router.post('/add-production', async (req, res) => {
         result: Result
     });
 });
+
 // Get category namees
 router.get("/getcategory", async (req, res) => {
     const { category } = req.query;
@@ -952,7 +969,6 @@ router.get("/getcategory", async (req, res) => {
         });
     }
 });
-
 
 // Check and update stock receive
 router.post('/update-stock', async (req, res) => {

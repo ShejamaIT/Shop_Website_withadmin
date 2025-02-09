@@ -118,130 +118,157 @@ const ItemDetails = () => {
                                 <div className="item-header">
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="item-general">
-                                        {!isEditing ? (
-                                            <p><strong>Item Name:</strong> {item.I_name}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Item Name:</strong></Label>
-                                                <Input
-                                                    type="text"
-                                                    name="I_name"
-                                                    value={formData.I_name}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )}
-                                        {!isEditing ? (
-                                            <p><strong>Description:</strong> {item.descrip}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Description:</strong></Label>
-                                                <Input
-                                                    type="textarea"
-                                                    name="descrip"
-                                                    value={formData.descrip}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )}
-                                        {!isEditing ? (
-                                            <p><strong>Price:</strong> Rs. {item.price}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Price:</strong></Label>
-                                                <Input
-                                                    type="number"
-                                                    name="price"
-                                                    value={formData.price}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )}
-                                        {!isEditing ? (
-                                            <p><strong>Warranty Period:</strong> {item.warrantyPeriod}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Warranty Period:</strong></Label>
-                                                <Input
-                                                    type="text"
-                                                    name="warrantyPeriod"
-                                                    value={formData.warrantyPeriod}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
+                                        <Row>
+                                            <Col>
+                                                {!isEditing ? (
+                                                    <p><strong>Item Name:</strong> {item.I_name}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Item Name:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="I_name"
+                                                            value={formData.I_name}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>Description:</strong> {item.descrip}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Description:</strong></Label>
+                                                        <Input
+                                                            type="textarea"
+                                                            name="descrip"
+                                                            value={formData.descrip}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>Price:</strong> Rs. {item.price}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Price:</strong></Label>
+                                                        <Input
+                                                            type="number"
+                                                            name="price"
+                                                            value={formData.price}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>Cost:</strong> Rs. {item.cost}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Cost:</strong></Label>
+                                                        <Input
+                                                            type="number"
+                                                            name="cost"
+                                                            value={formData.cost}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col>
+                                                {!isEditing ? (
+                                                    <p><strong>Warranty Period:</strong> {item.warrantyPeriod}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Warranty Period:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="warrantyPeriod"
+                                                            value={formData.warrantyPeriod}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
 
-                                        )}
-                                        {!isEditing ? (
-                                            <p><strong>Stock Quantity:</strong> {item.qty}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Stock Quantity:</strong></Label>
-                                                <Input
-                                                    type="number"
-                                                    name="qty"
-                                                    value={formData.qty}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>Stock Quantity:</strong> {item.stockQty}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Stock Quantity:</strong></Label>
+                                                        <Input
+                                                            type="number"
+                                                            name="qty"
+                                                            value={formData.stockQty}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
 
-                                        )}
-                                        {!isEditing ? (
-                                            <p><strong>Cost:</strong> Rs. {item.cost}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Cost:</strong></Label>
-                                                <Input
-                                                    type="number"
-                                                    name="cost"
-                                                    value={formData.cost}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )}
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>Available Quantity:</strong> {item.availableQty}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Stock Quantity:</strong></Label>
+                                                        <Input
+                                                            type="number"
+                                                            name="qty"
+                                                            value={formData.availableQty}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+
+                                                )}
+                                            </Col>
+                                        </Row>
                                         {/* Category Name */}
-                                        {!isEditing ? (
-                                            <p><strong>Category:</strong> {item.category_name}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Category:</strong></Label>
-                                                <Input
-                                                    type="text"
-                                                    name="categoryName"
-                                                    value={formData.category_name}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )}
+                                        <Row>
+                                            <Col>
+                                                {!isEditing ? (
+                                                    <p><strong>Category:</strong> {item.category_name}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Category:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="categoryName"
+                                                            value={formData.category_name}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
 
-                                        {/* Subcategory One */}
-                                        {!isEditing ? (
-                                            <p><strong>Subcategory One:</strong> {item.subcategory_one}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Subcategory One:</strong></Label>
-                                                <Input
-                                                    type="text"
-                                                    name="subcategoryOne"
-                                                    value={formData.subcategory_one}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )}
+                                                {/* Subcategory One */}
+                                                {!isEditing ? (
+                                                    <p><strong>Subcategory One:</strong> {item.subcategory_one}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Subcategory One:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="subcategoryOne"
+                                                            value={formData.subcategory_one}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
 
-                                        {/* Subcategory Two */}
-                                        {item.subcategory_two && item.subcategory_two !== 'None' && !isEditing ? (
-                                            <p><strong>Subcategory Two:</strong> {item.subcategory_two}</p>
-                                        ) : isEditing ? (
-                                            <FormGroup>
-                                                <Label><strong>Subcategory Two:</strong></Label>
-                                                <Input
-                                                    type="text"
-                                                    name="subcategoryTwo"
-                                                    value={formData.subcategory_two}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        ) : null}
+                                                {/* Subcategory Two */}
+                                                {item.subcategory_two && item.subcategory_two !== 'None' && !isEditing ? (
+                                                    <p><strong>Subcategory Two:</strong> {item.subcategory_two}</p>
+                                                ) : isEditing ? (
+                                                    <FormGroup>
+                                                        <Label><strong>Subcategory Two:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="subcategoryTwo"
+                                                            value={formData.subcategory_two}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                ) : null}
+                                            </Col>
+                                        </Row>
+
                                     </div>
                                 </div>
 

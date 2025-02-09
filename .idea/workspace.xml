@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update db query">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableTwo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -61,11 +68,11 @@
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\src\assets\images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\style" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\tables" />
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\backend\models" />
-      <recent name="D:\Gdse\React_final\Wimalasiri-ecommerce\src\components\Footer" />
     </key>
   </component>
   <component name="RunManager">
@@ -129,20 +136,7 @@
       <workItem from="1738727679950" duration="26743000" />
       <workItem from="1738813731373" duration="56200000" />
       <workItem from="1738986011492" duration="10678000" />
-    </task>
-    <task id="LOCAL-00102" summary="update 01/31 work (fixed errors)">
-      <created>1738326805117</created>
-      <option name="number" value="00102" />
-      <option name="presentableId" value="LOCAL-00102" />
-      <option name="project" value="LOCAL" />
-      <updated>1738326805117</updated>
-    </task>
-    <task id="LOCAL-00103" summary="fixed the place order function">
-      <created>1738392365369</created>
-      <option name="number" value="00103" />
-      <option name="presentableId" value="LOCAL-00103" />
-      <option name="project" value="LOCAL" />
-      <updated>1738392365370</updated>
+      <workItem from="1739072744751" duration="9461000" />
     </task>
     <task id="LOCAL-00104" summary="update backend">
       <created>1738407419811</created>
@@ -473,7 +467,21 @@
       <option name="project" value="LOCAL" />
       <updated>1739001185725</updated>
     </task>
-    <option name="localTasksCounter" value="151" />
+    <task id="LOCAL-00151" summary="update db query">
+      <created>1739073201535</created>
+      <option name="number" value="00151" />
+      <option name="presentableId" value="LOCAL-00151" />
+      <option name="project" value="LOCAL" />
+      <updated>1739073201535</updated>
+    </task>
+    <task id="LOCAL-00152" summary="update db query">
+      <created>1739073298198</created>
+      <option name="number" value="00152" />
+      <option name="presentableId" value="LOCAL-00152" />
+      <option name="project" value="LOCAL" />
+      <updated>1739073298198</updated>
+    </task>
+    <option name="localTasksCounter" value="153" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -492,7 +500,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="load order details" />
     <MESSAGE value="update order details" />
     <MESSAGE value="update work 02/04" />
     <MESSAGE value="add admin backend" />
@@ -517,6 +524,7 @@
     <MESSAGE value="update nav bar" />
     <MESSAGE value="update order details with updating order" />
     <MESSAGE value="update" />
-    <option name="LAST_COMMIT_MESSAGE" value="update" />
+    <MESSAGE value="update db query" />
+    <option name="LAST_COMMIT_MESSAGE" value="update db query" />
   </component>
 </project>

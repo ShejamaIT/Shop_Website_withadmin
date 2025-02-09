@@ -259,9 +259,22 @@ const OrderDetails = () => {
                                         {order.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
-                                                <p><strong>Requested Quantity:</strong> {item.quantity}</p>
+
+                                                {!isEditing ? (
+                                                    <p><strong>Requested Quantity:</strong> {item.quantity}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Requested Quantity:</strong></Label>
+                                                        {/*<Input*/}
+                                                        {/*    type="number"*/}
+                                                        {/*    name="district"*/}
+                                                        {/*    value={formData.item.quantity ?? order.item.quantity}*/}
+                                                        {/*    onChange={handleChange}*/}
+                                                        {/*/>*/}
+                                                    </FormGroup>
+                                                )}
                                                 <p><strong>Amount:</strong> Rs. {item.price}</p>
-                                                <p><strong>Stock Quantity:</strong> {item.stockCount}</p>
+                                                <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
                                                 {isEditing && (
                                                     <FormGroup check>
