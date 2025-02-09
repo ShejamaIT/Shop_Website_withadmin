@@ -155,7 +155,7 @@ router.post("/item", upload.single('img'), async (req, res) => {
     }
 });
 
-//get one order in-detail
+//get one accept order in-detail
 router.get("/accept-order-details", async (req, res) => {
     try {
         const { orID } = req.query;
@@ -166,12 +166,12 @@ router.get("/accept-order-details", async (req, res) => {
         // 1️⃣ Fetch Order Info with Sales Team Details
         const orderQuery = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, 
-                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice, 
+                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2,
+                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice,
                 o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
-            LEFT JOIN sales_team s ON o.stID = s.stID
-            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+                     LEFT JOIN sales_team s ON o.stID = s.stID
+                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
             WHERE o.OrID = ?`;
 
         const [orderResult] = await db.query(orderQuery, [orID]);
@@ -180,12 +180,13 @@ router.get("/accept-order-details", async (req, res) => {
         }
         const orderData = orderResult[0];
 
-        // 2️⃣ Fetch Ordered Items with Stock Count and Unit Price
+        // 2️⃣ Fetch Ordered Items with Updated Stock Fields
         const itemsQuery = `
-            SELECT 
-                od.I_Id, i.I_name, od.qty, od.tprice, i.price AS unitPrice, i.qty AS stockCount
+            SELECT
+                od.I_Id, i.I_name, od.qty, od.tprice, i.price AS unitPrice,
+                i.bookedQty, i.availableQty
             FROM Order_Detail od
-            JOIN Item i ON od.I_Id = i.I_Id
+                     JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
@@ -194,7 +195,7 @@ router.get("/accept-order-details", async (req, res) => {
         const bookedItemsQuery = `
             SELECT bi.I_Id, i.I_name, bi.qty
             FROM booked_item bi
-            JOIN Item i ON bi.I_Id = i.I_Id
+                     JOIN Item i ON bi.I_Id = i.I_Id
             WHERE bi.orID = ?`;
 
         const [bookedItemsResult] = await db.query(bookedItemsQuery, [orID]);
@@ -203,7 +204,7 @@ router.get("/accept-order-details", async (req, res) => {
         const acceptedOrdersQuery = `
             SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
             FROM accept_orders ao
-            JOIN Item i ON ao.I_Id = i.I_Id
+                     JOIN Item i ON ao.I_Id = i.I_Id
             WHERE ao.orID = ?`;
 
         const [acceptedOrdersResult] = await db.query(acceptedOrdersQuery, [orID]);
@@ -229,7 +230,8 @@ router.get("/accept-order-details", async (req, res) => {
                 quantity: item.qty,
                 price: item.tprice,
                 unitPrice: item.unitPrice,
-                stockCount: item.stockCount
+                bookedQuantity: item.bookedQty,
+                availableQuantity: item.availableQty // Updated field from Item table
             })),
             bookedItems: bookedItemsResult.map(item => ({
                 itemId: item.I_Id,
@@ -265,8 +267,8 @@ router.get("/accept-order-details", async (req, res) => {
             }
         }
 
-        // 7️⃣ If Order Status is "Accept", Call Another API
-        if (orderData.orStatus === "Accept") {
+        // 7️⃣ If Order Status is "Accepted", Trigger Additional API Call (Optional)
+        if (orderData.orStatus === "Accepted") {
             console.log(`Calling additional API for accepted order: ${orID}`);
             // Add API call logic here if needed (e.g., send notification)
         }

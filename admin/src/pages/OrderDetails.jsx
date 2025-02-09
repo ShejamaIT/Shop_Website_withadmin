@@ -265,12 +265,12 @@ const OrderDetails = () => {
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Requested Quantity:</strong></Label>
-                                                        {/*<Input*/}
-                                                        {/*    type="number"*/}
-                                                        {/*    name="district"*/}
-                                                        {/*    value={formData.item.quantity ?? order.item.quantity}*/}
-                                                        {/*    onChange={handleChange}*/}
-                                                        {/*/>*/}
+                                                        <Input
+                                                            type="number"
+                                                            value={formData.items[index]?.quantity || ""}
+                                                            onChange={(e) => handleChange(e, index)}
+                                                            min="0"
+                                                        />
                                                     </FormGroup>
                                                 )}
                                                 <p><strong>Amount:</strong> Rs. {item.price}</p>

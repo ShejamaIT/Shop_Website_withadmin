@@ -22,12 +22,21 @@ const AllOrders = () => {
                     {/* Navigation Tabs */}
                     <Nav tabs className="mb-3">
                         <NavItem>
+                            {/*<NavLink*/}
+                            {/*    className={classnames({ active: activeTab === "1" })}*/}
+                            {/*    onClick={() => setActiveTab("1")}*/}
+                            {/*    style={{ cursor: "pointer" }}*/}
+                            {/*>*/}
+                            {/*    All Orders*/}
+                            {/*</NavLink>*/}
+                        </NavItem>
+                        <NavItem>
                             <NavLink
                                 className={classnames({ active: activeTab === "1" })}
                                 onClick={() => setActiveTab("1")}
                                 style={{ cursor: "pointer" }}
                             >
-                                All Orders
+                                Pending Orders
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -36,22 +45,13 @@ const AllOrders = () => {
                                 onClick={() => setActiveTab("2")}
                                 style={{ cursor: "pointer" }}
                             >
-                                Pending Orders
+                                Accepted Orders
                             </NavLink>
                         </NavItem>
                         <NavItem>
                             <NavLink
                                 className={classnames({ active: activeTab === "3" })}
                                 onClick={() => setActiveTab("3")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Accepted Orders
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "4" })}
-                                onClick={() => setActiveTab("4")}
                                 style={{ cursor: "pointer" }}
                             >
                                 In Production
@@ -61,22 +61,22 @@ const AllOrders = () => {
 
                     {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
+                        {/*<TabPane tabId="1">*/}
+                        {/*    <Row>*/}
+                        {/*        <TableThree />*/}
+                        {/*    </Row>*/}
+                        {/*</TabPane>*/}
                         <TabPane tabId="1">
-                            <Row>
-                                <TableThree />
-                            </Row>
-                        </TabPane>
-                        <TabPane tabId="2">
                             <Row>
                                 <TablePending />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="3">
+                        <TabPane tabId="2">
                             <Row>
                                 <TableAccepting />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="4">
+                        <TabPane tabId="3">
                             <Row>
                                 <TableInproduction />
                             </Row>
