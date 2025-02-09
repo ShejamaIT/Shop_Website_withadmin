@@ -97,6 +97,7 @@ const OrderDetails = () => {
     };
 
     const handleEditClick = (order) => {
+        console.log("Opening modal for order:", order);  // Debugging line
         setSelectedOrder(order);
         setShowModal(true);
     };

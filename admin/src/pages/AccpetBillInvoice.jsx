@@ -1,95 +1,104 @@
-import React, { useState, useEffect } from "react";
-import "../style/EditOrderModal.css"; // Import CSS file
+import React, { useState } from "react";
+import "../style/invoice.css"; // Import the CSS file for styling
 
-const BillInvoice = ({ selectedOrder, setShowModal, handleSubmit }) => {
-    const [newStatus, setNewStatus] = useState(selectedOrder.status || "Incomplete");
-    const [isOrderComplete, setIsOrderComplete] = useState(false);
-    const [rDate, setRDate] = useState("");
-    const [recCount, setRecCount] = useState("");
-    const [detail, setDetail] = useState("");
+const BillInvoice = ({ selectedOrder, setShowModal }) => {
+    const invoiceDate = new Date().toLocaleDateString(); // System Date
 
-    // Function to check order completion
-    const checkOrderCompletion = () => {
-        const qty = Number(selectedOrder.qty); // Ensure it's a number
-        const receivedQty = Number(recCount);  // Ensure it's a number
+    // State for editable fields
+    const [deliveryCharge, setDeliveryCharge] = useState(selectedOrder.deliveryCharge);
+    const [discount, setDiscount] = useState(selectedOrder.discount);
+    const [advance, setAdvance] = useState(selectedOrder.advance);
 
+    // Calculate total for each item
+    const calculateTotal = (item) => item.quantity * item.unitPrice;
 
-        /* Ordered Count */
-        // if (qty === receivedQty) {
-        //     setIsOrderComplete(true);
-        //     setNewStatus("Complete");
-        // } else {
-        //     setIsOrderComplete(false);
-        //     setNewStatus("Incomplete");
-        // }
+    // Calculate Subtotal
+    const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
 
-        /* More than Ordered Count */
-        if (receivedQty >= qty) {
-            setIsOrderComplete(true);
-            setNewStatus("Complete");
-        } else {
-            setIsOrderComplete(false);
-            setNewStatus("Incomplete");
-        }
-    };
+    // Calculate Net Total & Balance
+    const netTotal = Number(subtotal) + Number(deliveryCharge) - Number(discount);
 
-    // Effect to update status after state changes
-    useEffect(() => {
-        if (rDate && recCount) {
-            checkOrderCompletion(); // Ensure status updates before submitting
-        }
-    }, [recCount, rDate]); // Runs when `recCount` or `rDate` changes
-
-    // Handle form submission
-    const handleFormSubmit = (e) => {
-        e.preventDefault();
-
-        handleSubmit({ newStatus, isOrderComplete, rDate, recCount, detail });
-
-    };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
-    };
+    // Calculate Balance
+    const balance = netTotal - Number(advance);
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content">
-                <h4>{{/*order id*/}} Invoice</h4>
-                <form onSubmit={handleFormSubmit}>
-                    {/* Order ID (Disabled) */}
-                    <label><strong>Order ID:</strong></label>
-                    <p>{selectedOrder.orderId}</p>
+            <div className="modal-content bill-invoice">
+                <h2 className="invoice-title">Invoice</h2>
 
-                    {/*/!* Expected Date Display *!/*/}
-                    {/*<label><strong>Expected Date:</strong></label>*/}
-                    {/*<p>{formatDate(selectedOrder.expectedDate)}</p>*/}
+                {/* Order Details */}
+                <div className="invoice-section">
+                    <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
+                    <p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
+                    <p><strong>Invoice Date:</strong> {invoiceDate}</p>
+                    <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
+                </div>
 
-                    {/*/!* Received Date Input *!/*/}
-                    {/*<label><strong>Received Date:</strong></label>*/}
-                    {/*<input type="date" value={rDate} onChange={(e) => setRDate(e.target.value)} required />*/}
+                {/* Items Table */}
+                <table className="invoice-table">
+                    <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {selectedOrder.items.map((item, index) => (
+                        <tr key={index}>
+                            <td>{item.itemName}</td>
+                            <td>{item.quantity}</td>
+                            <td>Rs. {item.unitPrice.toFixed(2)}</td>
+                            <td>Rs. {calculateTotal(item).toFixed(2)}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
 
-                    {/*/!* Received Count Input *!/*/}
-                    {/*<label><strong>Received Count:</strong></label>*/}
-                    {/*<input type="number" value={recCount} onChange={(e) => setRecCount(e.target.value)} min="1" required />*/}
+                {/* Summary */}
+                <div className="invoice-summary">
+                    <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
 
-                    {/*/!* Detail Input *!/*/}
-                    {/*<label><strong>Detail:</strong></label>*/}
-                    {/*<textarea value={detail} onChange={(e) => setDetail(e.target.value)} rows="3" />*/}
-
-                    {/*/!* Order Complete Checkbox *!/*/}
-                    {/*<div className="checkbox-container">*/}
-                    {/*    <input type="checkbox" id="orderComplete" checked={isOrderComplete} readOnly />*/}
-                    {/*    <label htmlFor="orderComplete">Order Complete</label>*/}
-                    {/*</div>*/}
-
-                    {/* Buttons */}
-                    <div className="modal-buttons">
-                        <button type="submit" className="save-btn">Save</button>
-                        <button type="button" className="close-btn" onClick={() => setShowModal(false)}>Close</button>
+                    <div className="invoice-summary-item">
+                        <label><strong>Delivery Price:</strong></label>
+                        <input
+                            type="number"
+                            value={deliveryCharge}
+                            onChange={(e) => setDeliveryCharge(e.target.value)}
+                        />
                     </div>
-                </form>
+
+                    <div className="invoice-summary-item">
+                        <label><strong>Discount:</strong></label>
+                        <input
+                            type="number"
+                            value={discount}
+                            onChange={(e) => setDiscount(e.target.value)}
+                        />
+                    </div>
+
+                    <hr />
+                    <p><strong>Net Total:</strong> Rs. {netTotal.toFixed(2)}</p>
+
+                    <div className="invoice-summary-item">
+                        <label><strong>Advance:</strong></label>
+                        <input
+                            type="number"
+                            value={advance}
+                            onChange={(e) => setAdvance(e.target.value)}
+                        />
+                    </div>
+
+                    <p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
+                </div>
+
+
+                {/* Print & Close Buttons */}
+                <div className="modal-buttons">
+                    <button className="print-btn" onClick={() => window.print()}>Print</button>
+                    <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
+                </div>
             </div>
         </div>
     );

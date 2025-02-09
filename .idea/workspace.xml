@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with item table">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/invoice.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,14 +136,7 @@
       <workItem from="1738986011492" duration="10678000" />
       <workItem from="1739072744751" duration="10942000" />
       <workItem from="1739091128453" duration="3202000" />
-      <workItem from="1739094539357" duration="2748000" />
-    </task>
-    <task id="LOCAL-00105" summary="temporary profile files (not finished)">
-      <created>1738407544298</created>
-      <option name="number" value="00105" />
-      <option name="presentableId" value="LOCAL-00105" />
-      <option name="project" value="LOCAL" />
-      <updated>1738407544298</updated>
+      <workItem from="1739094539357" duration="5511000" />
     </task>
     <task id="LOCAL-00106" summary="temporary profile files (not finished)">
       <created>1738407561907</created>
@@ -483,7 +474,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739085274862</updated>
     </task>
-    <option name="localTasksCounter" value="154" />
+    <task id="LOCAL-00154" summary="update with item table">
+      <created>1739097636462</created>
+      <option name="number" value="00154" />
+      <option name="presentableId" value="LOCAL-00154" />
+      <option name="project" value="LOCAL" />
+      <updated>1739097636462</updated>
+    </task>
+    <option name="localTasksCounter" value="155" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
