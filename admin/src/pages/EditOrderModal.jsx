@@ -13,16 +13,6 @@ const EditOrderModal = ({ selectedOrder, setShowModal, handleSubmit }) => {
         const qty = Number(selectedOrder.qty); // Ensure it's a number
         const receivedQty = Number(recCount);  // Ensure it's a number
 
-
-        /* Ordered Count */
-        // if (qty === receivedQty) {
-        //     setIsOrderComplete(true);
-        //     setNewStatus("Complete");
-        // } else {
-        //     setIsOrderComplete(false);
-        //     setNewStatus("Incomplete");
-        // }
-
         /* More than Ordered Count */
         if (receivedQty >= qty) {
             setIsOrderComplete(true);

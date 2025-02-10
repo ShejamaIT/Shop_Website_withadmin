@@ -108,3 +108,9 @@
 .close-btn:hover {
     background: #c0392b;
 }
+/* Hide buttons when printing */
+@media print {
+    .modal-buttons {
+        display: none;
+    }
+}

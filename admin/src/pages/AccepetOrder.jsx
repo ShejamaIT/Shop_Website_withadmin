@@ -123,8 +123,12 @@ const OrderDetails = () => {
             alert("Failed to update order!");
         }
     };
+    const handleSubmit = async (formData) => {
+        console.log("Submitting form data:", formData);
 
-    if (loading) return <p>Loading...</p>;
+    };
+
+        if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
 
@@ -246,6 +250,7 @@ const OrderDetails = () => {
                                 <BillInvoice
                                     selectedOrder={selectedOrder}
                                     setShowModal={setShowModal}
+                                    handleSubmit={handleSubmit}
                                 />
                             )}
                         </Col>
