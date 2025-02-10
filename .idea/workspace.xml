@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with booked unbooked">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update pending order detail form">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAcceptingUnbooked.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAcceptingUnbooked.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
     </list>
@@ -139,14 +140,7 @@
       <workItem from="1739072744751" duration="10942000" />
       <workItem from="1739091128453" duration="3202000" />
       <workItem from="1739094539357" duration="5841000" />
-      <workItem from="1739159373412" duration="20720000" />
-    </task>
-    <task id="LOCAL-00115" summary="fixed navbars">
-      <created>1738476516791</created>
-      <option name="number" value="00115" />
-      <option name="presentableId" value="LOCAL-00115" />
-      <option name="project" value="LOCAL" />
-      <updated>1738476516791</updated>
+      <workItem from="1739159373412" duration="22560000" />
     </task>
     <task id="LOCAL-00116" summary="load all orders and items">
       <created>1738480482946</created>
@@ -484,7 +478,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739179003371</updated>
     </task>
-    <option name="localTasksCounter" value="164" />
+    <task id="LOCAL-00164" summary="update pending order detail form">
+      <created>1739184767446</created>
+      <option name="number" value="00164" />
+      <option name="presentableId" value="LOCAL-00164" />
+      <option name="project" value="LOCAL" />
+      <updated>1739184767446</updated>
+    </task>
+    <option name="localTasksCounter" value="165" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -503,7 +504,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="finish order detail page" />
     <MESSAGE value="finish order detail page with order status" />
     <MESSAGE value="update orders with table tab pane" />
     <MESSAGE value="update item page" />
@@ -528,6 +528,7 @@
     <MESSAGE value="update frontend running ports (Used Fixed ports)" />
     <MESSAGE value="update backend" />
     <MESSAGE value="update with booked unbooked" />
-    <option name="LAST_COMMIT_MESSAGE" value="update with booked unbooked" />
+    <MESSAGE value="update pending order detail form" />
+    <option name="LAST_COMMIT_MESSAGE" value="update pending order detail form" />
   </component>
 </project>

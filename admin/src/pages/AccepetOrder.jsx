@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import Swal from 'sweetalert2';
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
@@ -10,6 +11,7 @@ import BillInvoice from "./AccpetBillInvoice";
 
 const OrderDetails = () => {
     const { id } = useParams();
+    const navigate = useNavigate(); // Initialize useNavigate
     const [order, setOrder] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
@@ -29,6 +31,13 @@ const OrderDetails = () => {
 
             const data = await response.json();
 
+            // Check order status, if not "Accepted", redirect to another page
+            if (data.order.orderStatus !== "Accepted") {
+                navigate("/dashboard"); // Redirect to another page
+                return;
+            }
+
+
             // Ensure `isBooked` updates correctly
             const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);
             const updatedItems = data.order.items.map((item) => ({
@@ -45,6 +54,12 @@ const OrderDetails = () => {
             setError(err.message);
             setLoading(false);
         }
+    };
+    const calculateTotal = () => {
+        const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
+        const delivery = Number(formData.deliveryCharge || 0);
+        const discount = Number(formData.discount || 0);
+        return itemTotal + delivery - discount;
     };
 
     const handleChange = (e, index) => {
@@ -89,17 +104,18 @@ const OrderDetails = () => {
     };
 
     const handleSave = async () => {
+        const updatedTotal = calculateTotal();
+        const updatedData = { ...formData, totalPrice: updatedTotal };
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/update-order`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(updatedData),
             });
 
             if (!response.ok) throw new Error("Failed to update order.");
 
             const updatedOrder = await response.json();
-
             if (updatedOrder.success) {
                 toast.success("Order updated successfully!");
                 await fetchOrder();
@@ -148,15 +164,6 @@ const OrderDetails = () => {
 
             if (response.ok) {
                 alert("Invoice and payment updated successfully!");
-
-                // Assuming you have a state `orders` to manage orders, we can update it
-                // setOrders((prevOrders) =>
-                //     prevOrders.map((order) =>
-                //         order.orID === orID
-                //             ? { ...order, netTotal, updatedAdvance, updatedDeliveryCharge, updatedDiscount }
-                //             : order
-                //     )
-                // );
 
                 setShowModal(false); // Close the modal if it's open
             } else {
@@ -265,9 +272,34 @@ const OrderDetails = () => {
                                 </ul>
 
                                 <div className="order-summary">
-                                    <p><strong>Discount Price:</strong> Rs. {order.discount}</p>
-                                    <p><strong>Delivery Amount:</strong> Rs. {order.deliveryCharge}</p>
-                                    <p><strong>Total Amount:</strong> Rs. {order.totalPrice}</p>
+                                    {!isEditing ? (
+                                        <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>
+                                    ) : (
+                                        <FormGroup>
+                                            <Label><strong>Discount Price:</strong></Label>
+                                            <Input
+                                                type="text"
+                                                name="discount"
+                                                value={formData.discount ?? order.discount}
+                                                onChange={handleChange}
+                                            />
+                                        </FormGroup>
+                                    )}
+
+                                    {!isEditing ? (
+                                        <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
+                                    ) : (
+                                        <FormGroup>
+                                            <Label><strong>Delivery Amount:</strong></Label>
+                                            <Input
+                                                type="text"
+                                                name="deliveryCharge"
+                                                value={formData.deliveryCharge ?? order.deliveryCharge}
+                                                onChange={handleChange}
+                                            />
+                                        </FormGroup>
+                                    )}
+                                    <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
                                 </div>
 
                                 {/* Buttons */}

@@ -59,7 +59,6 @@ const TableAcceptingUnbooked = () => {
                             <th>Order Status</th>
                             <th>Delivery Status</th>
                             <th>Total Price</th>
-                            <th>Item Received</th>
                             <th>Acceptance Status</th>
                             <th>Actions</th>
                         </tr>
@@ -67,7 +66,7 @@ const TableAcceptingUnbooked = () => {
                         <tbody>
                         {orders.length === 0 ? (
                             <tr>
-                                <td colSpan="9" className="no-data">No orders found</td>
+                                <td colSpan="9" className="no-data">No Unbooked orders found</td>
                             </tr>
                         ) : (
                             orders.map((order) => (
@@ -83,7 +82,6 @@ const TableAcceptingUnbooked = () => {
                                     </td>
                                     <td>{order.dvStatus}</td>
                                     <td>Rs.{order.totPrice.toFixed(2)}</td>
-                                    <td>{order.itemReceived}</td>
                                     <td>{order.acceptanceStatus}</td>
                                     <td className="action-buttons">
                                         <button
@@ -92,7 +90,6 @@ const TableAcceptingUnbooked = () => {
                                         >
                                             👁️
                                         </button>
-                                        <button className="edit-btn">✏️</button>
                                     </td>
                                 </tr>
                             ))

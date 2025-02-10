@@ -90,7 +90,6 @@ const TablePending = () => {
                                         >
                                             👁️
                                         </button>
-                                        <button className="edit-btn">✏️</button>
                                     </td>
                                 </tr>
                             ))

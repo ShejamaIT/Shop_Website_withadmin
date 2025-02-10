@@ -26,8 +26,6 @@ const OrderDetails = () => {
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
-            console.log(data.order);
-
             setOrder(data.order);
             setFormData({
                 ...data.order,
@@ -45,7 +43,9 @@ const OrderDetails = () => {
     };
     const calculateTotal = () => {
         const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
-        return itemTotal + (formData.deliveryCharge || 0) - (formData.discount || 0);
+       const delivery = Number(formData.deliveryCharge || 0);
+       const discount = Number(formData.discount || 0);
+        return itemTotal + delivery - discount;
     };
 
     const handleChange = (e, index) => {
@@ -123,11 +123,9 @@ const OrderDetails = () => {
                 if (updatedData.orderStatus === 'Accepted'){
                     navigate(`/accept-order-detail/${updatedData.orderId}`);
                 }else {
-                    navigate("dashboard");
+                    navigate("/dashboard");
                 }
 
-                // await fetchOrder();  // Call fetchOrder to get the updated order
-                // setIsEditing(false);
             }
 
         } catch (err) {
@@ -246,7 +244,6 @@ const OrderDetails = () => {
                                                 <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
                                                 <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
                                             </div>
-
                                         </>
                                     )}
                                 </div>
