@@ -601,8 +601,6 @@ router.put("/update-order", async (req, res) => {
     }
 });
 
-
-
 // GET Item Details by Item ID
 router.get("/item-details", async (req, res) => {
     try {
@@ -1117,6 +1115,99 @@ router.put("/update-invoice", async (req, res) => {
             message: "Error updating invoice data",
             details: error.message,
         });
+    }
+});
+
+//
+router.get("/orders-accept", async (req, res) => {
+    try {
+        // Step 1: Fetch all the orders and their associated items' statuses from the accept_orders table.
+        const query = `
+            SELECT 
+                o.OrID, 
+                o.orDate, 
+                o.customerEmail, 
+                o.orStatus, 
+                o.dvStatus, 
+                o.dvPrice, 
+                o.disPrice, 
+                o.totPrice, 
+                o.stID, 
+                o.expectedDate AS expectedDeliveryDate, 
+                ao.itemReceived, 
+                ao.status AS acceptanceStatus
+            FROM Orders o
+            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            WHERE o.orStatus = 'Accepted'
+        `;
+
+        const [orders] = await db.query(query);
+
+        // If no orders are found, return a 404 response.
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No Accepted orders found" });
+        }
+
+        // Step 2: Group orders by OrID.
+        const groupedOrders = {};
+
+        // Initialize arrays to hold booked and unbooked orders.
+        const bookedOrders = [];
+        const unbookedOrders = [];
+
+        // Step 3: Process each order and its items.
+        orders.forEach(order => {
+            // If the order does not exist in the groupedOrders object, create it.
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customerEmail: order.customerEmail,
+                    orStatus: order.orStatus,
+                    dvStatus: order.dvStatus,
+                    dvPrice: order.dvPrice,
+                    disPrice: order.disPrice,
+                    totPrice: order.totPrice,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    acceptanceStatuses: [], // Array to track item statuses.
+                    isUnbooked: false // Flag to check if the order contains any unbooked item.
+                };
+            }
+
+            // Add each item status to the list of acceptance statuses.
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // Check the acceptance status of the current item:
+            if (order.acceptanceStatus !== "Complete") {
+                // If the status is not "Complete", mark the order as unbooked.
+                groupedOrders[order.OrID].isUnbooked = true;
+            }
+        });
+
+        // Step 4: Now, categorize the orders as "booked" or "unbooked".
+        Object.values(groupedOrders).forEach(order => {
+            if (order.isUnbooked) {
+                // If the order has any unbooked item, mark the entire order as unbooked.
+                order.acceptanceStatus = "Incomplete";
+                unbookedOrders.push(order);
+            } else {
+                // If all items are booked, mark the order as booked.
+                order.acceptanceStatus = "Complete";
+                bookedOrders.push(order);
+            }
+        });
+
+        // Step 5: Send the response with two arrays: bookedOrders and unbookedOrders.
+        return res.status(200).json({
+            message: "Accepted orders found.",
+            bookedOrders: bookedOrders,
+            unbookedOrders: unbookedOrders
+        });
+
+    } catch (error) {
+        console.error("Error fetching accepted orders:", error.message);
+        return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
     }
 });
 

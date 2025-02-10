@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update frontend">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update backend">
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAcceptingUnbooked.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,30 +38,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Dell/Desktop/Shop_Mangement_Website/admin/src/pages&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Dell/Desktop/Shop_Mangement_Website/admin/src/components/tables",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\tables" />
+      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\assets\images" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\header" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\frontend\src\assets\images" />
@@ -137,21 +138,7 @@
       <workItem from="1739072744751" duration="10942000" />
       <workItem from="1739091128453" duration="3202000" />
       <workItem from="1739094539357" duration="5841000" />
-      <workItem from="1739159373412" duration="12515000" />
-    </task>
-    <task id="LOCAL-00112" summary="update admin side routes">
-      <created>1738412920683</created>
-      <option name="number" value="00112" />
-      <option name="presentableId" value="LOCAL-00112" />
-      <option name="project" value="LOCAL" />
-      <updated>1738412920683</updated>
-    </task>
-    <task id="LOCAL-00113" summary="final upload 02/01">
-      <created>1738413285107</created>
-      <option name="number" value="00113" />
-      <option name="presentableId" value="LOCAL-00113" />
-      <option name="project" value="LOCAL" />
-      <updated>1738413285107</updated>
+      <workItem from="1739159373412" duration="15446000" />
     </task>
     <task id="LOCAL-00114" summary="fixed navbars">
       <created>1738476365445</created>
@@ -482,7 +469,21 @@
       <option name="project" value="LOCAL" />
       <updated>1739175656076</updated>
     </task>
-    <option name="localTasksCounter" value="161" />
+    <task id="LOCAL-00161" summary="update frontend running ports (Used Fixed ports)">
+      <created>1739175993042</created>
+      <option name="number" value="00161" />
+      <option name="presentableId" value="LOCAL-00161" />
+      <option name="project" value="LOCAL" />
+      <updated>1739175993042</updated>
+    </task>
+    <task id="LOCAL-00162" summary="update backend">
+      <created>1739176084836</created>
+      <option name="number" value="00162" />
+      <option name="presentableId" value="LOCAL-00162" />
+      <option name="project" value="LOCAL" />
+      <updated>1739176084836</updated>
+    </task>
+    <option name="localTasksCounter" value="163" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -501,12 +502,10 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update cart handle" />
     <MESSAGE value="update checkout" />
     <MESSAGE value="finish order detail page" />
     <MESSAGE value="finish order detail page with order status" />
     <MESSAGE value="update orders with table tab pane" />
-    <MESSAGE value="update backend" />
     <MESSAGE value="update item page" />
     <MESSAGE value="update place supplier order" />
     <MESSAGE value="update in production table" />
@@ -526,6 +525,8 @@
     <MESSAGE value="save or print invoice function" />
     <MESSAGE value="update accepting order checkbox" />
     <MESSAGE value="update frontend" />
-    <option name="LAST_COMMIT_MESSAGE" value="update frontend" />
+    <MESSAGE value="update frontend running ports (Used Fixed ports)" />
+    <MESSAGE value="update backend" />
+    <option name="LAST_COMMIT_MESSAGE" value="update backend" />
   </component>
 </project>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./TableThree.css"; // Importing the stylesheet
 
-const TableAccepting = () => {
+const TableAcceptingUnbooked = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,12 +13,12 @@ const TableAccepting = () => {
             try {
                 const response = await fetch("http://localhost:5001/api/admin/main/orders-accept"); // Adjust API URL if needed
                 const data = await response.json();
-
+                console.log(data.unbookedOrders);
                 if (!response.ok) {
                     throw new Error(data.message || "Failed to fetch orders");
                 }
 
-                setOrders(data.bookedOrders); // Assuming `data.data` contains the array of orders
+                setOrders(data.unbookedOrders); // Assuming `data.data` contains the array of orders
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -105,4 +105,4 @@ const TableAccepting = () => {
     );
 };
 
-export default TableAccepting;
+export default TableAcceptingUnbooked;
