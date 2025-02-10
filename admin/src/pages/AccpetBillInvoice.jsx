@@ -1,35 +1,49 @@
 import React, { useState } from "react";
-import "../style/invoice.css"; // Import the CSS file for styling
+import "../style/invoice.css"; // Make sure this file includes the print styles
 
-const BillInvoice = ({ selectedOrder, setShowModal }) => {
-    const invoiceDate = new Date().toLocaleDateString(); // System Date
+const BillInvoice = ({ selectedOrder, setShowModal, handleSubmit }) => {
+    const invoiceDate = new Date().toLocaleDateString();
 
-    // State for editable fields
     const [deliveryCharge, setDeliveryCharge] = useState(selectedOrder.deliveryCharge);
+    const [previousDeliveryCharge, setPreviousDeliveryCharge] = useState(selectedOrder.deliveryCharge);
     const [discount, setDiscount] = useState(selectedOrder.discount);
     const [advance, setAdvance] = useState(selectedOrder.advance);
+    const [isPickup, setIsPickup] = useState(false);
 
-    // Calculate total for each item
     const calculateTotal = (item) => item.quantity * item.unitPrice;
-
-    // Calculate Subtotal
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
-
-    // Calculate Net Total
-    const netTotal = Number(subtotal) + Number(deliveryCharge) - Number(discount);
-
-    // Ensure advance is treated as 0 if it's empty or invalid
     const validAdvance = advance ? Number(advance) : 0;
-
-    // Calculate Balance
+    const netTotal = Number(subtotal) + (isPickup ? 0 : Number(deliveryCharge)) - Number(discount);
     const balance = netTotal - validAdvance;
+
+    const handlePickupChange = () => {
+        if (!isPickup) {
+            setPreviousDeliveryCharge(deliveryCharge);
+            setDeliveryCharge(0);
+        } else {
+            setDeliveryCharge(previousDeliveryCharge);
+        }
+        setIsPickup(!isPickup);
+    };
+
+    const handlePrintAndSubmit = () => {
+        handleSubmit({
+            updatedDeliveryCharge: isPickup ? 0 : Number(deliveryCharge),
+            updatedDiscount: Number(discount),
+            updatedAdvance: validAdvance,
+            netTotal: netTotal,
+            balance: balance,
+            isPickup: isPickup
+        });
+
+        window.print(); // This will now hide the buttons when printing
+    };
 
     return (
         <div className="modal-overlay">
             <div className="modal-content bill-invoice">
                 <h2 className="invoice-title">Invoice</h2>
 
-                {/* Order Details */}
                 <div className="invoice-section">
                     <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
                     <p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
@@ -37,7 +51,6 @@ const BillInvoice = ({ selectedOrder, setShowModal }) => {
                     <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
                 </div>
 
-                {/* Items Table */}
                 <table className="invoice-table">
                     <thead>
                     <tr>
@@ -59,15 +72,19 @@ const BillInvoice = ({ selectedOrder, setShowModal }) => {
                     </tbody>
                 </table>
 
-                {/* Summary */}
                 <div className="invoice-summary">
                     <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
 
                     <div className="invoice-summary-item">
                         <label><strong>Delivery Price:</strong></label>
+                        <p>
+                            <input type="checkbox" checked={isPickup} onChange={handlePickupChange} />
+                            Set as Pick up
+                        </p>
                         <input
                             type="number"
-                            value={deliveryCharge}
+                            value={isPickup ? 0 : deliveryCharge}
+                            disabled={isPickup}
                             onChange={(e) => setDeliveryCharge(e.target.value)}
                         />
                     </div>
@@ -98,7 +115,7 @@ const BillInvoice = ({ selectedOrder, setShowModal }) => {
 
                 {/* Print & Close Buttons */}
                 <div className="modal-buttons">
-                    <button className="print-btn" onClick={() => window.print()}>Print</button>
+                    <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
                     <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
                 </div>
             </div>
