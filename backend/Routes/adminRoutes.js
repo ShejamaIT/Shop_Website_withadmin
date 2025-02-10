@@ -148,7 +148,7 @@ router.get("/items", async (req, res) => {
             Ty_id: item.Ty_id, // Type ID (foreign key)
             descrip: item.descrip, // Item description
             price: item.price, // Price
-            qty: item.qty, // Quantity
+            qty: item.availableQty, // Quantity
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB image to Base64
         }));
 
@@ -178,7 +178,7 @@ router.get("/last3items", async (req, res) => {
             Ty_id: item.Ty_id, // Type ID (foreign key)
             descrip: item.descrip, // Item description
             price: item.price, // Price
-            qty: item.qty, // Quantity
+            qty: item.availableQty, // Quantity
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB image to Base64
         }));
 
@@ -208,7 +208,7 @@ router.get("/get3items", async (req, res) => {
             Ty_id: item.Ty_id, // Type ID (foreign key)
             descrip: item.descrip, // Item description
             price: item.price, // Price
-            qty: item.qty, // Quantity
+            qty: item.availableQty, // Quantity
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB image to Base64
         }));
 
@@ -291,7 +291,7 @@ router.get("/get-items-by-type", async (req, res) => {
             Ty_id: item.Ty_id,
             descrip: item.descrip,
             price: item.price,
-            qty: item.qty,
+            qty: item.availableQty,
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB to Base64
         }));
 
@@ -436,7 +436,7 @@ router.get("/getitembycategory", async (req, res) => {
     // SQL query to join Item, Type, Category, and subCat_one based on category and subcategory
     const sql = `
         SELECT 
-            i.I_Id, i.I_name, i.descrip, i.price, i.qty, i.img, 
+            i.I_Id, i.I_name, i.descrip, i.price, i.availableQty, i.img, 
             c.name AS category, sc.subcategory, t.sub_one AS type
         FROM Item i
         INNER JOIN Type t ON i.Ty_id = t.Ty_Id
@@ -464,7 +464,7 @@ router.get("/getitembycategory", async (req, res) => {
                 name: row.I_name,
                 description: row.descrip,
                 price: row.price,
-                quantity: row.qty,
+                quantity: row.availableQty,
                 category: row.category,
                 subcategory: row.subcategory,
                 type: row.type,
@@ -516,7 +516,7 @@ router.post("/gettypeid", async (req, res) => {
 
         // Fetch Items Based on Type ID
         const itemQuery = `
-            SELECT I_Id, I_name, descrip, price, qty, img 
+            SELECT I_Id, I_name, descrip, price, availableQty, img 
             FROM Item 
             WHERE Ty_id = ?
         `;
@@ -540,7 +540,7 @@ router.post("/gettypeid", async (req, res) => {
                 name: item.I_name,
                 description: item.descrip,
                 price: item.price,
-                quantity: item.qty,
+                quantity: item.availableQty,
                 img: item.img ? `data:image/png;base64,${item.img.toString("base64")}` : null,
             })),
         });
@@ -659,7 +659,7 @@ router.post("/orders", async (req, res) => {
             expectedDate,
             specialNote
         } = req.body;
-        console.log(deliveryMethod);
+        console.log(cartItems);
         // Generate unique order ID
         const orID = `ORD_${Date.now()}`;
         const orderDate = new Date().toISOString().split("T")[0]; // Get current date

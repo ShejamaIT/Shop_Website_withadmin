@@ -258,6 +258,9 @@ const Checkout = () => {
                                 {delivery && (
                                     <>
                                         <FormGroup className="form__group">
+                                            <input type="text" placeholder="Address" onChange={(e) => setAddress(e.target.value)} />
+                                        </FormGroup>
+                                        <FormGroup className="form__group">
                                             <select onChange={handleDistrictChange} className="form-control">
                                                 <option value="">Select District</option>
                                                 {districts.map((dist, index) => (
