@@ -28,6 +28,7 @@ const BillInvoice = ({ selectedOrder, setShowModal, handleSubmit }) => {
 
     const handlePrintAndSubmit = () => {
         handleSubmit({
+            orID : selectedOrder.orderId,
             updatedDeliveryCharge: isPickup ? 0 : Number(deliveryCharge),
             updatedDiscount: Number(discount),
             updatedAdvance: validAdvance,
@@ -38,6 +39,10 @@ const BillInvoice = ({ selectedOrder, setShowModal, handleSubmit }) => {
 
         window.print(); // This will now hide the buttons when printing
     };
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
+    };
 
     return (
         <div className="modal-overlay">
@@ -46,8 +51,8 @@ const BillInvoice = ({ selectedOrder, setShowModal, handleSubmit }) => {
 
                 <div className="invoice-section">
                     <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
-                    <p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
-                    <p><strong>Invoice Date:</strong> {invoiceDate}</p>
+                    <p><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
+                    <p><strong>Invoice Date:</strong> {formatDate(invoiceDate)}</p>
                     <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
                 </div>
 

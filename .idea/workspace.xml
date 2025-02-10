@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update invoice">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="save or print invoice function">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/EditOrderModal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/invoice.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/invoice.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,21 +138,7 @@
       <workItem from="1739072744751" duration="10942000" />
       <workItem from="1739091128453" duration="3202000" />
       <workItem from="1739094539357" duration="5841000" />
-      <workItem from="1739159373412" duration="2417000" />
-    </task>
-    <task id="LOCAL-00108" summary="fixed frist category with dropdown">
-      <created>1738410726614</created>
-      <option name="number" value="00108" />
-      <option name="presentableId" value="LOCAL-00108" />
-      <option name="project" value="LOCAL" />
-      <updated>1738410726614</updated>
-    </task>
-    <task id="LOCAL-00109" summary="fixed the bugged temporary">
-      <created>1738411686502</created>
-      <option name="number" value="00109" />
-      <option name="presentableId" value="LOCAL-00109" />
-      <option name="project" value="LOCAL" />
-      <updated>1738411686502</updated>
+      <workItem from="1739159373412" duration="8196000" />
     </task>
     <task id="LOCAL-00110" summary="start to update admin side">
       <created>1738412689535</created>
@@ -483,7 +469,21 @@
       <option name="project" value="LOCAL" />
       <updated>1739100443856</updated>
     </task>
-    <option name="localTasksCounter" value="157" />
+    <task id="LOCAL-00157" summary="pass invoice details to main page">
+      <created>1739162389832</created>
+      <option name="number" value="00157" />
+      <option name="presentableId" value="LOCAL-00157" />
+      <option name="project" value="LOCAL" />
+      <updated>1739162389832</updated>
+    </task>
+    <task id="LOCAL-00158" summary="save or print invoice function">
+      <created>1739162449190</created>
+      <option name="number" value="00158" />
+      <option name="presentableId" value="LOCAL-00158" />
+      <option name="project" value="LOCAL" />
+      <updated>1739162449190</updated>
+    </task>
+    <option name="localTasksCounter" value="159" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -502,8 +502,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add admin backend" />
-    <MESSAGE value="update place order" />
     <MESSAGE value="update place order second time" />
     <MESSAGE value="update delivery in place order" />
     <MESSAGE value="update cart handle" />
@@ -527,6 +525,8 @@
     <MESSAGE value="update db query" />
     <MESSAGE value="update with item table" />
     <MESSAGE value="update invoice" />
-    <option name="LAST_COMMIT_MESSAGE" value="update invoice" />
+    <MESSAGE value="pass invoice details to main page" />
+    <MESSAGE value="save or print invoice function" />
+    <option name="LAST_COMMIT_MESSAGE" value="save or print invoice function" />
   </component>
 </project>

@@ -22,21 +22,24 @@ const OrderDetails = () => {
         fetchOrder();
     }, [id]);
 
-    let isBooked = "No";
-
     const fetchOrder = async () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
-            setOrder(data.order);
-            setFormData(data.order);
+
+            // Ensure `isBooked` updates correctly
+            const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);
+            const updatedItems = data.order.items.map((item) => ({
+                ...item,
+                booked: bookedItems.includes(item.itemId),
+            }));
+
+            setOrder({ ...data.order, items: updatedItems });
+            setFormData({ ...data.order, items: updatedItems });
+
             setLoading(false);
-            console.log(data.order);
-            if (data.order.acceptedOrders.length > 0) {
-                isBooked = "Yes";
-            }
         } catch (err) {
             console.error("Error fetching order details:", err);
             setError(err.message);
@@ -48,58 +51,41 @@ const OrderDetails = () => {
         const { name, value, type, checked } = e.target;
 
         setFormData((prevFormData) => {
+            let updatedFormData = { ...prevFormData };
+
             if (name in prevFormData) {
-                return { ...prevFormData, [name]: value };
-            }
-
-            if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
-                return {
-                    ...prevFormData,
-                    deliveryInfo: {
-                        ...prevFormData.deliveryInfo,
-                        [name]: value,
-                    },
+                updatedFormData[name] = value;
+            } else if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
+                updatedFormData.deliveryInfo = {
+                    ...prevFormData.deliveryInfo,
+                    [name]: value,
                 };
-            }
-
-            if (name === "booked") {
-                const updatedItems = [...prevFormData.items];
-                updatedItems[index] = { ...updatedItems[index], booked: checked };
-                return { ...prevFormData, items: updatedItems };
-            }
-
-            if (name === "quantity") {
-                const updatedItems = [...prevFormData.items];
+            } else if (name === "booked") {
+                updatedFormData.items = prevFormData.items.map((item, i) =>
+                    i === index ? { ...item, booked: checked } : item
+                );
+            } else if (name === "quantity") {
                 const newQuantity = value === "" ? 0 : parseInt(value, 10);
                 if (!isNaN(newQuantity) && newQuantity >= 0) {
-                    updatedItems[index] = {
-                        ...updatedItems[index],
-                        quantity: newQuantity,
-                        price: newQuantity * updatedItems[index].unitPrice,
-                    };
+                    updatedFormData.items = prevFormData.items.map((item, i) =>
+                        i === index ? {
+                            ...item,
+                            quantity: newQuantity,
+                            price: newQuantity * item.unitPrice
+                        } : item
+                    );
                 }
-                return { ...prevFormData, items: updatedItems };
-            }
-
-            if (name === "discount" || name === "deliveryCharge") {
+            } else if (["discount", "deliveryCharge"].includes(name)) {
                 const updatedValue = value === "" ? 0 : parseFloat(value);
                 if (!isNaN(updatedValue) && updatedValue >= 0) {
-                    return {
-                        ...prevFormData,
-                        [name]: updatedValue,
-                        totalPrice: prevFormData.items.reduce((total, item) => total + item.price, 0) +
-                            (prevFormData.deliveryCharge || 0) - (prevFormData.discount || 0)
-                    };
+                    updatedFormData[name] = updatedValue;
+                    updatedFormData.totalPrice = updatedFormData.items.reduce((total, item) => total + item.price, 0) +
+                        (updatedFormData.deliveryCharge || 0) - (updatedFormData.discount || 0);
                 }
             }
-            return prevFormData;
-        });
-    };
 
-    const handleEditClick = (order) => {
-        console.log("Opening modal for order:", order);  // Debugging line
-        setSelectedOrder(order);
-        setShowModal(true);
+            return updatedFormData;
+        });
     };
 
     const handleSave = async () => {
@@ -114,21 +100,76 @@ const OrderDetails = () => {
 
             const updatedOrder = await response.json();
 
-            if (updatedOrder.data.orderId === formData.orderId) {
+            if (updatedOrder.success) {
+                toast.success("Order updated successfully!");
                 await fetchOrder();
                 setIsEditing(false);
+            } else {
+                toast.error(updatedOrder.message || "Failed to update order.");
             }
         } catch (err) {
             console.error("Error updating order:", err);
-            alert("Failed to update order!");
+            toast.error(`Error: ${err.message}`);
         }
     };
+
+    const handleEditClick = (order) => {
+        if (!order) return;
+        console.log("Opening modal for order:", order);
+        setSelectedOrder(order);
+        setShowModal(true);
+    };
+
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);
 
+        // Destructure the necessary fields from formData
+        const { orID, isPickup, netTotal, updatedAdvance, updatedDeliveryCharge, updatedDiscount } = formData;
+        console.log(formData);
+        try {
+            // Send request to the "update-invoice" API
+            const response = await fetch("http://localhost:5001/api/admin/main/update-invoice", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    orID,
+                    isPickup,
+                    netTotal,
+                    updatedAdvance,
+                    updatedDeliveryCharge,
+                    updatedDiscount,
+                }),
+            });
+
+            // Handle the response
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Invoice and payment updated successfully!");
+
+                // Assuming you have a state `orders` to manage orders, we can update it
+                // setOrders((prevOrders) =>
+                //     prevOrders.map((order) =>
+                //         order.orID === orID
+                //             ? { ...order, netTotal, updatedAdvance, updatedDeliveryCharge, updatedDiscount }
+                //             : order
+                //     )
+                // );
+
+                setShowModal(false); // Close the modal if it's open
+            } else {
+                alert(data.error || "Failed to update invoice.");
+            }
+        } catch (error) {
+            console.error("Error updating invoice:", error);
+            alert("Server error. Please try again.");
+        }
     };
 
-        if (loading) return <p>Loading...</p>;
+
+    if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
 
@@ -178,7 +219,7 @@ const OrderDetails = () => {
                                         <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
-                                        <p><strong>Is Booked:</strong> {isBooked}</p>
+                                        <p><strong>Is Booked:</strong> {order.bookedItems.length > 0 ? "Yes" : "No"}</p>
                                     </div>
                                 </div>
 
@@ -233,14 +274,21 @@ const OrderDetails = () => {
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
                                         <>
-                                            <Button color="primary" onClick={() => setIsEditing(true)}>Edit Order</Button>
-                                            <Button color="success" className="ms-3" onClick={() => handleEditClick(order)}>Print Invoice</Button>
+                                            <Button color="primary" onClick={() => setIsEditing(true)} disabled={loading}>
+                                                {loading ? "Loading..." : "Edit Order"}
+                                            </Button>
+                                            <Button color="success" className="ms-3" onClick={() => handleEditClick(order)} disabled={loading}>
+                                                Print Invoice
+                                            </Button>
                                         </>
-
                                     ) : (
                                         <>
-                                            <Button color="success" onClick={handleSave}>Save Changes</Button>
-                                            <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)}>Cancel</Button>
+                                            <Button color="success" onClick={handleSave} disabled={loading}>
+                                                {loading ? "Saving..." : "Save Changes"}
+                                            </Button>
+                                            <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)} disabled={loading}>
+                                                Cancel
+                                            </Button>
                                         </>
                                     )}
                                 </div>
