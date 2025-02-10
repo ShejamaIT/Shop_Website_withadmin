@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
 import { useParams } from "react-router-dom";
@@ -13,6 +14,7 @@ const OrderDetails = () => {
     const [formData, setFormData] = useState({}); // Stores editable fields
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         fetchOrder();
@@ -25,6 +27,7 @@ const OrderDetails = () => {
 
             const data = await response.json();
             console.log(data.order);
+
             setOrder(data.order);
             setFormData({
                 ...data.order,
@@ -39,6 +42,10 @@ const OrderDetails = () => {
             setError(err.message);
             setLoading(false);
         }
+    };
+    const calculateTotal = () => {
+        const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
+        return itemTotal + (formData.deliveryCharge || 0) - (formData.discount || 0);
     };
 
     const handleChange = (e, index) => {
@@ -97,23 +104,30 @@ const OrderDetails = () => {
     };
 
     const handleSave = async () => {
-
+        const updatedTotal = calculateTotal();
+        const updatedData = { ...formData, totalPrice: updatedTotal };
         try {
 
             const response = await fetch(`http://localhost:5001/api/admin/main/update-order`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(updatedData),
             });
 
             if (!response.ok) throw new Error("Failed to update order.");
 
             const updatedOrder = await response.json();
 
-            if (updatedOrder.data.orderId === formData.orderId){
+            if (updatedOrder.data.orderId === updatedData.orderId){
                 // Fetch the updated order details after update
-                await fetchOrder();  // Call fetchOrder to get the updated order
-                setIsEditing(false);
+                if (updatedData.orderStatus === 'Accepted'){
+                    navigate(`/accept-order-detail/${updatedData.orderId}`);
+                }else {
+                    navigate("dashboard");
+                }
+
+                // await fetchOrder();  // Call fetchOrder to get the updated order
+                // setIsEditing(false);
             }
 
         } catch (err) {
@@ -229,23 +243,7 @@ const OrderDetails = () => {
                                                         />
                                                     </FormGroup>
                                                 )}
-                                                {!isEditing ? (
-                                                    <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
-                                                ) : (
-                                                    <FormGroup>
-                                                        <Label><strong>Delivery Status:</strong></Label>
-                                                        <Input
-                                                            type="select"
-                                                            name="deliveryStatus"
-                                                            value={formData.deliveryInfo.status}
-                                                            onChange={handleChange}
-                                                        >
-                                                            <option value="Pending">Pending</option>
-                                                            <option value="Completed">Completed</option>
-                                                            <option value="Cancelled">Cancelled</option>
-                                                        </Input>
-                                                    </FormGroup>
-                                                )}
+                                                <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
                                                 <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
                                             </div>
 
@@ -325,7 +323,8 @@ const OrderDetails = () => {
                                         </FormGroup>
                                     )}
 
-                                    <p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>
+                                    {/*<p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>*/}
+                                    <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
                                 </div>
 
                                 <div className="text-center mt-4">
