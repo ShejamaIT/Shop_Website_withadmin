@@ -576,6 +576,13 @@ router.put("/update-order", async (req, res) => {
 
         // Handle deliveryInfo table update if status is "Delivery"
         if (deliveryStatus === "Delivery" && deliveryInfo) {
+            const checkDeliveryQuery = `SELECT * FROM delivery WHERE orID = ?`;
+            const [existingDelivery] = await db.query(checkDeliveryQuery, [orderId]);
+
+            if (existingDelivery.length > 0) {
+
+            }
+
             const deliveryUpdateQuery = `
                 UPDATE delivery
                 SET address = ?, district = ?, contact = ?, schedule_Date = ?
@@ -594,6 +601,9 @@ router.put("/update-order", async (req, res) => {
                 const deleteDeliveryQuery = `DELETE FROM delivery WHERE orID = ?`;
                 await db.query(deleteDeliveryQuery, [orderId]);
             }
+
+            const updateDeliveryQuery = `UPDATE orders SET dvPrice = 0 WHERE orID = ?`;
+            const [existingDelivery1] = await db.query(updateDeliveryQuery, [orderId]);
         }
 
         return res.status(200).json({

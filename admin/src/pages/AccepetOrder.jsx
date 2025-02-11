@@ -71,7 +71,9 @@ const OrderDetails = () => {
         setFormData((prevFormData) => {
             let updatedFormData = { ...prevFormData };
 
-            if (name in prevFormData) {
+            if (name === "deliveryStatus") {
+                updatedFormData.deliveryStatus = value; // ✅ Correctly updating deliveryStatus
+            } else if (name in prevFormData) {
                 updatedFormData[name] = value;
             } else if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
                 updatedFormData.deliveryInfo = {
@@ -105,6 +107,7 @@ const OrderDetails = () => {
             return updatedFormData;
         });
     };
+
 
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
@@ -232,22 +235,20 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
+                                        {/* Delivery Status */}
                                         {!isEditing ? (
-                                            <p><strong>Delivery Status:</strong>
-                                                {order.deliveryStatus}
-                                            </p>
+                                            <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
                                         ) : (
                                             <FormGroup>
                                                 <Label><strong>Delivery Status:</strong></Label>
                                                 <Input
                                                     type="select"
-                                                    name="orderStatus"
-                                                    value={formData.orderStatus}
+                                                    name="deliveryStatus"
+                                                    value={formData.deliveryStatus ?? order.deliveryStatus}
                                                     onChange={handleChange}
                                                 >
                                                     <option value="Delivery">Delivery</option>
-                                                    <option value="Completed">Completed</option>
-                                                    <option value="Cancelled">Cancelled</option>
+                                                    <option value="Pick up">Pick up</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
