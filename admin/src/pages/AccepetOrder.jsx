@@ -348,18 +348,22 @@ const OrderDetails = () => {
                                         </FormGroup>
                                     )}
 
-                                    {!isEditing ? (
+                                    {formData.deliveryStatus === "Pick up" ? (
                                         <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
                                     ) : (
-                                        <FormGroup>
-                                            <Label><strong>Delivery Amount:</strong></Label>
-                                            <Input
-                                                type="text"
-                                                name="deliveryCharge"
-                                                value={formData.deliveryCharge ?? order.deliveryCharge}
-                                                onChange={handleChange}
-                                            />
-                                        </FormGroup>
+                                        !isEditing ? (
+                                            <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Delivery Amount:</strong></Label>
+                                                <Input
+                                                    type="text"
+                                                    name="deliveryCharge"
+                                                    value={formData.deliveryCharge ?? order.deliveryCharge}
+                                                    onChange={handleChange}
+                                                />
+                                            </FormGroup>
+                                        )
                                     )}
                                     <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
                                 </div>

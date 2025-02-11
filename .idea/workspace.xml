@@ -4,14 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed update order issue">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/changeQty.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/style/changeQty.css" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="fixed delivery status error">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/changeQty.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/changeQty.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +53,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "settings.editor.selected.configurable": "advanced.settings",
     "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
@@ -141,14 +138,7 @@
       <workItem from="1739072744751" duration="10942000" />
       <workItem from="1739091128453" duration="3202000" />
       <workItem from="1739094539357" duration="5841000" />
-      <workItem from="1739159373412" duration="41234000" />
-    </task>
-    <task id="LOCAL-00117" summary="load all orders and items">
-      <created>1738499555822</created>
-      <option name="number" value="00117" />
-      <option name="presentableId" value="LOCAL-00117" />
-      <option name="project" value="LOCAL" />
-      <updated>1738499555822</updated>
+      <workItem from="1739159373412" duration="43100000" />
     </task>
     <task id="LOCAL-00118" summary="backup 02/02 works">
       <created>1738557911571</created>
@@ -486,7 +476,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739186883390</updated>
     </task>
-    <option name="localTasksCounter" value="166" />
+    <task id="LOCAL-00166" summary="fixed update order issue">
+      <created>1739263858784</created>
+      <option name="number" value="00166" />
+      <option name="presentableId" value="LOCAL-00166" />
+      <option name="project" value="LOCAL" />
+      <updated>1739263858785</updated>
+    </task>
+    <option name="localTasksCounter" value="167" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -505,7 +502,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update item page" />
     <MESSAGE value="update place supplier order" />
     <MESSAGE value="update in production table" />
     <MESSAGE value="update fetch item detail" />
@@ -530,6 +526,7 @@
     <MESSAGE value="update pending order detail form" />
     <MESSAGE value="update accept order detail form" />
     <MESSAGE value="fixed update order issue" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed update order issue" />
+    <MESSAGE value="fixed delivery status error" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed delivery status error" />
   </component>
 </project>

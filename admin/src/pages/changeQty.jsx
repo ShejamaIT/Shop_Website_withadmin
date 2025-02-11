@@ -21,13 +21,6 @@ const ChangeQty = ({ selectedItem, setShowModal, handleSubmit2 }) => {
         // If the input is empty, treat it as 1, otherwise parse it to a number
         let newQty = value === "" ? 1 : parseInt(value, 10);
         console.log("newQty "+newQty);
-        // // If parsed value is invalid or less than 1, reset it to 1
-        // if (isNaN(newQty) || newQty < 1) {
-        //     newQty = 1;
-        // }
-        //
-        // // Ensure the quantity is within the stock limit
-        // newQty = Math.max(1, Math.min(selectedItem.stockQuantity, newQty));
 
         // Update state
         setQuantity(newQty);
