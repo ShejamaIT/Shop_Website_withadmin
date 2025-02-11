@@ -489,25 +489,24 @@ router.put("/update-order", async (req, res) => {
             if (existingRecord.length > 0) {
                 // If the record exists, update it
                 const updateAcceptOrderQuery = `
-            UPDATE accept_orders
-            SET itemReceived = ?, status = ?
-            WHERE orID = ? AND I_Id = ?`;
+                    UPDATE accept_orders
+                    SET itemReceived = ?, status = ?
+                    WHERE orID = ? AND I_Id = ?`;
                 await db.query(updateAcceptOrderQuery, [
                     itemReceived, itemStatus, orderId, item.itemId
                 ]);
             } else {
                 // If the record does not exist, insert a new one
                 const insertAcceptOrderQuery = `
-            INSERT INTO accept_orders (orID, I_Id, itemReceived, status)
-            VALUES (?, ?, ?, ?)`;
+                    INSERT INTO accept_orders (orID, I_Id, itemReceived, status)
+                    VALUES (?, ?, ?, ?)`;
                 await db.query(insertAcceptOrderQuery, [
                     orderId, item.itemId, itemReceived, itemStatus
                 ]);
             }
         }
 
-
-        // Handle booked items (Ensure an item is booked only once & remove if unchecked)
+        // Handle booked items & inventory update
         for (const item of items) {
             if (item.booked) {
                 const checkBookedItemQuery = `SELECT * FROM booked_item WHERE orID = ? AND I_Id = ?`;
@@ -520,7 +519,7 @@ router.put("/update-order", async (req, res) => {
                         VALUES (?, ?, ?)`;
                     await db.query(bookItemQuery, [orderId, item.itemId, item.quantity]);
 
-                    // Update inventory
+                    // Update inventory (only if booked is TRUE)
                     const updateItemQtyQuery = `
                         UPDATE Item
                         SET bookedQty = bookedQty + ?, availableQty = availableQty - ?
@@ -532,12 +531,17 @@ router.put("/update-order", async (req, res) => {
                 const deleteBookedItemQuery = `DELETE FROM booked_item WHERE orID = ? AND I_Id = ?`;
                 await db.query(deleteBookedItemQuery, [orderId, item.itemId]);
 
-                // Restore inventory
-                const restoreStockQuery = `
-                    UPDATE Item
-                    SET bookedQty = bookedQty - ?, availableQty = availableQty + ?
-                    WHERE I_Id = ?`;
-                await db.query(restoreStockQuery, [item.quantity, item.quantity, item.itemId]);
+                // Restore inventory (only if item was previously booked)
+                const checkIfBookedQuery = `SELECT * FROM Item WHERE I_Id = ? AND bookedQty >= ?`;
+                const [bookedCheck] = await db.query(checkIfBookedQuery, [item.itemId, item.quantity]);
+
+                if (bookedCheck.length > 0) {
+                    const restoreStockQuery = `
+                        UPDATE Item
+                        SET bookedQty = bookedQty - ?, availableQty = availableQty + ?
+                        WHERE I_Id = ?`;
+                    await db.query(restoreStockQuery, [item.quantity, item.quantity, item.itemId]);
+                }
             }
         }
 
@@ -579,6 +583,17 @@ router.put("/update-order", async (req, res) => {
             await db.query(deliveryUpdateQuery, [
                 deliveryInfo.address, deliveryInfo.district, phoneNumber, deliveryInfo.scheduleDate, orderId
             ]);
+        }
+
+        // **Newly Added Code: If deliveryStatus is "Pick Up", delete any existing delivery record**
+        if (deliveryStatus === "Pick Up") {
+            const checkDeliveryQuery = `SELECT * FROM delivery WHERE orID = ?`;
+            const [existingDelivery] = await db.query(checkDeliveryQuery, [orderId]);
+
+            if (existingDelivery.length > 0) {
+                const deleteDeliveryQuery = `DELETE FROM delivery WHERE orID = ?`;
+                await db.query(deleteDeliveryQuery, [orderId]);
+            }
         }
 
         return res.status(200).json({
@@ -1039,8 +1054,11 @@ router.post('/update-stock', async (req, res) => {
         await db.query(sqlUpdate, [newQty, newStatus, p_ID]);
 
         // Update the Item table stock quantity
-        const sqlUpdateItem = `UPDATE Item SET qty = qty + ? WHERE I_Id = ?`;
+        const sqlUpdateItem = `UPDATE Item SET stockQty = stockQty + ? WHERE I_Id = ?`;
         await db.query(sqlUpdateItem, [receivedQty, itemId]);
+
+        const sqlUpdateItem1 = `UPDATE Item SET availableQty = availableQty + ? WHERE I_Id = ?`;
+        await db.query(sqlUpdateItem1, [receivedQty, itemId]);
 
         return res.status(200).json({
             success: true,

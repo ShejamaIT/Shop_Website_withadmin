@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../style/invoice.css"; // Make sure this file includes the print styles
 
-const BillInvoice = ({ selectedOrder, setShowModal, handleSubmit }) => {
+const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
     const invoiceDate = new Date().toLocaleDateString();
 
     const [deliveryCharge, setDeliveryCharge] = useState(selectedOrder.deliveryCharge);
@@ -121,7 +121,7 @@ const BillInvoice = ({ selectedOrder, setShowModal, handleSubmit }) => {
                 {/* Print & Close Buttons */}
                 <div className="modal-buttons">
                     <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
-                    <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
+                    <button className="close-btn" onClick={() => setShowModal1(false)}>Close</button>
                 </div>
             </div>
         </div>

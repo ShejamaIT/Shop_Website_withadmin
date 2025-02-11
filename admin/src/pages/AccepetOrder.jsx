@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
 import BillInvoice from "./AccpetBillInvoice";
+import ChangeQty from "./changeQty";
 
 const OrderDetails = () => {
     const { id } = useParams();
@@ -18,7 +19,9 @@ const OrderDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [showModal1, setShowModal1] = useState(false);
 
     useEffect(() => {
         fetchOrder();
@@ -133,8 +136,17 @@ const OrderDetails = () => {
         if (!order) return;
         console.log("Opening modal for order:", order);
         setSelectedOrder(order);
+        setShowModal1(true);
+    };
+    const handleEditClick2 = (item) => {
+        if (!item) return; // Prevent issues if item is undefined
+        console.log("Opening modal for order:", item);
+        setSelectedItem(item);
         setShowModal(true);
     };
+    const handleSubmit2 = async (formData) => {
+        console.log("Submitting form data:", formData);
+    }
 
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);
@@ -220,7 +232,25 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
-                                        <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
+                                        {!isEditing ? (
+                                            <p><strong>Delivery Status:</strong>
+                                                {order.deliveryStatus}
+                                            </p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Delivery Status:</strong></Label>
+                                                <Input
+                                                    type="select"
+                                                    name="orderStatus"
+                                                    value={formData.orderStatus}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="Delivery">Delivery</option>
+                                                    <option value="Completed">Completed</option>
+                                                    <option value="Cancelled">Cancelled</option>
+                                                </Input>
+                                            </FormGroup>
+                                        )}
                                         <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
                                         <p><strong>Contact:</strong> {order.phoneNumber}</p>
                                         <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
@@ -228,6 +258,42 @@ const OrderDetails = () => {
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
                                         <p><strong>Is Booked:</strong> {order.bookedItems.length > 0 ? "Yes" : "No"}</p>
                                     </div>
+                                    {order.deliveryInfo && (
+                                        <>
+                                            <h5 className="mt-4">Delivery Details</h5>
+                                            <div className="order-general">
+                                                <p><strong>Delivery ID:</strong> {order.deliveryInfo.deliveryId}</p>
+                                                {!isEditing ? (
+                                                    <p><strong>Address:</strong> {order.deliveryInfo.address}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Address:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="address"
+                                                            value={formData.deliveryInfo.address ?? order.deliveryInfo.address}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                {!isEditing ? (
+                                                    <p><strong>District:</strong> {order.deliveryInfo.district}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>District:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="district"
+                                                            value={formData.deliveryInfo.district ?? order.deliveryInfo.district}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
+                                                <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
 
                                 {/* Ordered Items */}
@@ -237,19 +303,7 @@ const OrderDetails = () => {
                                         {order.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
-
-                                                <p><strong>Requested Quantity:</strong>
-                                                    {!isEditing ? (
-                                                        item.quantity
-                                                    ) : (
-                                                        <Input
-                                                            type="number"
-                                                            value={formData.items[index]?.quantity || ""}
-                                                            onChange={(e) => handleChange(e, index)}
-                                                            min="0"
-                                                        />
-                                                    )}
-                                                </p>
+                                                <p><strong>Requested Quantity:</strong> {item.quantity}</p>
                                                 <p><strong>Amount:</strong> Rs. {formData.items[index]?.price || 0}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
@@ -264,6 +318,14 @@ const OrderDetails = () => {
                                                             />
                                                             Mark as Booked
                                                         </Label>
+                                                        <Button
+                                                            color="secondary"
+                                                            className="ms-4"
+                                                            onClick={() => handleEditClick2(item)} // Ensure this is not treating `selectedItem` as a function
+                                                            disabled={loading}
+                                                        >
+                                                            Change Qty
+                                                        </Button>
                                                     </FormGroup>
                                                 )}
                                             </li>
@@ -326,11 +388,18 @@ const OrderDetails = () => {
                                 </div>
                             </div>
 
-                            {showModal && selectedOrder && (
+                            {showModal1 && selectedOrder && (
                                 <BillInvoice
                                     selectedOrder={selectedOrder}
-                                    setShowModal={setShowModal}
+                                    setShowModal1={setShowModal1}
                                     handleSubmit={handleSubmit}
+                                />
+                            )}
+                            {showModal && selectedItem && (
+                                <ChangeQty
+                                    selectedItem={selectedItem} // Pass selectedItem as an object
+                                    setShowModal={setShowModal}
+                                    handleSubmit2={handleSubmit2}
                                 />
                             )}
                         </Col>

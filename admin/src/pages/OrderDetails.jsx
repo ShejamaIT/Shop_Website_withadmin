@@ -6,6 +6,8 @@ import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
+import BillInvoice from "./AccpetBillInvoice";
+import ChangeQty from "./changeQty";
 
 const OrderDetails = () => {
     const { id } = useParams(); // Get order ID from URL
@@ -15,6 +17,8 @@ const OrderDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate(); // Initialize navigate
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         fetchOrder();
@@ -106,6 +110,7 @@ const OrderDetails = () => {
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
+        console.log(updatedData);
         try {
 
             const response = await fetch(`http://localhost:5001/api/admin/main/update-order`, {
@@ -133,6 +138,15 @@ const OrderDetails = () => {
             alert("Failed to update order!");
         }
     };
+    const handleEditClick = (item) => {
+        if (!item) return; // Prevent issues if item is undefined
+        console.log("Opening modal for order:", item);
+        setSelectedItem(item);
+        setShowModal(true);
+    };
+    const handleSubmit2 = async (formData) => {
+        console.log("Submitting form data:", formData);
+    }
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -178,8 +192,24 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
-
-                                        <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
+                                        {!isEditing ? (
+                                            <p><strong>Delivery Status:</strong>
+                                                {order.deliveryStatus}
+                                            </p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Delivery Status:</strong></Label>
+                                                <Input
+                                                    type="select"
+                                                    name="deliveryStatus"
+                                                    value={formData.deliveryStatus}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="Delivery">Delivery</option>
+                                                    <option value="Pick up">Pick up</option>
+                                                </Input>
+                                            </FormGroup>
+                                        )}
                                         <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
                                         {!isEditing ? (
                                             <p><strong>Contact:</strong> {order.phoneNumber}</p>
@@ -254,20 +284,7 @@ const OrderDetails = () => {
                                         {order.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
-
-                                                {!isEditing ? (
-                                                    <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                ) : (
-                                                    <FormGroup>
-                                                        <Label><strong>Requested Quantity:</strong></Label>
-                                                        <Input
-                                                            type="number"
-                                                            value={formData.items[index]?.quantity || ""}
-                                                            onChange={(e) => handleChange(e, index)}
-                                                            min="0"
-                                                        />
-                                                    </FormGroup>
-                                                )}
+                                                <p><strong>Requested Quantity:</strong> {item.quantity}</p>
                                                 <p><strong>Amount:</strong> Rs. {item.price}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
@@ -282,6 +299,14 @@ const OrderDetails = () => {
                                                             />
                                                             Mark as Booked
                                                         </Label>
+                                                        <Button
+                                                            color="secondary"
+                                                            className="ms-4"
+                                                            onClick={() => handleEditClick(item)} // Ensure this is not treating `selectedItem` as a function
+                                                            disabled={loading}
+                                                        >
+                                                            Change Qty
+                                                        </Button>
                                                     </FormGroup>
                                                 )}
 
@@ -335,6 +360,14 @@ const OrderDetails = () => {
                                     )}
                                 </div>
                             </div>
+
+                            {showModal && selectedItem && (
+                                <ChangeQty
+                                    selectedItem={selectedItem} // Pass selectedItem as an object
+                                    setShowModal={setShowModal}
+                                    handleSubmit2={handleSubmit2}
+                                />
+                            )}
                         </Col>
                     </Row>
                 </Container>
