@@ -58,6 +58,7 @@ const OrderDetails = () => {
             setLoading(false);
         }
     };
+
     const calculateTotal = () => {
         const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
         const delivery = Number(formData.deliveryCharge || 0);
@@ -112,6 +113,7 @@ const OrderDetails = () => {
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
+        console.log(updatedData);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/update-order`, {
                 method: "PUT",
@@ -141,12 +143,14 @@ const OrderDetails = () => {
         setSelectedOrder(order);
         setShowModal1(true);
     };
+
     const handleEditClick2 = (item) => {
         if (!item) return; // Prevent issues if item is undefined
         console.log("Opening modal for order:", item);
         setSelectedItem(item);
         setShowModal(true);
     };
+
     const handleSubmit2 = async (formData) => {
         console.log("Submitting form data:", formData);
     }

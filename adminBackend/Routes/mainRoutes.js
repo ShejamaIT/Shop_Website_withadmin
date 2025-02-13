@@ -8,7 +8,7 @@ const router = express.Router();
 const storage = multer.memoryStorage(); // Store image in memory
 const upload = multer({ storage: storage });
 
-//Get all orders
+// Get all orders
 router.get("/orders", async (req, res) => {
     try {
         // Query the database to fetch all Orders
@@ -45,7 +45,7 @@ router.get("/orders", async (req, res) => {
     }
 });
 
-//get all items
+// Get all items
 router.get("/allitems", async (req, res) => {
     try {
         // Query the database to fetch all items
@@ -76,7 +76,7 @@ router.get("/allitems", async (req, res) => {
     }
 });
 
-//Save Supplier
+// Save Supplier
 router.post("/supplier", async (req, res) => {
     const sql = `INSERT INTO Supplier (s_ID,name,contact) VALUES (?, ?,?)`;
     const values = [
@@ -155,7 +155,7 @@ router.post("/item", upload.single('img'), async (req, res) => {
     }
 });
 
-//get one accept order in-detail
+// Get one accept order in-detail
 router.get("/accept-order-details", async (req, res) => {
     try {
         const { orID } = req.query;
@@ -267,11 +267,11 @@ router.get("/accept-order-details", async (req, res) => {
             }
         }
 
-        // 7️⃣ If Order Status is "Accepted", Trigger Additional API Call (Optional)
-        if (orderData.orStatus === "Accepted") {
-            console.log(`Calling additional API for accepted order: ${orID}`);
-            // Add API call logic here if needed (e.g., send notification)
-        }
+        // // 7️⃣ If Order Status is "Accepted", Trigger Additional API Call (Optional)
+        // if (orderData.orStatus === "Accepted") {
+        //     // console.log(`Calling additional API for accepted order: ${orID}`);
+        //     // Add API call logic here if needed (e.g., send notification)
+        // }
 
         return res.status(200).json({
             success: true,
@@ -289,7 +289,7 @@ router.get("/accept-order-details", async (req, res) => {
     }
 });
 
-//get one order in-detail
+// Get one order in-detail
 router.get("/order-details", async (req, res) => {
     try {
         const { orID } = req.query;
@@ -424,7 +424,7 @@ router.get("/order-details", async (req, res) => {
     }
 });
 
-//update order
+// Update order
 router.put("/update-order", async (req, res) => {
     try {
         const {
@@ -444,6 +444,8 @@ router.put("/update-order", async (req, res) => {
             items,
             deliveryInfo
         } = req.body;
+
+        console.log(req.body);
 
         // Check if the order exists
         const orderCheckQuery = `SELECT * FROM orders WHERE OrID = ?`;
@@ -683,7 +685,7 @@ router.get("/item-details", async (req, res) => {
     }
 });
 
-//Get all orders by status= pending
+// Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
     try {
         // Query the database to fetch all pending Orders
@@ -720,7 +722,8 @@ router.get("/orders-pending", async (req, res) => {
     }
 });
 
-//Get all orders by status= accepting
+
+// Get all orders by status= accepting
 router.get("/orders-accepting", async (req, res) => {
     try {
         // Query to fetch orders with their acceptance status from accept_orders table
@@ -796,7 +799,84 @@ router.get("/orders-accepting", async (req, res) => {
     }
 });
 
-//Get all orders by status= inproduction
+
+// Get all orders by status= completed
+router.get("/orders-completed", async (req, res) => {
+    try {
+        // Query to fetch orders with their acceptance status from accept_orders table
+        const query = `
+            SELECT 
+                o.OrID, 
+                o.orDate, 
+                o.customerEmail, 
+                o.orStatus, 
+                o.dvStatus, 
+                o.dvPrice, 
+                o.disPrice, 
+                o.totPrice, 
+                o.stID, 
+                o.expectedDate AS expectedDeliveryDate, 
+                ao.itemReceived, 
+                ao.status AS acceptanceStatus
+            FROM Orders o
+            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            WHERE o.orStatus = 'Completed'
+        `;
+
+        const [orders] = await db.query(query);
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No Accepted orders found" });
+        }
+
+        // Group orders by OrID
+        const groupedOrders = {};
+
+        orders.forEach(order => {
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customerEmail: order.customerEmail,
+                    orStatus: order.orStatus,
+                    dvStatus: order.dvStatus,
+                    dvPrice: order.dvPrice,
+                    disPrice: order.disPrice,
+                    totPrice: order.totPrice,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    itemReceived: order.itemReceived,
+                    acceptanceStatus: "Complete", // Default status is Complete
+                    acceptanceStatuses: [] // Track individual item statuses
+                };
+            }
+
+            // Add each item status to the list
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // If any of the items have an "In Production" or "None" status, mark the order as "Incomplete"
+            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
+                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
+            }
+        });
+
+        // Convert the grouped orders into an array
+        const formattedOrders = Object.values(groupedOrders);
+
+        // Send the formatted orders with their acceptance status as a JSON response
+        return res.status(200).json({
+            message: "Accepted orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching accepted orders:", error.message);
+        return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
+    }
+});
+
+// Get all orders by status= inproduction
 router.get("/orders-inproduction", async (req, res) => {
     try {
         // Query the database to fetch all pending Orders
@@ -863,7 +943,7 @@ router.get("/allitemslessone", async (req, res) => {
     }
 });
 
-//get all suppliers for the item
+// get all suppliers for the item
 router.get("/item-suppliers", async (req, res) => {
     try {
         const { I_Id } = req.query;
@@ -908,7 +988,7 @@ router.get("/item-suppliers", async (req, res) => {
     }
 });
 
-//get item detail in item table only
+// get item detail in item table only
 router.get("/item-detail", async (req, res) => {
     try {
         const { Id } = req.query;
@@ -953,7 +1033,7 @@ router.get("/item-detail", async (req, res) => {
     }
 });
 
-//save in production
+// save in production
 router.post('/add-production', async (req, res) => {
     const {itemId, qty, supplierId, expectedDate, specialnote} = req.body;
 
@@ -1083,7 +1163,7 @@ router.post('/update-stock', async (req, res) => {
     }
 });
 
-// update order in invoice part
+// Update order in invoice part
 router.put("/update-invoice", async (req, res) => {
     try {
         console.log(req.body);

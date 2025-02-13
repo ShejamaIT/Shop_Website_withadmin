@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
-import TableThree from "../components/tables/TableThree";
 import TablePending from "../components/tables/TablePending";
 import TableAccepting from "../components/tables/TableAccepting";
 import TableInproduction from "../components/tables/TableInProduction";
@@ -10,6 +9,7 @@ import NavBar from "../components/header/navBar";
 import '../style/Dashboard.css';
 import classnames from "classnames";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
+import TableCompleted from "../components/tables/TableCompleted";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("1"); // Main tab tracking
@@ -49,6 +49,15 @@ const AllOrders = () => {
                                 style={{ cursor: "pointer" }}
                             >
                                 In Production
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={classnames({ active: activeTab === "4" })}
+                                onClick={() => setActiveTab("4")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                Completed Orders
                             </NavLink>
                         </NavItem>
                     </Nav>
@@ -103,6 +112,12 @@ const AllOrders = () => {
                         <TabPane tabId="3">
                             <Row>
                                 <TableInproduction />
+                            </Row>
+                        </TabPane>
+
+                        <TabPane tabId="4">
+                            <Row>
+                                <TableCompleted />
                             </Row>
                         </TabPane>
                     </TabContent>
