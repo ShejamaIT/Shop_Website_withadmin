@@ -108,6 +108,7 @@ const CompleteOrderDetails = () => {
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
         console.log(updatedData);
+        let updatedDeliveryOrder = null;
 
         try {
             // Step 1: Update order general details only if changed
@@ -164,7 +165,7 @@ const CompleteOrderDetails = () => {
                     throw new Error("Failed to update delivery information.");
                 }
 
-                const updatedDeliveryOrder = await deliveryResponse.json();
+                updatedDeliveryOrder = await deliveryResponse.json();
                 console.log(updatedDeliveryOrder);
 
                 if (!updatedDeliveryOrder.success) {
@@ -177,8 +178,21 @@ const CompleteOrderDetails = () => {
             toast.success("Order updated successfully!");
 
             // Fetch updated order details
-            await fetchOrder();
-            setIsEditing(false);
+            if (updatedDeliveryOrder.orID === updatedData.orderId) {
+                // Fetch the updated order details after update
+                if (updatedData.orderStatus === 'Accepted') {
+                    navigate(`/accept-order-detail/${updatedData.orderId}`);
+                } else if (updatedData.orderStatus === 'Pending') {
+                    // Navigate to a specific page for Pending status
+                    navigate(`/order-detail/${updatedData.orderId}`);
+                } else if (updatedData.orderStatus === 'Completed') {
+                    // Navigate to a page where Shipped orders are detailed
+                    navigate(`/complete-order-detail/${updatedData.orderId}`);
+                } else {
+                    // Default redirect when no specific status matches
+                    navigate("/dashboard");
+                }
+            }
 
         } catch (err) {
             console.error("Error updating order:", err);
@@ -339,7 +353,6 @@ const CompleteOrderDetails = () => {
                                         <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
-                                        <p><strong>Is Booked:</strong> {order.bookedItems.length > 0 ? "Yes" : "No"}</p>
                                     </div>
                                     {order.deliveryInfo && (
                                         <>

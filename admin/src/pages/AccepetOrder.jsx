@@ -115,7 +115,6 @@ const OrderDetails = () => {
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
         console.log(updatedData);
-        let updatedDeliveryOrder = null;
 
         try {
             // Step 1: Update order general details only if changed
@@ -172,7 +171,7 @@ const OrderDetails = () => {
                     throw new Error("Failed to update delivery information.");
                 }
 
-                updatedDeliveryOrder = await deliveryResponse.json();
+                const updatedDeliveryOrder = await deliveryResponse.json();
                 console.log(updatedDeliveryOrder);
 
                 if (!updatedDeliveryOrder.success) {
@@ -185,21 +184,8 @@ const OrderDetails = () => {
             toast.success("Order updated successfully!");
 
             // Fetch updated order details
-            if (updatedDeliveryOrder.orID === updatedData.orderId) {
-                // Fetch the updated order details after update
-                if (updatedData.orderStatus === 'Accepted') {
-                    navigate(`/accept-order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Pending') {
-                    // Navigate to a specific page for Pending status
-                    navigate(`/order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Completed') {
-                    // Navigate to a page where Shipped orders are detailed
-                    navigate(`/complete-order-detail/${updatedData.orderId}`);
-                } else {
-                    // Default redirect when no specific status matches
-                    navigate("/dashboard");
-                }
-            }
+            await fetchOrder();
+            setIsEditing(false);
 
         } catch (err) {
             console.error("Error updating order:", err);

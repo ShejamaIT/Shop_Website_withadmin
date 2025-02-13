@@ -123,15 +123,22 @@ const OrderDetails = () => {
 
             const updatedOrder = await response.json();
 
-            if (updatedOrder.data.orderId === updatedData.orderId){
+            if (updatedOrder.data.orderId === updatedData.orderId) {
                 // Fetch the updated order details after update
-                if (updatedData.orderStatus === 'Accepted'){
+                if (updatedData.orderStatus === 'Accepted') {
                     navigate(`/accept-order-detail/${updatedData.orderId}`);
-                }else {
+                } else if (updatedData.orderStatus === 'Pending') {
+                    // Navigate to a specific page for Pending status
+                    navigate(`/order-detail/${updatedData.orderId}`);
+                } else if (updatedData.orderStatus === 'Completed') {
+                    // Navigate to a page where Shipped orders are detailed
+                    navigate(`/complete-order-detail/${updatedData.orderId}`);
+                } else {
+                    // Default redirect when no specific status matches
                     navigate("/dashboard");
                 }
-
             }
+
 
         } catch (err) {
             console.error("Error updating order:", err);
