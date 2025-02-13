@@ -13,6 +13,7 @@ import User from "../pages/User";
 import SignUp from "../pages/SignUp";
 import Orders from "../pages/Orders";
 import AccepetOrderDetails from "../pages/AccepetOrder";
+import CompleteOrderDetails from "../pages/CompletedOrders";
 const Router = () => {
     return(
         <Routes>
@@ -28,6 +29,7 @@ const Router = () => {
             <Route path="dashboard/product-detail/:id" element={<ProductDetails />} />
             <Route path="order-detail/:id" element={<OrderDetails />} />
             <Route path="accept-order-detail/:id" element={<AccepetOrderDetails />} />
+            <Route path="complete-order-detail/:id" element={<CompleteOrderDetails />} />
             <Route path="item-detail/:id" element={<ItemDetails />} />
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />
         </Routes>

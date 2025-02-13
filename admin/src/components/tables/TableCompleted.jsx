@@ -38,7 +38,7 @@ const TableCompleted = () => {
 
     // Function to navigate to order details page
     const handleViewOrder = (orderId) => {
-        navigate(`/order-detail/${orderId}`); // Navigate to OrderDetails page
+        navigate(`/complete-order-detail/${orderId}`); // Navigate to OrderDetails page
     };
 
     return (

@@ -10,7 +10,7 @@ import "../style/orderDetails.css";
 import BillInvoice from "./AccpetBillInvoice";
 import ChangeQty from "./changeQty";
 
-const OrderDetails = () => {
+const CompleteOrderDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate(); // Initialize useNavigate
     const [order, setOrder] = useState(null);
@@ -33,13 +33,6 @@ const OrderDetails = () => {
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
-
-            // Check order status, if not "Accepted", redirect to another page
-            if (data.order.orderStatus !== "Accepted") {
-                navigate("/dashboard"); // Redirect to another page
-                return;
-            }
-
 
             // Ensure `isBooked` updates correctly
             const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);
@@ -115,7 +108,6 @@ const OrderDetails = () => {
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
         console.log(updatedData);
-        let updatedDeliveryOrder = null;
 
         try {
             // Step 1: Update order general details only if changed
@@ -172,7 +164,7 @@ const OrderDetails = () => {
                     throw new Error("Failed to update delivery information.");
                 }
 
-                updatedDeliveryOrder = await deliveryResponse.json();
+                const updatedDeliveryOrder = await deliveryResponse.json();
                 console.log(updatedDeliveryOrder);
 
                 if (!updatedDeliveryOrder.success) {
@@ -185,21 +177,8 @@ const OrderDetails = () => {
             toast.success("Order updated successfully!");
 
             // Fetch updated order details
-            if (updatedDeliveryOrder.orID === updatedData.orderId) {
-                // Fetch the updated order details after update
-                if (updatedData.orderStatus === 'Accepted') {
-                    navigate(`/accept-order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Pending') {
-                    // Navigate to a specific page for Pending status
-                    navigate(`/order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Completed') {
-                    // Navigate to a page where Shipped orders are detailed
-                    navigate(`/complete-order-detail/${updatedData.orderId}`);
-                } else {
-                    // Default redirect when no specific status matches
-                    navigate("/dashboard");
-                }
-            }
+            await fetchOrder();
+            setIsEditing(false);
 
         } catch (err) {
             console.error("Error updating order:", err);
@@ -222,7 +201,6 @@ const OrderDetails = () => {
     };
 
     const hasItemsChanged = (updatedData) => {
-
         return updatedData.items.some((item, index) => {
             const originalItem = order.items[index];
             return item.quantity !== originalItem.quantity ||
@@ -232,7 +210,6 @@ const OrderDetails = () => {
     };
 
     const hasDeliveryChanged = (updatedData) => {
-        // Check if delivery-related information has changed
         return updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryInfo !== order.deliveryInfo;
     };
@@ -520,4 +497,4 @@ const OrderDetails = () => {
     );
 };
 
-export default OrderDetails;
+export default CompleteOrderDetails;
