@@ -14,6 +14,8 @@ import SignUp from "../pages/SignUp";
 import Orders from "../pages/Orders";
 import AccepetOrderDetails from "../pages/AccepetOrder";
 import CompleteOrderDetails from "../pages/CompletedOrders";
+import AllSaleteam from "../pages/AllSaleteam";
+import SaleteamDetail  from "../pages/SaleteamDetail";
 const Router = () => {
     return(
         <Routes>
@@ -24,6 +26,7 @@ const Router = () => {
             <Route path='all-orders' element={<AllOrders/>}/>
             <Route path='dashboard/users' element={<User/>}/>
             <Route path='all-products' element={<AllProducts/>}/>
+            <Route path='all-saleteam' element={<AllSaleteam/>}/>
             <Route path='dashboard/add-products' element={<AddProduct/>}/>
             <Route path='dashboard/orders' element={<Orders/>}/>
             <Route path="dashboard/product-detail/:id" element={<ProductDetails />} />
@@ -32,6 +35,7 @@ const Router = () => {
             <Route path="complete-order-detail/:id" element={<CompleteOrderDetails />} />
             <Route path="item-detail/:id" element={<ItemDetails />} />
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />
+            <Route path="saleteam-detail/:id" element={<SaleteamDetail />} />
         </Routes>
     ) ;
 };

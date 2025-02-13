@@ -10,7 +10,7 @@ const nav__link = [
     { path: '/dashboard' , display: 'Dashboard'},
     { path: '/all-orders', display: 'Orders' },
     { path: '/all-products', display: 'Items' },
-    { path: '/cart', display: 'Employees' },
+    { path: '/all-saleteam', display: 'Employees' },
 ];
 
 const NavBar = () => {

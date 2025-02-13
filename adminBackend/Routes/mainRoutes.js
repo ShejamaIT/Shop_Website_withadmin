@@ -1491,4 +1491,126 @@ router.put("/update-delivery", async (req, res) => {
 });
 
 
+//Get All sale team members
+router.get("/salesteam", async (req, res) => {
+    try {
+        // Query the database to fetch all sales team members
+        const [salesTeam] = await db.query(`
+            SELECT 
+                st.stID, 
+                st.target, 
+                st.currentRate, 
+                e.E_Id, 
+                e.name AS employeeName, 
+                e.address, 
+                e.nic, 
+                e.dob, 
+                e.contact, 
+                e.job, 
+                e.basic
+            FROM sales_team st
+            JOIN Employee e ON st.E_Id = e.E_Id;
+        `);
+
+        // If no sales team members found, return a 404 status
+        if (salesTeam.length === 0) {
+            return res.status(404).json({ message: "No sales team members found" });
+        }
+
+        // Format the response data
+        const formattedSalesTeam = salesTeam.map(member => ({
+            stID: member.stID,
+            E_Id: member.E_Id,
+            employeeName: member.employeeName,
+            address: member.address,
+            nic: member.nic,
+            dob: member.dob,
+            contact: member.contact,
+            job: member.job,
+            basic: member.basic,
+            target: member.target,
+            currentRate: member.currentRate
+        }));
+
+        // Send the formatted data as a JSON response
+        return res.status(200).json({
+            message: "Sales team members found.",
+            data: formattedSalesTeam
+        });
+
+    } catch (error) {
+        console.error("Error fetching sales team members:", error.message);
+        return res.status(500).json({ message: "Error fetching sales team members" });
+    }
+});
+
+// Get orders for a specific sales team member (stID)
+router.get("/orders/by-sales-team", async (req, res) => {
+    try {
+        const { stID } = req.query;
+        console.log(stID);
+
+        // Query the database to fetch sales team member details and their orders using a JOIN
+        const [results] = await db.query(`
+            SELECT 
+                e.name AS employeeName, 
+                e.contact AS employeeContact,
+                e.nic AS employeeNic,
+                e.dob AS employeeDob,
+                e.address AS employeeAddress,
+                e.job AS employeeJob,
+                e.basic AS employeeBasic,
+                st.stID,
+                st.target,
+                st.currentRate,
+                o.OrID AS orderId,
+                o.orDate AS orderDate,
+                o.totPrice AS totalPrice
+            FROM sales_team st
+            JOIN Employee e ON e.E_Id = st.E_Id
+            LEFT JOIN Orders o ON o.stID = st.stID
+            WHERE st.stID = ?;
+        `, [stID]);
+
+        // Check if we have any data for the given sales team
+        if (results.length === 0) {
+            return res.status(404).json({ message: "No orders found for this sales team member." });
+        }
+
+        // Prepare the response with sales team details and orders
+        const memberDetails = {
+            employeeName: results[0].employeeName,
+            employeeContact: results[0].employeeContact,
+            employeeNic: results[0].employeeNic,
+            employeeDob: results[0].employeeDob,
+            employeeAddress: results[0].employeeAddress,
+            employeeJob: results[0].employeeJob,
+            employeeBasic: results[0].employeeBasic,
+            stID: results[0].stID,
+            target: results[0].target,
+            currentRate: results[0].currentRate,
+        };
+
+        const orders = results.map(order => ({
+            orderId: order.orderId,
+            orderDate: order.orderDate,
+            totalPrice: order.totalPrice
+        }));
+
+        // Send the member details and orders as a JSON response
+        return res.status(200).json({
+            message: "Sales team details and orders fetched successfully.",
+            data: {
+                memberDetails,
+                orders
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching orders and member details:", error.message);
+        return res.status(500).json({ message: "Error fetching orders and member details." });
+    }
+});
+
+
 export default router;
