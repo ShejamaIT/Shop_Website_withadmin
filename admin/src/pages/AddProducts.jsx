@@ -9,8 +9,11 @@ const AddItem = () => {
         I_name: "",
         Ca_Id: "", // Category ID
         Ty_id: "", // Type ID
+        sub_one: "", // Sub One ID
+        sub_two: "", // Sub Two ID
         descrip: "",
         color: "",
+        material: "",
         price: "",
         warrantyPeriod: "",
         cost: "",
@@ -60,6 +63,10 @@ const AddItem = () => {
             setFormData((prev) => ({ ...prev, [name]: files[0] }));
         }
     };
+    // Handle Other Material Change
+    const handleOtherMaterialChange = (e) => {
+        setFormData((prev) => ({ ...prev, otherMaterial: e.target.value }));
+    };
 
     // Handle Form Submission
     const handleSubmit = async (e) => {
@@ -81,7 +88,9 @@ const AddItem = () => {
 
             console.log("Fetched Type ID:", typeId);
 
-            // Prepare FormData object for file upload
+            // If "Other" material is selected, set the material to the otherMaterial value
+            const materialToSend = formData.material === "Other" ? formData.otherMaterial : formData.material;
+            console.log(materialToSend);
             const formDataToSend = new FormData();
             formDataToSend.append("I_Id", formData.I_Id);
             formDataToSend.append("I_name", formData.I_name);
@@ -89,6 +98,7 @@ const AddItem = () => {
             formDataToSend.append("Ty_id", typeId);
             formDataToSend.append("descrip", formData.descrip);
             formDataToSend.append("color", formData.color);
+            formDataToSend.append("material", materialToSend); // Send the correct material value
             formDataToSend.append("price", formData.price);
             formDataToSend.append("warrantyPeriod", formData.warrantyPeriod);
             formDataToSend.append("cost", formData.cost);
@@ -96,12 +106,12 @@ const AddItem = () => {
             // Append Required Images
             if (formData.img) formDataToSend.append("img", formData.img);
             if (formData.img1) formDataToSend.append("img1", formData.img1);
-            if (formData.img2) formDataToSend.append("img2", formData.img2);
 
             // Append Optional Image
+            if (formData.img2) formDataToSend.append("img2", formData.img2);
             if (formData.img3) formDataToSend.append("img3", formData.img3);
 
-            // Submit form data
+            // Submit the form data (You can now handle the form data submission)
             const submitResponse = await fetch("http://localhost:5001/api/admin/main/add-item", {
                 method: "POST",
                 body: formDataToSend, // Send FormData
@@ -120,6 +130,7 @@ const AddItem = () => {
                     sub_two: "",
                     descrip: "",
                     color: "",
+                    material: "",
                     price: "",
                     warrantyPeriod: "",
                     cost: "",
@@ -148,6 +159,7 @@ const AddItem = () => {
             sub_two: "",
             descrip: "",
             color: "",
+            material: "",
             price: "",
             warrantyPeriod: "",
             cost: "",
@@ -247,8 +259,43 @@ const AddItem = () => {
                         </FormGroup>
 
                         <FormGroup>
-                            <Label for="price">Price</Label>
-                            <Input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required />
+                            <Row>
+                                <Col md={6}>
+                                    <Label for="material">Material</Label>
+                                    <Input
+                                        type="select"
+                                        name="material"
+                                        id="material"
+                                        value={formData.material}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">Select Material</option>
+                                        <option value="Teak">Teak</option>
+                                        <option value="Mahogani">Mahogani</option>
+                                        <option value="Mara">Mara</option>
+                                        <option value="Attoriya">Attoriya</option>
+                                        <option value="Sapu">Sapu</option>
+                                        <option value="Steel">Steel</option>
+                                        <option value="MDF">MDF</option>
+                                        <option value="MM">MM</option>
+                                        <option value="Other">Other</option>
+                                    </Input>
+                                </Col>
+                                <Col md={6}>
+                                    {formData.material === "Other" && (
+                                        <Input
+                                            type="text"
+                                            name="otherMaterial"
+                                            id="otherMaterial"
+                                            placeholder="Enter custom material"
+                                            value={formData.otherMaterial || ""} // This ensures it is editable
+                                            onChange={handleOtherMaterialChange}
+                                            required
+                                        />
+                                    )}
+                                </Col>
+                            </Row>
                         </FormGroup>
 
                         <FormGroup>
@@ -259,6 +306,11 @@ const AddItem = () => {
                         <FormGroup>
                             <Label for="cost">Cost</Label>
                             <Input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} required />
+                        </FormGroup>
+
+                        <FormGroup>
+                            <Label for="price">Price</Label>
+                            <Input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required />
                         </FormGroup>
 
                         {/* Image Upload Inputs */}

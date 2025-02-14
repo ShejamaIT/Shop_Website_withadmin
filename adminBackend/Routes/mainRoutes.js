@@ -4,7 +4,7 @@ import db from '../utils/db.js';
 
 const router = express.Router();
 
-
+// Save  new item
 router.post("/add-item", upload.fields([
     { name: "img", maxCount: 1 },
     { name: "img1", maxCount: 1 },
@@ -13,7 +13,8 @@ router.post("/add-item", upload.fields([
 ]), async (req, res) => {
     try {
         // Validate request body
-        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost } = req.body;
+        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost ,material } = req.body;
+        console.log(req.body);
         if (!I_Id || !I_name || !Ty_id || !price || !req.files || !req.files["img"] || !req.files["img1"]) {
             return res.status(400).json({ success: false, message: "Missing required fields or mandatory images." });
         }
@@ -30,9 +31,8 @@ router.post("/add-item", upload.fields([
 
 
         const itemValues = [
-            I_Id, I_name, Ty_id, descrip, color, parsedPrice, imgBuffer, warrantyPeriod, parsedCost
+            I_Id, I_name, Ty_id, descrip, color,material, parsedPrice, imgBuffer, warrantyPeriod, parsedCost
         ];
-        console.log(itemValues);
 
         const imgValues = [
             I_Id,
@@ -40,12 +40,11 @@ router.post("/add-item", upload.fields([
             img2Buffer ? Buffer.from(img2Buffer) : null,
             img3Buffer ? Buffer.from(img3Buffer) : null
         ];
-        console.log(imgValues);
 
 
         // Insert into `Item` table (Main image)
-        const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color, price, stockQty, bookedQty, availableQty, img, warrantyPeriod, cost) 
-                         VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?);`;
+        const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color,material, price, stockQty, bookedQty, availableQty, img, warrantyPeriod, cost) 
+                         VALUES (?, ?, ?, ?, ?,?, ?, 0, 0, 0, ?, ?, ?);`;
 
         await db.query(itemSql, itemValues);
 
@@ -63,6 +62,7 @@ router.post("/add-item", upload.fields([
                 Ty_id: Ty_id,
                 descrip,
                 color,
+                material,
                 price: parsedPrice,
                 warrantyPeriod,
                 cost: parsedCost
@@ -177,53 +177,6 @@ router.post("/supplier", async (req, res) => {
         });
     }
 });
-
-
-// router.post("/item", upload.single('img'), async (req, res) => {
-//     const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img,s_ID,warrantyPeriod,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`;
-//
-//     const values = [
-//         req.body.I_Id,
-//         req.body.I_name,
-//         req.body.Ty_id,
-//         req.body.descrip,
-//         req.body.price,
-//         req.body.qty,
-//         req.file.buffer,  // The image file is in `req.file.buffer`
-//         req.body.s_ID,
-//         req.body.warrantyPeriod,
-//         req.body.cost
-//     ];
-//
-//     try {
-//         const [result] = await db.query(sql, values);
-//
-//         return res.status(201).json({
-//             success: true,
-//             message: "Item added successfully",
-//             data: {
-//                 I_Id: req.body.I_Id,
-//                 I_name: req.body.I_name,
-//                 Ty_id: req.body.Ty_id,
-//                 descrip: req.body.descrip,
-//                 price: req.body.price,
-//                 qty: req.body.qty,
-//                 warrantyPeriod : req.body.warrantyPeriod,
-//                 cost : req.body.cost,
-//                 s_ID: req.body.s_ID
-//             },
-//         });
-//     } catch (err) {
-//         console.error("Error inserting item data:", err.message);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Error inserting data into database",
-//             details: err.message,
-//         });
-//     }
-// });
-
-
 
 // Get one accept order in-detail
 router.get("/accept-order-details", async (req, res) => {
@@ -1184,7 +1137,6 @@ router.get("/orders-accept", async (req, res) => {
         return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
     }
 });
-
 
 // Update order
 router.put("/update-order", async (req, res) => {

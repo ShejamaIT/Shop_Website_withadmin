@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update item save">
-      <change afterPath="$PROJECT_DIR$/adminBackend/middlewares/upload.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/server.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -145,14 +143,7 @@
       <workItem from="1739094539357" duration="5841000" />
       <workItem from="1739159373412" duration="48678000" />
       <workItem from="1739416561583" duration="32899000" />
-      <workItem from="1739504997512" duration="8139000" />
-    </task>
-    <task id="LOCAL-00126" summary="add admin backend">
-      <created>1738729226616</created>
-      <option name="number" value="00126" />
-      <option name="presentableId" value="LOCAL-00126" />
-      <option name="project" value="LOCAL" />
-      <updated>1738729226617</updated>
+      <workItem from="1739504997512" duration="13437000" />
     </task>
     <task id="LOCAL-00127" summary="update place order">
       <created>1738732122762</created>
@@ -490,7 +481,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739502971716</updated>
     </task>
-    <option name="localTasksCounter" value="175" />
+    <task id="LOCAL-00175" summary="finish item save api with view">
+      <created>1739516598111</created>
+      <option name="number" value="00175" />
+      <option name="presentableId" value="LOCAL-00175" />
+      <option name="project" value="LOCAL" />
+      <updated>1739516598112</updated>
+    </task>
+    <option name="localTasksCounter" value="176" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -509,7 +507,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="final update in 02/06" />
     <MESSAGE value="update receive product pop without api" />
     <MESSAGE value="update receive product pop with api" />
     <MESSAGE value="update supplier order" />
@@ -533,6 +530,7 @@
     <MESSAGE value="fixed delivery status error" />
     <MESSAGE value="update with complete form" />
     <MESSAGE value="update saleteam details" />
+    <MESSAGE value="finish item save api with view" />
     <MESSAGE value="update item save" />
     <option name="LAST_COMMIT_MESSAGE" value="update item save" />
   </component>

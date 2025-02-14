@@ -38,6 +38,7 @@ CREATE TABLE Item(
       Ty_id VARCHAR(15),
       descrip TEXT,
       color VARCHAR(20),
+      material VARCHAR(20),
       price DOUBLE,
       qty INT,
       warrantyPeriod VARCHAR(25),
