@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-
+import upload from "./middlewares/upload.js";
 import mainRoutes from "./Routes/mainRoutes.js";
 import auth from "./Routes/auth.js";
 
@@ -13,6 +13,8 @@ const app = express();
 const PORT = process.env.PORT || 6000; // If port is not defined then default to 6000
 
 // Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true })); // Add this to handle form data
 // app.use(cors());
 app.use(cors({
     origin: 'http://localhost:3000',

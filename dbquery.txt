@@ -37,6 +37,7 @@ CREATE TABLE Item(
       I_name TEXT ,
       Ty_id VARCHAR(15),
       descrip TEXT,
+      color VARCHAR(20),
       price DOUBLE,
       qty INT,
       warrantyPeriod VARCHAR(25),
@@ -47,6 +48,14 @@ CREATE TABLE Item(
       img LONGBLOB NOT NULL,
 	        CONSTRAINT FOREIGN KEY (Ty_id) REFERENCES Type (Ty_id)
 			    ON DELETE CASCADE ON UPDATE CASCADE,
+);
+CREATE TABLE Item_img(
+    I_Id VARCHAR(25) PRIMARY KEY,
+    img1 LONGBLOB NOT NULL,
+    img2 LONGBLOB,
+    img3 LONGBLOB,
+    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+            ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE Employee(
       E_Id VARCHAR(15) PRIMARY KEY,

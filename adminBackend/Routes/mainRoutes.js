@@ -1,12 +1,80 @@
 import express from 'express';
-import multer from 'multer';
-import bcrypt from "bcrypt";
+import upload from "../middlewares/upload.js";
 import db from '../utils/db.js';
 
 const router = express.Router();
-// Set up multer for image upload
-const storage = multer.memoryStorage(); // Store image in memory
-const upload = multer({ storage: storage });
+
+
+router.post("/add-item", upload.fields([
+    { name: "img", maxCount: 1 },
+    { name: "img1", maxCount: 1 },
+    { name: "img2", maxCount: 1 },
+    { name: "img3", maxCount: 1 }
+]), async (req, res) => {
+    try {
+        // Validate request body
+        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost } = req.body;
+        if (!I_Id || !I_name || !Ty_id || !price || !req.files || !req.files["img"] || !req.files["img1"]) {
+            return res.status(400).json({ success: false, message: "Missing required fields or mandatory images." });
+        }
+        // Convert data to appropriate types
+        const parsedPrice = parseFloat(price) || 0;
+        const parsedCost = parseFloat(cost) || 0;
+
+
+        // Extract image buffers
+        const imgBuffer = req.files["img"][0].buffer;
+        const img1Buffer = req.files["img1"][0].buffer;
+        const img2Buffer = req.files["img2"] ? req.files["img2"][0].buffer : null;
+        const img3Buffer = req.files["img3"] ? req.files["img3"][0].buffer : null;
+
+
+        const itemValues = [
+            I_Id, I_name, Ty_id, descrip, color, parsedPrice, imgBuffer, warrantyPeriod, parsedCost
+        ];
+        console.log(itemValues);
+
+        const imgValues = [
+            I_Id,
+            img1Buffer ? Buffer.from(img1Buffer) : null,
+            img2Buffer ? Buffer.from(img2Buffer) : null,
+            img3Buffer ? Buffer.from(img3Buffer) : null
+        ];
+        console.log(imgValues);
+
+
+        // Insert into `Item` table (Main image)
+        const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color, price, stockQty, bookedQty, availableQty, img, warrantyPeriod, cost) 
+                         VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?);`;
+
+        await db.query(itemSql, itemValues);
+
+        // Insert into `Item_img` table (Additional images)
+        const imgSql = `INSERT INTO Item_img (I_Id, img1, img2, img3) VALUES (?, ?, ?, ?);`;
+
+        await db.query(imgSql, imgValues);
+
+        res.status(201).json({
+            success: true,
+            message: "Item added successfully",
+            data: {
+                I_Id,
+                I_name,
+                Ty_id: Ty_id,
+                descrip,
+                color,
+                price: parsedPrice,
+                warrantyPeriod,
+                cost: parsedCost
+            }
+        });
+
+    } catch (err) {
+        console.error("❌ Error inserting item data:", err.message);
+        res.status(500).json({ success: false, message: "Error inserting data into database", details: err.message });
+    }
+});
+
 
 // Get all orders
 router.get("/orders", async (req, res) => {
@@ -110,7 +178,7 @@ router.post("/supplier", async (req, res) => {
     }
 });
 
-// Save New Item
+
 // router.post("/item", upload.single('img'), async (req, res) => {
 //     const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img,s_ID,warrantyPeriod,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`;
 //
@@ -155,72 +223,6 @@ router.post("/supplier", async (req, res) => {
 //     }
 // });
 
-router.post("/item", upload.single('img'), async (req, res) => {
-    try {
-        // Step 1: Fetch the last item ID to generate the new one
-        const [rows] = await db.query("SELECT I_Id FROM Item ORDER BY I_Id DESC LIMIT 1");
-
-        let newItemId = "I_0001"; // Default ID in case no items exist
-
-        if (rows.length > 0) {
-            // Step 2: Extract the numeric part of the last item ID (e.g., I_0001 -> 0001)
-            const lastItemId = rows[0].I_Id;
-            const lastIdNumber = parseInt(lastItemId.split('_')[1]);
-
-            // Step 3: Increment the numeric part by 1
-            const newIdNumber = lastIdNumber + 1;
-
-            // Step 4: Generate the new item ID (e.g., I_0002)
-            newItemId = `I_${newIdNumber.toString().padStart(4, '0')}`;
-        }
-
-        // Prepare the SQL query
-        const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img, s_ID, warrantyPeriod, cost) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-        // Prepare the values to be inserted into the database
-        const values = [
-            newItemId,                // New item ID
-            req.body.I_name,          // Item name
-            req.body.Ty_id,           // Type ID
-            req.body.descrip,         // Description
-            req.body.price,           // Price
-            req.body.qty,             // Quantity
-            req.file.buffer,          // Image file buffer (uploaded image)
-            req.body.s_ID,            // Supplier ID
-            req.body.warrantyPeriod,  // Warranty Period
-            req.body.cost             // Cost
-        ];
-
-        // Step 5: Insert the new item into the database
-        const [result] = await db.query(sql, values);
-
-        // Send a success response
-        return res.status(201).json({
-            success: true,
-            message: "Item added successfully",
-            data: {
-                I_Id: newItemId,          // Send the newly generated ID
-                I_name: req.body.I_name,
-                Ty_id: req.body.Ty_id,
-                descrip: req.body.descrip,
-                price: req.body.price,
-                qty: req.body.qty,
-                warrantyPeriod: req.body.warrantyPeriod,
-                cost: req.body.cost,
-                s_ID: req.body.s_ID
-            }
-        });
-    } catch (err) {
-        // Catch errors and send a failure response
-        console.error("Error inserting item data:", err.message);
-        return res.status(500).json({
-            success: false,
-            message: "Error inserting data into database",
-            details: err.message
-        });
-    }
-});
 
 
 // Get one accept order in-detail
