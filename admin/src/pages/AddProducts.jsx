@@ -20,10 +20,12 @@ const AddItem = () => {
         img: null,  // Main Image
         img1: null, // Additional Images
         img2: null,
-        img3: null
+        img3: null,
+        s_Id:""
     });
 
     const [categories, setCategories] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
     const [types, setTypes] = useState([]);
 
     // Fetch Categories
@@ -34,6 +36,23 @@ const AddItem = () => {
             .catch((err) => {
                 console.error("Error fetching categories:", err);
                 toast.error("Failed to load categories.");
+            });
+    }, []);
+
+    // Fetch All Suppliers when component loads
+    useEffect(() => {
+        fetch("http://localhost:5001/api/admin/main/suppliers")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    setSuppliers(data.suppliers); // Store suppliers data
+                } else {
+                    toast.error("Failed to load suppliers.");
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching suppliers:", err);
+                toast.error("Error fetching suppliers.");
             });
     }, []);
 
@@ -86,8 +105,6 @@ const AddItem = () => {
             const typeData = await typeResponse.json();
             const typeId = typeData.type.Ty_Id; // Extract Type ID
 
-            console.log("Fetched Type ID:", typeId);
-
             // If "Other" material is selected, set the material to the otherMaterial value
             const materialToSend = formData.material === "Other" ? formData.otherMaterial : formData.material;
             console.log(materialToSend);
@@ -102,6 +119,7 @@ const AddItem = () => {
             formDataToSend.append("price", formData.price);
             formDataToSend.append("warrantyPeriod", formData.warrantyPeriod);
             formDataToSend.append("cost", formData.cost);
+            formDataToSend.append("s_Id", formData.s_Id);
 
             // Append Required Images
             if (formData.img) formDataToSend.append("img", formData.img);
@@ -110,6 +128,7 @@ const AddItem = () => {
             // Append Optional Image
             if (formData.img2) formDataToSend.append("img2", formData.img2);
             if (formData.img3) formDataToSend.append("img3", formData.img3);
+            console.log(formData);
 
             // Submit the form data (You can now handle the form data submission)
             const submitResponse = await fetch("http://localhost:5001/api/admin/main/add-item", {
@@ -138,10 +157,13 @@ const AddItem = () => {
                     img1: null,
                     img2: null,
                     img3: null,
+                    s_Id:"",
                 });
             } else {
                 toast.error(submitData.message || "Failed to add item.");
             }
+
+
         } catch (error) {
             console.error("Error submitting form:", error);
             toast.error(error.message || "Error during form submission.");
@@ -167,6 +189,7 @@ const AddItem = () => {
             img1: null,
             img2: null,
             img3: null,
+            s_Id:"",
         });
     };
 
@@ -329,6 +352,18 @@ const AddItem = () => {
                         <FormGroup>
                             <Label for="img3">Additional Image 3 (Optional)</Label>
                             <Input type="file" name="img3" id="img3" accept="image/*" onChange={handleImageChange} />
+                        </FormGroup>
+
+                        <FormGroup>
+                            <Label for="s_Id">Select Supplier</Label>
+                            <Input type="select" name="s_Id" id="s_Id" value={formData.s_Id} onChange={handleChange} required>
+                                <option value="">Select Supplier</option>
+                                {suppliers.map((supplier) => (
+                                    <option key={supplier.s_ID} value={supplier.s_ID}>
+                                        {supplier.name} ({supplier.contact})
+                                    </option>
+                                ))}
+                            </Input>
                         </FormGroup>
 
                         <div>

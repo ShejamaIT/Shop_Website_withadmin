@@ -13,11 +13,7 @@ router.post("/add-item", upload.fields([
 ]), async (req, res) => {
     try {
         // Validate request body
-        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost ,material } = req.body;
-        console.log(req.body);
-        if (!I_Id || !I_name || !Ty_id || !price || !req.files || !req.files["img"] || !req.files["img1"]) {
-            return res.status(400).json({ success: false, message: "Missing required fields or mandatory images." });
-        }
+        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost ,material,s_Id } = req.body;
         // Convert data to appropriate types
         const parsedPrice = parseFloat(price) || 0;
         const parsedCost = parseFloat(cost) || 0;
@@ -26,8 +22,8 @@ router.post("/add-item", upload.fields([
         // Extract image buffers
         const imgBuffer = req.files["img"][0].buffer;
         const img1Buffer = req.files["img1"][0].buffer;
-        const img2Buffer = req.files["img2"] ? req.files["img2"][0].buffer : null;
-        const img3Buffer = req.files["img3"] ? req.files["img3"][0].buffer : null;
+        const img2Buffer = req.files["img2"][0].buffer ;
+        const img3Buffer = req.files["img3"][0].buffer;
 
 
         const itemValues = [
@@ -41,6 +37,9 @@ router.post("/add-item", upload.fields([
             img3Buffer ? Buffer.from(img3Buffer) : null
         ];
 
+        const supplierValues = [
+            I_Id, s_Id
+        ];
 
         // Insert into `Item` table (Main image)
         const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color,material, price, stockQty, bookedQty, availableQty, img, warrantyPeriod, cost) 
@@ -52,6 +51,11 @@ router.post("/add-item", upload.fields([
         const imgSql = `INSERT INTO Item_img (I_Id, img1, img2, img3) VALUES (?, ?, ?, ?);`;
 
         await db.query(imgSql, imgValues);
+
+        // Insert into `Item_supplier` table
+        const itemsuplierSql = `INSERT INTO item_supplier (I_Id, s_ID) VALUES (?, ?);`;
+
+        await db.query(itemsuplierSql, supplierValues);
 
         res.status(201).json({
             success: true,
@@ -803,6 +807,33 @@ router.get("/item-suppliers", async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching item suppliers:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+// Get all suppliers
+router.get("/suppliers", async (req, res) => {
+    try {
+        // Step 1: Fetch all suppliers
+        const suppliersQuery = `
+            SELECT s_ID, name, contact
+            FROM Supplier`;
+
+        const [suppliersResult] = await db.query(suppliersQuery);
+
+        // Step 2: Check if suppliers were found
+        if (suppliersResult.length === 0) {
+            return res.status(404).json({ success: false, message: "No suppliers found" });
+        }
+
+        // Step 3: Return the supplier details
+        return res.status(200).json({
+            success: true,
+            suppliers: suppliersResult,
+        });
+
+    } catch (error) {
+        console.error("Error fetching suppliers:", error.message);
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
