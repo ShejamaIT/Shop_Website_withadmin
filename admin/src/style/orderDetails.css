@@ -55,7 +55,26 @@
     display: inline-block;
     text-transform: capitalize;
 }
+/* Different status colors */
+.status.completed {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+}
 
+.status.cancelled {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.status.pending {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #f39c12;
+}
+
+.status.accepted {
+    background-color: rgba(155, 89, 182, 0.2);
+    color: #9b59b6;
+}
 /* Ordered Items List */
 .order-items {
     list-style: none;

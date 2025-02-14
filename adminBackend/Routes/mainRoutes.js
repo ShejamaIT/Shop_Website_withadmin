@@ -111,49 +111,117 @@ router.post("/supplier", async (req, res) => {
 });
 
 // Save New Item
+// router.post("/item", upload.single('img'), async (req, res) => {
+//     const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img,s_ID,warrantyPeriod,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`;
+//
+//     const values = [
+//         req.body.I_Id,
+//         req.body.I_name,
+//         req.body.Ty_id,
+//         req.body.descrip,
+//         req.body.price,
+//         req.body.qty,
+//         req.file.buffer,  // The image file is in `req.file.buffer`
+//         req.body.s_ID,
+//         req.body.warrantyPeriod,
+//         req.body.cost
+//     ];
+//
+//     try {
+//         const [result] = await db.query(sql, values);
+//
+//         return res.status(201).json({
+//             success: true,
+//             message: "Item added successfully",
+//             data: {
+//                 I_Id: req.body.I_Id,
+//                 I_name: req.body.I_name,
+//                 Ty_id: req.body.Ty_id,
+//                 descrip: req.body.descrip,
+//                 price: req.body.price,
+//                 qty: req.body.qty,
+//                 warrantyPeriod : req.body.warrantyPeriod,
+//                 cost : req.body.cost,
+//                 s_ID: req.body.s_ID
+//             },
+//         });
+//     } catch (err) {
+//         console.error("Error inserting item data:", err.message);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Error inserting data into database",
+//             details: err.message,
+//         });
+//     }
+// });
+
 router.post("/item", upload.single('img'), async (req, res) => {
-    const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img,s_ID,warrantyPeriod,cost) VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`;
-
-    const values = [
-        req.body.I_Id,
-        req.body.I_name,
-        req.body.Ty_id,
-        req.body.descrip,
-        req.body.price,
-        req.body.qty,
-        req.file.buffer,  // The image file is in `req.file.buffer`
-        req.body.s_ID,
-        req.body.warrantyPeriod,
-        req.body.cost
-    ];
-
     try {
+        // Step 1: Fetch the last item ID to generate the new one
+        const [rows] = await db.query("SELECT I_Id FROM Item ORDER BY I_Id DESC LIMIT 1");
+
+        let newItemId = "I_0001"; // Default ID in case no items exist
+
+        if (rows.length > 0) {
+            // Step 2: Extract the numeric part of the last item ID (e.g., I_0001 -> 0001)
+            const lastItemId = rows[0].I_Id;
+            const lastIdNumber = parseInt(lastItemId.split('_')[1]);
+
+            // Step 3: Increment the numeric part by 1
+            const newIdNumber = lastIdNumber + 1;
+
+            // Step 4: Generate the new item ID (e.g., I_0002)
+            newItemId = `I_${newIdNumber.toString().padStart(4, '0')}`;
+        }
+
+        // Prepare the SQL query
+        const sql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, price, qty, img, s_ID, warrantyPeriod, cost) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        // Prepare the values to be inserted into the database
+        const values = [
+            newItemId,                // New item ID
+            req.body.I_name,          // Item name
+            req.body.Ty_id,           // Type ID
+            req.body.descrip,         // Description
+            req.body.price,           // Price
+            req.body.qty,             // Quantity
+            req.file.buffer,          // Image file buffer (uploaded image)
+            req.body.s_ID,            // Supplier ID
+            req.body.warrantyPeriod,  // Warranty Period
+            req.body.cost             // Cost
+        ];
+
+        // Step 5: Insert the new item into the database
         const [result] = await db.query(sql, values);
 
+        // Send a success response
         return res.status(201).json({
             success: true,
             message: "Item added successfully",
             data: {
-                I_Id: req.body.I_Id,
+                I_Id: newItemId,          // Send the newly generated ID
                 I_name: req.body.I_name,
                 Ty_id: req.body.Ty_id,
                 descrip: req.body.descrip,
                 price: req.body.price,
                 qty: req.body.qty,
-                warrantyPeriod : req.body.warrantyPeriod,
-                cost : req.body.cost,
+                warrantyPeriod: req.body.warrantyPeriod,
+                cost: req.body.cost,
                 s_ID: req.body.s_ID
-            },
+            }
         });
     } catch (err) {
+        // Catch errors and send a failure response
         console.error("Error inserting item data:", err.message);
         return res.status(500).json({
             success: false,
             message: "Error inserting data into database",
-            details: err.message,
+            details: err.message
         });
     }
 });
+
 
 // Get one accept order in-detail
 router.get("/accept-order-details", async (req, res) => {
@@ -1611,6 +1679,101 @@ router.get("/orders/by-sales-team", async (req, res) => {
         return res.status(500).json({ message: "Error fetching orders and member details." });
     }
 });
+
+// Get all categories
+router.get("/categories", async (req, res) => {
+    try {
+        // Query the database to fetch all categories
+        const [categories] = await db.query("SELECT * FROM Category");
+
+        // If no categories found, return a 404 status
+        if (categories.length === 0) {
+            return res.status(404).json({ message: "No categories found" });
+        }
+
+        // Map through categories to format the response
+        const formattedCategories = categories.map(category => ({
+            id: category.Ca_Id,  // Assuming you have a Ca_Id column for the category ID
+            name: category.name   // Assuming you have a name column for the category name
+        }));
+
+        // Send the formatted categories as a JSON response
+        return res.status(200).json(formattedCategories);
+    } catch (error) {
+        console.error("Error fetching categories:", error.message);
+        return res.status(500).json({ message: "Error fetching categories" });
+    }
+});
+
+
+//API to Get All Sub Categories (sub_one and sub_two) by Category ID (Ca_Id):
+router.get("/types", async (req, res) => {
+    try {
+        const { Ca_Id } = req.query; // Get Category ID from the query parameters
+
+        if (!Ca_Id) {
+            return res.status(400).json({ message: "Category ID is required." });
+        }
+
+        // Query the database to fetch all types for the given Ca_Id
+        const [types] = await db.query(`
+            SELECT Ty_Id, sub_one, sub_two
+            FROM Type
+            WHERE Ca_Id = ?;
+        `, [Ca_Id]);
+
+        // If no types found for this category, return a 404 status
+        if (types.length === 0) {
+            return res.status(404).json({ message: "No types found for this category." });
+        }
+
+        // Send the types as a JSON response
+        return res.status(200).json({
+            message: "Types found.",
+            types: types,
+        });
+
+    } catch (error) {
+        console.error("Error fetching types:", error.message);
+        return res.status(500).json({ message: "Error fetching types" });
+    }
+});
+
+// Find Type id
+router.get("/find-types", async (req, res) => {
+    try {
+        const { Ca_Id, sub_one, sub_two } = req.query; // Get Category ID, sub_one, and sub_two from the query parameters
+        console.log(req.query);
+
+        if (!Ca_Id || !sub_one || !sub_two) {
+            return res.status(400).json({ message: "Category ID, Sub One, and Sub Two are required." });
+        }
+
+        // Query the database to fetch the type for the given Ca_Id, sub_one, and sub_two
+        const [types] = await db.query(`
+            SELECT Ty_Id, sub_one, sub_two
+            FROM Type
+            WHERE Ca_Id = ? AND sub_one = ? AND sub_two = ?;
+        `, [Ca_Id, sub_one, sub_two]);
+
+        // If no type found for this combination, return a 404 status
+        if (types.length === 0) {
+            return res.status(404).json({ message: "No type found for this category and sub-one/sub-two combination." });
+        }
+        console.log(types[0]);
+
+        // Send the type as a JSON response
+        return res.status(200).json({
+            message: "Type found.",
+            type: types[0],  // Return only the first matching type
+        });
+
+    } catch (error) {
+        console.error("Error fetching types:", error.message);
+        return res.status(500).json({ message: "Error fetching types" });
+    }
+});
+
 
 
 export default router;
