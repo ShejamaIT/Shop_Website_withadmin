@@ -242,3 +242,16 @@ CREATE TABLE order_Payment(
                          ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE main_stock_received (
+    sr_ID INT AUTO_INCREMENT PRIMARY KEY,
+    s_ID VARCHAR(25) NOT NULL,
+    I_Id varchar(25) NOT NULL,
+    rDate DATE NOT NULL,
+    rec_count INT,
+    detail TEXT,
+    CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
+                    ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                  ON DELETE CASCADE ON UPDATE CASCADE
+);
+

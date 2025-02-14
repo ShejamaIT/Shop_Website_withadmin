@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import Helmet from "../components/Helmet/Helmet";
-import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
+import { Container, Row, Col, Button, Input, FormGroup, Label, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/ItemDetails.css";
+
 
 const ItemDetails = () => {
     const { id } = useParams(); // Get item ID from URL
@@ -13,6 +14,18 @@ const ItemDetails = () => {
     const [formData, setFormData] = useState({}); // Stores editable fields
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [showSupplierModal, setShowSupplierModal] = useState(false);
+    const [stockData, setStockData] = useState({
+        supplierId: "",
+        stockCount: "",
+        date: ""
+    });
+    const [supplierData, setSupplierData] = useState({
+        supplierName: "",
+        contactInfo: "",
+        email: ""
+    });
 
     useEffect(() => {
         fetchItem();
@@ -70,11 +83,55 @@ const ItemDetails = () => {
             reader.onloadend = () => {
                 setFormData((prevFormData) => ({
                     ...prevFormData,
-                    [name]: reader.result.split(',')[1], // Store base64 string without the data URL prefix
+                    [name]: reader.result.split(',')[1], // Store base64 without data URL prefix
                 }));
             };
 
             reader.readAsDataURL(file);
+        }
+    };
+    const handleStockChange = (e) => {
+        const { name, value } = e.target;
+        setStockData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSupplierChange = (e) => {
+        const { name, value } = e.target;
+        setSupplierData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddStock = async () => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/add-stock`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ itemId: id, ...stockData }),
+            });
+
+            if (!response.ok) throw new Error("Failed to add stock.");
+
+            toast.success("Stock added successfully!");
+            setShowStockModal(false);
+            fetchItem();
+        } catch (err) {
+            toast.error("Failed to add stock!");
+        }
+    };
+
+    const handleAddSupplier = async () => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/add-supplier`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(supplierData),
+            });
+
+            if (!response.ok) throw new Error("Failed to add supplier.");
+
+            toast.success("Supplier added successfully!");
+            setShowSupplierModal(false);
+        } catch (err) {
+            toast.error("Failed to add supplier!");
         }
     };
 
@@ -273,33 +330,44 @@ const ItemDetails = () => {
                                 </div>
 
                                 {/* Item Image */}
-                                <div className="item-image">
-                                    <h5 className="mt-4">Item Image</h5>
-                                    {!isEditing ? (
-                                        // Display the image if not editing
-                                        <img
-                                            src={`data:image/png;base64,${item.img}`}
-                                            alt={item.I_name}
-                                            className="item-image-display"
-                                        />
-                                    ) : (
-                                        // Show the input field for image editing (or add the logic to upload the image)
-                                        <FormGroup>
-                                            <Label><strong>Item Image:</strong></Label>
-                                            <Input
-                                                type="file"
-                                                name="img"
-                                                onChange={handleImageChange}
-                                            />
-                                        </FormGroup>
-                                    )}
+                                <div className="item-images">
+                                    <h5 className="mt-4">Item Images</h5>
+                                    <Row className="image-row">
+                                        {[{ key: "img", label: "Main Image" }, { key: "img1", label: "Image 1" }, { key: "img2", label: "Image 2" }, { key: "img3", label: "Image 3" }].map(({ key, label }) => (
+                                            <Col md="3" key={key} className="image-col">
+                                                <div className="image-container">
+                                                    {!isEditing ? (
+                                                        item[key] ? (
+                                                            <img
+                                                                src={`data:image/png;base64,${item[key]}`}
+                                                                alt={label}
+                                                                className="item-image"
+                                                            />
+                                                        ) : (
+                                                            <div className="no-image">No Image Available</div>
+                                                        )
+                                                    ) : (
+                                                        <FormGroup>
+                                                            <Label><strong>{label}:</strong></Label>
+                                                            <Input type="file" name={key} onChange={handleImageChange} />
+                                                        </FormGroup>
+                                                    )}
+                                                </div>
+                                            </Col>
+                                        ))}
+                                    </Row>
                                 </div>
 
 
                                 {/* Buttons */}
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
-                                        <Button color="primary" onClick={() => setIsEditing(true)}>Edit Item</Button>
+                                        <>
+                                            <Button color="primary" className="ms-3" onClick={() => setIsEditing(true)}>Edit Item</Button>
+                                            <Button color="secondary" className="ms-3" onClick={() => setShowSupplierModal(true)}>Add Supplier</Button>
+                                            <Button color="danger" className="ms-3" onClick={() => setShowStockModal(true)}>Add Stock</Button>
+                                        </>
+
                                     ) : (
                                         <>
                                             <Button color="success" onClick={handleSave}>Save Changes</Button>
@@ -308,6 +376,53 @@ const ItemDetails = () => {
                                     )}
                                 </div>
                             </div>
+
+                            {/* Add Stock Modal */}
+                            <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
+                                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Add Stock</ModalHeader>
+                                <ModalBody>
+                                    <FormGroup>
+                                        <Label>Supplier ID</Label>
+                                        <Input type="text" name="supplierId" value={stockData.supplierId} onChange={handleStockChange} />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Stock Count</Label>
+                                        <Input type="number" name="stockCount" value={stockData.stockCount} onChange={handleStockChange} />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Date</Label>
+                                        <Input type="date" name="date" value={stockData.date} onChange={handleStockChange} />
+                                    </FormGroup>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" onClick={handleAddStock}>Add Stock</Button>
+                                    <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
+
+                            {/* Add Supplier Modal */}
+                            <Modal isOpen={showSupplierModal} toggle={() => setShowSupplierModal(!showSupplierModal)}>
+                                <ModalHeader toggle={() => setShowSupplierModal(!showSupplierModal)}>Add Supplier</ModalHeader>
+                                <ModalBody>
+                                    <FormGroup>
+                                        <Label>Supplier Name</Label>
+                                        <Input type="text" name="supplierName" value={supplierData.supplierName} onChange={handleSupplierChange} />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Contact Info</Label>
+                                        <Input type="text" name="contactInfo" value={supplierData.contactInfo} onChange={handleSupplierChange} />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Email</Label>
+                                        <Input type="email" name="email" value={supplierData.email} onChange={handleSupplierChange} />
+                                    </FormGroup>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" onClick={handleAddSupplier}>Add Supplier</Button>
+                                    <Button color="secondary" onClick={() => setShowSupplierModal(false)}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
+
                         </Col>
                     </Row>
                 </Container>

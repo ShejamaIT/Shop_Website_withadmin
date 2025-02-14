@@ -462,13 +462,13 @@ router.get("/item-details", async (req, res) => {
 
         // Step 1: Fetch Item details along with Type and Category information
         const itemQuery = `
-            SELECT 
-                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty,I.bookedQty,I.availableQty,
-                I.warrantyPeriod, I.s_ID, I.cost, I.img, 
+            SELECT
+                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty,
+                I.warrantyPeriod, I.s_ID, I.cost, I.img,
                 T.sub_one, T.sub_two, C.name AS category_name
             FROM Item I
-            JOIN Type T ON I.Ty_id = T.Ty_Id
-            JOIN Category C ON T.Ca_Id = C.Ca_Id
+                     JOIN Type T ON I.Ty_id = T.Ty_Id
+                     JOIN Category C ON T.Ca_Id = C.Ca_Id
             WHERE I.I_Id = ?`;
 
         const [itemResult] = await db.query(itemQuery, [I_Id]);
@@ -479,7 +479,28 @@ router.get("/item-details", async (req, res) => {
 
         const itemData = itemResult[0];
 
-        // Step 2: Construct final response
+        // Step 2: Fetch additional images from Item_img table
+        const imageQuery = `SELECT img1, img2, img3 FROM Item_img WHERE I_Id = ?`;
+        const [imageResult] = await db.query(imageQuery, [I_Id]);
+
+        let imgData = {
+            img1: null,
+            img2: null,
+            img3: null
+        };
+
+        if (imageResult.length > 0) {
+            imgData = {
+                img1: imageResult[0].img1 ? Buffer.from(imageResult[0].img1).toString("base64") : null,
+                img2: imageResult[0].img2 ? Buffer.from(imageResult[0].img2).toString("base64") : null,
+                img3: imageResult[0].img3 ? Buffer.from(imageResult[0].img3).toString("base64") : null,
+            };
+        }
+
+        // Convert the main image from Item table to Base64
+        const mainImgBase64 = itemData.img ? Buffer.from(itemData.img).toString("base64") : null;
+
+        // Step 3: Construct final response
         const responseData = {
             success: true,
             item: {
@@ -494,7 +515,10 @@ router.get("/item-details", async (req, res) => {
                 warrantyPeriod: itemData.warrantyPeriod,
                 s_ID: itemData.s_ID,
                 cost: itemData.cost,
-                img: itemData.img ? itemData.img.toString("base64") : null, // Convert image to Base64 if available
+                img: mainImgBase64, // Main image from Item table
+                img1: imgData.img1, // Additional Image 1
+                img2: imgData.img2, // Additional Image 2
+                img3: imgData.img3, // Additional Image 3
                 category_name: itemData.category_name, // Category name
                 subcategory_one: itemData.sub_one, // Subcategory One
                 subcategory_two: itemData.sub_two  // Subcategory Two
