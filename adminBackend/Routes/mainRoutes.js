@@ -460,15 +460,15 @@ router.get("/item-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "Item ID is required" });
         }
 
-        // Step 1: Fetch Item details along with Type and Category information
+        // Fetch item details along with Type and Category information
         const itemQuery = `
             SELECT
                 I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty,
                 I.warrantyPeriod, I.s_ID, I.cost, I.img,
                 T.sub_one, T.sub_two, C.name AS category_name
             FROM Item I
-                     JOIN Type T ON I.Ty_id = T.Ty_Id
-                     JOIN Category C ON T.Ca_Id = C.Ca_Id
+            JOIN Type T ON I.Ty_id = T.Ty_Id
+            JOIN Category C ON T.Ca_Id = C.Ca_Id
             WHERE I.I_Id = ?`;
 
         const [itemResult] = await db.query(itemQuery, [I_Id]);
@@ -479,7 +479,7 @@ router.get("/item-details", async (req, res) => {
 
         const itemData = itemResult[0];
 
-        // Step 2: Fetch additional images from Item_img table
+        // Fetch additional images from Item_img table
         const imageQuery = `SELECT img1, img2, img3 FROM Item_img WHERE I_Id = ?`;
         const [imageResult] = await db.query(imageQuery, [I_Id]);
 
@@ -500,7 +500,22 @@ router.get("/item-details", async (req, res) => {
         // Convert the main image from Item table to Base64
         const mainImgBase64 = itemData.img ? Buffer.from(itemData.img).toString("base64") : null;
 
-        // Step 3: Construct final response
+        // Fetch all suppliers that provide this item
+        const supplierQuery = `
+            SELECT S.s_ID, S.name, S.contact
+            FROM Supplier S
+            JOIN item_supplier ISUP ON S.s_ID = ISUP.s_ID
+            WHERE ISUP.I_Id = ?`;
+
+        const [suppliersResult] = await db.query(supplierQuery, [I_Id]);
+
+        const suppliers = suppliersResult.map(supplier => ({
+            s_ID: supplier.s_ID,
+            name: supplier.name,
+            contact: supplier.contact
+        }));
+
+        // Construct final response
         const responseData = {
             success: true,
             item: {
@@ -521,7 +536,8 @@ router.get("/item-details", async (req, res) => {
                 img3: imgData.img3, // Additional Image 3
                 category_name: itemData.category_name, // Category name
                 subcategory_one: itemData.sub_one, // Subcategory One
-                subcategory_two: itemData.sub_two  // Subcategory Two
+                subcategory_two: itemData.sub_two,  // Subcategory Two
+                suppliers: suppliers // List of suppliers
             }
         };
 
@@ -531,6 +547,7 @@ router.get("/item-details", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
 
 // Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
@@ -1783,6 +1800,39 @@ router.get("/find-types", async (req, res) => {
     }
 });
 
+// API endpoint to save item-supplier association
+router.post('/add-item-supplier', async (req, res) => {
+    const { I_Id, s_ID } = req.body;
+
+    // Check if I_Id and s_ID are provided
+    if (!I_Id || !s_ID) {
+        return res.status(400).json({ success: false, message: 'Item ID and Supplier ID are required' });
+    }
+
+    try {
+        // Step 1: Check if the Item ID exists in the Item table
+        const [itemExists] = await db.query('SELECT * FROM Item WHERE I_Id = ?', [I_Id]);
+        if (itemExists.length === 0) {
+            return res.status(404).json({ success: false, message: 'Item not found' });
+        }
+
+        // Step 2: Check if the Supplier ID exists in the Supplier table
+        const [supplierExists] = await db.query('SELECT * FROM Supplier WHERE s_ID = ?', [s_ID]);
+        if (supplierExists.length === 0) {
+            return res.status(404).json({ success: false, message: 'Supplier not found' });
+        }
+
+        // Step 3: Insert the item-supplier relationship into the item_supplier table
+        const insertQuery = 'INSERT INTO item_supplier (I_Id, s_ID) VALUES (?, ?)';
+        const [result] = await db.query(insertQuery, [I_Id, s_ID]);
+
+        // Step 4: Return success response
+        return res.status(200).json({ success: true, message: 'Item-Supplier relationship added successfully', data: result });
+    } catch (error) {
+        console.error('Error adding item-supplier:', error.message);
+        return res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+});
 
 
 export default router;

@@ -4,12 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update item detail with two pop up">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with adding new supplier to item">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/ItemDetails.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/ItemDetails.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,14 +142,7 @@
       <workItem from="1739094539357" duration="5841000" />
       <workItem from="1739159373412" duration="48678000" />
       <workItem from="1739416561583" duration="32899000" />
-      <workItem from="1739504997512" duration="21005000" />
-    </task>
-    <task id="LOCAL-00129" summary="update delivery in place order">
-      <created>1738733842686</created>
-      <option name="number" value="00129" />
-      <option name="presentableId" value="LOCAL-00129" />
-      <option name="project" value="LOCAL" />
-      <updated>1738733842686</updated>
+      <workItem from="1739504997512" duration="24502000" />
     </task>
     <task id="LOCAL-00130" summary="update cart handle">
       <created>1738740609906</created>
@@ -489,7 +480,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739527149699</updated>
     </task>
-    <option name="localTasksCounter" value="178" />
+    <task id="LOCAL-00178" summary="update item detail with two pop up">
+      <created>1739530878718</created>
+      <option name="number" value="00178" />
+      <option name="presentableId" value="LOCAL-00178" />
+      <option name="project" value="LOCAL" />
+      <updated>1739530878718</updated>
+    </task>
+    <option name="localTasksCounter" value="179" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -508,7 +506,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update supplier order" />
     <MESSAGE value="update order detail with status" />
     <MESSAGE value="update nav bar" />
     <MESSAGE value="update order details with updating order" />
@@ -533,6 +530,7 @@
     <MESSAGE value="update item save" />
     <MESSAGE value="update item save with supplier" />
     <MESSAGE value="update item detail with two pop up" />
-    <option name="LAST_COMMIT_MESSAGE" value="update item detail with two pop up" />
+    <MESSAGE value="update with adding new supplier to item" />
+    <option name="LAST_COMMIT_MESSAGE" value="update with adding new supplier to item" />
   </component>
 </project>
