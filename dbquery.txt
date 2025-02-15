@@ -248,8 +248,6 @@ CREATE TABLE main_stock_received (
     I_Id varchar(25) NOT NULL,
     rDate DATE NOT NULL,
     rec_count INT,
-    cost DOUBLE,
-    price DOUBLE,
     detail TEXT,
     CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
                     ON DELETE CASCADE ON UPDATE CASCADE,

@@ -7,6 +7,7 @@ import TableTwo from "../components/tables/TableTwo";
 import Tableforproduction from "../components/tables/Tableforproduction";
 import TableInProduction from "../components/tables/TableInProduction";
 import AddProduct from "./AddProducts";
+import AddOtherDetails from "./AddOtherDetails";
 
 const AllProducts = () => {
     const [activeTab, setActiveTab] = useState("1"); // Manage active tab
@@ -53,6 +54,14 @@ const AllProducts = () => {
                                 Add Item
                             </NavLink>
                         </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={activeTab === "5" ? "active" : ""}
+                                onClick={() => setActiveTab("5")}
+                            >
+                                Add Other Details
+                            </NavLink>
+                        </NavItem>
                     </Nav>
 
                     {/* Tab Content */}
@@ -82,8 +91,14 @@ const AllProducts = () => {
                         <TabPane tabId="4">
                             <Row>
                                 <Col>
-                                    {/*<TableInProduction />*/}
                                     <AddProduct />
+                                </Col>
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="5">
+                            <Row>
+                                <Col>
+                                    <AddOtherDetails />
                                 </Col>
                             </Row>
                         </TabPane>

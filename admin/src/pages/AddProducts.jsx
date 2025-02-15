@@ -106,6 +106,10 @@ const AddItem = () => {
             const typeData = await typeResponse.json();
             const typeId = typeData.type.Ty_Id; // Extract Type ID
 
+            if (!typeId){
+                toast.error("Added Type Frist");
+            }
+
             // If "Other" material is selected, set the material to the otherMaterial value
             const materialToSend = formData.material === "Other" ? formData.otherMaterial : formData.material;
             console.log(materialToSend);

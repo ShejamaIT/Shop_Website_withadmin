@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with add new supplier for item api">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update item stock maintain">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
@@ -144,14 +146,8 @@
       <workItem from="1739094539357" duration="5841000" />
       <workItem from="1739159373412" duration="48678000" />
       <workItem from="1739416561583" duration="32899000" />
-      <workItem from="1739504997512" duration="39677000" />
-    </task>
-    <task id="LOCAL-00132" summary="update checkout">
-      <created>1738745171643</created>
-      <option name="number" value="00132" />
-      <option name="presentableId" value="LOCAL-00132" />
-      <option name="project" value="LOCAL" />
-      <updated>1738745171644</updated>
+      <workItem from="1739504997512" duration="40825000" />
+      <workItem from="1739612321784" duration="5548000" />
     </task>
     <task id="LOCAL-00133" summary="update checkout">
       <created>1738752936278</created>
@@ -489,7 +485,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739593997998</updated>
     </task>
-    <option name="localTasksCounter" value="181" />
+    <task id="LOCAL-00181" summary="update with add new supplier for item api">
+      <created>1739611287192</created>
+      <option name="number" value="00181" />
+      <option name="presentableId" value="LOCAL-00181" />
+      <option name="project" value="LOCAL" />
+      <updated>1739611287193</updated>
+    </task>
+    <option name="localTasksCounter" value="182" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -508,7 +511,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update order details with updating order" />
     <MESSAGE value="update" />
     <MESSAGE value="update db query" />
     <MESSAGE value="update with item table" />
@@ -533,6 +535,7 @@
     <MESSAGE value="update with adding new supplier to item" />
     <MESSAGE value="update with add stock api" />
     <MESSAGE value="update with add new supplier for item api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update with add new supplier for item api" />
+    <MESSAGE value="update item stock maintain" />
+    <option name="LAST_COMMIT_MESSAGE" value="update item stock maintain" />
   </component>
 </project>

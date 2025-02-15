@@ -5,8 +5,6 @@ import { Container, Row, Col, Button, Input, FormGroup, Label, Modal, ModalHeade
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/ItemDetails.css";
-
-
 const ItemDetails = () => {
     const { id } = useParams(); // Get item ID from URL
     const [item, setItem] = useState(null);
@@ -25,7 +23,6 @@ const ItemDetails = () => {
         stockCount: "",
         date: "",
         cost:"",
-        price:"",
         comment:""
     });
     const [supplierData, setSupplierData] = useState({
@@ -102,8 +99,6 @@ const ItemDetails = () => {
         }
     };
 
-
-
     const fetchItem = async () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/item-details?I_Id=${id}`);
@@ -167,16 +162,37 @@ const ItemDetails = () => {
         }
     };
 
-    const handleStockChange = (e) => {
+
+    const handleStockChange = async (e) => {
         const { name, value } = e.target;
         setStockData((prev) => ({ ...prev, [name]: value }));
+
+        // Fetch cost when supplier is selected
+        if (name === "supplierId" && value) {
+            try {
+                const response = await fetch(`http://localhost:5001/api/admin/main/find-cost?s_ID=${value}&I_Id=${id}`);
+                const data = await response.json();
+                console.log(data);
+                if (response.ok) {
+                    setStockData((prev) => ({
+                        ...prev,
+                        cost: data.cost.unit_cost, // Set cost from API response
+                    }));
+                } else {
+                    setStockData((prev) => ({ ...prev, cost: "" })); // Reset if not found
+                    toast.error(data.message || "Cost not found.");
+                }
+            } catch (error) {
+                console.error("Error fetching cost:", error.message);
+                toast.error("Error fetching cost.");
+            }
+        }
     };
 
     const handleSupplierChange = (e) => {
         const { name, value } = e.target;
         setSupplierData(prev => ({ ...prev, [name]: value }));
     };
-
 
     const handleAddStock = async () => {
         try {
@@ -213,7 +229,6 @@ const ItemDetails = () => {
         }
     };
 
-
     const handleAddSupplier = async () => {
         try {
             // Assuming you want to save the item-supplier association
@@ -241,11 +256,27 @@ const ItemDetails = () => {
         }
     };
 
+
     const handleSave = async () => {
         console.log(formData);
+        // try {
+        //     const response = await fetch(`http://localhost:5001/api/admin/main/update-item`, {
+        //         method: "PUT",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify(formData),
+        //     });
+        //
+        //     if (!response.ok) throw new Error("Failed to update item.");
+        //
+        //     const updatedItem = await response.json();
+        //     setItem(updatedItem);
+        //     setIsEditing(false);
+        // } catch (err) {
+        //     console.error("Error updating item:", err);
+        //     toast.error("Failed to update item!");
+        // }
 
     };
-
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!item) return <p>Item not found</p>;
@@ -367,7 +398,7 @@ const ItemDetails = () => {
                                                                id="category_name"
                                                                value={formData.category_name}
                                                                onChange={handleChange} required>
-                                                            <option value="">{formData.category_name}</option>
+
                                                             {categories.map((cat) => (
                                                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
                                                             ))}
@@ -448,6 +479,7 @@ const ItemDetails = () => {
                                                     <p><strong>Supplier ID:</strong> {supplier.s_ID}</p>
                                                     <p><strong>Name:</strong> {supplier.name}</p>
                                                     <p><strong>Contact:</strong> {supplier.contact}</p>
+                                                    <p><strong>Cost:</strong> {supplier.unit_cost}</p>
                                                 </div>
                                             </Col>
                                         ))}
@@ -470,8 +502,6 @@ const ItemDetails = () => {
                                     )}
                                 </div>
                             </div>
-
-
                             {/* Add Stock Modal */}
                             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Add Stock</ModalHeader>
@@ -493,6 +523,16 @@ const ItemDetails = () => {
                                         </Input>
                                     </FormGroup>
                                     <FormGroup>
+                                        <Label>Cost</Label>
+                                        <Input
+                                            type="text"
+                                            name="cost"
+                                            value={stockData.cost || "N/A"} // Display "N/A" if no cost is found
+                                            readOnly // Make it non-editable
+                                        />
+                                    </FormGroup>
+
+                                    <FormGroup>
                                         <Label>Quantity</Label>
                                         <Input
                                             type="number"
@@ -507,24 +547,6 @@ const ItemDetails = () => {
                                             type="date"
                                             name="date"
                                             value={stockData.date}
-                                            onChange={handleStockChange}
-                                        />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label>Cost</Label>
-                                        <Input
-                                            type="text"
-                                            name="cost"
-                                            value={stockData.cost}
-                                            onChange={handleStockChange}
-                                        />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label>Price</Label>
-                                        <Input
-                                            type="text"
-                                            name="price"
-                                            value={stockData.price}
                                             onChange={handleStockChange}
                                         />
                                     </FormGroup>

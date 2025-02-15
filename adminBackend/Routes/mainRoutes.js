@@ -79,7 +79,6 @@ router.post("/add-item", upload.fields([
     }
 });
 
-
 // Get all orders
 router.get("/orders", async (req, res) => {
     try {
@@ -500,9 +499,9 @@ router.get("/item-details", async (req, res) => {
         // Convert the main image from Item table to Base64
         const mainImgBase64 = itemData.img ? Buffer.from(itemData.img).toString("base64") : null;
 
-        // Fetch all suppliers that provide this item
+        // Fetch all suppliers that provide this item along with unit_cost
         const supplierQuery = `
-            SELECT S.s_ID, S.name, S.contact
+            SELECT S.s_ID, S.name, S.contact, ISUP.unit_cost
             FROM Supplier S
             JOIN item_supplier ISUP ON S.s_ID = ISUP.s_ID
             WHERE ISUP.I_Id = ?`;
@@ -512,7 +511,8 @@ router.get("/item-details", async (req, res) => {
         const suppliers = suppliersResult.map(supplier => ({
             s_ID: supplier.s_ID,
             name: supplier.name,
-            contact: supplier.contact
+            contact: supplier.contact,
+            unit_cost: supplier.unit_cost // Include unit cost
         }));
 
         // Construct final response
@@ -535,7 +535,7 @@ router.get("/item-details", async (req, res) => {
                 category_name: itemData.category_name, // Category name
                 subcategory_one: itemData.sub_one, // Subcategory One
                 subcategory_two: itemData.sub_two,  // Subcategory Two
-                suppliers: suppliers // List of suppliers
+                suppliers: suppliers // List of suppliers with unit cost
             }
         };
 
@@ -545,7 +545,6 @@ router.get("/item-details", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
-
 
 // Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
@@ -583,7 +582,6 @@ router.get("/orders-pending", async (req, res) => {
         return res.status(500).json({ message: "Error fetching pending orders", error: error.message });
     }
 });
-
 
 // Get all orders by status= accepting
 router.get("/orders-accepting", async (req, res) => {
@@ -660,7 +658,6 @@ router.get("/orders-accepting", async (req, res) => {
         return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
     }
 });
-
 
 // Get all orders by status= completed
 router.get("/orders-completed", async (req, res) => {
@@ -1729,7 +1726,6 @@ router.get("/categories", async (req, res) => {
     }
 });
 
-
 //API to Get All Sub Categories (sub_one and sub_two) by Category ID (Ca_Id):
 router.get("/types", async (req, res) => {
     try {
@@ -1767,7 +1763,6 @@ router.get("/types", async (req, res) => {
 router.get("/find-types", async (req, res) => {
     try {
         const { Ca_Id, sub_one, sub_two } = req.query; // Get Category ID, sub_one, and sub_two from the query parameters
-        console.log(req.query);
 
         if (!Ca_Id || !sub_one || !sub_two) {
             return res.status(400).json({ message: "Category ID, Sub One, and Sub Two are required." });
@@ -1833,61 +1828,21 @@ router.post('/add-item-supplier', async (req, res) => {
 });
 
 // API to save stock received data
-// router.post("/add-stock-received", async (req, res) => {
-//     try {
-//         const { supplierId, itemId, date, stockCount, cost, price, comment } = req.body;
-//
-//         // Validate required fields
-//         if (!supplierId || !itemId || !date || !stockCount || !cost || !price) {
-//             return res.status(400).json({ success: false, message: "All fields are required!" });
-//         }
-//         // Insert stock received record
-//         const insertQuery = `
-//                 INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, cost, price, detail)
-//                 VALUES (?, ?, ?, ?, ?, ?, ?)
-//             `;
-//
-//         const values = [supplierId, itemId, date, stockCount, cost, price, comment || ""];
-//         const [result] = await db.query(insertQuery, values);
-//
-//         // Update stockQty and availableQty in Item table
-//         const updateItemQuery = `
-//                 UPDATE Item
-//                 SET stockQty = stockQty + ?, availableQty = availableQty + ?
-//                 WHERE I_Id = ?
-//             `;
-//
-//         const [update] = await db.query(updateItemQuery, [stockCount, stockCount, itemId]);
-//
-//
-//         return res.status(201).json({
-//             success: true,
-//             message: "Stock received successfully added and inventory updated!",
-//             stockReceivedId: result.insertId,
-//         });
-//
-//     } catch (error) {
-//         console.error("Error adding stock received:", error.message);
-//         return res.status(500).json({ success: false, message: "Server error", error: error.message });
-//     }
-// });
-
-
 router.post("/add-stock-received", async (req, res) => {
     try {
-        const { supplierId, itemId, date, stockCount, cost, price, comment } = req.body;
+        const { supplierId, itemId, date, stockCount, comment } = req.body;
 
         // Validate required fields
-        if (!supplierId || !itemId || !date || !stockCount || !cost || !price) {
+        if (!supplierId || !itemId || !date || !stockCount ) {
             return res.status(400).json({ success: false, message: "All fields are required!" });
         }
 
         // Insert stock received record
         const insertQuery = `
-                INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, cost, price, detail)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count,  detail)
+                VALUES (?, ?, ?, ?, ?)
             `;
-        const values = [supplierId, itemId, date, stockCount, cost, price, comment || ""];
+        const values = [supplierId, itemId, date, stockCount, comment || ""];
         const [result] = await db.query(insertQuery, values);
         const receivedStockId = result.insertId;
 
@@ -1922,5 +1877,37 @@ router.post("/add-stock-received", async (req, res) => {
     }
 });
 
+// Find cost by sid and iid
+router.get("/find-cost", async (req, res) => {
+    try {
+        const { s_ID , I_Id } = req.query;
+
+        if (!s_ID || !I_Id ) {
+            return res.status(400).json({ message: "Item ID, Supplier Id are required." });
+        }
+
+        // Query the database to fetch the type for the given Ca_Id, sub_one, and sub_two
+        const [cost] = await db.query(`
+            SELECT unit_cost
+            FROM item_supplier
+            WHERE s_ID = ? AND I_Id = ? ;
+        `, [s_ID,I_Id]);
+
+        // If no type found for this combination, return a 404 status
+        if (cost.length === 0) {
+            return res.status(404).json({ message: "No cost found." });
+        }
+
+        // Send the type as a JSON response
+        return res.status(200).json({
+            message: "Cost found.",
+            cost: cost[0],  // Return only the first matching cost
+        });
+
+    } catch (error) {
+        console.error("Error fetching cost:", error.message);
+        return res.status(500).json({ message: "Error fetching cost" });
+    }
+});
 
 export default router;
