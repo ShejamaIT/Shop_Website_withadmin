@@ -19,9 +19,13 @@ const ItemDetails = () => {
     const [showStockModal, setShowStockModal] = useState(false);
     const [showSupplierModal, setShowSupplierModal] = useState(false);
     const [stockData, setStockData] = useState({
+        itemId:id,
         supplierId: "",
         stockCount: "",
-        date: ""
+        date: "",
+        cost:"",
+        price:"",
+        comment:""
     });
     const [supplierData, setSupplierData] = useState({
         supplierName: "",
@@ -89,7 +93,6 @@ const ItemDetails = () => {
         }
     };
 
-
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
 
@@ -116,6 +119,7 @@ const ItemDetails = () => {
             }));
         }
     };
+
     const handleImageChange = (e) => {
         const { name, files } = e.target;
         const file = files[0];
@@ -133,6 +137,7 @@ const ItemDetails = () => {
             reader.readAsDataURL(file);
         }
     };
+
     const handleStockChange = (e) => {
         const { name, value } = e.target;
         setStockData((prev) => ({ ...prev, [name]: value }));
@@ -144,23 +149,31 @@ const ItemDetails = () => {
     };
 
     const handleAddStock = async () => {
-        console.log(item.id,stockData);
-        // try {
-        //     const response = await fetch(`http://localhost:5001/api/admin/main/add-stock`, {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify({ itemId: id, ...stockData }),
-        //     });
-        //
-        //     if (!response.ok) throw new Error("Failed to add stock.");
-        //
-        //     toast.success("Stock added successfully!");
-        //     setShowStockModal(false);
-        //     fetchItem();
-        // } catch (err) {
-        //     toast.error("Failed to add stock!");
-        // }
+        try {
+            console.log("Stock Data to be sent:", stockData);
+
+            const response = await fetch("http://localhost:5001/api/admin/main/add-stock-received", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(stockData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to add stock.");
+            }
+
+            toast.success("Stock added successfully!");
+            setShowStockModal(false); // Close the modal after success
+            fetchItem(); // Refresh item list or update UI
+
+        } catch (err) {
+            console.error("Error adding stock:", err.message);
+            toast.error(err.message || "Failed to add stock!");
+        }
     };
+
 
     const handleAddSupplier = async () => {
         try {
@@ -187,7 +200,6 @@ const ItemDetails = () => {
             toast.error("Error adding item-supplier association");
         }
     };
-
 
     const handleSave = async () => {
         try {
@@ -462,7 +474,7 @@ const ItemDetails = () => {
                                         </Input>
                                     </FormGroup>
                                     <FormGroup>
-                                        <Label>Stock Count</Label>
+                                        <Label>Quantity</Label>
                                         <Input
                                             type="number"
                                             name="stockCount"
@@ -471,11 +483,38 @@ const ItemDetails = () => {
                                         />
                                     </FormGroup>
                                     <FormGroup>
-                                        <Label>Date</Label>
+                                        <Label>Received Date</Label>
                                         <Input
                                             type="date"
                                             name="date"
                                             value={stockData.date}
+                                            onChange={handleStockChange}
+                                        />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Cost</Label>
+                                        <Input
+                                            type="text"
+                                            name="cost"
+                                            value={stockData.cost}
+                                            onChange={handleStockChange}
+                                        />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Price</Label>
+                                        <Input
+                                            type="text"
+                                            name="price"
+                                            value={stockData.price}
+                                            onChange={handleStockChange}
+                                        />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Detail</Label>
+                                        <Input
+                                            type="textarea"
+                                            name="comment"
+                                            value={stockData.comment}
                                             onChange={handleStockChange}
                                         />
                                     </FormGroup>

@@ -1834,5 +1834,60 @@ router.post('/add-item-supplier', async (req, res) => {
     }
 });
 
+// API to save stock received data
+router.post("/add-stock-received", async (req, res) => {
+    try {
+        const { supplierId, itemId, date, stockCount, cost, price, comment } = req.body;
+
+        // Validate required fields
+        if (!supplierId || !itemId || !date || !stockCount || !cost || !price) {
+            return res.status(400).json({ success: false, message: "All fields are required!" });
+        }
+
+        // Start a transaction to ensure consistency
+        const connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        try {
+            // Insert stock received record
+            const insertQuery = `
+                INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, cost, price, detail)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const values = [supplierId, itemId, date, stockCount, cost, price, comment || ""];
+            const [result] = await connection.query(insertQuery, values);
+
+            // Update stockQty and availableQty in Item table
+            const updateItemQuery = `
+                UPDATE Item 
+                SET stockQty = stockQty + ?, availableQty = availableQty + ?
+                WHERE I_Id = ?
+            `;
+
+            await connection.query(updateItemQuery, [stockCount, stockCount, itemId]);
+
+            // Commit the transaction
+            await connection.commit();
+            connection.release();
+
+            return res.status(201).json({
+                success: true,
+                message: "Stock received successfully added and inventory updated!",
+                stockReceivedId: result.insertId,
+            });
+
+        } catch (error) {
+            await connection.rollback(); // Rollback changes if error occurs
+            connection.release();
+            throw error;
+        }
+
+    } catch (error) {
+        console.error("Error adding stock received:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
 
 export default router;
