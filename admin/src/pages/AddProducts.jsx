@@ -82,6 +82,7 @@ const AddItem = () => {
             setFormData((prev) => ({ ...prev, [name]: files[0] }));
         }
     };
+
     // Handle Other Material Change
     const handleOtherMaterialChange = (e) => {
         setFormData((prev) => ({ ...prev, otherMaterial: e.target.value }));
@@ -327,11 +328,6 @@ const AddItem = () => {
                         </FormGroup>
 
                         <FormGroup>
-                            <Label for="cost">Cost</Label>
-                            <Input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} required />
-                        </FormGroup>
-
-                        <FormGroup>
                             <Label for="price">Price</Label>
                             <Input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required />
                         </FormGroup>
@@ -364,6 +360,11 @@ const AddItem = () => {
                                     </option>
                                 ))}
                             </Input>
+                        </FormGroup>
+
+                        <FormGroup>
+                            <Label for="cost">Cost</Label>
+                            <Input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} required />
                         </FormGroup>
 
                         <div>

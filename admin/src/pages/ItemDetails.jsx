@@ -13,6 +13,7 @@ const ItemDetails = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [suppliers, setSuppliers] = useState([]); // State to store supplier data
     const [suppliers1, setSuppliers1] = useState([]); // State to store supplier data
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({}); // Stores editable fields
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -30,12 +31,24 @@ const ItemDetails = () => {
     const [supplierData, setSupplierData] = useState({
         supplierName: "",
         contactInfo: "",
-        email: ""
+        cost:""
     });
+    const [types, setTypes] = useState([]);
 
     useEffect(() => {
         fetchItem();
     }, [id]);
+
+    // Fetch Categories
+    useEffect(() => {
+        fetch("http://localhost:5001/api/admin/main/categories")
+            .then((res) => res.json())
+            .then((data) => setCategories(data))
+            .catch((err) => {
+                console.error("Error fetching categories:", err);
+                toast.error("Failed to load categories.");
+            });
+    }, []);
 
     // Fetch all suppliers when the modal opens
     useEffect(() => {
@@ -59,6 +72,19 @@ const ItemDetails = () => {
         }
     }, [showSupplierModal]); // Re-run this when the modal is opened
 
+    // Fetch Types when Category Changes
+    useEffect(() => {
+        if (formData.category_name) {
+            fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_name}`)
+                .then((res) => res.json())
+                .then((data) => setTypes(data.types))
+                .catch((err) => {
+                    console.error("Error fetching types:", err);
+                    toast.error("Failed to load types.");
+                });
+        }
+    }, [formData.category_name]);
+
     const handleSupplierSelect = (e) => {
         const selectedSupplierID = e.target.value;
 
@@ -66,15 +92,17 @@ const ItemDetails = () => {
         const selectedSupplier = suppliers1.find(supplier => supplier.s_ID === selectedSupplierID);
 
         if (selectedSupplier) {
-            // Update the form fields with the selected supplier's details
-            setSupplierData({
-                ...supplierData,
+            setSupplierData(prevState => ({
+                ...prevState,
                 supplierID: selectedSupplier.s_ID,
                 supplierName: selectedSupplier.name,
                 contactInfo: selectedSupplier.contact,
-            });
+                cost: selectedSupplier.cost || "",  // Ensure cost is updated too
+            }));
         }
     };
+
+
 
     const fetchItem = async () => {
         try {
@@ -95,6 +123,7 @@ const ItemDetails = () => {
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
+        console.log(name , value);
 
         if (type === "file" && files) {
             // Handle image file change (Convert to base64)
@@ -145,8 +174,9 @@ const ItemDetails = () => {
 
     const handleSupplierChange = (e) => {
         const { name, value } = e.target;
-        setSupplierData((prev) => ({ ...prev, [name]: value }));
+        setSupplierData(prev => ({ ...prev, [name]: value }));
     };
+
 
     const handleAddStock = async () => {
         try {
@@ -165,6 +195,15 @@ const ItemDetails = () => {
             }
 
             toast.success("Stock added successfully!");
+            setStockData({
+                itemId:id,
+                supplierId: "",
+                stockCount: "",
+                date: "",
+                cost:"",
+                price:"",
+                comment:""
+            });
             setShowStockModal(false); // Close the modal after success
             fetchItem(); // Refresh item list or update UI
 
@@ -182,8 +221,9 @@ const ItemDetails = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    I_Id: item.I_Id,  // Make sure this is the correct Item ID
-                    s_ID: supplierData.supplierID   // Make sure this is the correct Supplier ID
+                    I_Id: item.I_Id,
+                    s_ID: supplierData.supplierID,
+                    cost: supplierData.cost
                 }),
             });
 
@@ -202,22 +242,8 @@ const ItemDetails = () => {
     };
 
     const handleSave = async () => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/update-item`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+        console.log(formData);
 
-            if (!response.ok) throw new Error("Failed to update item.");
-
-            const updatedItem = await response.json();
-            setItem(updatedItem);
-            setIsEditing(false);
-        } catch (err) {
-            console.error("Error updating item:", err);
-            toast.error("Failed to update item!");
-        }
     };
 
     if (loading) return <p>Loading...</p>;
@@ -280,19 +306,6 @@ const ItemDetails = () => {
                                                         />
                                                     </FormGroup>
                                                 )}
-                                                {!isEditing ? (
-                                                    <p><strong>Cost:</strong> Rs. {item.cost}</p>
-                                                ) : (
-                                                    <FormGroup>
-                                                        <Label><strong>Cost:</strong></Label>
-                                                        <Input
-                                                            type="number"
-                                                            name="cost"
-                                                            value={formData.cost}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </FormGroup>
-                                                )}
                                             </Col>
                                         </Row>
                                         <Row>
@@ -349,14 +362,19 @@ const ItemDetails = () => {
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Category:</strong></Label>
-                                                        <Input
-                                                            type="text"
-                                                            name="categoryName"
-                                                            value={formData.category_name}
-                                                            onChange={handleChange}
-                                                        />
+                                                        <Input type="select"
+                                                               name="category_name"
+                                                               id="category_name"
+                                                               value={formData.category_name}
+                                                               onChange={handleChange} required>
+                                                            <option value="">{formData.category_name}</option>
+                                                            {categories.map((cat) => (
+                                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                            ))}
+                                                        </Input>
                                                     </FormGroup>
                                                 )}
+
 
                                                 {/* Subcategory One */}
                                                 {!isEditing ? (
@@ -453,6 +471,7 @@ const ItemDetails = () => {
                                 </div>
                             </div>
 
+
                             {/* Add Stock Modal */}
                             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Add Stock</ModalHeader>
@@ -545,23 +564,26 @@ const ItemDetails = () => {
                                         </Input>
                                     </FormGroup>
                                     <FormGroup>
-                                        <Label>Supplier Name</Label>
-                                        <Input
-                                            type="text"
-                                            name="supplierName"
-                                            value={supplierData.supplierName}
-                                            onChange={handleSupplierChange} // Handle change for name
-                                        />
+                                        <p>
+                                            <Label>Supplier Name : </Label>{supplierData.supplierName}
+                                        </p>
+
                                     </FormGroup>
                                     <FormGroup>
-                                        <Label>Contact Info</Label>
+                                        <p>
+                                            <Label>Contact Info : </Label><strong>{supplierData.contactInfo}</strong>
+                                        </p>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Cost</Label>
                                         <Input
-                                            type="text"
-                                            name="contactInfo"
-                                            value={supplierData.contactInfo}
-                                            onChange={handleSupplierChange} // Handle change for contact info
+                                            type="number"
+                                            name="cost"
+                                            value={supplierData.cost}
+                                            onChange={handleSupplierChange} // Now using correct function
                                         />
                                     </FormGroup>
+
                                 </ModalBody>
                                 <ModalFooter>
                                     <Button color="primary" onClick={handleAddSupplier}>Add Supplier</Button>

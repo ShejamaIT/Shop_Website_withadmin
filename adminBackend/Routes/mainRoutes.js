@@ -27,7 +27,7 @@ router.post("/add-item", upload.fields([
 
 
         const itemValues = [
-            I_Id, I_name, Ty_id, descrip, color,material, parsedPrice, imgBuffer, warrantyPeriod, parsedCost
+            I_Id, I_name, Ty_id, descrip, color,material, parsedPrice, imgBuffer, warrantyPeriod
         ];
 
         const imgValues = [
@@ -38,12 +38,12 @@ router.post("/add-item", upload.fields([
         ];
 
         const supplierValues = [
-            I_Id, s_Id
+            I_Id, s_Id,parsedCost
         ];
 
         // Insert into `Item` table (Main image)
-        const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color,material, price, stockQty, bookedQty, availableQty, img, warrantyPeriod, cost) 
-                         VALUES (?, ?, ?, ?, ?,?, ?, 0, 0, 0, ?, ?, ?);`;
+        const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color,material, price, stockQty, bookedQty, availableQty, img, warrantyPeriod) 
+                         VALUES (?, ?, ?, ?, ?,?,?, 0, 0, 0, ?, ?);`;
 
         await db.query(itemSql, itemValues);
 
@@ -53,7 +53,7 @@ router.post("/add-item", upload.fields([
         await db.query(imgSql, imgValues);
 
         // Insert into `Item_supplier` table
-        const itemsuplierSql = `INSERT INTO item_supplier (I_Id, s_ID) VALUES (?, ?);`;
+        const itemsuplierSql = `INSERT INTO item_supplier (I_Id, s_ID,unit_cost) VALUES (?, ?,?);`;
 
         await db.query(itemsuplierSql, supplierValues);
 
@@ -464,7 +464,7 @@ router.get("/item-details", async (req, res) => {
         const itemQuery = `
             SELECT
                 I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty,
-                I.warrantyPeriod, I.s_ID, I.cost, I.img,
+                I.warrantyPeriod, I.img,
                 T.sub_one, T.sub_two, C.name AS category_name
             FROM Item I
             JOIN Type T ON I.Ty_id = T.Ty_Id
@@ -528,8 +528,6 @@ router.get("/item-details", async (req, res) => {
                 availableQty: itemData.availableQty,
                 bookedQty: itemData.bookedQty,
                 warrantyPeriod: itemData.warrantyPeriod,
-                s_ID: itemData.s_ID,
-                cost: itemData.cost,
                 img: mainImgBase64, // Main image from Item table
                 img1: imgData.img1, // Additional Image 1
                 img2: imgData.img2, // Additional Image 2
@@ -892,7 +890,7 @@ router.get("/item-detail", async (req, res) => {
         const itemQuery = `
             SELECT 
                 I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty,I.bookedQty,I.availableQty,
-                I.warrantyPeriod, I.s_ID, I.cost, I.img
+                I.warrantyPeriod, I.img
             FROM Item I
             WHERE I.I_Id = ?`;
 
@@ -1802,10 +1800,10 @@ router.get("/find-types", async (req, res) => {
 
 // API endpoint to save item-supplier association
 router.post('/add-item-supplier', async (req, res) => {
-    const { I_Id, s_ID } = req.body;
+    const { I_Id, s_ID ,cost } = req.body;
 
     // Check if I_Id and s_ID are provided
-    if (!I_Id || !s_ID) {
+    if (!I_Id || !s_ID ) {
         return res.status(400).json({ success: false, message: 'Item ID and Supplier ID are required' });
     }
 
@@ -1823,8 +1821,8 @@ router.post('/add-item-supplier', async (req, res) => {
         }
 
         // Step 3: Insert the item-supplier relationship into the item_supplier table
-        const insertQuery = 'INSERT INTO item_supplier (I_Id, s_ID) VALUES (?, ?)';
-        const [result] = await db.query(insertQuery, [I_Id, s_ID]);
+        const insertQuery = 'INSERT INTO item_supplier (I_Id, s_ID,unit_cost) VALUES (?, ?,?)';
+        const [result] = await db.query(insertQuery, [I_Id, s_ID,cost]);
 
         // Step 4: Return success response
         return res.status(200).json({ success: true, message: 'Item-Supplier relationship added successfully', data: result });
@@ -1835,6 +1833,46 @@ router.post('/add-item-supplier', async (req, res) => {
 });
 
 // API to save stock received data
+// router.post("/add-stock-received", async (req, res) => {
+//     try {
+//         const { supplierId, itemId, date, stockCount, cost, price, comment } = req.body;
+//
+//         // Validate required fields
+//         if (!supplierId || !itemId || !date || !stockCount || !cost || !price) {
+//             return res.status(400).json({ success: false, message: "All fields are required!" });
+//         }
+//         // Insert stock received record
+//         const insertQuery = `
+//                 INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, cost, price, detail)
+//                 VALUES (?, ?, ?, ?, ?, ?, ?)
+//             `;
+//
+//         const values = [supplierId, itemId, date, stockCount, cost, price, comment || ""];
+//         const [result] = await db.query(insertQuery, values);
+//
+//         // Update stockQty and availableQty in Item table
+//         const updateItemQuery = `
+//                 UPDATE Item
+//                 SET stockQty = stockQty + ?, availableQty = availableQty + ?
+//                 WHERE I_Id = ?
+//             `;
+//
+//         const [update] = await db.query(updateItemQuery, [stockCount, stockCount, itemId]);
+//
+//
+//         return res.status(201).json({
+//             success: true,
+//             message: "Stock received successfully added and inventory updated!",
+//             stockReceivedId: result.insertId,
+//         });
+//
+//     } catch (error) {
+//         console.error("Error adding stock received:", error.message);
+//         return res.status(500).json({ success: false, message: "Server error", error: error.message });
+//     }
+// });
+
+
 router.post("/add-stock-received", async (req, res) => {
     try {
         const { supplierId, itemId, date, stockCount, cost, price, comment } = req.body;
@@ -1844,45 +1882,40 @@ router.post("/add-stock-received", async (req, res) => {
             return res.status(400).json({ success: false, message: "All fields are required!" });
         }
 
-        // Start a transaction to ensure consistency
-        const connection = await db.getConnection();
-        await connection.beginTransaction();
-
-        try {
-            // Insert stock received record
-            const insertQuery = `
+        // Insert stock received record
+        const insertQuery = `
                 INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, cost, price, detail)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             `;
+        const values = [supplierId, itemId, date, stockCount, cost, price, comment || ""];
+        const [result] = await db.query(insertQuery, values);
+        const receivedStockId = result.insertId;
 
-            const values = [supplierId, itemId, date, stockCount, cost, price, comment || ""];
-            const [result] = await connection.query(insertQuery, values);
-
-            // Update stockQty and availableQty in Item table
-            const updateItemQuery = `
+        // Update stockQty and availableQty in Item table
+        const updateItemQuery = `
                 UPDATE Item 
                 SET stockQty = stockQty + ?, availableQty = availableQty + ?
                 WHERE I_Id = ?
             `;
+        const [result1] =await db.query(updateItemQuery, [stockCount, stockCount, itemId]);
 
-            await connection.query(updateItemQuery, [stockCount, stockCount, itemId]);
+        // Get last stock_Id for this item
+        const getLastStockIdQuery = `SELECT MAX(stock_Id) AS lastStockId FROM m_s_r_detail WHERE I_Id = ?`;
+        const [lastStockResult] = await db.query(getLastStockIdQuery, [itemId]);
+        let lastStockId = lastStockResult[0]?.lastStockId || 0; // Default to 0 if no previous stock exists
 
-            // Commit the transaction
-            await connection.commit();
-            connection.release();
-
-            return res.status(201).json({
-                success: true,
-                message: "Stock received successfully added and inventory updated!",
-                stockReceivedId: result.insertId,
-            });
-
-        } catch (error) {
-            await connection.rollback(); // Rollback changes if error occurs
-            connection.release();
-            throw error;
+        // Insert stock details in m_s_r_detail
+        const insertDetailQuery = `INSERT INTO m_s_r_detail (I_Id, stock_Id,sr_ID) VALUES (?, ?,?)`;
+        for (let i = 1; i <= stockCount; i++) {
+            lastStockId++;
+            const query = await db.query(insertDetailQuery, [itemId, lastStockId,receivedStockId]);
         }
 
+        return res.status(201).json({
+            success: true,
+            message: "Stock received successfully added and inventory updated!",
+            stockReceivedId: receivedStockId,
+        });
     } catch (error) {
         console.error("Error adding stock received:", error.message);
         return res.status(500).json({ success: false, message: "Server error", error: error.message });

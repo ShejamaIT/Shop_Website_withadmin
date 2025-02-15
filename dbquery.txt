@@ -80,7 +80,6 @@ CREATE TABLE sales_coupon(
     cpID VARCHAR(25) PRIMARY KEY,
     stID VARCHAR(25),
     discount DOUBLE,
-    loyalty_price DOUBLE,
         CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
                                    ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -225,6 +224,7 @@ CREATE TABLE accept_orders (
 CREATE TABLE item_supplier (
   I_Id varchar(25) NOT NULL,
   s_ID varchar(25) NOT NULL,
+  unit_cost DOUBLE,
   PRIMARY KEY (I_Id,s_ID),
   CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
               ON DELETE CASCADE ON UPDATE CASCADE,
@@ -255,5 +255,15 @@ CREATE TABLE main_stock_received (
                     ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
                   ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE m_s_r_detail(
+    srd_Id INT AUTO_INCREMENT PRIMARY KEY,
+    I_Id varchar(25) NOT NULL,
+    stock_Id varchar(25) NOT NULL,
+    sr_ID INT NOT NULL,
+    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                      ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (sr_ID) REFERENCES main_stock_received (sr_ID)
+                        ON DELETE CASCADE ON UPDATE CASCADE
 );
 

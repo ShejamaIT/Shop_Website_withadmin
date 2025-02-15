@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with add stock api">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with add new supplier for item api">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
@@ -143,14 +144,7 @@
       <workItem from="1739094539357" duration="5841000" />
       <workItem from="1739159373412" duration="48678000" />
       <workItem from="1739416561583" duration="32899000" />
-      <workItem from="1739504997512" duration="28010000" />
-    </task>
-    <task id="LOCAL-00131" summary="update checkout">
-      <created>1738741850523</created>
-      <option name="number" value="00131" />
-      <option name="presentableId" value="LOCAL-00131" />
-      <option name="project" value="LOCAL" />
-      <updated>1738741850523</updated>
+      <workItem from="1739504997512" duration="39677000" />
     </task>
     <task id="LOCAL-00132" summary="update checkout">
       <created>1738745171643</created>
@@ -488,7 +482,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739535325041</updated>
     </task>
-    <option name="localTasksCounter" value="180" />
+    <task id="LOCAL-00180" summary="update with add stock api">
+      <created>1739593997998</created>
+      <option name="number" value="00180" />
+      <option name="presentableId" value="LOCAL-00180" />
+      <option name="project" value="LOCAL" />
+      <updated>1739593997998</updated>
+    </task>
+    <option name="localTasksCounter" value="181" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -507,7 +508,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update nav bar" />
     <MESSAGE value="update order details with updating order" />
     <MESSAGE value="update" />
     <MESSAGE value="update db query" />
@@ -532,6 +532,7 @@
     <MESSAGE value="update item detail with two pop up" />
     <MESSAGE value="update with adding new supplier to item" />
     <MESSAGE value="update with add stock api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update with add stock api" />
+    <MESSAGE value="update with add new supplier for item api" />
+    <option name="LAST_COMMIT_MESSAGE" value="update with add new supplier for item api" />
   </component>
 </project>
