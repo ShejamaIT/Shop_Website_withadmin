@@ -54,6 +54,7 @@ const TableThree = () => {
                         <tr>
                             <th>Order ID</th>
                             <th>Order Date</th>
+                            <th>Order Type</th>
                             <th>Expected Date</th>
                             <th>Customer Email</th>
                             <th>Order Status</th>
@@ -73,6 +74,7 @@ const TableThree = () => {
                                 <tr key={order.OrID}>
                                     <td>{order.OrID}</td>
                                     <td>{formatDate(order.orDate)}</td>
+                                    <td>{order.ordertype}</td>
                                     <td>{formatDate(order.expectedDeliveryDate)}</td>
                                     <td>{order.customerEmail}</td>
                                     <td>

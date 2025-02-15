@@ -95,6 +95,7 @@ router.get("/orders", async (req, res) => {
             OrID : order.OrID, // Assuming you have an id column
             orDate : order.orDate,
             customerEmail : order.customerEmail,
+            ordertype : order.order_type,
             orStatus : order.orStatus,
             dvStatus : order.dvStatus,
             dvPrice : order.dvPrice,
@@ -193,7 +194,7 @@ router.get("/accept-order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2,
-                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice,
+                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice,o.order_type,
                 o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN sales_team s ON o.stID = s.stID
@@ -240,6 +241,7 @@ router.get("/accept-order-details", async (req, res) => {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
+            orderType: orderData.order_type,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
@@ -327,7 +329,7 @@ router.get("/order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.orStatus, o.dvStatus,
-                o.dvPrice, o.disPrice, o.totPrice, o.expectedDate, o.specialNote,
+                o.dvPrice, o.disPrice, o.totPrice, o.expectedDate, o.specialNote, o.order_type,
                 s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN sales_team s ON o.stID = s.stID
@@ -358,6 +360,7 @@ router.get("/order-details", async (req, res) => {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
+            ordertype:orderData.order_type,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
@@ -562,6 +565,7 @@ router.get("/orders-pending", async (req, res) => {
             OrID: order.OrID, // Order ID
             orDate: order.orDate, // Order Date
             customerEmail: order.customerEmail, // Customer Email
+            ordertype:order.order_type,
             orStatus: order.orStatus, // Order Status
             dvStatus: order.dvStatus, // Delivery Status
             dvPrice: order.dvPrice, // Delivery Price
@@ -591,7 +595,8 @@ router.get("/orders-accepting", async (req, res) => {
             SELECT 
                 o.OrID, 
                 o.orDate, 
-                o.customerEmail, 
+                o.customerEmail,
+                o.order_type,
                 o.orStatus, 
                 o.dvStatus, 
                 o.dvPrice, 
@@ -622,6 +627,7 @@ router.get("/orders-accepting", async (req, res) => {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
+                    orderType: order.order_type,
                     orStatus: order.orStatus,
                     dvStatus: order.dvStatus,
                     dvPrice: order.dvPrice,
@@ -667,7 +673,8 @@ router.get("/orders-completed", async (req, res) => {
             SELECT 
                 o.OrID, 
                 o.orDate, 
-                o.customerEmail, 
+                o.customerEmail,
+                o.order_type,
                 o.orStatus, 
                 o.dvStatus, 
                 o.dvPrice, 
@@ -698,6 +705,7 @@ router.get("/orders-completed", async (req, res) => {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
+                    orderType: order.order_type,
                     orStatus: order.orStatus,
                     dvStatus: order.dvStatus,
                     dvPrice: order.dvPrice,
@@ -1907,6 +1915,93 @@ router.get("/find-cost", async (req, res) => {
     } catch (error) {
         console.error("Error fetching cost:", error.message);
         return res.status(500).json({ message: "Error fetching cost" });
+    }
+});
+
+// Get subcat one detail by ca_id
+router.get("/getSubcategories", async (req, res) => {
+    const { Ca_Id } = req.query;
+    console.log(Ca_Id);
+    if (!Ca_Id) {
+        return res.status(400).json({
+            success: false,
+            message: "Category ID (Ca_Id) is required",
+        });
+    }
+
+    try {
+        // Fetch subcategories under the given category ID
+        const sqlSubcategories = `SELECT sb_c_id, subcategory FROM subCat_one WHERE Ca_Id = ?`;
+        const [subCategories] = await db.query(sqlSubcategories, [Ca_Id]);
+
+        if (subCategories.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No subcategories found for the given category ID",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Subcategories retrieved successfully",
+            data: subCategories.map(subCat => ({
+                sb_c_id: subCat.sb_c_id,
+                subcategory: subCat.subcategory
+            })),
+        });
+
+    } catch (err) {
+        console.error("Error fetching subcategories:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching data from database",
+            details: err.message,
+        });
+    }
+});
+
+
+// // Get subcat two detail by ca_id
+router.get("/getSubcategoriesTwo", async (req, res) => {
+    const { sb_c_id } = req.query;
+
+    if (!sb_c_id) {
+        return res.status(400).json({
+            success: false,
+            message: "Subcategory One ID (sb_c_id) is required",
+        });
+    }
+
+    try {
+        // Fetch subcategory two names under the given subcategory one ID
+        const sqlSubcategoriesTwo = `SELECT sb_cc_id, subcategory FROM subCat_two WHERE sb_c_id = ?
+        `;
+        const [subCategoriesTwo] = await db.query(sqlSubcategoriesTwo, [sb_c_id]);
+
+        if (subCategoriesTwo.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No subcategories found",
+                data: [{ sb_cc_id: "None", subcategory: "None" }],
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Subcategories retrieved successfully",
+            data: subCategoriesTwo.map(subCat => ({
+                sb_cc_id: subCat.sb_cc_id,
+                subcategory: subCat.subcategory
+            })),
+        });
+
+    } catch (err) {
+        console.error("Error fetching subcategories:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching data from database",
+            details: err.message,
+        });
     }
 });
 

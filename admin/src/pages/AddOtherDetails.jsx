@@ -8,9 +8,10 @@ const AddOtherDetails = () => {
     const [subCategory2Image, setSubCategory2Image] = useState(null);
     const [typeImage, setTypeImage] = useState(null);
     const [categories, setCategories] = useState([]);
-    const [types, setTypes] = useState([]);
+    const [subCategoriesOne, setSubCategoriesOne] = useState([]);
+    const [subCategoriesTwo, setSubCategoriesTwo] = useState([]);
     const [formData, setFormData] = useState({
-        Ca_Id: "", // Category ID
+        Ca_Id: "",
         sub_one: "",
         sub_two: "",
     });
@@ -26,24 +27,52 @@ const AddOtherDetails = () => {
             });
     }, []);
 
-    // Fetch Types when Category Changes
+    // Fetch SubCategory One when Category Changes
     useEffect(() => {
         if (formData.Ca_Id) {
-            fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.Ca_Id}`)
+            console.log(formData.Ca_Id);
+            fetch(`http://localhost:5001/api/admin/main/getSubcategories?Ca_Id=${formData.Ca_Id}`)
                 .then((res) => res.json())
-                .then((data) => setTypes(data.types))
+                .then((data) => {
+                    if (data.success) {
+                        setSubCategoriesOne(data.data);
+                        setFormData((prev) => ({ ...prev, sub_one: "", sub_two: "" })); // Reset selections
+                    }
+                })
                 .catch((err) => {
-                    console.error("Error fetching types:", err);
-                    toast.error("Failed to load types.");
+                    console.error("Error fetching subcategories:", err);
+                    toast.error("Failed to load subcategories.");
                 });
         } else {
-            setTypes([]);
+            setSubCategoriesOne([]);
+            setSubCategoriesTwo([]);
         }
     }, [formData.Ca_Id]);
+
+    // Fetch SubCategory Two when SubCategory One Changes
+    useEffect(() => {
+        if (formData.sub_one) {
+            fetch(`http://localhost:5001/api/admin/main/getSubcategoriesTwo?sb_c_id=${formData.sub_one}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.success) {
+                        setSubCategoriesTwo(data.data);
+                        setFormData((prev) => ({ ...prev, sub_two: "" })); // Reset sub_two selection
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error fetching subcategories:", err);
+                    toast.error("Failed to load subcategories.");
+                });
+        } else {
+            setSubCategoriesTwo([]);
+        }
+    }, [formData.sub_one]);
 
     // Handle Input Changes
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log(name , value);
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -51,6 +80,7 @@ const AddOtherDetails = () => {
         <Container className="add-item-container">
             <Row className="justify-content-center">
                 <Col lg="6" className="d-flex flex-column gap-4">
+
                     {/* Add Category Section */}
                     <div className="p-3 border rounded shadow-sm">
                         <Label className="fw-bold">Add Category</Label>
@@ -77,6 +107,8 @@ const AddOtherDetails = () => {
                     {/* Add Type Section */}
                     <div className="p-3 border rounded shadow-sm">
                         <Label className="fw-bold">Add Type</Label>
+
+                        {/* Category Dropdown */}
                         <Input type="select" className="mb-2" name="Ca_Id" id="Ca_Id" value={formData.Ca_Id} onChange={handleChange} required>
                             <option value="">Select Category</option>
                             {categories.map((cat) => (
@@ -84,29 +116,23 @@ const AddOtherDetails = () => {
                             ))}
                         </Input>
 
-                        {/* Sub One Dropdown (Only Show if Category is Selected) */}
-                        {formData.Ca_Id && (
+                        {/* Sub One Dropdown */}
+                        {subCategoriesOne.length > 0 && (
                             <Input type="select" className="mb-2" name="sub_one" id="sub_one" value={formData.sub_one} onChange={handleChange} required>
                                 <option value="">Select Sub One</option>
-                                {types.map((type) => (
-                                    <option key={type.Ty_Id} value={type.sub_one}>
-                                        {type.sub_one}
-                                    </option>
+                                {subCategoriesOne.map((sub) => (
+                                    <option key={sub.sb_c_id} value={sub.sb_c_id}>{sub.subcategory}</option>
                                 ))}
                             </Input>
                         )}
 
-                        {/* Sub Two Dropdown (Only Show if Sub One is Selected) */}
-                        {formData.sub_one && (
+                        {/* Sub Two Dropdown */}
+                        {subCategoriesTwo.length > 0 && (
                             <Input type="select" className="mb-2" name="sub_two" id="sub_two" value={formData.sub_two} onChange={handleChange} required>
                                 <option value="">Select Sub Two</option>
-                                {types
-                                    .filter((type) => type.sub_one === formData.sub_one)
-                                    .map((type) => (
-                                        <option key={type.Ty_Id} value={type.sub_two}>
-                                            {type.sub_two}
-                                        </option>
-                                    ))}
+                                {subCategoriesTwo.map((sub) => (
+                                    <option key={sub.sb_cc_id} value={sub.sb_cc_id}>{sub.subcategory}</option>
+                                ))}
                             </Input>
                         )}
 
