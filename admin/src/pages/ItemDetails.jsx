@@ -33,17 +33,17 @@ const ItemDetails = () => {
     const [types, setTypes] = useState([]);
 
     // // Fetch Types when Category Changes
-    // useEffect(() => {
-    //     if (formData.category_name) {
-    //         fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_name}`)
-    //             .then((res) => res.json())
-    //             .then((data) => setTypes(data.types))
-    //             .catch((err) => {
-    //                 console.error("Error fetching types:", err);
-    //                 toast.error("Failed to load types.");
-    //             });
-    //     }
-    // }, [formData.category_name]);
+    useEffect(() => {
+        if (formData.category_name) {
+            fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_name}`)
+                .then((res) => res.json())
+                .then((data) => setTypes(data.types))
+                .catch((err) => {
+                    console.error("Error fetching types:", err);
+                    toast.error("Failed to load types.");
+                });
+        }
+    }, [formData.category_name]);
 
     const handleSupplierSelect = (e) => {
         const selectedSupplierID = e.target.value;
@@ -273,19 +273,6 @@ const ItemDetails = () => {
         }));
     };
 
-    // // Fetch Types when Category Changes
-    // useEffect(() => {
-    //     if (formData.category_name) {
-    //         fetch(`http://localhost:5001/api/admin/main/types-cat?category_name=${formData.category_name}`)
-    //             .then((res) => res.json())
-    //             .then((data) => setTypes(data.types))
-    //             .catch((err) => {
-    //                 console.error("Error fetching types:", err);
-    //                 toast.error("Failed to load types.");
-    //             });
-    //     }
-    // }, [formData.category_name]);
-
     const handleSave = async () => {
         try {
             // Fetch Type ID based on Category
@@ -352,7 +339,6 @@ const ItemDetails = () => {
         // This will run whenever the suppliers state is updated
         console.log("Updated Suppliers:", types);
     }, [types]);  // The dependency array ensures it runs when suppliers change
-
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -497,12 +483,12 @@ const ItemDetails = () => {
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Subcategory One:</strong></Label>
-                                                        {/*<Input*/}
-                                                        {/*    type="text"*/}
-                                                        {/*    name="subcategoryOne"*/}
-                                                        {/*    value={formData.subcategory_one}*/}
-                                                        {/*    onChange={handleChange}*/}
-                                                        {/*/>*/}
+                                                        <Input
+                                                            type="text"
+                                                            name="subcategoryOne"
+                                                            value={formData.subcategory_one}
+                                                            onChange={handleChange}
+                                                        />
 
                                                         <Input
                                                             type="select"
@@ -512,13 +498,15 @@ const ItemDetails = () => {
                                                             required
                                                         >
                                                             <option value="">Select Sub Two</option>
-                                                            {types
-                                                                .filter((type) => type.sub_one === formData.sub_one)
-                                                                .map((type) => (
-                                                                    <option key={type.Ty_Id} value={type.sub_two}>
-                                                                        {type.sub_two}
-                                                                    </option>
-                                                                ))}
+                                                            {/*{types*/}
+                                                            {/*    .filter((type) => type.sub_one === formData.sub_one)*/}
+                                                            {/*    .map((type) => (*/}
+                                                            {/*        console.log({type.sub_two})*/}
+                                                            {/*        <option value="" key=""></option>*/}
+                                                            {/*        // <option key={type.Ty_Id} value={type.sub_two}>*/}
+                                                            {/*        //     {type.sub_two}*/}
+                                                            {/*        // </option>*/}
+                                                            {/*    ))}*/}
                                                         </Input>
                                                     </FormGroup>
                                                 )}
