@@ -5,12 +5,7 @@ import db from '../utils/db.js';
 const router = express.Router();
 
 // Save  new item
-router.post("/add-item", upload.fields([
-    { name: "img", maxCount: 1 },
-    { name: "img1", maxCount: 1 },
-    { name: "img2", maxCount: 1 },
-    { name: "img3", maxCount: 1 }
-]), async (req, res) => {
+router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 }]), async (req, res) => {
     try {
         // Validate request body
         const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost ,material,s_Id } = req.body;
@@ -18,44 +13,39 @@ router.post("/add-item", upload.fields([
         const parsedPrice = parseFloat(price) || 0;
         const parsedCost = parseFloat(cost) || 0;
 
-
         // Extract image buffers
         const imgBuffer = req.files["img"][0].buffer;
         const img1Buffer = req.files["img1"][0].buffer;
         const img2Buffer = req.files["img2"][0].buffer ;
         const img3Buffer = req.files["img3"][0].buffer;
 
-
         const itemValues = [
             I_Id, I_name, Ty_id, descrip, color,material, parsedPrice, imgBuffer, warrantyPeriod
         ];
-
         const imgValues = [
-            I_Id,
-            img1Buffer ? Buffer.from(img1Buffer) : null,
-            img2Buffer ? Buffer.from(img2Buffer) : null,
-            img3Buffer ? Buffer.from(img3Buffer) : null
+            I_Id, img1Buffer ? Buffer.from(img1Buffer) : null, img2Buffer ? Buffer.from(img2Buffer) : null, img3Buffer ? Buffer.from(img3Buffer) : null
         ];
-
         const supplierValues = [
             I_Id, s_Id,parsedCost
         ];
-
         // Insert into `Item` table (Main image)
         const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color,material, price, stockQty, bookedQty, availableQty, img, warrantyPeriod) 
                          VALUES (?, ?, ?, ?, ?,?,?, 0, 0, 0, ?, ?);`;
 
-        await db.query(itemSql, itemValues);
+        const query = await db.query(itemSql, itemValues);
+        console.log("query");
 
         // Insert into `Item_img` table (Additional images)
         const imgSql = `INSERT INTO Item_img (I_Id, img1, img2, img3) VALUES (?, ?, ?, ?);`;
 
-        await db.query(imgSql, imgValues);
+        const query1 = await db.query(imgSql, imgValues);
+        console.log("query1");
 
         // Insert into `Item_supplier` table
         const itemsuplierSql = `INSERT INTO item_supplier (I_Id, s_ID,unit_cost) VALUES (?, ?,?);`;
 
-        await db.query(itemsuplierSql, supplierValues);
+        const query2 = await db.query(itemsuplierSql, supplierValues);
+        console.log("query2");
 
         res.status(201).json({
             success: true,
@@ -72,12 +62,109 @@ router.post("/add-item", upload.fields([
                 cost: parsedCost
             }
         });
-
     } catch (err) {
         console.error("❌ Error inserting item data:", err.message);
         res.status(500).json({ success: false, message: "Error inserting data into database", details: err.message });
     }
 });
+
+// Update exit item
+router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 }]), async (req, res) => {
+    try {
+        // Extract and validate request body
+        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, s_Id, availableQty, bookedQty, stockQty, img1, img2, img3 } = req.body;
+        const parsedPrice = parseFloat(price) || 0;
+        const parsedCost = parseFloat(cost) || 0;
+
+        // Check if the I_Id exists
+        const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
+        const itemCheckResult = await db.query(itemCheckSql, [I_Id]);
+
+        if (itemCheckResult.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Item not found."
+            });
+        }
+
+        // Extract image buffers if provided
+        // const imgBuffer = req.files["img"] ? req.files["img"][0].buffer : null;
+        // const img1Buffer = req.files["img1"] ? req.files["img1"][0].buffer : null;
+        // const img2Buffer = req.files["img2"] ? req.files["img2"][0].buffer : null;
+        // const img3Buffer = req.files["img3"] ? req.files["img3"][0].buffer : null;
+
+        const imgBuffer = req.files["img"][0].buffer;
+        const img1Buffer = req.files["img1"][0].buffer;
+        const img2Buffer = req.files["img2"][0].buffer ;
+        const img3Buffer = req.files["img3"][0].buffer;
+
+        const itemValues = [
+            I_name, Ty_id, descrip, color, material, parsedPrice, availableQty, bookedQty, stockQty, imgBuffer ? imgBuffer : null, warrantyPeriod, I_Id
+        ];
+        console.log(itemValues);
+
+        const imgValues = [
+            I_Id, img1Buffer ? img1Buffer : null, img2Buffer ? img2Buffer : null, img3Buffer ? img3Buffer : null
+        ];
+        console.log(imgValues);
+
+        const supplierValues = [
+            I_Id, s_Id, parsedCost
+        ];
+        console.log(supplierValues);
+
+        // // Update `Item` table
+        // const itemUpdateSql = `
+        //     UPDATE Item
+        //     SET I_name = ?, Ty_id = ?, descrip = ?, color = ?, material = ?, price = ?, availableQty = ?, bookedQty = ?, stockQty = ?, img = ?, warrantyPeriod = ?
+        //     WHERE I_Id = ?;
+        // `;
+        //
+        // await db.query(itemUpdateSql, itemValues);
+        //
+        // // Update `Item_img` table if images are provided
+        // if (img1Buffer || img2Buffer || img3Buffer) {
+        //     const imgUpdateSql = `
+        //         UPDATE Item_img
+        //         SET img1 = ?, img2 = ?, img3 = ?
+        //         WHERE I_Id = ?;
+        //     `;
+        //     await db.query(imgUpdateSql, imgValues);
+        // }
+        //
+        // // Update the supplier information
+        // const supplierUpdateSql = `
+        //     UPDATE item_supplier
+        //     SET unit_cost = ?
+        //     WHERE I_Id = ? AND s_ID = ?;
+        // `;
+        //
+        // await db.query(supplierUpdateSql, supplierValues);
+
+        res.status(200).json({
+            success: true,
+            message: "Item updated successfully",
+            data: {
+                I_Id,
+                I_name,
+                Ty_id,
+                descrip,
+                color,
+                material,
+                price: parsedPrice,
+                warrantyPeriod,
+                cost: parsedCost,
+                availableQty,
+                bookedQty,
+                stockQty
+            }
+        });
+    } catch (err) {
+        console.error("❌ Error updating item data:", err.message);
+        res.status(500).json({ success: false, message: "Error updating data into database", details: err.message });
+    }
+});
+
 
 // Get all orders
 router.get("/orders", async (req, res) => {
@@ -194,7 +281,7 @@ router.get("/accept-order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2,
-                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice,o.order_type,
+                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice, o.order_type,
                 o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN sales_team s ON o.stID = s.stID
@@ -241,7 +328,7 @@ router.get("/accept-order-details", async (req, res) => {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
-            orderType: orderData.order_type,
+            ordertype : orderData.order_type,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
@@ -360,7 +447,7 @@ router.get("/order-details", async (req, res) => {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
-            ordertype:orderData.order_type,
+            ordertype : orderData.order_type,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
@@ -466,7 +553,7 @@ router.get("/item-details", async (req, res) => {
         const itemQuery = `
             SELECT
                 I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty,
-                I.warrantyPeriod, I.img,
+                I.warrantyPeriod, I.img, I.color , I.material,
                 T.sub_one, T.sub_two, C.name AS category_name
             FROM Item I
             JOIN Type T ON I.Ty_id = T.Ty_Id
@@ -526,6 +613,8 @@ router.get("/item-details", async (req, res) => {
                 I_name: itemData.I_name,
                 Ty_id: itemData.Ty_id,
                 descrip: itemData.descrip,
+                color: itemData.color,
+                material: itemData.material,
                 price: itemData.price,
                 stockQty: itemData.stockQty,
                 availableQty: itemData.availableQty,
@@ -565,7 +654,7 @@ router.get("/orders-pending", async (req, res) => {
             OrID: order.OrID, // Order ID
             orDate: order.orDate, // Order Date
             customerEmail: order.customerEmail, // Customer Email
-            ordertype:order.order_type,
+            ordertype : order.order_type,
             orStatus: order.orStatus, // Order Status
             dvStatus: order.dvStatus, // Delivery Status
             dvPrice: order.dvPrice, // Delivery Price
@@ -627,7 +716,7 @@ router.get("/orders-accepting", async (req, res) => {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
-                    orderType: order.order_type,
+                    ordertype : order.order_type,
                     orStatus: order.orStatus,
                     dvStatus: order.dvStatus,
                     dvPrice: order.dvPrice,
@@ -639,6 +728,7 @@ router.get("/orders-accepting", async (req, res) => {
                     acceptanceStatus: "Complete", // Default status is Complete
                     acceptanceStatuses: [] // Track individual item statuses
                 };
+                console.log(order.order_type);
             }
 
             // Add each item status to the list
@@ -705,7 +795,7 @@ router.get("/orders-completed", async (req, res) => {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
-                    orderType: order.order_type,
+                    ordertype : order.order_type,
                     orStatus: order.orStatus,
                     dvStatus: order.dvStatus,
                     dvPrice: order.dvPrice,
@@ -1129,6 +1219,7 @@ router.get("/orders-accept", async (req, res) => {
                 o.OrID, 
                 o.orDate, 
                 o.customerEmail, 
+                o.order_type,
                 o.orStatus, 
                 o.dvStatus, 
                 o.dvPrice, 
@@ -1165,6 +1256,7 @@ router.get("/orders-accept", async (req, res) => {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
+                    ordertype : order.order_type,
                     orStatus: order.orStatus,
                     dvStatus: order.dvStatus,
                     dvPrice: order.dvPrice,
@@ -1767,6 +1859,53 @@ router.get("/types", async (req, res) => {
     }
 });
 
+// find type by cat name
+router.get("/types-cat", async (req, res) => {
+    try {
+        const { category_name } = req.query; // Get Category name from the query parameters
+
+        if (!category_name) {
+            return res.status(400).json({ message: "Category name is required." });
+        }
+
+        // Step 1: Query the Category table to get the Ca_Id based on the category_name
+        const [categoryResult] = await db.query(`
+            SELECT Ca_Id
+            FROM Category
+            WHERE name = ?;
+        `, [category_name]);
+
+        // If no category found, return an error
+        if (categoryResult.length === 0) {
+            return res.status(404).json({ message: "Category not found." });
+        }
+
+        const Ca_Id = categoryResult[0].Ca_Id; // Extract the Ca_Id from the result
+
+        // Step 2: Query the Type table to fetch all types for the given Ca_Id
+        const [types] = await db.query(`
+            SELECT Ty_Id, sub_one, sub_two
+            FROM Type
+            WHERE Ca_Id = ?;
+        `, [Ca_Id]);
+
+        // If no types found for this category, return a 404 status
+        if (types.length === 0) {
+            return res.status(404).json({ message: "No types found for this category." });
+        }
+
+        // Step 3: Return the found types
+        return res.status(200).json({
+            message: "Types found.",
+            types: types,
+        });
+
+    } catch (error) {
+        console.error("Error fetching types:", error.message);
+        return res.status(500).json({ message: "Error fetching types" });
+    }
+});
+
 // Find Type id
 router.get("/find-types", async (req, res) => {
     try {
@@ -1800,6 +1939,56 @@ router.get("/find-types", async (req, res) => {
         return res.status(500).json({ message: "Error fetching types" });
     }
 });
+
+// Find type id when category name comes
+router.get("/find-types-cat", async (req, res) => {
+    try {
+        const { category_name, sub_one, sub_two } = req.query; // Get Category name, sub_one, and sub_two from the query parameters
+
+        if (!category_name || !sub_one || !sub_two) {
+            return res.status(400).json({ message: "Category name, Sub One, and Sub Two are required." });
+        }
+
+        // Step 1: Query the Category table to get the Ca_Id based on the category name
+        const [categoryResult] = await db.query(`
+            SELECT Ca_Id
+            FROM Category
+            WHERE name = ?;
+        `, [category_name]);
+
+        // If no category found, return an error
+        if (categoryResult.length === 0) {
+            return res.status(404).json({ message: "Category not found." });
+        }
+
+        const Ca_Id = categoryResult[0].Ca_Id; // Extract the Ca_Id from the result
+
+        // Step 2: Query the Type table to find the Ty_Id based on Ca_Id, sub_one, and sub_two
+        const [types] = await db.query(`
+            SELECT Ty_Id, sub_one, sub_two
+            FROM Type
+            WHERE Ca_Id = ? AND sub_one = ? AND sub_two = ?;
+        `, [Ca_Id, sub_one, sub_two]);
+
+        // If no type found for this combination, return a 404 status
+        if (types.length === 0) {
+            return res.status(404).json({ message: "No type found for this category and sub-one/sub-two combination." });
+        }
+
+        console.log(types[0]);
+
+        // Step 3: Return the found Type data
+        return res.status(200).json({
+            message: "Type found.",
+            type: types[0],  // Return only the first matching type
+        });
+
+    } catch (error) {
+        console.error("Error fetching types:", error.message);
+        return res.status(500).json({ message: "Error fetching types" });
+    }
+});
+
 
 // API endpoint to save item-supplier association
 router.post('/add-item-supplier', async (req, res) => {
@@ -1960,7 +2149,6 @@ router.get("/getSubcategories", async (req, res) => {
     }
 });
 
-
 // // Get subcat two detail by ca_id
 router.get("/getSubcategoriesTwo", async (req, res) => {
     const { sb_c_id } = req.query;
@@ -2004,5 +2192,165 @@ router.get("/getSubcategoriesTwo", async (req, res) => {
         });
     }
 });
+
+// Save New Category
+router.post("/category", async (req, res) => {
+    try {
+        // Fetch the last inserted category ID
+        const [lastCategory] = await db.query("SELECT Ca_Id FROM Category ORDER BY Ca_Id DESC LIMIT 1");
+
+        let newId;
+        if (lastCategory.length > 0) {
+            // Extract the number from the last ID and increment
+            const lastIdNumber = parseInt(lastCategory[0].Ca_Id.split("_")[1], 10);
+            newId = `Ca_${String(lastIdNumber + 1).padStart(4, "0")}`;
+        } else {
+            // If no categories exist, start from Ca_0001
+            newId = "Ca_0001";
+        }
+
+        // SQL query to insert new category
+        const sql = `INSERT INTO Category (Ca_Id, name) VALUES (?, ?)`;
+        const values = [newId, req.body.Catname];
+
+        // Execute the insert query
+        await db.query(sql, values);
+
+        // Return success response with the new category details
+        return res.status(201).json({
+            success: true,
+            message: "Category added successfully",
+            data: {
+                Ca_Id: newId,
+                name: req.body.Catname
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting category data:", err.message);
+
+        // Respond with error details
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+// Save New Sub category one and two with image
+router.post("/subcategory", upload.fields([{ name: "subcatone_img" }, { name: "subcattwo_img" }]), async (req, res) => {
+    const { Ca_Id, sub_one, sub_two } = req.body;
+    const subcatone_img = req.files["subcatone_img"] ? req.files["subcatone_img"][0].buffer : null;
+    const subcattwo_img = req.files["subcattwo_img"] ? req.files["subcattwo_img"][0].buffer : null;
+
+    try {
+        // Generate ID for subCat_one
+        const sb_c_id = await generateNewId("subCat_one", "sb_c_id", "S1");
+
+        // Insert into subCat_one
+        await db.query(
+            "INSERT INTO subCat_one (sb_c_id, subcategory, Ca_Id, img) VALUES (?, ?, ?, ?)",
+            [sb_c_id, sub_one, Ca_Id, subcatone_img]
+        );
+
+        let sb_cc_id = null;
+        if (sub_two !== "None" && subcattwo_img) {
+            // Generate ID for subCat_two
+            sb_cc_id = await generateNewId("subCat_two", "sb_cc_id", "S2");
+
+            // Insert into subCat_two
+            await db.query(
+                "INSERT INTO subCat_two (sb_cc_id, subcategory, sb_c_id, img) VALUES (?, ?, ?, ?)",
+                [sb_cc_id, sub_two, sb_c_id, subcattwo_img]
+            );
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Sub-category added successfully",
+            data: {
+                sb_c_id,
+                sub_one,
+                Ca_Id,
+                sb_cc_id: sb_cc_id || null,
+                sub_two: sb_cc_id ? sub_two : null,
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting sub-category data:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+// API to save or retrieve existing Type
+router.post("/type", async (req, res) => {
+    const { Ca_Id, sub_one, sub_two } = req.body;
+    console.log(req.body);
+
+    if (!Ca_Id || !sub_one) {
+        return res.status(400).json({
+            success: false,
+            message: "Ca_Id and sub_one are required.",
+        });
+    }
+
+    try {
+        // Check if a Type entry already exists
+        const [existing] = await db.query(
+            "SELECT * FROM Type WHERE Ca_Id = ? AND sub_one = ? AND (sub_two = ? OR ? IS NULL)",
+            [Ca_Id, sub_one, sub_two, sub_two]
+        );
+
+        if (existing.length > 0) {
+            return res.status(200).json({
+                success: true,
+                message: "Type already exists.",
+                data: existing[0],
+            });
+        }
+
+        // Generate new Type ID
+        const newTypeId = await generateNewId("Type", "Ty_Id", "Ty");
+
+        // Insert new Type entry
+        await db.query(
+            "INSERT INTO Type (Ty_Id, Ca_Id, sub_one, sub_two) VALUES (?, ?, ?, ?)",
+            [newTypeId, Ca_Id, sub_one, sub_two || null]
+        );
+
+        return res.status(201).json({
+            success: true,
+            message: "Type added successfully.",
+            data: {
+                Ty_Id: newTypeId,
+                Ca_Id,
+                sub_one,
+                sub_two: sub_two || null,
+            },
+        });
+    } catch (err) {
+        console.error("Error saving type:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+
+// Function to generate new ida
+const generateNewId = async (table, column, prefix) => {
+    const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
+    if (rows.length === 0) return `${prefix}_001`; // First entry
+    const lastId = rows[0][column]; // Get last ID
+    const lastNum = parseInt(lastId.split("_")[1], 10) + 1; // Extract number and increment
+    return `${prefix}_${String(lastNum).padStart(3, "0")}`;
+};
+
 
 export default router;
