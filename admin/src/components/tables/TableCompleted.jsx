@@ -74,7 +74,7 @@ const TableCompleted = () => {
                                 <tr key={order.OrID}>
                                     <td>{order.OrID}</td>
                                     <td>{formatDate(order.orDate)}</td>
-                                    <td>{order.orderType}</td>
+                                    <td>{order.ordertype}</td>
                                     <td>{formatDate(order.expectedDeliveryDate)}</td>
                                     <td>{order.customerEmail}</td>
                                     <td>
