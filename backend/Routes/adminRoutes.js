@@ -9,37 +9,6 @@ const storage = multer.memoryStorage(); // Store image in memory
 const upload = multer({ storage: storage });
 
 
-// Save New Category
-router.post("/category", async (req, res) => {
-    const sql = `INSERT INTO Category (Ca_Id,name) VALUES (?, ?)`;
-    const values = [
-        req.body.Ca_Id,
-        req.body.name,
-    ];
-    try {
-        // Execute the query and retrieve the result
-        const [result] = await db.query(sql, values);
-
-        // Return success response with inserted data details
-        return res.status(201).json({
-            success: true,
-            message: "Category added successfully",
-            data: {
-                Ca_Id: req.body.Ca_Id,
-                name: req.body.name
-            },
-        });
-    } catch (err) {
-        console.error("Error inserting category data:", err.message);
-
-        // Respond with error details
-        return res.status(500).json({
-            success: false,
-            message: "Error inserting data into database",
-            details: err.message,
-        });
-    }
-});
 // Save New Type
 router.post("/type", async (req, res) => {
     const sql = `INSERT INTO type (Ty_Id,Ca_Id,sub_one,sub_two) VALUES (?, ?,?,?)`;
@@ -75,6 +44,7 @@ router.post("/type", async (req, res) => {
         });
     }
 });
+
 // Save New Promotion
 router.post("/promotion", upload.single('img'), async (req, res) => {
     const sql = `INSERT INTO Promotion (img, date ) VALUES (?, ?)`;
@@ -130,6 +100,7 @@ router.get("/promotions", async (req, res) => {
         return res.status(500).json({ message: "Error fetching promotions" });
     }
 });
+
 //get all items
 router.get("/items", async (req, res) => {
     try {
@@ -639,7 +610,6 @@ router.post("/coupone", async (req, res) => {
     }
 });
 
-
 // Save a order
 router.post("/orders", async (req, res) => {
     try {
@@ -686,8 +656,8 @@ router.post("/orders", async (req, res) => {
         }
         // Insert Order
         let orderQuery = `
-            INSERT INTO Orders (OrID, orDate, customerEmail,contact1,contact2, orStatus, dvStatus,city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote)
-            VALUES (?, ?, ?,?,?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?)`;
+            INSERT INTO Orders (OrID, orDate, customerEmail,contact1,contact2, orStatus, dvStatus,city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote,order_type)
+            VALUES (?, ?, ?,?,?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?.'site')`;
         let orderParams = [orID, orderDate, email,phoneNumber,optionalNumber, dvStatus,city, deliveryCharge, discount, totalAmount, stID, expectedDate, specialNote];
 
         await db.query(orderQuery, orderParams);
@@ -856,6 +826,7 @@ router.get("/delivery-rate", async (req, res) => {
         return res.status(500).json({ message: "Error fetching delivery rate" });
     }
 });
+
 // GET API to fetch delivery schedule by district
 router.get("/delivery-schedule", async (req, res) => {
     const { district } = req.query; // Get district from query parameter
