@@ -48,7 +48,7 @@ CREATE TABLE Item(
       availableQty INT,
       img LONGBLOB NOT NULL,
 	        CONSTRAINT FOREIGN KEY (Ty_id) REFERENCES Type (Ty_id)
-			    ON DELETE CASCADE ON UPDATE CASCADE,
+			    ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE Item_img(
     I_Id VARCHAR(25) PRIMARY KEY,
@@ -121,6 +121,7 @@ CREATE TABLE Orders (
     contact1 VARCHAR(14) NOT NULL,
     contact2 VARCHAR(14),
     orStatus VARCHAR(15),
+    city VARCHAR(25),
     dvStatus VARCHAR(10),
     dvPrice DOUBLE,
     disPrice DOUBLE,
@@ -128,6 +129,7 @@ CREATE TABLE Orders (
     stID VARCHAR(25),
     expectedDate DATE,
     specialNote TEXT,
+    order_type VARCHAR(10),
     CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -229,7 +231,7 @@ CREATE TABLE item_supplier (
   CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
               ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
-                ON DELETE CASCADE ON UPDATE CASCADE,
+                ON DELETE CASCADE ON UPDATE CASCADE
 
 );
 CREATE TABLE order_Payment(

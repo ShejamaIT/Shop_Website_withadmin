@@ -68,7 +68,7 @@ const Login = () => {
                                            value={password} onChange={e=> setPassword(e.target.value)}/>
                                 </FormGroup>
 
-                                <button type={'submit'} onClick={validateSubmition} className='btn auth__btn'>Login</button>
+                                <button type={'submit'} onClick={submitLogin} className='btn auth__btn'>Login</button>
                                 <p>Don't have an account? <Link to={'/signup'}>Create an account</Link></p>
 
                             </Form>

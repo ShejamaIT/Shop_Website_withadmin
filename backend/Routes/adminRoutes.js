@@ -657,7 +657,7 @@ router.post("/orders", async (req, res) => {
         // Insert Order
         let orderQuery = `
             INSERT INTO Orders (OrID, orDate, customerEmail,contact1,contact2, orStatus, dvStatus,city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote,order_type)
-            VALUES (?, ?, ?,?,?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?.'site')`;
+            VALUES (?, ?, ?,?,?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?,'site')`;
         let orderParams = [orID, orderDate, email,phoneNumber,optionalNumber, dvStatus,city, deliveryCharge, discount, totalAmount, stID, expectedDate, specialNote];
 
         await db.query(orderQuery, orderParams);
