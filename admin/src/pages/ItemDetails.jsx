@@ -32,55 +32,18 @@ const ItemDetails = () => {
     });
     const [types, setTypes] = useState([]);
 
-    useEffect(() => {
-        fetchItem();
-    }, [id]);
-
-    // Fetch Categories
-    useEffect(() => {
-        fetch("http://localhost:5001/api/admin/main/categories")
-            .then((res) => res.json())
-            .then((data) => setCategories(data))
-            .catch((err) => {
-                console.error("Error fetching categories:", err);
-                toast.error("Failed to load categories.");
-            });
-    }, []);
-
-    // Fetch all suppliers when the modal opens
-    useEffect(() => {
-        const fetchSuppliers = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/suppliers"); // Adjust the endpoint if necessary
-                if (!response.ok) throw new Error("Failed to fetch suppliers");
-                const data = await response.json();
-                if (data.success) {
-                    setSuppliers1(data.suppliers); // Set the suppliers list
-                } else {
-                    toast.error(data.message);
-                }
-            } catch (error) {
-                toast.error("Error loading suppliers");
-            }
-        };
-
-        if (showSupplierModal) {
-            fetchSuppliers();
-        }
-    }, [showSupplierModal]); // Re-run this when the modal is opened
-
-    // Fetch Types when Category Changes
-    useEffect(() => {
-        if (formData.category_name) {
-            fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_name}`)
-                .then((res) => res.json())
-                .then((data) => setTypes(data.types))
-                .catch((err) => {
-                    console.error("Error fetching types:", err);
-                    toast.error("Failed to load types.");
-                });
-        }
-    }, [formData.category_name]);
+    // // Fetch Types when Category Changes
+    // useEffect(() => {
+    //     if (formData.category_name) {
+    //         fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_name}`)
+    //             .then((res) => res.json())
+    //             .then((data) => setTypes(data.types))
+    //             .catch((err) => {
+    //                 console.error("Error fetching types:", err);
+    //                 toast.error("Failed to load types.");
+    //             });
+    //     }
+    // }, [formData.category_name]);
 
     const handleSupplierSelect = (e) => {
         const selectedSupplierID = e.target.value;
@@ -95,51 +58,6 @@ const ItemDetails = () => {
                 supplierName: selectedSupplier.name,
                 contactInfo: selectedSupplier.contact,
                 cost: selectedSupplier.cost || "",  // Ensure cost is updated too
-            }));
-        }
-    };
-
-    const fetchItem = async () => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/item-details?I_Id=${id}`);
-            if (!response.ok) throw new Error("Failed to fetch item details.");
-            const data = await response.json();
-            setItem(data.item);
-            setSuppliers(data.item.suppliers || []); // Set suppliers
-            setFormData(data.item); // Copy item details for editing
-            console.log(data.item);
-            setLoading(false);
-        } catch (err) {
-            console.error("Error fetching item details:", err);
-            setError(err.message);
-            setLoading(false);
-        }
-    };
-
-    const handleChange = (e) => {
-        const { name, value, type, files } = e.target;
-        console.log(name , value);
-
-        if (type === "file" && files) {
-            // Handle image file change (Convert to base64)
-            const file = files[0];
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                // Update the formData with the base64 string of the image
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    [name]: reader.result.split(',')[1], // Removing the "data:image/png;base64," part
-                }));
-            };
-
-            // Read the file as a data URL (Base64 encoded string)
-            reader.readAsDataURL(file);
-        } else {
-            // Handle regular text input changes
-            setFormData((prevFormData) => ({
-                ...prevFormData,
-                [name]: value,
             }));
         }
     };
@@ -161,7 +79,6 @@ const ItemDetails = () => {
             reader.readAsDataURL(file);
         }
     };
-
 
     const handleStockChange = async (e) => {
         const { name, value } = e.target;
@@ -256,27 +173,187 @@ const ItemDetails = () => {
         }
     };
 
+    useEffect(() => {
+        fetchItem();
+    }, [id]);
+
+    // Fetch Categories
+    useEffect(() => {
+        fetch("http://localhost:5001/api/admin/main/categories")
+            .then((res) => res.json())
+            .then((data) => setCategories(data))
+            .catch((err) => {
+                console.error("Error fetching categories:", err);
+                toast.error("Failed to load categories.");
+            });
+    }, []);
+
+    // Fetch all suppliers when the modal opens
+    useEffect(() => {
+        const fetchSuppliers = async () => {
+            try {
+                const response = await fetch("http://localhost:5001/api/admin/main/suppliers"); // Adjust the endpoint if necessary
+                if (!response.ok) throw new Error("Failed to fetch suppliers");
+                const data = await response.json();
+                if (data.success) {
+                    setSuppliers1(data.suppliers); // Set the suppliers list
+                } else {
+                    toast.error(data.message);
+                }
+            } catch (error) {
+                toast.error("Error loading suppliers");
+            }
+        };
+
+        if (showSupplierModal) {
+            fetchSuppliers();
+        }
+    }, [showSupplierModal]); // Re-run this when the modal is opened
+
+    const fetchItem = async () => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/item-details?I_Id=${id}`);
+            if (!response.ok) throw new Error("Failed to fetch item details.");
+            const data = await response.json();
+            setItem(data.item);
+            setSuppliers(data.item.suppliers || []); // Set suppliers
+            setFormData(data.item); // Copy item details for editing
+            console.log(data.item);
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching item details:", err);
+            setError(err.message);
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (e, supplierId) => {
+        const { name, value, type, files } = e.target;
+
+        console.log(name, value); // Check the input name and value
+
+        // If the field is a file, handle image upload
+        if (type === "file" && files) {
+            const file = files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+                setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    [name]: reader.result.split(',')[1], // Removing the "data:image/png;base64," part
+                }));
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            // Handle regular text input changes
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                [name]: value,
+            }));
+        }
+
+        // Update the specific supplier's data in the suppliers array
+        setSuppliers((prevSuppliers) =>
+            prevSuppliers.map((supplier) =>
+                supplier.s_ID === supplierId
+                    ? { ...supplier, [name]: value } // Update the supplier's cost
+                    : supplier
+            )
+        );
+
+        // Also update the supplier information in formData
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            suppliers: prevFormData.suppliers.map((supplier) =>
+                supplier.s_ID === supplierId
+                    ? { ...supplier, [name]: value } // Update the supplier's cost in the formData
+                    : supplier
+            )
+        }));
+    };
+
+    // // Fetch Types when Category Changes
+    // useEffect(() => {
+    //     if (formData.category_name) {
+    //         fetch(`http://localhost:5001/api/admin/main/types-cat?category_name=${formData.category_name}`)
+    //             .then((res) => res.json())
+    //             .then((data) => setTypes(data.types))
+    //             .catch((err) => {
+    //                 console.error("Error fetching types:", err);
+    //                 toast.error("Failed to load types.");
+    //             });
+    //     }
+    // }, [formData.category_name]);
 
     const handleSave = async () => {
-        console.log(formData);
-        // try {
-        //     const response = await fetch(`http://localhost:5001/api/admin/main/update-item`, {
-        //         method: "PUT",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify(formData),
-        //     });
-        //
-        //     if (!response.ok) throw new Error("Failed to update item.");
-        //
-        //     const updatedItem = await response.json();
-        //     setItem(updatedItem);
-        //     setIsEditing(false);
-        // } catch (err) {
-        //     console.error("Error updating item:", err);
-        //     toast.error("Failed to update item!");
-        // }
+        try {
+            // Fetch Type ID based on Category
+            const typeResponse = await fetch(
+                `http://localhost:5001/api/admin/main/find-types-cat?category_name=${formData.category_name}&sub_one=${formData.subcategory_one}&sub_two=${formData.subcategory_two}`
+            );
 
+            if (!typeResponse.ok) {
+                throw new Error("Failed to fetch Type ID");
+            }
+
+            const typeData = await typeResponse.json();
+            const typeId = typeData.type.Ty_Id; // Extract Type ID
+
+            if (!typeId){
+                toast.error("Added Type Frist");
+            }
+            console.log(formData);
+            // Step 2: Prepare the FormData for sending the request
+            const updatedFormData = new FormData();
+
+            // Add regular fields to FormData
+            updatedFormData.append('I_Id', formData.I_Id);
+            updatedFormData.append('I_name', formData.I_name);
+            updatedFormData.append('Ty_id', formData.Ty_id);
+            updatedFormData.append('descrip', formData.descrip);
+            updatedFormData.append('color', formData.color);
+            updatedFormData.append('price', formData.price);
+            updatedFormData.append('warrantyPeriod', formData.warrantyPeriod);
+            updatedFormData.append('cost', formData.unit_cost); // Assuming the updated supplier cost here
+            updatedFormData.append('material', formData.material);
+            updatedFormData.append('s_Id', formData.s_ID); // Assuming the supplier ID is stored in formData.s_ID
+            updatedFormData.append('availableQty', formData.availableQty);
+            updatedFormData.append('bookedQty', formData.bookedQty);
+            updatedFormData.append('stockQty', formData.stockQty);
+
+            // Add images if available
+            if (formData.img) updatedFormData.append('img', formData.img); // If there's a new image
+            if (formData.img1) updatedFormData.append('img1', formData.img1);
+            if (formData.img2) updatedFormData.append('img2', formData.img2);
+            if (formData.img3) updatedFormData.append('img3', formData.img3);
+            console.log(formData);
+            // Step 3: Send the update request to your backend API
+            const updateResponse = await fetch(`http://localhost:5001/api/admin/main/update-item`, {
+                method: "PUT",
+                body: updatedFormData,
+            });
+
+            const updateResult = await updateResponse.json();
+
+            if (updateResult.success) {
+                toast.success("Item updated successfully!");
+                setIsEditing(false);  // Reset edit mode
+                setFormData(updateResult.data);  // Optionally update form data with returned data (useful if the backend sends updated details)
+            } else {
+                toast.error(updateResult.message || "Failed to update item.");
+            }
+        } catch (error) {
+            toast.error("Error updating item: " + error.message);
+        }
     };
+
+    useEffect(() => {
+        // This will run whenever the suppliers state is updated
+        console.log("Updated Suppliers:", types);
+    }, [types]);  // The dependency array ensures it runs when suppliers change
+
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!item) return <p>Item not found</p>;
@@ -353,36 +430,45 @@ const ItemDetails = () => {
                                                             onChange={handleChange}
                                                         />
                                                     </FormGroup>
-
                                                 )}
                                                 {!isEditing ? (
-                                                    <p><strong>Stock Quantity:</strong> {item.stockQty}</p>
+                                                    <p><strong>Color:</strong> {item.color}</p>
                                                 ) : (
                                                     <FormGroup>
-                                                        <Label><strong>Stock Quantity:</strong></Label>
+                                                        <Label><strong>Color:</strong></Label>
                                                         <Input
-                                                            type="number"
-                                                            name="qty"
-                                                            value={formData.stockQty}
+                                                            type="text"
+                                                            name="color"
+                                                            value={formData.color}
                                                             onChange={handleChange}
                                                         />
                                                     </FormGroup>
-
                                                 )}
                                                 {!isEditing ? (
-                                                    <p><strong>Available Quantity:</strong> {item.availableQty}</p>
+                                                    <p><strong>Material:</strong> {item.material}</p>
                                                 ) : (
                                                     <FormGroup>
-                                                        <Label><strong>Stock Quantity:</strong></Label>
+                                                        <Label><strong>Material:</strong></Label>
                                                         <Input
-                                                            type="number"
-                                                            name="qty"
-                                                            value={formData.availableQty}
+                                                            type="select"
+                                                            name="material"
+                                                            value={formData.material}
                                                             onChange={handleChange}
-                                                        />
+                                                        >
+                                                            <option value="">Select Material</option>
+                                                            <option value="Teak">Teak</option>
+                                                            <option value="Mahogani">Mahogani</option>
+                                                            <option value="Mara">Mara</option>
+                                                            <option value="Attoriya">Attoriya</option>
+                                                            <option value="Sapu">Sapu</option>
+                                                            <option value="Steel">Steel</option>
+                                                            <option value="MDF">MDF</option>
+                                                            <option value="MM">MM</option>
+                                                            <option value="Other">Other</option>
+                                                        </Input>
                                                     </FormGroup>
-
                                                 )}
+
                                             </Col>
                                         </Row>
                                         {/* Category Name */}
@@ -405,20 +491,35 @@ const ItemDetails = () => {
                                                         </Input>
                                                     </FormGroup>
                                                 )}
-
-
                                                 {/* Subcategory One */}
                                                 {!isEditing ? (
                                                     <p><strong>Subcategory One:</strong> {item.subcategory_one}</p>
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Subcategory One:</strong></Label>
+                                                        {/*<Input*/}
+                                                        {/*    type="text"*/}
+                                                        {/*    name="subcategoryOne"*/}
+                                                        {/*    value={formData.subcategory_one}*/}
+                                                        {/*    onChange={handleChange}*/}
+                                                        {/*/>*/}
+
                                                         <Input
-                                                            type="text"
+                                                            type="select"
                                                             name="subcategoryOne"
                                                             value={formData.subcategory_one}
                                                             onChange={handleChange}
-                                                        />
+                                                            required
+                                                        >
+                                                            <option value="">Select Sub Two</option>
+                                                            {types
+                                                                .filter((type) => type.sub_one === formData.sub_one)
+                                                                .map((type) => (
+                                                                    <option key={type.Ty_Id} value={type.sub_two}>
+                                                                        {type.sub_two}
+                                                                    </option>
+                                                                ))}
+                                                        </Input>
                                                     </FormGroup>
                                                 )}
 
@@ -436,6 +537,12 @@ const ItemDetails = () => {
                                                         />
                                                     </FormGroup>
                                                 ) : null}
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col>
+                                                <p><strong>Stock Quantity:</strong> {item.stockQty}</p>
+                                                <p><strong>Available Quantity:</strong> {item.availableQty}</p>
                                             </Col>
                                         </Row>
                                     </div>
@@ -479,7 +586,20 @@ const ItemDetails = () => {
                                                     <p><strong>Supplier ID:</strong> {supplier.s_ID}</p>
                                                     <p><strong>Name:</strong> {supplier.name}</p>
                                                     <p><strong>Contact:</strong> {supplier.contact}</p>
-                                                    <p><strong>Cost:</strong> {supplier.unit_cost}</p>
+
+                                                    <FormGroup>
+                                                        <Label><strong>Cost:</strong></Label>
+                                                        {!isEditing ? (
+                                                            <p>{supplier.unit_cost}</p>
+                                                        ) : (
+                                                            <Input
+                                                                type="text"
+                                                                name="unit_cost"
+                                                                value={supplier.unit_cost}
+                                                                onChange={(e) => handleChange(e, supplier.s_ID)} // Update cost for the specific supplier
+                                                            />
+                                                        )}
+                                                    </FormGroup>
                                                 </div>
                                             </Col>
                                         ))}

@@ -23,7 +23,6 @@ const AddItem = () => {
         img3: null,
         s_Id:""
     });
-
     const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
     const [types, setTypes] = useState([]);
