@@ -281,8 +281,6 @@ router.put("/update-item",  async (req, res) => {
 });
 
 
-
-
 // Get all orders
 router.get("/orders", async (req, res) => {
     try {
@@ -341,6 +339,7 @@ router.get("/allitems", async (req, res) => {
             price: item.price, // Price
             stockQty: item.stockQty, // Quantity
             availableQty : item.availableQty, // available stock
+            warrantyPeriod: item.warrantyPeriod,
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB image to Base64
         }));
 
@@ -1059,17 +1058,64 @@ router.get("/item-suppliers", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+// get all items for the supplier
+// Fetch all items associated with the supplier
+router.get("/supplier-items", async (req, res) => {
+    try {
+        const { s_Id } = req.query;
+
+        // Validate input
+        if (!s_Id) {
+            return res.status(400).json({ success: false, message: "Supplier ID is required" });
+        }
+
+        // Query to fetch supplier's items along with cost, warranty period, and image
+        const query = `
+            SELECT
+                item_supplier.I_Id,
+                Item.I_name,
+                item_supplier.unit_cost,
+                Item.warrantyPeriod,
+                Item.img  -- Fetch the binary image (LONGBLOB)
+            FROM item_supplier
+                     JOIN Item ON Item.I_Id = item_supplier.I_Id
+            WHERE item_supplier.s_ID = ?
+        `;
+
+        const [itemsResult] = await db.query(query, [s_Id]);
+
+        // If no items found, return a 404 response
+        if (itemsResult.length === 0) {
+            return res.status(404).json({ success: false, message: "No items found for the given supplier" });
+        }
+
+        // Convert image binary data to Base64
+        const itemsWithImages = itemsResult.map(item => ({
+            ...item,
+            img: item.img ? `data:image/jpeg;base64,${item.img.toString('base64')}` : null  // Convert LONGBLOB to Base64
+        }));
+
+        // Return the supplier's items with cost, warranty period, and image
+        return res.status(200).json({
+            success: true,
+            items: itemsWithImages,
+        });
+
+    } catch (error) {
+        console.error("Error fetching supplier items:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
 
 // Get all suppliers
 router.get("/suppliers", async (req, res) => {
     try {
         // Step 1: Fetch all suppliers
         const suppliersQuery = `
-            SELECT s_ID, name, contact
+            SELECT s_ID, name, contact,address
             FROM Supplier`;
 
         const [suppliersResult] = await db.query(suppliersQuery);
-
         // Step 2: Check if suppliers were found
         if (suppliersResult.length === 0) {
             return res.status(404).json({ success: false, message: "No suppliers found" });
@@ -2455,6 +2501,32 @@ router.post("/type", async (req, res) => {
     }
 });
 
+//Save new item to supplier
+router.post("/add-supplier-item", async (req, res) => {
+    try {
+        const { I_Id, s_ID, unit_cost } = req.body;
+        console.log(I_Id, s_ID, unit_cost);
+
+        // Validate input
+        if (!I_Id || !s_ID || !unit_cost) {
+            return res.status(400).json({ success: false, message: "Missing required fields" });
+        }
+
+        // Query to insert the supplier item
+        const query = `
+            INSERT INTO item_supplier (I_Id, s_ID, unit_cost) 
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)
+        `;
+
+        await db.query(query, [I_Id, s_ID, unit_cost]);
+
+        return res.status(201).json({ success: true, message: "Item added successfully" });
+    } catch (error) {
+        console.error("Error adding supplier item:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
