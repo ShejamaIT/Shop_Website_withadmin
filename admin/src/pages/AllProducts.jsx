@@ -59,7 +59,7 @@ const AllProducts = () => {
                                 className={activeTab === "5" ? "active" : ""}
                                 onClick={() => setActiveTab("5")}
                             >
-                                Add Other Details
+                                Add Categories
                             </NavLink>
                         </NavItem>
                     </Nav>
