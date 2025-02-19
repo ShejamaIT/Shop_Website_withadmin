@@ -1,7 +1,9 @@
 CREATE TABLE Supplier(
     s_ID VARCHAR(25) PRIMARY KEY,
     name VARCHAR(45),
-    contact VARCHAR(10)
+    address TEXT,
+    contact VARCHAR(10),
+    contact2 VARCHAR(10)
 );
 CREATE TABLE Category (
     Ca_Id VARCHAR(15) PRIMARY KEY,
