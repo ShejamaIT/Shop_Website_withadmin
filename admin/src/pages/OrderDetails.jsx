@@ -358,6 +358,8 @@ const OrderDetails = () => {
 
                                     {/*<p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>*/}
                                     <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
+                                    <p><strong>Advance Amount:</strong> Rs. {order.paymentDetails.advance}</p>
+                                    <p><strong>Balance Amount:</strong> Rs. {order.paymentDetails.balance}</p>
                                 </div>
 
                                 <div className="text-center mt-4">

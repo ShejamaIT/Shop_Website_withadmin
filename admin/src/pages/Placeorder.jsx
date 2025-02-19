@@ -293,6 +293,10 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
                         {formData.dvStatus === "Delivery" && (
                             <>
+                                <FormGroup>
+                                    <Label>City</Label>
+                                    <Input type="text" name="city" onChange={handleChange}></Input>
+                                </FormGroup>
 
                                 <FormGroup>
                                     <Label>Address</Label>
