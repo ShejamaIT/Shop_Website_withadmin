@@ -321,7 +321,7 @@ const Checkout = () => {
                                 <h6>Subtotal: <span>Rs.{totalAmount}</span></h6>
                                 <h6>Delivery: <span>Rs.{deliveryCharge}</span></h6>
                                 <h6>Discount: <span>Rs.{discount}</span></h6>
-                                <h4>Total cost: <span>Rs.{totalAmount + deliveryCharge - discount}</span></h4>
+                                <h4>Total cost: <span>Rs.{(totalAmount-discount)+ deliveryCharge}</span></h4>
 
                                 <button className="buy_btn auth__btn w-100" onClick={placeOrder}>
                                     Place an order

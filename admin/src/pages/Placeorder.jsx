@@ -147,7 +147,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const calculateTotalPrice = () => {
         const itemTotal = selectedItems.reduce((total, item) => total + item.price * item.qty, 0);
         setTotalItemPrice(itemTotal);
-        setTotalBillPrice(itemTotal + deliveryPrice - discountAmount);
+        setTotalBillPrice((itemTotal - discountAmount ) + deliveryPrice);
     };
 
     const handleSubmit = async (e) => {
@@ -348,10 +348,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <Label>Special Note</Label>
                             <Input type="textarea" name="specialNote" onChange={handleChange}></Input>
                         </FormGroup>
-
-
-
-
 
                         <h5>Delivery Fee: Rs.{deliveryPrice}</h5>
                         <h5>Discount: Rs.{discountAmount}</h5>
