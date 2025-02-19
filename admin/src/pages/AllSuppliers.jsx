@@ -1,36 +1,37 @@
 import React, { useState, useEffect } from "react";
-import {Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button} from "reactstrap";
+import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SupplierDetails from "./SupplierDetails";
-import AddOtherDetails from "./AddOtherDetails";
-import AddItem from "./AddProducts";
+import { toast } from "react-toastify";
+import AddSupplier from "./AddSupplier";
 
 const AllSuppliers = () => {
-    const [activeTab, setActiveTab] = useState(""); // Initially empty, will set dynamically
-    const [suppliers, setSuppliers] = useState([]); // State to store sales team members
-    const navigate = useNavigate(); // Initialize navigate
+    const [activeTab, setActiveTab] = useState("");
+    const [suppliers, setSuppliers] = useState([]);
+    const navigate = useNavigate();
 
-    // Fetch sales team members when the component mounts
-    useEffect(() => {
-        const fetchSuppliers = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/suppliers"); // Adjusted API endpoint
-                const data = await response.json();
-                console.log(data.suppliers);
-                if (data.suppliers && data.suppliers.length > 0) {
-                    setSuppliers(data.suppliers); // Store the fetched data in state
-                    setActiveTab(data.suppliers[0].s_ID); // Set first member as default active tab
-                }
-            } catch (error) {
-                console.error("Error fetching sales team members:", error);
+    // Function to fetch suppliers
+    const fetchSuppliers = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
+            const data = await response.json();
+            if (data.suppliers && data.suppliers.length > 0) {
+                setSuppliers(data.suppliers);
+                setActiveTab(data.suppliers[0].s_ID);
             }
-        };
+        } catch (error) {
+            console.error("Error fetching suppliers:", error);
+            toast.error("Error fetching suppliers.");
+        }
+    };
 
+    // Fetch suppliers when the component mounts or after adding a supplier
+    useEffect(() => {
         fetchSuppliers();
-    }, []); // Run only once when component mounts
+    }, []);
 
     return (
         <Helmet title={'All-Suppliers'}>
@@ -40,15 +41,14 @@ const AllSuppliers = () => {
                 </Row>
 
                 <Container className="all-products">
-                    {/* Tab Navigation */}
                     <Nav tabs>
-                        {suppliers.map((member) => (
-                            <NavItem key={member.s_ID}>
+                        {suppliers.map((supplier) => (
+                            <NavItem key={supplier.s_ID}>
                                 <NavLink
-                                    className={activeTab === member.s_ID ? "active" : ""}
-                                    onClick={() => setActiveTab(member.s_ID)}
+                                    className={activeTab === supplier.s_ID ? "active" : ""}
+                                    onClick={() => setActiveTab(supplier.s_ID)}
                                 >
-                                    {member.name} {/* Displaying employee's name */}
+                                    {supplier.name}
                                 </NavLink>
                             </NavItem>
                         ))}
@@ -62,18 +62,16 @@ const AllSuppliers = () => {
                         </NavItem>
                     </Nav>
 
-                    {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        {suppliers.map((member) => (
-                            <TabPane tabId={member.s_ID} key={member.s_ID}>
-                                {/* Use the SupplierDetails component */}
-                                <SupplierDetails supplier={member} />
+                        {suppliers.map((supplier) => (
+                            <TabPane tabId={supplier.s_ID} key={supplier.s_ID}>
+                                <SupplierDetails supplier={supplier} />
                             </TabPane>
                         ))}
                         <TabPane tabId="5">
                             <Row>
                                 <Col>
-                                    <AddItem />
+                                    <AddSupplier onAddSupplier={fetchSuppliers} />
                                 </Col>
                             </Row>
                         </TabPane>
