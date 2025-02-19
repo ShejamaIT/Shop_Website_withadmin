@@ -4,19 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update view">
-      <change afterPath="$PROJECT_DIR$/admin/src/assets/images/white-pink-kids-dressers-xs-wf297964aah-1f_600.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shejama_group.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2_16_2025_4_20_PM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2_16_2025_4_20_PM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllSaleteam.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllSaleteam.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllSuppliers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllSuppliers.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -159,42 +149,7 @@
       <workItem from="1739702523381" duration="1598000" />
       <workItem from="1739849100860" duration="9889000" />
       <workItem from="1739859293203" duration="638000" />
-      <workItem from="1739860319399" duration="20925000" />
-    </task>
-    <task id="LOCAL-00144" summary="update receive product pop with api">
-      <created>1738908521446</created>
-      <option name="number" value="00144" />
-      <option name="presentableId" value="LOCAL-00144" />
-      <option name="project" value="LOCAL" />
-      <updated>1738908521446</updated>
-    </task>
-    <task id="LOCAL-00145" summary="update supplier order">
-      <created>1738908943368</created>
-      <option name="number" value="00145" />
-      <option name="presentableId" value="LOCAL-00145" />
-      <option name="project" value="LOCAL" />
-      <updated>1738908943368</updated>
-    </task>
-    <task id="LOCAL-00146" summary="update order detail with status">
-      <created>1738912627349</created>
-      <option name="number" value="00146" />
-      <option name="presentableId" value="LOCAL-00146" />
-      <option name="project" value="LOCAL" />
-      <updated>1738912627349</updated>
-    </task>
-    <task id="LOCAL-00147" summary="update order detail with status">
-      <created>1738923738938</created>
-      <option name="number" value="00147" />
-      <option name="presentableId" value="LOCAL-00147" />
-      <option name="project" value="LOCAL" />
-      <updated>1738923738938</updated>
-    </task>
-    <task id="LOCAL-00148" summary="update nav bar">
-      <created>1738923932054</created>
-      <option name="number" value="00148" />
-      <option name="presentableId" value="LOCAL-00148" />
-      <option name="project" value="LOCAL" />
-      <updated>1738923932054</updated>
+      <workItem from="1739860319399" duration="24379000" />
     </task>
     <task id="LOCAL-00149" summary="update order details with updating order">
       <created>1738993819143</created>
@@ -504,7 +459,42 @@
       <option name="project" value="LOCAL" />
       <updated>1739937544577</updated>
     </task>
-    <option name="localTasksCounter" value="193" />
+    <task id="LOCAL-00193" summary="update view">
+      <created>1739937728878</created>
+      <option name="number" value="00193" />
+      <option name="presentableId" value="LOCAL-00193" />
+      <option name="project" value="LOCAL" />
+      <updated>1739937728878</updated>
+    </task>
+    <task id="LOCAL-00194" summary="update view">
+      <created>1739937749891</created>
+      <option name="number" value="00194" />
+      <option name="presentableId" value="LOCAL-00194" />
+      <option name="project" value="LOCAL" />
+      <updated>1739937749891</updated>
+    </task>
+    <task id="LOCAL-00195" summary="update">
+      <created>1739937768944</created>
+      <option name="number" value="00195" />
+      <option name="presentableId" value="LOCAL-00195" />
+      <option name="project" value="LOCAL" />
+      <updated>1739937768944</updated>
+    </task>
+    <task id="LOCAL-00196" summary="ad image">
+      <created>1739937783067</created>
+      <option name="number" value="00196" />
+      <option name="presentableId" value="LOCAL-00196" />
+      <option name="project" value="LOCAL" />
+      <updated>1739937783067</updated>
+    </task>
+    <task id="LOCAL-00197" summary="update">
+      <created>1739941102202</created>
+      <option name="number" value="00197" />
+      <option name="presentableId" value="LOCAL-00197" />
+      <option name="project" value="LOCAL" />
+      <updated>1739941102202</updated>
+    </task>
+    <option name="localTasksCounter" value="198" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -523,7 +513,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update backend" />
     <MESSAGE value="update with booked unbooked" />
     <MESSAGE value="update pending order detail form" />
     <MESSAGE value="update accept order detail form" />
@@ -541,13 +530,14 @@
     <MESSAGE value="update item stock maintain" />
     <MESSAGE value="update other detail" />
     <MESSAGE value="update other detail with api" />
-    <MESSAGE value="update" />
     <MESSAGE value="update itemdetail (unfinished)" />
     <MESSAGE value="supplier view" />
     <MESSAGE value="update with api" />
     <MESSAGE value="update db" />
     <MESSAGE value="update api" />
     <MESSAGE value="update view" />
-    <option name="LAST_COMMIT_MESSAGE" value="update view" />
+    <MESSAGE value="ad image" />
+    <MESSAGE value="update" />
+    <option name="LAST_COMMIT_MESSAGE" value="update" />
   </component>
 </project>

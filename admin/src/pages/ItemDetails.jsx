@@ -230,7 +230,7 @@ const ItemDetails = () => {
     const handleChange = (e, supplierId) => {
         const { name, value, type, files } = e.target;
 
-        //console.log(name, value); // Check the input name and value
+        console.log(name, value); // Check the input name and value
 
         // If the field is a file, handle image upload
         if (type === "file" && files) {
@@ -345,8 +345,6 @@ const ItemDetails = () => {
             toast.error("Error updating item: " + error.message);
         }
     };
-
-
 
     useEffect(() => {
         // This will run whenever the suppliers state is updated
