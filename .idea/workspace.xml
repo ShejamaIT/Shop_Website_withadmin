@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update api">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update calculate">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Checkout.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,14 +148,7 @@
       <workItem from="1739702523381" duration="1598000" />
       <workItem from="1739849100860" duration="9889000" />
       <workItem from="1739859293203" duration="638000" />
-      <workItem from="1739860319399" duration="40116000" />
-    </task>
-    <task id="LOCAL-00154" summary="update with item table">
-      <created>1739097636462</created>
-      <option name="number" value="00154" />
-      <option name="presentableId" value="LOCAL-00154" />
-      <option name="project" value="LOCAL" />
-      <updated>1739097636462</updated>
+      <workItem from="1739860319399" duration="41931000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -493,7 +486,14 @@
       <option name="project" value="LOCAL" />
       <updated>1739959266711</updated>
     </task>
-    <option name="localTasksCounter" value="203" />
+    <task id="LOCAL-00203" summary="update calculate">
+      <created>1739959764374</created>
+      <option name="number" value="00203" />
+      <option name="presentableId" value="LOCAL-00203" />
+      <option name="project" value="LOCAL" />
+      <updated>1739959764374</updated>
+    </task>
+    <option name="localTasksCounter" value="204" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -512,7 +512,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update pending order detail form" />
     <MESSAGE value="update accept order detail form" />
     <MESSAGE value="fixed update order issue" />
     <MESSAGE value="fixed delivery status error" />
@@ -537,6 +536,7 @@
     <MESSAGE value="update view" />
     <MESSAGE value="update db" />
     <MESSAGE value="update api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update api" />
+    <MESSAGE value="update calculate" />
+    <option name="LAST_COMMIT_MESSAGE" value="update calculate" />
   </component>
 </project>
