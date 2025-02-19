@@ -5,68 +5,300 @@ import db from '../utils/db.js';
 const router = express.Router();
 
 // Save  new item
-router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 }]), async (req, res) => {
+router.post("/add-item", upload.fields([
+    { name: "img", maxCount: 1 },
+    { name: "img1", maxCount: 1 },
+    { name: "img2", maxCount: 1 },
+    { name: "img3", maxCount: 1 }
+]), async (req, res) => {
     try {
-        // Validate request body
-        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost ,material,s_Id } = req.body;
-        // Convert data to appropriate types
+        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, s_Id } = req.body;
         const parsedPrice = parseFloat(price) || 0;
         const parsedCost = parseFloat(cost) || 0;
 
-        // Extract image buffers
-        const imgBuffer = req.files["img"][0].buffer;
-        const img1Buffer = req.files["img1"][0].buffer;
-        const img2Buffer = req.files["img2"][0].buffer ;
-        const img3Buffer = req.files["img3"][0].buffer;
+        // ✅ Check if `Ty_id` exists in `Type` table
+        const [typeCheck] = await db.query(`SELECT Ty_Id FROM Type WHERE Ty_Id = ?`, [Ty_id]);
+        if (typeCheck.length === 0) {
+            return res.status(400).json({ success: false, message: `Invalid Type ID: ${Ty_id}` });
+        }
 
-        const itemValues = [
-            I_Id, I_name, Ty_id, descrip, color,material, parsedPrice, imgBuffer, warrantyPeriod
-        ];
-        const imgValues = [
-            I_Id, img1Buffer ? Buffer.from(img1Buffer) : null, img2Buffer ? Buffer.from(img2Buffer) : null, img3Buffer ? Buffer.from(img3Buffer) : null
-        ];
-        const supplierValues = [
-            I_Id, s_Id,parsedCost
-        ];
-        // Insert into `Item` table (Main image)
-        const itemSql = `INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color,material, price, stockQty, bookedQty, availableQty, img, warrantyPeriod) 
-                         VALUES (?, ?, ?, ?, ?,?,?, 0, 0, 0, ?, ?);`;
+        // ✅ Check if `s_Id` exists in `Supplier` table
+        const [supplierCheck] = await db.query(`SELECT s_ID FROM Supplier WHERE s_ID = ?`, [s_Id]);
+        if (supplierCheck.length === 0) {
+            return res.status(400).json({ success: false, message: `Invalid Supplier ID: ${s_Id}` });
+        }
 
-        const query = await db.query(itemSql, itemValues);
-        console.log("query");
+        // ✅ Extract image buffers safely
+        const imgBuffer = req.files["img"]?.[0]?.buffer || null;
+        const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
+        const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
+        const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
 
-        // Insert into `Item_img` table (Additional images)
-        const imgSql = `INSERT INTO Item_img (I_Id, img1, img2, img3) VALUES (?, ?, ?, ?);`;
+        // ✅ Insert into `Item` table
+        const itemSql = `
+            INSERT INTO Item (I_Id, I_name, Ty_id, descrip, color, material, price, stockQty, bookedQty, availableQty, img, img1, img2, img3, warrantyPeriod) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, ?, ?);
+        `;
+        await db.query(itemSql, [I_Id, I_name, Ty_id, descrip, color, material, parsedPrice, imgBuffer, img1Buffer, img2Buffer, img3Buffer, warrantyPeriod]);
 
-        const query1 = await db.query(imgSql, imgValues);
-        console.log("query1");
-
-        // Insert into `Item_supplier` table
-        const itemsuplierSql = `INSERT INTO item_supplier (I_Id, s_ID,unit_cost) VALUES (?, ?,?);`;
-
-        const query2 = await db.query(itemsuplierSql, supplierValues);
-        console.log("query2");
+        // ✅ Insert into `Item_supplier` table
+        const supplierSql = `INSERT INTO item_supplier (I_Id, s_ID, unit_cost) VALUES (?, ?, ?);`;
+        await db.query(supplierSql, [I_Id, s_Id, parsedCost]);
 
         res.status(201).json({
             success: true,
-            message: "Item added successfully",
-            data: {
-                I_Id,
-                I_name,
-                Ty_id: Ty_id,
-                descrip,
-                color,
-                material,
-                price: parsedPrice,
-                warrantyPeriod,
-                cost: parsedCost
-            }
+            message: "✅ Item added successfully!",
+            data: { I_Id, I_name, Ty_id, descrip, color, material, price: parsedPrice, warrantyPeriod, cost: parsedCost }
         });
+
     } catch (err) {
         console.error("❌ Error inserting item data:", err.message);
         res.status(500).json({ success: false, message: "Error inserting data into database", details: err.message });
     }
 });
+
+
+
+
+// Update exit item
+// router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 },{ name: "img1", maxCount: 1 },{ name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 },]), async (req, res) => {
+//         try {
+//             // Extract request body data
+//             const {
+//                 I_Id,
+//                 I_name,
+//                 Ty_id,
+//                 descrip,
+//                 color,
+//                 price,
+//                 warrantyPeriod,
+//                 cost,
+//                 material,
+//                 suppliers,
+//                 availableQty,
+//                 bookedQty,
+//                 stockQty,
+//             } = req.body;
+//             console.log(req.body);
+//
+//             // Parse price and cost values
+//             const parsedPrice = parseFloat(price) || 0;
+//             const parsedCost = parseFloat(cost) || 0;
+//
+//             // ✅ Check if the item exists
+//             const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
+//             const [itemCheckResult] = await db.query(itemCheckSql, [I_Id]);
+//
+//             if (itemCheckResult.length === 0) {
+//                 return res.status(404).json({ success: false, message: "Item not found." });
+//             }
+//
+//             // ✅ Handle image updates (Only include images that were provided)
+//             const imgBuffer = req.files["img"]?.[0]?.buffer || null;
+//             const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
+//             const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
+//             const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
+//
+//             // Update `Item` table with regular fields
+//             const itemUpdateSql = `
+//             UPDATE Item
+//             SET I_name = ?, Ty_id = ?, descrip = ?, color = ?, material = ?, price = ?, availableQty = ?, bookedQty = ?, stockQty = ?, img = ?, warrantyPeriod = ? ,img1 = ? ,img2 = ? ,img3 = ?
+//             WHERE I_Id = ?;
+//         `;
+//             const itemValues = [
+//                 I_name, Ty_id, descrip, color, material, parsedPrice, availableQty, bookedQty, stockQty, imgBuffer, warrantyPeriod, img1Buffer, img2Buffer, img3Buffer, I_Id
+//             ];
+//              console.log(itemValues);
+//
+//            // await db.query(itemUpdateSql, itemValues);
+//             // **Handle Suppliers (Array of suppliers from formData)**
+//             if (suppliers && Array.isArray(suppliers)) {
+//                 console.log("pass");
+//                 for (const supplier of suppliers) {
+//
+//                     const { s_ID, unit_cost } = supplier;
+//                     console.log(supplier);
+//                     const parsedUnitCost = parseFloat(unit_cost) || 0;
+//
+//                     // Update or insert supplier cost data
+//                     const supplierUpdateSql = `
+//                     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+//                     VALUES (?, ?, ?)
+//                     ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
+//                 `;
+//                     const supplierValues = [
+//                         I_Id, s_ID, parsedUnitCost
+//                     ];
+//                     console.log(supplierValues);
+//                     // await db.query(supplierUpdateSql, supplierValues);
+//                 }
+//             }
+//
+//             // ✅ Respond with success message
+//             res.status(200).json({
+//                 success: true,
+//                 message: "Item updated successfully",
+//                 data: {
+//                     I_Id,
+//                     I_name,
+//                     Ty_id,
+//                     descrip,
+//                     color,
+//                     material,
+//                     price: parsedPrice,
+//                     warrantyPeriod,
+//                     availableQty,
+//                     bookedQty,
+//                     stockQty,
+//                 },
+//             });
+//         } catch (err) {
+//             console.error("❌ Error updating item data:", err.message);
+//             res.status(500).json({ success: false, message: "Error updating data", details: err.message });
+//         }
+//     }
+// );
+
+
+router.put(
+    "/update-item",
+    upload.fields([
+        { name: "img", maxCount: 1 },
+        { name: "img1", maxCount: 1 },
+        { name: "img2", maxCount: 1 },
+        { name: "img3", maxCount: 1 },
+    ]),
+    async (req, res) => {
+        try {
+            // ✅ Extract request body
+            let {
+                I_Id,
+                I_name,
+                Ty_id,
+                descrip,
+                color,
+                price,
+                warrantyPeriod,
+                material,
+                suppliers,
+                availableQty,
+                bookedQty,
+                stockQty,
+            } = req.body;
+
+            // console.log(req.body);
+
+            // ✅ Ensure `I_Id` is provided
+            if (!I_Id) {
+                return res.status(400).json({ success: false, message: "Item ID is required." });
+            }
+
+            // ✅ Check if the item exists
+            const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
+            const [itemCheckResult] = await db.query(itemCheckSql, [I_Id]);
+
+            if (itemCheckResult.length === 0) {
+                return res.status(404).json({ success: false, message: "Item not found." });
+            }
+
+            // ✅ Parse numeric values
+            const parsedPrice = parseFloat(price) || 0;
+
+            // ✅ Handle images (Only update images that were provided)
+            const imgBuffer = req.files["img"]?.[0]?.buffer || null;
+            const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
+            const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
+            const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
+
+            // ✅ Construct dynamic update query for `Item` table
+            let updateFields = [];
+            let updateValues = [];
+
+            if (I_name) updateFields.push("I_name = ?");
+            if (Ty_id) updateFields.push("Ty_id = ?");
+            if (descrip) updateFields.push("descrip = ?");
+            if (color) updateFields.push("color = ?");
+            if (material) updateFields.push("material = ?");
+            if (parsedPrice) updateFields.push("price = ?");
+            if (availableQty !== undefined) updateFields.push("availableQty = ?");
+            if (bookedQty !== undefined) updateFields.push("bookedQty = ?");
+            if (stockQty !== undefined) updateFields.push("stockQty = ?");
+            if (warrantyPeriod) updateFields.push("warrantyPeriod = ?");
+            if (imgBuffer) updateFields.push("img = ?");
+            if (img1Buffer) updateFields.push("img1 = ?");
+            if (img2Buffer) updateFields.push("img2 = ?");
+            if (img3Buffer) updateFields.push("img3 = ?");
+
+            updateValues = [
+                I_name,
+                Ty_id,
+                descrip,
+                color,
+                material,
+                parsedPrice,
+                availableQty,
+                bookedQty,
+                stockQty,
+                warrantyPeriod,
+                imgBuffer,
+                img1Buffer,
+                img2Buffer,
+                img3Buffer
+            ].filter((value) => value !== undefined);
+           // console.log(updateFields);
+
+            if (updateFields.length > 0) {
+                const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
+                console.log(updateQuery);
+                updateValues.push(I_Id);
+                await db.query(updateQuery, updateValues);
+            }
+
+            // ✅ Handle `suppliers` (Ensure it's an array)
+            if (suppliers) {
+                if (typeof suppliers === "string") {
+                    suppliers = JSON.parse(suppliers); // Convert string to JSON if necessary
+                    console.log(suppliers);
+                }
+                if (Array.isArray(suppliers)) {
+                    for (const supplier of suppliers) {
+                        const { s_ID, unit_cost } = supplier;
+                        const parsedUnitCost = parseFloat(unit_cost) || 0;
+
+                        const supplierUpdateSql = `
+                            INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+                            VALUES (?, ?, ?)
+                            ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
+                        `;
+                        await db.query(supplierUpdateSql, [I_Id, s_ID, parsedUnitCost]);
+                    }
+                }
+            }
+
+            // ✅ Respond with success message
+            res.status(200).json({
+                success: true,
+                message: "Item updated successfully",
+                data: {
+                    I_Id,
+                    I_name,
+                    Ty_id,
+                    descrip,
+                    color,
+                    material,
+                    price: parsedPrice,
+                    warrantyPeriod,
+                    availableQty,
+                    bookedQty,
+                    stockQty,
+                },
+            });
+        } catch (err) {
+            console.error("❌ Error updating item data:", err.message);
+            res.status(500).json({ success: false, message: "Error updating data", details: err.message });
+        }
+    }
+);
 
 // Update exit item
 // router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 }]), async (req, res) => {
@@ -100,39 +332,9 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 //
 //         console.log(imgBuffer,img1Buffer,img2Buffer,img3Buffer);
 //
-//         // Update `Item` table with regular fields
-//         const itemUpdateSql = `
-//             UPDATE Item
-//             SET I_name = ?, Ty_id = ?, descrip = ?, color = ?, material = ?, price = ?, availableQty = ?, bookedQty = ?, stockQty = ?, img = ?, warrantyPeriod = ?
-//             WHERE I_Id = ?;
-//         `;
-//         const itemValues = [
-//             I_name, Ty_id, descrip, color, material, parsedPrice, availableQty, bookedQty, stockQty, imgBuffer, warrantyPeriod, I_Id
-//         ];
-//         // console.log(itemValues);
-//         // await db.query(itemUpdateSql, itemValues);
-//         // **Handle Suppliers (Array of suppliers from formData)**
-//         if (suppliers && Array.isArray(suppliers)) {
-//             console.log("pass");
-//             for (const supplier of suppliers) {
-//
-//                 const { s_ID, unit_cost } = supplier;
-//                 console.log(supplier);
-//                 const parsedUnitCost = parseFloat(unit_cost) || 0;
-//
-//                 // Update or insert supplier cost data
-//                 const supplierUpdateSql = `
-//                     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
-//                     VALUES (?, ?, ?)
-//                     ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
-//                 `;
-//                 const supplierValues = [
-//                     I_Id, s_ID, parsedUnitCost
-//                 ];
-//                 console.log(supplierValues);
-//                 // await db.query(supplierUpdateSql, supplierValues);
-//             }
-//         }
+
+
+
 //
 //         // Handle image updates for `Item_img` table (if any images are provided)
 //         if (img1Buffer || img2Buffer || img3Buffer) {
@@ -148,7 +350,62 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 //             // await db.query(imgUpdateSql, imgValues);
 //         }
 //
-//
+//  // ✅ Construct dynamic `UPDATE` query for `Item` table
+//           //   let updateFields = [];
+//           //   let updateValues = [];
+//           //
+//           //   if (I_name) updateFields.push("I_name = ?");
+//           //   if (Ty_id) updateFields.push("Ty_id = ?");
+//           //   if (descrip) updateFields.push("descrip = ?");
+//           //   if (color) updateFields.push("color = ?");
+//           //   if (material) updateFields.push("material = ?");
+//           //   if (parsedPrice) updateFields.push("price = ?");
+//           //   if (availableQty) updateFields.push("availableQty = ?");
+//           //   if (bookedQty) updateFields.push("bookedQty = ?");
+//           //   if (stockQty) updateFields.push("stockQty = ?");
+//           //   if (warrantyPeriod) updateFields.push("warrantyPeriod = ?");
+//           //   if (imgBuffer) updateFields.push("img = ?");
+//           //   if (img1Buffer) updateFields.push("img1 = ?");
+//           //   if (img2Buffer) updateFields.push("img2 = ?");
+//           //   if (img3Buffer) updateFields.push("img3 = ?");
+//           //
+//           //   updateValues = [
+//           //       I_name,
+//           //       Ty_id,
+//           //       descrip,
+//           //       color,
+//           //       material,
+//           //       parsedPrice,
+//           //       availableQty,
+//           //       bookedQty,
+//           //       stockQty,
+//           //       warrantyPeriod,
+//           //       imgBuffer,
+//           //       img1Buffer,
+//           //       img2Buffer,
+//           //       img3Buffer,
+//           //   ].filter((value) => value !== undefined);
+//           //
+//           //   if (updateFields.length > 0) {
+//           //       const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
+//           //       updateValues.push(I_Id);
+//           //       await db.query(updateQuery, updateValues);
+//           //   }
+//           //
+//           //   // ✅ Handle suppliers update (Insert or update in `item_supplier`)
+//           //   if (suppliers && Array.isArray(suppliers)) {
+//           //       for (const supplier of suppliers) {
+//           //           const { s_ID, unit_cost } = supplier;
+//           //           const parsedUnitCost = parseFloat(unit_cost) || 0;
+//           //
+//           //           const supplierUpdateSql = `
+//           //     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+//           //     VALUES (?, ?, ?)
+//           //     ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
+//           // `;
+//           //           await db.query(supplierUpdateSql, [I_Id, s_ID, parsedUnitCost]);
+//           //       }
+//           //   }
 //
 //         // Respond with success
 //         res.status(200).json({
@@ -174,111 +431,6 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 //         res.status(500).json({ success: false, message: "Error updating data into database", details: err.message });
 //     }
 // });
-router.put("/update-item",  async (req, res) => {
-    try {
-        // Extract request body and parse incoming form data
-        const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, suppliers, availableQty, bookedQty, stockQty  } = req.body;
-
-        // Parse price and cost fields to float
-        const parsedPrice = parseFloat(price) || 0;
-        const parsedCost = parseFloat(cost) || 0;
-
-         console.log("🔹 Request Data:", { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, suppliers, availableQty, bookedQty, stockQty });
-
-        // Ensure I_Id exists in the database
-        const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
-        const [itemCheckResult] = await db.query(itemCheckSql, [I_Id]);
-
-        if (itemCheckResult.length === 0) {
-            return res.status(404).json({ success: false, message: "Item not found." });
-        }
-
-        // Handle image files, if any
-        // const imgBuffer = req.files["img"]?.[0]?.buffer || null;
-        // const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
-        // const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
-        // const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
-        // const imgBuffer = req.files["img"][0].buffer;
-        // const img1Buffer = req.files["img1"][0].buffer;
-        // const img2Buffer = req.files["img2"][0].buffer ;
-        // const img3Buffer = req.files["img3"][0].buffer;
-
-        // console.log(imgBuffer,img1Buffer,img2Buffer,img3Buffer);
-
-        // Update `Item` table with regular fields
-        const itemUpdateSql = `
-            UPDATE Item
-            SET I_name = ?, Ty_id = ?, descrip = ?, color = ?, material = ?, price = ?, availableQty = ?, bookedQty = ?, stockQty = ?, img = ?, warrantyPeriod = ?
-            WHERE I_Id = ?;
-        `;
-        const itemValues = [
-            I_name, Ty_id, descrip, color, material, parsedPrice, availableQty, bookedQty, stockQty, imgBuffer, warrantyPeriod, I_Id
-        ];
-         console.log(itemValues);
-        // await db.query(itemUpdateSql, itemValues);
-        // **Handle Suppliers (Array of suppliers from formData)**
-        if (suppliers && Array.isArray(suppliers)) {
-            console.log("pass");
-            for (const supplier of suppliers) {
-
-                const { s_ID, unit_cost } = supplier;
-                console.log(supplier);
-                const parsedUnitCost = parseFloat(unit_cost) || 0;
-
-                // Update or insert supplier cost data
-                const supplierUpdateSql = `
-                    INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
-                    VALUES (?, ?, ?)
-                        ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
-                `;
-                const supplierValues = [
-                    I_Id, s_ID, parsedUnitCost
-                ];
-                console.log(supplierValues);
-                // await db.query(supplierUpdateSql, supplierValues);
-            }
-        }
-
-        // // Handle image updates for `Item_img` table (if any images are provided)
-        // if (img1Buffer || img2Buffer || img3Buffer) {
-        //     const imgUpdateSql = `
-        //         UPDATE Item_img
-        //         SET img1 = ?, img2 = ?, img3 = ?
-        //         WHERE I_Id = ?;
-        //     `;
-        //     const imgValues = [
-        //         img1Buffer, img2Buffer, img3Buffer, I_Id
-        //     ];
-        //     console.log(imgValues);
-        //     // await db.query(imgUpdateSql, imgValues);
-        // }
-
-
-
-        // Respond with success
-        res.status(200).json({
-            success: true,
-            message: "Item updated successfully",
-            data: {
-                I_Id,
-                I_name,
-                Ty_id,
-                descrip,
-                color,
-                material,
-                price: parsedPrice,
-                warrantyPeriod,
-                availableQty,
-                bookedQty,
-                stockQty
-            }
-        });
-
-    } catch (err) {
-        console.error("❌ Error updating item data:", err.message);
-        res.status(500).json({ success: false, message: "Error updating data into database", details: err.message });
-    }
-});
 
 
 // Get all orders
@@ -351,30 +503,58 @@ router.get("/allitems", async (req, res) => {
     }
 });
 
-// Save Supplier
+//add a new supplier and items
 router.post("/supplier", async (req, res) => {
-    const sql = `INSERT INTO Supplier (s_ID,name,contact) VALUES (?, ?,?)`;
-    const values = [
-        req.body.s_ID,
-        req.body.name,
-        req.body.contact,
-    ];
-    try {
-        // Execute the query and retrieve the result
-        const [result] = await db.query(sql, values);
+    const { name, contact, contact2, address, items } = req.body;
 
-        // Return success response with inserted data details
+    // Generate new supplier ID
+    const s_ID = await generateNewIds("Supplier", "s_ID", "S");
+    console.log(s_ID);
+    const sqlInsertSupplier = `
+        INSERT INTO Supplier (s_ID, name, address, contact, contact2)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+    const valuesSupplier = [
+        s_ID,
+        name,
+        address,
+        contact,
+        contact2 || "", // If contact2 is empty, set it as an empty string
+    ];
+
+    try {
+        // Insert the supplier into the Supplier table
+        await db.query(sqlInsertSupplier, valuesSupplier);
+
+        // Insert items into the item_supplier table
+        if (items && items.length > 0) {
+            // Prepare the insert query for items
+            const itemQueries = items.map((item) => {
+                return db.query(
+                    "INSERT INTO item_supplier (I_Id, s_ID, unit_cost) VALUES (?, ?, ?)",
+                    [item.I_Id, s_ID, item.cost]
+                );
+            });
+
+            // Execute all insert queries for items in parallel
+            await Promise.all(itemQueries);
+        }
+
+        // Respond with success message and new supplier details
         return res.status(201).json({
             success: true,
-            message: "Suppplier added successfully",
+            message: "Supplier and items added successfully",
             data: {
-                s_ID: req.body.s_ID,
-                name: req.body.name,
-                contact : req.body.contact
+                s_ID,
+                name,
+                contact,
+                contact2,
+                address,
+                items, // Including the items linked to the supplier
             },
         });
     } catch (err) {
-        console.error("Error inserting supplier data:", err.message);
+        console.error("Error inserting supplier or item data:", err.message);
 
         // Respond with error details
         return res.status(500).json({
@@ -665,11 +845,11 @@ router.get("/item-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "Item ID is required" });
         }
 
-        // Fetch item details along with Type and Category information
+        // ✅ Fetch item details along with Type and Category information
         const itemQuery = `
             SELECT
                 I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty,
-                I.warrantyPeriod, I.img, I.color, I.material,
+                I.warrantyPeriod, I.img, I.img1, I.img2, I.img3, I.color, I.material,
                 T.sub_one, T.sub_two, C.Ca_Id, C.name AS category_name
             FROM Item I
             JOIN Type T ON I.Ty_id = T.Ty_Id
@@ -684,24 +864,13 @@ router.get("/item-details", async (req, res) => {
 
         const itemData = itemResult[0];
 
-        // Fetch additional images from Item_img table
-        const imageQuery = `SELECT img1, img2, img3 FROM Item_img WHERE I_Id = ?`;
-        const [imageResult] = await db.query(imageQuery, [I_Id]);
-
-        let imgData = { img1: null, img2: null, img3: null };
-
-        if (imageResult.length > 0) {
-            imgData = {
-                img1: imageResult[0].img1 ? Buffer.from(imageResult[0].img1).toString("base64") : null,
-                img2: imageResult[0].img2 ? Buffer.from(imageResult[0].img2).toString("base64") : null,
-                img3: imageResult[0].img3 ? Buffer.from(imageResult[0].img3).toString("base64") : null,
-            };
-        }
-
-        // Convert the main image from Item table to Base64
+        // ✅ Convert images to Base64
         const mainImgBase64 = itemData.img ? Buffer.from(itemData.img).toString("base64") : null;
+        const img1Base64 = itemData.img1 ? Buffer.from(itemData.img1).toString("base64") : null;
+        const img2Base64 = itemData.img2 ? Buffer.from(itemData.img2).toString("base64") : null;
+        const img3Base64 = itemData.img3 ? Buffer.from(itemData.img3).toString("base64") : null;
 
-        // Fetch all suppliers that provide this item along with unit_cost
+        // ✅ Fetch all suppliers that provide this item along with unit_cost
         const supplierQuery = `
             SELECT S.s_ID, S.name, S.contact, ISUP.unit_cost
             FROM Supplier S
@@ -717,7 +886,7 @@ router.get("/item-details", async (req, res) => {
             unit_cost: supplier.unit_cost // Include unit cost
         }));
 
-        // Construct final response
+        // ✅ Construct final response
         const responseData = {
             success: true,
             item: {
@@ -732,10 +901,10 @@ router.get("/item-details", async (req, res) => {
                 availableQty: itemData.availableQty,
                 bookedQty: itemData.bookedQty,
                 warrantyPeriod: itemData.warrantyPeriod,
-                img: mainImgBase64, // Main image from Item table
-                img1: imgData.img1, // Additional Image 1
-                img2: imgData.img2, // Additional Image 2
-                img3: imgData.img3, // Additional Image 3
+                img: mainImgBase64,  // Main image from Item table
+                img1: img1Base64,     // Additional Image 1
+                img2: img2Base64,     // Additional Image 2
+                img3: img3Base64,     // Additional Image 3
                 category_id: itemData.Ca_Id, // Category ID
                 category_name: itemData.category_name, // Category name
                 subcategory_one: itemData.sub_one, // Subcategory One
@@ -747,10 +916,11 @@ router.get("/item-details", async (req, res) => {
         return res.status(200).json(responseData);
 
     } catch (error) {
-        console.error("Error fetching item details:", error.message);
+        console.error("❌ Error fetching item details:", error.message);
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
 
 // Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
@@ -2528,14 +2698,229 @@ router.post("/add-supplier-item", async (req, res) => {
     }
 });
 
+// Fetch all coupons
+router.get("/coupon-details", async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                sc.cpID AS coupon_code,
+                sc.discount,
+                st.stID AS sales_team_id,
+                e.name AS employee_name
+            FROM sales_coupon sc
+            JOIN sales_team st ON sc.stID = st.stID
+            JOIN Employee e ON st.E_Id = e.E_Id
+        `;
+
+        const [results] = await db.query(query);
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: "No coupon details found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Coupon details retrieved successfully",
+            data: results,
+        });
+    } catch (error) {
+        console.error("Error fetching coupon details:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching coupon details",
+            error: error.message,
+        });
+    }
+});
+
+// Fetch all coupons
+router.get("/delivery-rates", async (req, res) => {
+    try {
+        const query = `SELECT * FROM deli_rates`;
+
+        const [results] = await db.query(query);
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: "No rates details found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Rates details retrieved successfully",
+            data: results,
+        });
+    } catch (error) {
+        console.error("Error fetching  details:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching details",
+            error: error.message,
+        });
+    }
+});
+
+// GET API to fetch delivery schedule by district
+router.get("/delivery-schedule", async (req, res) => {
+    const { district } = req.query; // Get district from query parameter
+
+    if (!district) {
+        return res.status(400).json({ message: "District is required" });
+    }
+
+    try {
+        // Fetch all delivery dates for the given district
+        const [result] = await db.query(
+            "SELECT ds_date FROM delivery_schedule WHERE district = ?",
+            [district]
+        );
+        console.log(result);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: "District not found" });
+        }
+
+        // Get the current date (yyyy-mm-dd format)
+        const currentDate = new Date().toISOString().split("T")[0];
+
+        // Filter and sort dates
+        const upcomingDates = result
+            .map(row => {
+                // Convert ds_date to a string in yyyy-mm-dd format (ignoring time part)
+                const date = new Date(row.ds_date).toISOString().split("T")[0];
+                return date;
+            })
+            .filter(date => date >= currentDate) // Keep only upcoming dates
+            .sort((a, b) => new Date(a) - new Date(b)); // Sort in ascending order
+
+        if (upcomingDates.length === 0) {
+            return res.status(404).json({ message: "No upcoming delivery dates available" });
+        }
+
+        return res.status(200).json({
+            message: "Upcoming delivery dates found",
+            district: district,
+            upcomingDates: upcomingDates,
+        });
+    } catch (error) {
+        console.error("Error fetching delivery schedule:", error.message);
+        return res.status(500).json({ message: "Error fetching delivery schedule" });
+    }
+});
+
+// Save a order
+router.post("/orders", async (req, res) => {
+    try {
+        const {
+            dvStatus,
+            address,
+            city,
+            district,
+            email,
+            customerName,
+            phoneNumber,
+            otherNumber,
+            items,
+            totalBillPrice,
+            deliveryPrice,
+            discountAmount,
+            couponCode,
+            expectedDate,
+            specialNote
+        } = req.body;
+        console.log(items);
+        // Generate unique order ID
+        const orID = `ORD_${Date.now()}`;
+        const orderDate = new Date().toISOString().split("T")[0]; // Get current date
+
+        // Initialize stID to null
+        let stID = null;
+
+        // Check if a coupon is provided, if yes fetch associated stID
+        if (couponCode) {
+            // Fetch the stID associated with the provided coupon ID (cpID)
+            const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
+            const [couponResult] = await db.query(couponQuery, [couponCode]);
+
+            if (couponResult.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid coupon code"
+                });
+            }
+
+            // Set the sales team ID (stID) from the coupon
+            stID = couponResult[0].stID;
+        }
+        // Insert Order
+        let orderQuery = `
+            INSERT INTO Orders (OrID, orDate,custName, customerEmail,contact1,contact2, orStatus, dvStatus,city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote,order_type)
+            VALUES (?, ?,?, ?,?,?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?,'on-site')`;
+        let orderParams = [orID, orderDate,customerName, email,phoneNumber,otherNumber, dvStatus,city, deliveryPrice, discountAmount, totalBillPrice, stID, expectedDate, specialNote];
+
+        await db.query(orderQuery, orderParams);
+
+        // Insert Order Details
+        for (const item of items) {
+            let orderDetailQuery = `
+                INSERT INTO Order_Detail (orID, I_Id, qty, tprice)
+                VALUES (?, ?, ?, ?)`;
+            let orderDetailParams = [orID, item.I_Id, item.qty, item.price];
+
+            await db.query(orderDetailQuery, orderDetailParams);
+        }
+
+        // Insert Delivery Info if delivery is selected
+        if (dvStatus === "Delivery") {
+            const dvID = `DLV_${Date.now()}`;
+            let deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, district, contact, status,schedule_Date)
+                VALUES (?, ?, ?, ?, ?, 'Pending',?)`;
+            let deliveryParams = [dvID, orID, address, district, phoneNumber, expectedDate];
+
+            await db.query(deliveryQuery, deliveryParams);
+        }
+
+        // Insert Coupon Info if a coupon is used
+        if (couponCode) {
+            const ocID = `OCP_${Date.now()}`;
+            let couponQuery = `
+                INSERT INTO order_coupon (ocID, orID, cpID)
+                VALUES (?, ?, ?)`;
+            let couponParams = [ocID, orID, couponCode];
+
+            await db.query(couponQuery, couponParams);
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            data: {
+                orID: orID,
+                orderDate: orderDate,
+                expectedDate: expectedDate
+            },
+        });
+
+    } catch (error) {
+        console.error("Error inserting order data:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: error.message,
+        });
+    }
+});
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
     const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
     if (rows.length === 0) return `${prefix}_001`; // First entry
     const lastId = rows[0][column]; // Get last ID
+    console.log(lastId);
     const lastNum = parseInt(lastId.split("_")[1], 10) + 1; // Extract number and increment
+    console.log(lastNum);
+    console.log(`${prefix}_${String(lastNum).padStart(3, "0")}`);
     return `${prefix}_${String(lastNum).padStart(3, "0")}`;
 };
-
 
 export default router;
