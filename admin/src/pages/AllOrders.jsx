@@ -10,10 +10,11 @@ import '../style/Dashboard.css';
 import classnames from "classnames";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
 import TableCompleted from "../components/tables/TableCompleted";
+import PlaceOrder from "./Placeorder";
 
 const AllOrders = () => {
-    const [activeTab, setActiveTab] = useState("1"); // Main tab tracking
-    const [nestedActiveTab, setNestedActiveTab] = useState("1"); // Nested tab tracking for Accepted Orders
+    const [activeTab, setActiveTab] = useState("0"); // Main tab tracking
+    const [nestedActiveTab, setNestedActiveTab] = useState("0");
 
     return (
         <Helmet title={'Dashboard'}>
@@ -24,6 +25,15 @@ const AllOrders = () => {
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}
                     <Nav tabs className="mb-3">
+                        <NavItem>
+                            <NavLink
+                                className={classnames({ active: activeTab === "0" })}
+                                onClick={() => setActiveTab("0")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                Place Order
+                            </NavLink>
+                        </NavItem>
                         <NavItem>
                             <NavLink
                                 className={classnames({ active: activeTab === "1" })}
@@ -64,6 +74,12 @@ const AllOrders = () => {
 
                     {/* Main Tab Content */}
                     <TabContent activeTab={activeTab}>
+                        <TabPane tabId="0">
+                            <Row>
+                                <PlaceOrder />
+                            </Row>
+                        </TabPane>
+
                         <TabPane tabId="1">
                             <Row>
                                 <TablePending />

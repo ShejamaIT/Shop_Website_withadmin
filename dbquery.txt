@@ -122,6 +122,7 @@ CREATE TABLE delivery_schedule(
 CREATE TABLE Orders (
     OrID VARCHAR(25) PRIMARY KEY,
     orDate DATE,
+    custName VARCHAR(30),
     customerEmail TEXT,
     contact1 VARCHAR(14) NOT NULL,
     contact2 VARCHAR(14),
