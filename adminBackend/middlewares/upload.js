@@ -1,26 +1,27 @@
 import multer from "multer";
 
-// Set up Multer for storing images in memory
+// Multer storage (Memory for processing images in memory)
 const storage = multer.memoryStorage();
 
-// File filter to allow only image uploads
+// File filter to allow only images (JPEG, PNG, WebP, GIF)
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+    if (allowedTypes.includes(file.mimetype)) {
         cb(null, true); // Accept the file
     } else {
-        cb(new Error("Invalid file type. Only images are allowed."), false);
+        cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", "Invalid file type. Only images (JPG, PNG, WebP, GIF) are allowed."), false);
     }
 };
 
 // Define Multer upload middleware
 const upload = multer({
-    storage: storage,
+    storage,
     limits: {
-        fileSize: 20 * 1024 * 1024,  // 20MB per file
-        fieldSize: 50 * 1024 * 1024, // ⬅️ Increase field size to 50MB
+        fileSize: 20 * 1024 * 1024,  // ✅ 20MB per file
     },
-    fileFilter: fileFilter,
+    fileFilter,
 });
 
-
+// Export the upload instance
 export default upload;
