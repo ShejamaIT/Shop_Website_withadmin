@@ -15,7 +15,6 @@ CREATE TABLE subCat_one(
         CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
         			ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 CREATE TABLE subCat_two(
       sb_cc_id VARCHAR(15) PRIMARY KEY,
       subcategory TEXT,
@@ -25,11 +24,11 @@ CREATE TABLE subCat_two(
         			ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE Type(
-    Ty_Id VARCHAR(15) PRIMARY KEY,
+     Ty_Id VARCHAR(15) PRIMARY KEY,
      Ca_Id VARCHAR(15),
      sub_one VARCHAR(40),
      sub_two VARCHAR(40),
-	CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
+	    CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
 			ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE Item(
@@ -40,23 +39,27 @@ CREATE TABLE Item(
       color VARCHAR(20),
       material VARCHAR(20),
       price DOUBLE,
-      qty INT,
       warrantyPeriod VARCHAR(25),
-      cost DOUBLE,
       stockQty INT,
       bookedQty INT,
       availableQty INT,
       img LONGBLOB NOT NULL,
+      img1 LONGBLOB NOT NULL,
+      img2 LONGBLOB NOT NULL,
+      img3 LONGBLOB NOT NULL,
 	        CONSTRAINT FOREIGN KEY (Ty_id) REFERENCES Type (Ty_id)
 			    ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE Item_img(
-    I_Id VARCHAR(25) PRIMARY KEY,
-    img1 LONGBLOB NOT NULL,
-    img2 LONGBLOB,
-    img3 LONGBLOB,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-            ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE item_supplier (
+  I_Id varchar(25) NOT NULL,
+  s_ID varchar(25) NOT NULL,
+  unit_cost DOUBLE,
+  PRIMARY KEY (I_Id,s_ID),
+  CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+              ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
+                ON DELETE CASCADE ON UPDATE CASCADE
+
 );
 CREATE TABLE Employee(
       E_Id VARCHAR(15) PRIMARY KEY,
@@ -223,17 +226,7 @@ CREATE TABLE accept_orders (
     CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
                      ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE item_supplier (
-  I_Id varchar(25) NOT NULL,
-  s_ID varchar(25) NOT NULL,
-  unit_cost DOUBLE,
-  PRIMARY KEY (I_Id,s_ID),
-  CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-              ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
-                ON DELETE CASCADE ON UPDATE CASCADE
 
-);
 CREATE TABLE order_Payment(
     op_ID INT AUTO_INCREMENT PRIMARY KEY,
     orID VARCHAR(25),
