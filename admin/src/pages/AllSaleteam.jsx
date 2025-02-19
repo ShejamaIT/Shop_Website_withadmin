@@ -32,6 +32,7 @@ const AllSaleteam = () => {
     }, []); // Run only once when component mounts
 
     function handleNavigate(stid) {
+        console.log(stid);
         navigate(`/saleteam-detail/${stid}`); // Navigate to OrderDetails page
     }
 
