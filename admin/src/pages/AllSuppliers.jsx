@@ -5,6 +5,8 @@ import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import {useNavigate} from "react-router-dom";
 import SupplierDetails from "./SupplierDetails";
+import AddOtherDetails from "./AddOtherDetails";
+import AddItem from "./AddProducts";
 
 const AllSuppliers = () => {
     const [activeTab, setActiveTab] = useState(""); // Initially empty, will set dynamically
@@ -50,6 +52,14 @@ const AllSuppliers = () => {
                                 </NavLink>
                             </NavItem>
                         ))}
+                        <NavItem>
+                            <NavLink
+                                className={activeTab === "5" ? "active" : ""}
+                                onClick={() => setActiveTab("5")}
+                            >
+                                Add New Supplier
+                            </NavLink>
+                        </NavItem>
                     </Nav>
 
                     {/* Tab Content */}
@@ -60,6 +70,13 @@ const AllSuppliers = () => {
                                 <SupplierDetails supplier={member} />
                             </TabPane>
                         ))}
+                        <TabPane tabId="5">
+                            <Row>
+                                <Col>
+                                    <AddItem />
+                                </Col>
+                            </Row>
+                        </TabPane>
                     </TabContent>
                 </Container>
             </section>

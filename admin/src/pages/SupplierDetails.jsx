@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Button, Input, Table } from 'reactstrap';
+import {Row, Col, Button, Input, Table, Label} from 'reactstrap';
 import {toast} from "react-toastify";
 
 const SupplierDetails = ({ supplier }) => {
@@ -163,10 +163,10 @@ const SupplierDetails = ({ supplier }) => {
         <Row>
             <Col>
                 <Row>
-                    <h4>Details for {supplier.name}</h4>
-                    <p><strong>Id:</strong> {supplier.s_ID}</p>
-                    <p><strong>Contact:</strong> {supplier.contact}</p>
-                    <p><strong>Address:</strong> {supplier.address}</p>
+                    <h5 >Details for {supplier.name}</h5><hr/>
+                    <Col md={4}><Label><strong>Id:</strong> {supplier.s_ID}</Label></Col>
+                    <Col md={4}><Label><strong>Contact:</strong> {supplier.contact}</Label></Col>
+                    <Col md={4}><Label><strong>Address:</strong> {supplier.address}</Label></Col>
                 </Row>
 
                 {/* Search box */}
