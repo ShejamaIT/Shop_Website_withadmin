@@ -57,118 +57,13 @@ router.post("/add-item", upload.fields([
     }
 });
 
-
-
-
-// Update exit item
-// router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 },{ name: "img1", maxCount: 1 },{ name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 },]), async (req, res) => {
-//         try {
-//             // Extract request body data
-//             const {
-//                 I_Id,
-//                 I_name,
-//                 Ty_id,
-//                 descrip,
-//                 color,
-//                 price,
-//                 warrantyPeriod,
-//                 cost,
-//                 material,
-//                 suppliers,
-//                 availableQty,
-//                 bookedQty,
-//                 stockQty,
-//             } = req.body;
-//             console.log(req.body);
-//
-//             // Parse price and cost values
-//             const parsedPrice = parseFloat(price) || 0;
-//             const parsedCost = parseFloat(cost) || 0;
-//
-//             // ✅ Check if the item exists
-//             const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
-//             const [itemCheckResult] = await db.query(itemCheckSql, [I_Id]);
-//
-//             if (itemCheckResult.length === 0) {
-//                 return res.status(404).json({ success: false, message: "Item not found." });
-//             }
-//
-//             // ✅ Handle image updates (Only include images that were provided)
-//             const imgBuffer = req.files["img"]?.[0]?.buffer || null;
-//             const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
-//             const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
-//             const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
-//
-//             // Update `Item` table with regular fields
-//             const itemUpdateSql = `
-//             UPDATE Item
-//             SET I_name = ?, Ty_id = ?, descrip = ?, color = ?, material = ?, price = ?, availableQty = ?, bookedQty = ?, stockQty = ?, img = ?, warrantyPeriod = ? ,img1 = ? ,img2 = ? ,img3 = ?
-//             WHERE I_Id = ?;
-//         `;
-//             const itemValues = [
-//                 I_name, Ty_id, descrip, color, material, parsedPrice, availableQty, bookedQty, stockQty, imgBuffer, warrantyPeriod, img1Buffer, img2Buffer, img3Buffer, I_Id
-//             ];
-//              console.log(itemValues);
-//
-//            // await db.query(itemUpdateSql, itemValues);
-//             // **Handle Suppliers (Array of suppliers from formData)**
-//             if (suppliers && Array.isArray(suppliers)) {
-//                 console.log("pass");
-//                 for (const supplier of suppliers) {
-//
-//                     const { s_ID, unit_cost } = supplier;
-//                     console.log(supplier);
-//                     const parsedUnitCost = parseFloat(unit_cost) || 0;
-//
-//                     // Update or insert supplier cost data
-//                     const supplierUpdateSql = `
-//                     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
-//                     VALUES (?, ?, ?)
-//                     ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
-//                 `;
-//                     const supplierValues = [
-//                         I_Id, s_ID, parsedUnitCost
-//                     ];
-//                     console.log(supplierValues);
-//                     // await db.query(supplierUpdateSql, supplierValues);
-//                 }
-//             }
-//
-//             // ✅ Respond with success message
-//             res.status(200).json({
-//                 success: true,
-//                 message: "Item updated successfully",
-//                 data: {
-//                     I_Id,
-//                     I_name,
-//                     Ty_id,
-//                     descrip,
-//                     color,
-//                     material,
-//                     price: parsedPrice,
-//                     warrantyPeriod,
-//                     availableQty,
-//                     bookedQty,
-//                     stockQty,
-//                 },
-//             });
-//         } catch (err) {
-//             console.error("❌ Error updating item data:", err.message);
-//             res.status(500).json({ success: false, message: "Error updating data", details: err.message });
-//         }
-//     }
-// );
-
-
-router.put(
-    "/update-item",
-    upload.fields([
+// Update item
+router.put("/update-item", upload.fields([
         { name: "img", maxCount: 1 },
         { name: "img1", maxCount: 1 },
         { name: "img2", maxCount: 1 },
         { name: "img3", maxCount: 1 },
-    ]),
-    async (req, res) => {
+    ]), async (req, res) => {
         try {
             // ✅ Extract request body
             let {
@@ -300,138 +195,117 @@ router.put(
     }
 );
 
-// Update exit item
-// router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 }]), async (req, res) => {
-//     try {
-//         // Extract request body and parse incoming form data
-//         const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, suppliers, availableQty, bookedQty, stockQty  } = req.body;
-//
-//         // Parse price and cost fields to float
-//         const parsedPrice = parseFloat(price) || 0;
-//         const parsedCost = parseFloat(cost) || 0;
-//
-//          // console.log("🔹 Request Data:", { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, suppliers, availableQty, bookedQty, stockQty });
-//
-//         // Ensure I_Id exists in the database
-//         const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
-//         const [itemCheckResult] = await db.query(itemCheckSql, [I_Id]);
-//
-//         if (itemCheckResult.length === 0) {
-//             return res.status(404).json({ success: false, message: "Item not found." });
-//         }
-//
-//         // Handle image files, if any
-//         // const imgBuffer = req.files["img"]?.[0]?.buffer || null;
-//         // const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
-//         // const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
-//         // const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
-//         const imgBuffer = req.files["img"][0].buffer;
-//         const img1Buffer = req.files["img1"][0].buffer;
-//         const img2Buffer = req.files["img2"][0].buffer ;
-//         const img3Buffer = req.files["img3"][0].buffer;
-//
-//         console.log(imgBuffer,img1Buffer,img2Buffer,img3Buffer);
-//
+// Save a order
+router.post("/orders", async (req, res) => {
+    try {
+        const {
+            dvStatus,
+            address,
+            city,
+            district,
+            email,
+            customerName,
+            phoneNumber,
+            otherNumber,
+            items,
+            totalBillPrice,
+            deliveryPrice,
+            discountAmount,
+            couponCode,
+            expectedDate,
+            specialNote,
+        } = req.body;
+        console.log(req.body);
 
+        // Calculate net total, balance
+        const netTotal = parseFloat(totalBillPrice) ; // Ensure it's a valid number
+        const advance = 0;  // Advance is explicitly set to 0
+        const balance = netTotal - parseFloat(advance);  // Balance calculation
 
+        // Generate unique order ID
+        const orID = `ORD_${Date.now()}`;
+        const orderDate = new Date().toISOString().split("T")[0]; // Get current date
 
-//
-//         // Handle image updates for `Item_img` table (if any images are provided)
-//         if (img1Buffer || img2Buffer || img3Buffer) {
-//             const imgUpdateSql = `
-//                 UPDATE Item_img
-//                 SET img1 = ?, img2 = ?, img3 = ?
-//                 WHERE I_Id = ?;
-//             `;
-//             const imgValues = [
-//                 img1Buffer, img2Buffer, img3Buffer, I_Id
-//             ];
-//              console.log(imgValues);
-//             // await db.query(imgUpdateSql, imgValues);
-//         }
-//
-//  // ✅ Construct dynamic `UPDATE` query for `Item` table
-//           //   let updateFields = [];
-//           //   let updateValues = [];
-//           //
-//           //   if (I_name) updateFields.push("I_name = ?");
-//           //   if (Ty_id) updateFields.push("Ty_id = ?");
-//           //   if (descrip) updateFields.push("descrip = ?");
-//           //   if (color) updateFields.push("color = ?");
-//           //   if (material) updateFields.push("material = ?");
-//           //   if (parsedPrice) updateFields.push("price = ?");
-//           //   if (availableQty) updateFields.push("availableQty = ?");
-//           //   if (bookedQty) updateFields.push("bookedQty = ?");
-//           //   if (stockQty) updateFields.push("stockQty = ?");
-//           //   if (warrantyPeriod) updateFields.push("warrantyPeriod = ?");
-//           //   if (imgBuffer) updateFields.push("img = ?");
-//           //   if (img1Buffer) updateFields.push("img1 = ?");
-//           //   if (img2Buffer) updateFields.push("img2 = ?");
-//           //   if (img3Buffer) updateFields.push("img3 = ?");
-//           //
-//           //   updateValues = [
-//           //       I_name,
-//           //       Ty_id,
-//           //       descrip,
-//           //       color,
-//           //       material,
-//           //       parsedPrice,
-//           //       availableQty,
-//           //       bookedQty,
-//           //       stockQty,
-//           //       warrantyPeriod,
-//           //       imgBuffer,
-//           //       img1Buffer,
-//           //       img2Buffer,
-//           //       img3Buffer,
-//           //   ].filter((value) => value !== undefined);
-//           //
-//           //   if (updateFields.length > 0) {
-//           //       const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
-//           //       updateValues.push(I_Id);
-//           //       await db.query(updateQuery, updateValues);
-//           //   }
-//           //
-//           //   // ✅ Handle suppliers update (Insert or update in `item_supplier`)
-//           //   if (suppliers && Array.isArray(suppliers)) {
-//           //       for (const supplier of suppliers) {
-//           //           const { s_ID, unit_cost } = supplier;
-//           //           const parsedUnitCost = parseFloat(unit_cost) || 0;
-//           //
-//           //           const supplierUpdateSql = `
-//           //     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
-//           //     VALUES (?, ?, ?)
-//           //     ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
-//           // `;
-//           //           await db.query(supplierUpdateSql, [I_Id, s_ID, parsedUnitCost]);
-//           //       }
-//           //   }
-//
-//         // Respond with success
-//         res.status(200).json({
-//             success: true,
-//             message: "Item updated successfully",
-//             data: {
-//                 I_Id,
-//                 I_name,
-//                 Ty_id,
-//                 descrip,
-//                 color,
-//                 material,
-//                 price: parsedPrice,
-//                 warrantyPeriod,
-//                 availableQty,
-//                 bookedQty,
-//                 stockQty
-//             }
-//         });
-//
-//     } catch (err) {
-//         console.error("❌ Error updating item data:", err.message);
-//         res.status(500).json({ success: false, message: "Error updating data into database", details: err.message });
-//     }
-// });
+        // Initialize stID to null
+        let stID = null;
 
+        // Check if a coupon is provided, if yes fetch associated stID
+        if (couponCode) {
+            // Fetch the stID associated with the provided coupon ID (cpID)
+            const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
+            const [couponResult] = await db.query(couponQuery, [couponCode]);
+
+            if (couponResult.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid coupon code"
+                });
+            }
+
+            // Set the sales team ID (stID) from the coupon
+            stID = couponResult[0].stID;
+        }
+
+        // Insert Order
+        let orderQuery = `
+            INSERT INTO Orders (OrID, orDate, custName, customerEmail, contact1, contact2, orStatus, delStatus, city, delPrice, discount, total, stID, expectedDate, specialNote, ordertype,advance,balance,payStatus)
+            VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?, 'on-site',?,?,'Pending')`;
+        let orderParams = [orID, orderDate, customerName, email, phoneNumber, otherNumber, dvStatus, city, parseFloat(deliveryPrice), parseFloat(discountAmount), parseFloat(totalBillPrice), stID, expectedDate, specialNote,advance,balance];
+
+        await db.query(orderQuery, orderParams);
+
+        // Insert Order Details
+        for (const item of items) {
+            let orderDetailQuery = `
+                INSERT INTO Order_Detail (orID, I_Id, qty, tprice)
+                VALUES (?, ?, ?, ?)`;
+            let orderDetailParams = [orID, item.I_Id, item.qty, parseFloat(item.price)];
+
+            await db.query(orderDetailQuery, orderDetailParams);
+        }
+
+        // Insert Delivery Info if delivery is selected
+        if (dvStatus === "Delivery") {
+            const dvID = `DLV_${Date.now()}`;
+            let deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, district, contact, status, schedule_Date)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
+            let deliveryParams = [dvID, orID, address, district, phoneNumber, expectedDate];
+
+            await db.query(deliveryQuery, deliveryParams);
+        }
+
+        // Insert Coupon Info if a coupon is used
+        if (couponCode) {
+            const ocID = `OCP_${Date.now()}`;
+            let couponQuery = `
+                INSERT INTO order_coupon (ocID, orID, cpID)
+                VALUES (?, ?, ?)`;
+            let couponParams = [ocID, orID, couponCode];
+
+            await db.query(couponQuery, couponParams);
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            data: {
+                orID: orID,
+                orderDate: orderDate,
+                expectedDate: expectedDate
+            },
+        });
+
+    } catch (error) {
+        console.error("Error inserting order data:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: error.message,
+        });
+    }
+});
 
 // Get all orders
 router.get("/orders", async (req, res) => {
@@ -449,12 +323,15 @@ router.get("/orders", async (req, res) => {
             OrID : order.OrID, // Assuming you have an id column
             orDate : order.orDate,
             customerEmail : order.customerEmail,
-            ordertype : order.order_type,
+            ordertype : order.ordertype,
             orStatus : order.orStatus,
-            dvStatus : order.dvStatus,
-            dvPrice : order.dvPrice,
-            disPrice : order.disPrice,
-            totPrice : order.totPrice,
+            delStatus : order.delStatus,
+            delPrice : order.delPrice,
+            disPrice : order.discount,
+            totPrice : order.total,
+            advance : order.advance,
+            balance : order.balance,
+            payStatus : order.payStatus,
             stID:  order.stID,
             expectedDeliveryDate: order.expectedDate
         }));
@@ -576,8 +453,8 @@ router.get("/accept-order-details", async (req, res) => {
         // 1️⃣ Fetch Order Info with Sales Team Details
         const orderQuery = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2,
-                o.orStatus, o.dvStatus, o.dvPrice, o.disPrice, o.totPrice, o.order_type,
+                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2,o.advance,o.balance,o.payStatus,
+                o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype,
                 o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN sales_team s ON o.stID = s.stID
@@ -624,14 +501,17 @@ router.get("/accept-order-details", async (req, res) => {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
-            ordertype : orderData.order_type,
+            ordertype : orderData.ordertype,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
-            deliveryStatus: orderData.dvStatus,
-            deliveryCharge: orderData.dvPrice,
-            discount: orderData.disPrice,
-            totalPrice: orderData.totPrice,
+            deliveryStatus: orderData.delStatus,
+            deliveryCharge: orderData.delPrice,
+            discount: orderData.discount,
+            totalPrice: orderData.total,
+            advance: orderData.advance,
+            balance: orderData.balance,
+            payStatus : orderData.payStatus,
             expectedDeliveryDate: orderData.expectedDate,
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
@@ -678,12 +558,6 @@ router.get("/accept-order-details", async (req, res) => {
             }
         }
 
-        // // 7️⃣ If Order Status is "Accepted", Trigger Additional API Call (Optional)
-        // if (orderData.orStatus === "Accepted") {
-        //     // console.log(`Calling additional API for accepted order: ${orID}`);
-        //     // Add API call logic here if needed (e.g., send notification)
-        // }
-
         return res.status(200).json({
             success: true,
             message: "Order details fetched successfully",
@@ -711,9 +585,9 @@ router.get("/order-details", async (req, res) => {
         // Fetch Order Info along with Sales Team details (Employee Name)
         const orderQuery = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.orStatus, o.dvStatus,
-                o.dvPrice, o.disPrice, o.totPrice, o.expectedDate, o.specialNote, o.order_type,
-                s.stID, e.name AS salesEmployeeName
+                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.orStatus, o.delStatus,
+                o.delPrice, o.discount, o.total, o.advance , o.balance, o.payStatus, o.expectedDate, 
+                o.specialNote, o.ordertype, s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN sales_team s ON o.stID = s.stID
                      LEFT JOIN Employee e ON s.E_Id = e.E_Id
@@ -738,37 +612,26 @@ router.get("/order-details", async (req, res) => {
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
-        // Fetch Payment Details (advance and balance) from order_Payment
-        const paymentQuery = `
-            SELECT netTotal, advance, balance
-            FROM order_Payment
-            WHERE orID = ?`;
-
-        const [paymentResult] = await db.query(paymentQuery, [orID]);
-
-        let paymentDetails = null;
-        if (paymentResult.length > 0) {
-            paymentDetails = paymentResult[0];
-        }
-
         // Prepare the order response
         const orderResponse = {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
-            ordertype: orderData.order_type,
+            ordertype: orderData.ordertype,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
-            deliveryStatus: orderData.dvStatus,
-            deliveryCharge: orderData.dvPrice,
-            discount: orderData.disPrice,
-            totalPrice: orderData.totPrice,
+            deliveryStatus: orderData.delStatus,
+            deliveryCharge: orderData.delPrice,
+            discount: orderData.discount,
+            totalPrice: orderData.total,
+            advance: orderData.advance,
+            balance: orderData.balance,
+            payStatus : orderData.payStatus,
             expectedDeliveryDate: orderData.expectedDate,
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: [],
-            paymentDetails: paymentDetails || { advance: 0, balance: 0, netTotal: 0 },  // Include payment details
         };
 
         // If order is "Accepted", fetch booked items and accept_orders
@@ -935,7 +798,6 @@ router.get("/item-details", async (req, res) => {
     }
 });
 
-
 // Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
     try {
@@ -954,10 +816,13 @@ router.get("/orders-pending", async (req, res) => {
             customerEmail: order.customerEmail, // Customer Email
             ordertype : order.order_type,
             orStatus: order.orStatus, // Order Status
-            dvStatus: order.dvStatus, // Delivery Status
-            dvPrice: order.dvPrice, // Delivery Price
-            disPrice: order.disPrice, // Discount Price
-            totPrice: order.totPrice, // Total Price
+            dvStatus: order.delStatus, // Delivery Status
+            dvPrice: order.delPrice, // Delivery Price
+            disPrice: order.discount, // Discount Price
+            totPrice: order.total, // Total Price
+            advance: order.advance,
+            balance: order.balance,
+            payStatus : order.payStatus,
             stID: order.stID, // Sales Team ID
             expectedDeliveryDate: order.expectedDate, // Expected Delivery Date
         }));
@@ -980,17 +845,8 @@ router.get("/orders-accepting", async (req, res) => {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
             SELECT 
-                o.OrID, 
-                o.orDate, 
-                o.customerEmail,
-                o.order_type,
-                o.orStatus, 
-                o.dvStatus, 
-                o.dvPrice, 
-                o.disPrice, 
-                o.totPrice, 
-                o.stID, 
-                o.expectedDate AS expectedDeliveryDate, 
+                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice, 
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, 
                 ao.status AS acceptanceStatus
             FROM Orders o
@@ -1014,25 +870,27 @@ router.get("/orders-accepting", async (req, res) => {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
-                    ordertype : order.order_type,
+                    ordertype: order.ordertype,
                     orStatus: order.orStatus,
-                    dvStatus: order.dvStatus,
-                    dvPrice: order.dvPrice,
-                    disPrice: order.disPrice,
-                    totPrice: order.totPrice,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
                     stID: order.stID,
                     expectedDeliveryDate: order.expectedDeliveryDate,
                     itemReceived: order.itemReceived,
                     acceptanceStatus: "Complete", // Default status is Complete
                     acceptanceStatuses: [] // Track individual item statuses
                 };
-                console.log(order.order_type);
             }
 
             // Add each item status to the list
             groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
 
-            // If any of the items have an "In Production" or "None" status, mark the order as "Incomplete"
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
             if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
                 groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
             }
@@ -1058,18 +916,9 @@ router.get("/orders-completed", async (req, res) => {
     try {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
-            SELECT 
-                o.OrID, 
-                o.orDate, 
-                o.customerEmail,
-                o.order_type,
-                o.orStatus, 
-                o.dvStatus, 
-                o.dvPrice, 
-                o.disPrice, 
-                o.totPrice, 
-                o.stID, 
-                o.expectedDate AS expectedDeliveryDate, 
+            SELECT
+                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate, 
                 ao.itemReceived, 
                 ao.status AS acceptanceStatus
             FROM Orders o
@@ -1081,7 +930,7 @@ router.get("/orders-completed", async (req, res) => {
 
         // If no orders found, return a 404 status
         if (orders.length === 0) {
-            return res.status(404).json({ message: "No Accepted orders found" });
+            return res.status(404).json({ message: "No Completed orders found" });
         }
 
         // Group orders by OrID
@@ -1093,12 +942,15 @@ router.get("/orders-completed", async (req, res) => {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
-                    ordertype : order.order_type,
+                    ordertype: order.ordertype,
                     orStatus: order.orStatus,
-                    dvStatus: order.dvStatus,
-                    dvPrice: order.dvPrice,
-                    disPrice: order.disPrice,
-                    totPrice: order.totPrice,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
                     stID: order.stID,
                     expectedDeliveryDate: order.expectedDeliveryDate,
                     itemReceived: order.itemReceived,
@@ -1110,7 +962,7 @@ router.get("/orders-completed", async (req, res) => {
             // Add each item status to the list
             groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
 
-            // If any of the items have an "In Production" or "None" status, mark the order as "Incomplete"
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
             if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
                 groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
             }
@@ -1121,13 +973,13 @@ router.get("/orders-completed", async (req, res) => {
 
         // Send the formatted orders with their acceptance status as a JSON response
         return res.status(200).json({
-            message: "Accepted orders found.",
+            message: "Completed orders found.",
             data: formattedOrders,
         });
 
     } catch (error) {
-        console.error("Error fetching accepted orders:", error.message);
-        return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
+        console.error("Error fetching completed orders:", error.message);
+        return res.status(500).json({ message: "Error fetching completed orders", error: error.message });
     }
 });
 
@@ -1170,7 +1022,7 @@ router.get("/allitemslessone", async (req, res) => {
     try {
         // Query the database to fetch items with qty <= 1
         const [items] = await db.query(
-            "SELECT I_Id, I_name, Ty_id, descrip, price,stockQty, availableQty, img FROM Item WHERE availableQty <= 1"
+            "SELECT I_Id, I_name, Ty_id, descrip, price,stockQty, availableQty, img FROM Item WHERE availableQty <= minQTY"
         );
 
         // If no items found, return a 404 status with a descriptive message
@@ -1242,8 +1094,8 @@ router.get("/item-suppliers", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
 // get all items for the supplier
-// Fetch all items associated with the supplier
 router.get("/supplier-items", async (req, res) => {
     try {
         const { s_Id } = req.query;
@@ -1500,7 +1352,10 @@ router.put("/update-invoice", async (req, res) => {
             orID,
             isPickup,
             netTotal,
-            updatedAdvance,
+            totalAdvance,
+            previousAdvance,
+            balance,
+            addedAdvance,
             updatedDeliveryCharge,
             updatedDiscount
         } = req.body;
@@ -1519,26 +1374,25 @@ router.put("/update-invoice", async (req, res) => {
         // Update the Orders table
         let orderUpdateQuery = `
             UPDATE Orders
-            SET totPrice = ?, disPrice = ?, dvPrice = ?
+            SET total = ?, discount = ?, delPrice = ?, advance = ?, balance = ?
             WHERE OrID = ?`;
-        const orderUpdateParams = [netTotal, updatedDiscount, updatedDeliveryCharge, orID];
+        const orderUpdateParams = [netTotal, updatedDiscount, updatedDeliveryCharge, totalAdvance, balance, orID];
         await db.query(orderUpdateQuery, orderUpdateParams);
 
         // If isPickup is true, update the delivery table
         if (isPickup) {
-            // Remove the existing delivery entry for the order
             const deleteDeliveryQuery = `DELETE FROM delivery WHERE orID = ?`;
             await db.query(deleteDeliveryQuery, [orID]);
         }
 
-        // Calculate the balance (netTotal - advance)
-        const balance = netTotal - updatedAdvance;
+        // Get the current date and time
+        const currentDateTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-        // Insert the new entry into the order_Payment table
+        // Insert the new entry into the Payment table
         const insertPaymentQuery = `
-            INSERT INTO order_Payment (orID, netTotal, advance, balance)
-            VALUES (?, ?, ?, ?)`;
-        const paymentParams = [orID, netTotal, updatedAdvance, balance];
+            INSERT INTO Payment (orID, amount, dateTime)
+            VALUES (?, ?, ?)`;
+        const paymentParams = [orID, addedAdvance, currentDateTime];
         await db.query(insertPaymentQuery, paymentParams);
 
         return res.status(200).json({
@@ -1555,23 +1409,14 @@ router.put("/update-invoice", async (req, res) => {
     }
 });
 
-//
+// Fetch Accept orders in booked-unbooked
 router.get("/orders-accept", async (req, res) => {
     try {
         // Step 1: Fetch all the orders and their associated items' statuses from the accept_orders table.
         const query = `
-            SELECT 
-                o.OrID, 
-                o.orDate, 
-                o.customerEmail, 
-                o.order_type,
-                o.orStatus, 
-                o.dvStatus, 
-                o.dvPrice, 
-                o.disPrice, 
-                o.totPrice, 
-                o.stID, 
-                o.expectedDate AS expectedDeliveryDate, 
+            SELECT
+                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate, 
                 ao.itemReceived, 
                 ao.status AS acceptanceStatus
             FROM Orders o
@@ -1581,63 +1426,55 @@ router.get("/orders-accept", async (req, res) => {
 
         const [orders] = await db.query(query);
 
-        // If no orders are found, return a 404 response.
         if (orders.length === 0) {
             return res.status(404).json({ message: "No Accepted orders found" });
         }
 
-        // Step 2: Group orders by OrID.
         const groupedOrders = {};
-
-        // Initialize arrays to hold booked and unbooked orders.
         const bookedOrders = [];
         const unbookedOrders = [];
 
         // Step 3: Process each order and its items.
         orders.forEach(order => {
-            // If the order does not exist in the groupedOrders object, create it.
             if (!groupedOrders[order.OrID]) {
                 groupedOrders[order.OrID] = {
                     OrID: order.OrID,
                     orDate: order.orDate,
                     customerEmail: order.customerEmail,
-                    ordertype : order.order_type,
+                    ordertype: order.ordertype,
                     orStatus: order.orStatus,
-                    dvStatus: order.dvStatus,
-                    dvPrice: order.dvPrice,
-                    disPrice: order.disPrice,
-                    totPrice: order.totPrice,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
                     stID: order.stID,
                     expectedDeliveryDate: order.expectedDeliveryDate,
-                    acceptanceStatuses: [], // Array to track item statuses.
-                    isUnbooked: false // Flag to check if the order contains any unbooked item.
+                    acceptanceStatuses: [],
+                    isUnbooked: false
                 };
             }
 
-            // Add each item status to the list of acceptance statuses.
             groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
 
-            // Check the acceptance status of the current item:
             if (order.acceptanceStatus !== "Complete") {
-                // If the status is not "Complete", mark the order as unbooked.
                 groupedOrders[order.OrID].isUnbooked = true;
             }
         });
 
-        // Step 4: Now, categorize the orders as "booked" or "unbooked".
+        // Step 4: Categorize orders.
         Object.values(groupedOrders).forEach(order => {
             if (order.isUnbooked) {
-                // If the order has any unbooked item, mark the entire order as unbooked.
                 order.acceptanceStatus = "Incomplete";
                 unbookedOrders.push(order);
             } else {
-                // If all items are booked, mark the order as booked.
                 order.acceptanceStatus = "Complete";
                 bookedOrders.push(order);
             }
         });
 
-        // Step 5: Send the response with two arrays: bookedOrders and unbookedOrders.
         return res.status(200).json({
             message: "Accepted orders found.",
             bookedOrders: bookedOrders,
@@ -1699,7 +1536,7 @@ router.put("/update-order", async (req, res) => {
         const orderUpdateQuery = `
             UPDATE orders
             SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?,
-                dvStatus = ?, dvPrice = ?, disPrice = ?, totPrice = ?, expectedDate = ?, specialNote = ?
+                delStatus = ?, delPrice = ?, discount = ?, total = ?, expectedDate = ?, specialNote = ?
             WHERE OrID = ?`;
         const orderUpdateParams = [
             orderDate, customerEmail, phoneNumber, optionalNumber, orderStatus,
@@ -1878,6 +1715,7 @@ router.put("/update-order-details", async (req, res) => {
     try {
         const { orderId, orderDate, customerEmail, phoneNumber, optionalNumber, orderStatus,
             deliveryStatus, deliveryCharge, discount, totalPrice, expectedDeliveryDate, specialNote } = req.body;
+        console.log(req.body);
 
         // Check if the order exists
         const orderCheckQuery = `SELECT * FROM orders WHERE OrID = ?`;
@@ -1889,8 +1727,8 @@ router.put("/update-order-details", async (req, res) => {
 
         // Update order details
         const orderUpdateQuery = `
-            UPDATE orders SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?, 
-            dvStatus = ?, dvPrice = ?, disPrice = ?, totPrice = ?, expectedDate = ?, specialNote = ?
+            UPDATE orders SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?,
+                              delStatus = ?, delPrice = ?, discount = ?, total = ?, expectedDate = ?, specialNote = ?
             WHERE OrID = ?`;
         await db.query(orderUpdateQuery, [
             orderDate, customerEmail, phoneNumber, optionalNumber, orderStatus, deliveryStatus,
@@ -2821,126 +2659,63 @@ router.get("/delivery-schedule", async (req, res) => {
     }
 });
 
-// Save a order
-router.post("/orders", async (req, res) => {
+// Update change qty
+router.put("/change-quantity", async (req, res) => {
+    const { orID, itemId, newQuantity, updatedPrice } = req.body;
+    console.log(req.body);
+
+    if (!orID || !itemId || newQuantity == null || updatedPrice == null) {
+        return res.status(400).json({ message: "Missing required fields." });
+    }
+
     try {
-        const {
-            dvStatus,
-            address,
-            city,
-            district,
-            email,
-            customerName,
-            phoneNumber,
-            otherNumber,
-            items,
-            totalBillPrice,
-            deliveryPrice,
-            discountAmount,
-            couponCode,
-            expectedDate,
-            specialNote,
-        } = req.body;
-        console.log(req.body);
+        await db.beginTransaction();
 
-        // Calculate net total, balance
-        const netTotal = parseFloat(totalBillPrice) ; // Ensure it's a valid number
-        const advance = 0;  // Advance is explicitly set to 0
-        const balance = netTotal - parseFloat(advance);  // Balance calculation
+        // Get current item quantities
+        const [currentItem] = await db.query(
+            "SELECT bookedQty, availableQty FROM Item WHERE I_Id = ?",
+            [itemId]
+        );
+        if (!currentItem) throw new Error("Item not found.");
 
-        // Generate unique order ID
-        const orID = `ORD_${Date.now()}`;
-        const orderDate = new Date().toISOString().split("T")[0]; // Get current date
+        const [currentOrder] = await db.query(
+            "SELECT qty FROM Order_Detail WHERE orID = ? AND I_Id = ?",
+            [orID, itemId]
+        );
+        if (!currentOrder) throw new Error("Order detail not found.");
 
-        // Initialize stID to null
-        let stID = null;
+        const qtyDifference = newQuantity - currentOrder.qty;
+        const newBookedQty = currentItem.bookedQty + qtyDifference;
+        const newAvailableQty = currentItem.availableQty - qtyDifference;
 
-        // Check if a coupon is provided, if yes fetch associated stID
-        if (couponCode) {
-            // Fetch the stID associated with the provided coupon ID (cpID)
-            const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
-            const [couponResult] = await db.query(couponQuery, [couponCode]);
+        if (newAvailableQty < 0) throw new Error("Insufficient available quantity.");
 
-            if (couponResult.length === 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid coupon code"
-                });
-            }
+        // Update Order_Detail
+        await db.query(
+            "UPDATE Order_Detail SET qty = ?, tprice = ? WHERE orID = ? AND I_Id = ?",
+            [newQuantity, updatedPrice, orID, itemId]
+        );
 
-            // Set the sales team ID (stID) from the coupon
-            stID = couponResult[0].stID;
-        }
+        // Update booked_item
+        await db.query(
+            "UPDATE booked_item SET qty = ? WHERE orID = ? AND I_Id = ?",
+            [newQuantity, orID, itemId]
+        );
 
-        // Insert Order
-        let orderQuery = `
-            INSERT INTO Orders (OrID, orDate, custName, customerEmail, contact1, contact2, orStatus, dvStatus, city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote, order_type)
-            VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?, 'on-site')`;
-        let orderParams = [orID, orderDate, customerName, email, phoneNumber, otherNumber, dvStatus, city, parseFloat(deliveryPrice), parseFloat(discountAmount), parseFloat(totalBillPrice), stID, expectedDate, specialNote];
+        // Update Item
+        await db.query(
+            "UPDATE Item SET bookedQty = ?, availableQty = ? WHERE I_Id = ?",
+            [newBookedQty, newAvailableQty, itemId]
+        );
 
-        await db.query(orderQuery, orderParams);
-
-        // Insert Order Details
-        for (const item of items) {
-            let orderDetailQuery = `
-                INSERT INTO Order_Detail (orID, I_Id, qty, tprice)
-                VALUES (?, ?, ?, ?)`;
-            let orderDetailParams = [orID, item.I_Id, item.qty, parseFloat(item.price)];
-
-            await db.query(orderDetailQuery, orderDetailParams);
-        }
-
-        // Insert Delivery Info if delivery is selected
-        if (dvStatus === "Delivery") {
-            const dvID = `DLV_${Date.now()}`;
-            let deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, contact, status, schedule_Date)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
-            let deliveryParams = [dvID, orID, address, district, phoneNumber, expectedDate];
-
-            await db.query(deliveryQuery, deliveryParams);
-        }
-
-        // Insert Coupon Info if a coupon is used
-        if (couponCode) {
-            const ocID = `OCP_${Date.now()}`;
-            let couponQuery = `
-                INSERT INTO order_coupon (ocID, orID, cpID)
-                VALUES (?, ?, ?)`;
-            let couponParams = [ocID, orID, couponCode];
-
-            await db.query(couponQuery, couponParams);
-        }
-
-        // Insert Payment Info
-        let paymentQuery = `
-            INSERT INTO order_Payment (orID, netTotal, advance, balance)
-            VALUES (?, ?, ?, ?)`;
-        let paymentParams = [orID, netTotal, advance, balance];
-
-        await db.query(paymentQuery, paymentParams);
-
-        return res.status(201).json({
-            success: true,
-            message: "Order placed successfully",
-            data: {
-                orID: orID,
-                orderDate: orderDate,
-                expectedDate: expectedDate
-            },
-        });
-
+        await db.commit();
+        res.status(200).json({ message: "Quantity updated successfully." });
     } catch (error) {
-        console.error("Error inserting order data:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            message: "Error inserting data into database",
-            details: error.message,
-        });
+        await db.rollback();
+        console.error("Error updating quantity:", error);
+        res.status(500).json({ message: "Error updating quantity.", error: error.message });
     }
 });
-
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
