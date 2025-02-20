@@ -738,12 +738,25 @@ router.get("/order-details", async (req, res) => {
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
+        // Fetch Payment Details (advance and balance) from order_Payment
+        const paymentQuery = `
+            SELECT netTotal, advance, balance
+            FROM order_Payment
+            WHERE orID = ?`;
+
+        const [paymentResult] = await db.query(paymentQuery, [orID]);
+
+        let paymentDetails = null;
+        if (paymentResult.length > 0) {
+            paymentDetails = paymentResult[0];
+        }
+
         // Prepare the order response
         const orderResponse = {
             orderId: orderData.OrID,
             orderDate: orderData.orDate,
             customerEmail: orderData.customerEmail,
-            ordertype : orderData.order_type,
+            ordertype: orderData.order_type,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
@@ -754,7 +767,8 @@ router.get("/order-details", async (req, res) => {
             expectedDeliveryDate: orderData.expectedDate,
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
-            items: []
+            items: [],
+            paymentDetails: paymentDetails || { advance: 0, balance: 0, netTotal: 0 },  // Include payment details
         };
 
         // If order is "Accepted", fetch booked items and accept_orders
@@ -780,7 +794,7 @@ router.get("/order-details", async (req, res) => {
                     booked: item.bookedQty > 0, // true if the item is booked
                     bookedQuantity: item.bookedQty,
                     availableQuantity: item.availableQty, // Updated field from Item table
-                    stockQuantity : item.stockQty,
+                    stockQuantity: item.stockQty,
                     itemReceived: itemReceived,
                     itemStatus: itemStatus
                 });
@@ -795,7 +809,7 @@ router.get("/order-details", async (req, res) => {
                 unitPrice: item.unitPrice,
                 bookedQuantity: item.bookedQty,
                 availableQuantity: item.availableQty, // Updated field
-                stockQuantity : item.stockQty
+                stockQuantity: item.stockQty
             }));
         }
 
@@ -2825,9 +2839,15 @@ router.post("/orders", async (req, res) => {
             discountAmount,
             couponCode,
             expectedDate,
-            specialNote
+            specialNote,
         } = req.body;
-        console.log(items);
+        console.log(req.body);
+
+        // Calculate net total, balance
+        const netTotal = parseFloat(totalBillPrice) ; // Ensure it's a valid number
+        const advance = 0;  // Advance is explicitly set to 0
+        const balance = netTotal - parseFloat(advance);  // Balance calculation
+
         // Generate unique order ID
         const orID = `ORD_${Date.now()}`;
         const orderDate = new Date().toISOString().split("T")[0]; // Get current date
@@ -2851,11 +2871,12 @@ router.post("/orders", async (req, res) => {
             // Set the sales team ID (stID) from the coupon
             stID = couponResult[0].stID;
         }
+
         // Insert Order
         let orderQuery = `
-            INSERT INTO Orders (OrID, orDate,custName, customerEmail,contact1,contact2, orStatus, dvStatus,city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote,order_type)
-            VALUES (?, ?,?, ?,?,?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?,'on-site')`;
-        let orderParams = [orID, orderDate,customerName, email,phoneNumber,otherNumber, dvStatus,city, deliveryPrice, discountAmount, totalBillPrice, stID, expectedDate, specialNote];
+            INSERT INTO Orders (OrID, orDate, custName, customerEmail, contact1, contact2, orStatus, dvStatus, city, dvPrice, disPrice, totPrice, stID, expectedDate, specialNote, order_type)
+            VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?, 'on-site')`;
+        let orderParams = [orID, orderDate, customerName, email, phoneNumber, otherNumber, dvStatus, city, parseFloat(deliveryPrice), parseFloat(discountAmount), parseFloat(totalBillPrice), stID, expectedDate, specialNote];
 
         await db.query(orderQuery, orderParams);
 
@@ -2864,7 +2885,7 @@ router.post("/orders", async (req, res) => {
             let orderDetailQuery = `
                 INSERT INTO Order_Detail (orID, I_Id, qty, tprice)
                 VALUES (?, ?, ?, ?)`;
-            let orderDetailParams = [orID, item.I_Id, item.qty, item.price];
+            let orderDetailParams = [orID, item.I_Id, item.qty, parseFloat(item.price)];
 
             await db.query(orderDetailQuery, orderDetailParams);
         }
@@ -2873,8 +2894,8 @@ router.post("/orders", async (req, res) => {
         if (dvStatus === "Delivery") {
             const dvID = `DLV_${Date.now()}`;
             let deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, contact, status,schedule_Date)
-                VALUES (?, ?, ?, ?, ?, 'Pending',?)`;
+                INSERT INTO delivery (dv_id, orID, address, district, contact, status, schedule_Date)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
             let deliveryParams = [dvID, orID, address, district, phoneNumber, expectedDate];
 
             await db.query(deliveryQuery, deliveryParams);
@@ -2890,6 +2911,14 @@ router.post("/orders", async (req, res) => {
 
             await db.query(couponQuery, couponParams);
         }
+
+        // Insert Payment Info
+        let paymentQuery = `
+            INSERT INTO order_Payment (orID, netTotal, advance, balance)
+            VALUES (?, ?, ?, ?)`;
+        let paymentParams = [orID, netTotal, advance, balance];
+
+        await db.query(paymentQuery, paymentParams);
 
         return res.status(201).json({
             success: true,
@@ -2911,6 +2940,8 @@ router.post("/orders", async (req, res) => {
         });
     }
 });
+
+
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
     const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
