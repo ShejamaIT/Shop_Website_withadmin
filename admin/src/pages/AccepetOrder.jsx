@@ -246,7 +246,15 @@ const OrderDetails = () => {
         console.log("Submitting form data:", formData);
 
         // Destructure the necessary fields from formData
-        const { orID, isPickup, netTotal, updatedAdvance, updatedDeliveryCharge, updatedDiscount } = formData;
+        const { orID,
+            isPickup,
+            netTotal,
+            totalAdvance,
+            previousAdvance,
+            balance,
+            addedAdvance,
+            updatedDeliveryCharge,
+            updatedDiscount } = formData;
         console.log(formData);
         try {
             // Send request to the "update-invoice" API
@@ -259,9 +267,12 @@ const OrderDetails = () => {
                     orID,
                     isPickup,
                     netTotal,
-                    updatedAdvance,
+                    totalAdvance,
+                    previousAdvance,
+                    balance,
+                    addedAdvance,
                     updatedDeliveryCharge,
-                    updatedDiscount,
+                    updatedDiscount
                 }),
             });
 
@@ -269,6 +280,7 @@ const OrderDetails = () => {
             const data = await response.json();
 
             if (response.ok) {
+                fetchOrder();
                 alert("Invoice and payment updated successfully!");
 
                 setShowModal(false); // Close the modal if it's open

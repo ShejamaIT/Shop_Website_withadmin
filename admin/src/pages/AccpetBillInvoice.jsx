@@ -8,13 +8,15 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
     const [previousDeliveryCharge, setPreviousDeliveryCharge] = useState(selectedOrder.deliveryCharge);
     const [discount, setDiscount] = useState(selectedOrder.discount);
     const [advance, setAdvance] = useState(selectedOrder.advance);
+    const [nowPay, setNowPay] = useState(0);
     const [isPickup, setIsPickup] = useState(false);
 
     const calculateTotal = (item) => item.quantity * item.unitPrice;
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
     const validAdvance = advance ? Number(advance) : 0;
+    const totalAdvance = validAdvance + Number(nowPay);
     const netTotal = Number(subtotal) + (isPickup ? 0 : Number(deliveryCharge)) - Number(discount);
-    const balance = netTotal - validAdvance;
+    const balance = netTotal - totalAdvance;
 
     const handlePickupChange = () => {
         if (!isPickup) {
@@ -28,10 +30,12 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
 
     const handlePrintAndSubmit = () => {
         handleSubmit({
-            orID : selectedOrder.orderId,
+            orID: selectedOrder.orderId,
             updatedDeliveryCharge: isPickup ? 0 : Number(deliveryCharge),
             updatedDiscount: Number(discount),
-            updatedAdvance: validAdvance,
+            previousAdvance: validAdvance,
+            addedAdvance: Number(nowPay),
+            totalAdvance: totalAdvance,
             netTotal: netTotal,
             balance: balance,
             isPickup: isPickup
@@ -39,6 +43,7 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
 
         window.print(); // This will now hide the buttons when printing
     };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
@@ -105,16 +110,18 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
 
                     <hr />
                     <p><strong>Net Total:</strong> Rs. {netTotal.toFixed(2)}</p>
+                    <p><strong>Previous Advance:</strong> Rs. {validAdvance.toFixed(2)}</p>
 
                     <div className="invoice-summary-item">
-                        <label><strong>Advance:</strong></label>
+                        <label><strong>Now Paying:</strong></label>
                         <input
                             type="number"
-                            value={advance}
-                            onChange={(e) => setAdvance(e.target.value)}
+                            value={nowPay}
+                            onChange={(e) => setNowPay(e.target.value)}
                         />
                     </div>
 
+                    <p><strong>Total Advance:</strong> Rs. {totalAdvance.toFixed(2)}</p>
                     <p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
                 </div>
 

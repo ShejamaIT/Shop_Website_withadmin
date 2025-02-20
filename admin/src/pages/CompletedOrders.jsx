@@ -9,7 +9,6 @@ import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
 import BillInvoice from "./AccpetBillInvoice";
 import ChangeQty from "./changeQty";
-
 const CompleteOrderDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate(); // Initialize useNavigate
@@ -65,8 +64,8 @@ const CompleteOrderDetails = () => {
         setFormData((prevFormData) => {
             let updatedFormData = { ...prevFormData };
 
-            if (name === "deliveryStatus") {
-                updatedFormData.deliveryStatus = value; // ✅ Correctly updating deliveryStatus
+            if (["deliveryStatus", "orderStatus", "payStatus"].includes(name)) {
+                updatedFormData[name] = value; // ✅ Handles payStatus update
             } else if (name in prevFormData) {
                 updatedFormData[name] = value;
             } else if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
@@ -82,19 +81,19 @@ const CompleteOrderDetails = () => {
                 const newQuantity = value === "" ? 0 : parseInt(value, 10);
                 if (!isNaN(newQuantity) && newQuantity >= 0) {
                     updatedFormData.items = prevFormData.items.map((item, i) =>
-                        i === index ? {
-                            ...item,
-                            quantity: newQuantity,
-                            price: newQuantity * item.unitPrice
-                        } : item
+                        i === index
+                            ? { ...item, quantity: newQuantity, price: newQuantity * item.unitPrice }
+                            : item
                     );
                 }
             } else if (["discount", "deliveryCharge"].includes(name)) {
                 const updatedValue = value === "" ? 0 : parseFloat(value);
                 if (!isNaN(updatedValue) && updatedValue >= 0) {
                     updatedFormData[name] = updatedValue;
-                    updatedFormData.totalPrice = updatedFormData.items.reduce((total, item) => total + item.price, 0) +
-                        (updatedFormData.deliveryCharge || 0) - (updatedFormData.discount || 0);
+                    updatedFormData.totalPrice =
+                        updatedFormData.items.reduce((total, item) => total + item.price, 0) +
+                        (updatedFormData.deliveryCharge || 0) -
+                        (updatedFormData.discount || 0);
                 }
             }
 
@@ -102,14 +101,12 @@ const CompleteOrderDetails = () => {
         });
     };
 
-
     const handleSave = async () => {
         console.log(formData);
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
         console.log(updatedData);
         let updatedDeliveryOrder = null;
-
         try {
             // Step 1: Update order general details only if changed
             if (hasGeneralDetailsChanged(updatedData)) {
@@ -175,7 +172,7 @@ const CompleteOrderDetails = () => {
             }
 
             // If all updates are successful, show a success message
-            toast.success("Order updated successfully!");
+            //toast.success("Order updated successfully!");
 
             // Fetch updated order details
             if (updatedDeliveryOrder.orID === updatedData.orderId) {
@@ -200,7 +197,7 @@ const CompleteOrderDetails = () => {
         }
     };
 
-// Helper functions to check for changes
+    // Helper functions to check for changes
     const hasGeneralDetailsChanged = (updatedData) => {
         return updatedData.orderDate !== order.orderDate ||
             updatedData.phoneNumber !== order.phoneNumber ||
@@ -210,6 +207,7 @@ const CompleteOrderDetails = () => {
             updatedData.deliveryCharge !== order.deliveryCharge ||
             updatedData.discount !== order.discount ||
             updatedData.totalPrice !== order.totalPrice ||
+
             updatedData.expectedDeliveryDate !== order.expectedDeliveryDate ||
             updatedData.specialNote !== order.specialNote;
     };
@@ -228,7 +226,6 @@ const CompleteOrderDetails = () => {
             updatedData.deliveryInfo !== order.deliveryInfo;
     };
 
-
     const handleEditClick = (order) => {
         if (!order) return;
         console.log("Opening modal for order:", order);
@@ -242,16 +239,21 @@ const CompleteOrderDetails = () => {
         setSelectedItem(item);
         setShowModal(true);
     };
-
     const handleSubmit2 = async (formData) => {
         console.log("Submitting form data:", formData);
     }
-
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);
-
         // Destructure the necessary fields from formData
-        const { orID, isPickup, netTotal, updatedAdvance, updatedDeliveryCharge, updatedDiscount } = formData;
+        const { orID,
+            isPickup,
+            netTotal,
+            totalAdvance,
+            previousAdvance,
+            balance,
+            addedAdvance,
+            updatedDeliveryCharge,
+            updatedDiscount } = formData;
         console.log(formData);
         try {
             // Send request to the "update-invoice" API
@@ -264,9 +266,12 @@ const CompleteOrderDetails = () => {
                     orID,
                     isPickup,
                     netTotal,
-                    updatedAdvance,
+                    totalAdvance,
+                    previousAdvance,
+                    balance,
+                    addedAdvance,
                     updatedDeliveryCharge,
-                    updatedDiscount,
+                    updatedDiscount
                 }),
             });
 
@@ -285,8 +290,6 @@ const CompleteOrderDetails = () => {
             alert("Server error. Please try again.");
         }
     };
-
-
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
@@ -307,7 +310,7 @@ const CompleteOrderDetails = () => {
                                     <div className="order-general">
                                         <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
                                         <p><strong>Customer Email:</strong> {order.customerEmail}</p>
-                                        {/* Order Status */}
+
                                         {!isEditing ? (
                                             <p><strong>Order Status:</strong>
                                                 <span className={`status ${order.orderStatus.toLowerCase()}`}>
@@ -320,8 +323,8 @@ const CompleteOrderDetails = () => {
                                                 <Input
                                                     type="select"
                                                     name="orderStatus"
-                                                    value={formData.orderStatus} // Bind order status to formData
-                                                    onChange={handleChange} // Ensure handleChange updates formData correctly
+                                                    value={formData.orderStatus}
+                                                    onChange={handleChange}
                                                 >
                                                     <option value="Pending">Pending</option>
                                                     <option value="Accepted">Accepted</option>
@@ -331,16 +334,17 @@ const CompleteOrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
-                                        {/* Delivery Status */}
                                         {!isEditing ? (
-                                            <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
+                                            <p><strong>Delivery Status:</strong>
+                                                {order.deliveryStatus}
+                                            </p>
                                         ) : (
                                             <FormGroup>
                                                 <Label><strong>Delivery Status:</strong></Label>
                                                 <Input
                                                     type="select"
                                                     name="deliveryStatus"
-                                                    value={formData.deliveryStatus ?? order.deliveryStatus}
+                                                    value={formData.deliveryStatus}
                                                     onChange={handleChange}
                                                 >
                                                     <option value="Delivery">Delivery</option>
@@ -348,9 +352,56 @@ const CompleteOrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
+                                        {!isEditing ? (
+                                            <p><strong>Payment Status:</strong>
+                                                <span >
+                                                    {order.payStatus}
+                                                </span>
+                                            </p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Payment Status:</strong></Label>
+                                                <Input
+                                                    type="select"
+                                                    name="payStatus"
+                                                    value={formData.payStatus}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Advanced">Advanced</option>
+                                                    <option value="Settled">Settled</option>
+                                                    <option value="COD">COD</option>
+                                                    <option value="Credit">Credit</option>
+                                                </Input>
+                                            </FormGroup>
+                                        )}
                                         <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
-                                        <p><strong>Contact:</strong> {order.phoneNumber}</p>
-                                        <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
+                                        {!isEditing ? (
+                                            <p><strong>Contact:</strong> {order.phoneNumber}</p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Contact:</strong></Label>
+                                                <Input
+                                                    type="text"
+                                                    name="phoneNumber"
+                                                    value={formData.phoneNumber ?? order.phoneNumber}
+                                                    onChange={handleChange}
+                                                />
+                                            </FormGroup>
+                                        )}
+                                        {!isEditing ? (
+                                            <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Optional Contact:</strong></Label>
+                                                <Input
+                                                    type="text"
+                                                    name="optionalNumber"
+                                                    value={formData.optionalNumber ?? order.optionalNumber}
+                                                    onChange={handleChange}
+                                                />
+                                            </FormGroup>
+                                        )}
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
                                     </div>
@@ -462,6 +513,8 @@ const CompleteOrderDetails = () => {
                                         )
                                     )}
                                     <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
+                                    <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
+                                    <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
                                 </div>
 
                                 {/* Buttons */}
@@ -509,5 +562,4 @@ const CompleteOrderDetails = () => {
         </Helmet>
     );
 };
-
 export default CompleteOrderDetails;
