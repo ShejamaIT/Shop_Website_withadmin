@@ -129,17 +129,32 @@ CREATE TABLE Orders (
     contact2 VARCHAR(14),
     orStatus VARCHAR(15),
     city VARCHAR(25),
-    dvStatus VARCHAR(10),
-    dvPrice DOUBLE,
-    disPrice DOUBLE,
-    totPrice DOUBLE,
+    delStatus VARCHAR(10),
+    delPrice DOUBLE,
+    discount DOUBLE,
+    total DOUBLE,
+    advance DOUBLE,
+    balance DOUBLE,
+    payStatus DOUBLE,
     stID VARCHAR(25),
     expectedDate DATE,
     specialNote TEXT,
-    order_type VARCHAR(10),
+    ordertype VARCHAR(10),
     CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE accept_orders (
+    ao_ID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    I_Id VARCHAR(25),
+    itemReceived VARCHAR(25),
+    status VARCHAR(25),
+    CONSTRAINT FK_accept_orders_orID FOREIGN KEY (orID) REFERENCES Orders (orID)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                     ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE Order_Detail (
     orID VARCHAR(25),
     I_Id VARCHAR(25),
@@ -219,24 +234,12 @@ CREATE TABLE booked_item (
         CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
                         			ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE accept_orders (
-    ao_ID INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    I_Id VARCHAR(25),
-    itemReceived VARCHAR(25),
-    status VARCHAR(25),
-    CONSTRAINT FK_accept_orders_orID FOREIGN KEY (orID) REFERENCES Orders (orID)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                     ON DELETE CASCADE ON UPDATE CASCADE
-);
 
-CREATE TABLE order_Payment(
+CREATE TABLE Payment(
     op_ID INT AUTO_INCREMENT PRIMARY KEY,
     orID VARCHAR(25),
-    netTotal DOUBLE,
-    advance DOUBLE,
-    balance DOUBLE,
+    amount DOUBLE,
+    dateTime DATETIME ,
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                          ON DELETE CASCADE ON UPDATE CASCADE
 );

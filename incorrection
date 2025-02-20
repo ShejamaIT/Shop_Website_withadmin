@@ -1,0 +1,307 @@
+// Update exit item
+// router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 },{ name: "img1", maxCount: 1 },{ name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 },]), async (req, res) => {
+//         try {
+//             // Extract request body data
+//             const {
+//                 I_Id,
+//                 I_name,
+//                 Ty_id,
+//                 descrip,
+//                 color,
+//                 price,
+//                 warrantyPeriod,
+//                 cost,
+//                 material,
+//                 suppliers,
+//                 availableQty,
+//                 bookedQty,
+//                 stockQty,
+//             } = req.body;
+//             console.log(req.body);
+//
+//             // Parse price and cost values
+//             const parsedPrice = parseFloat(price) || 0;
+//             const parsedCost = parseFloat(cost) || 0;
+//
+//             // ✅ Check if the item exists
+//             const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
+//             const [itemCheckResult] = await db.query(itemCheckSql, [I_Id]);
+//
+//             if (itemCheckResult.length === 0) {
+//                 return res.status(404).json({ success: false, message: "Item not found." });
+//             }
+//
+//             // ✅ Handle image updates (Only include images that were provided)
+//             const imgBuffer = req.files["img"]?.[0]?.buffer || null;
+//             const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
+//             const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
+//             const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
+//
+//             // Update `Item` table with regular fields
+//             const itemUpdateSql = `
+//             UPDATE Item
+//             SET I_name = ?, Ty_id = ?, descrip = ?, color = ?, material = ?, price = ?, availableQty = ?, bookedQty = ?, stockQty = ?, img = ?, warrantyPeriod = ? ,img1 = ? ,img2 = ? ,img3 = ?
+//             WHERE I_Id = ?;
+//         `;
+//             const itemValues = [
+//                 I_name, Ty_id, descrip, color, material, parsedPrice, availableQty, bookedQty, stockQty, imgBuffer, warrantyPeriod, img1Buffer, img2Buffer, img3Buffer, I_Id
+//             ];
+//              console.log(itemValues);
+//
+//            // await db.query(itemUpdateSql, itemValues);
+//             // **Handle Suppliers (Array of suppliers from formData)**
+//             if (suppliers && Array.isArray(suppliers)) {
+//                 console.log("pass");
+//                 for (const supplier of suppliers) {
+//
+//                     const { s_ID, unit_cost } = supplier;
+//                     console.log(supplier);
+//                     const parsedUnitCost = parseFloat(unit_cost) || 0;
+//
+//                     // Update or insert supplier cost data
+//                     const supplierUpdateSql = `
+//                     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+//                     VALUES (?, ?, ?)
+//                     ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
+//                 `;
+//                     const supplierValues = [
+//                         I_Id, s_ID, parsedUnitCost
+//                     ];
+//                     console.log(supplierValues);
+//                     // await db.query(supplierUpdateSql, supplierValues);
+//                 }
+//             }
+//
+//             // ✅ Respond with success message
+//             res.status(200).json({
+//                 success: true,
+//                 message: "Item updated successfully",
+//                 data: {
+//                     I_Id,
+//                     I_name,
+//                     Ty_id,
+//                     descrip,
+//                     color,
+//                     material,
+//                     price: parsedPrice,
+//                     warrantyPeriod,
+//                     availableQty,
+//                     bookedQty,
+//                     stockQty,
+//                 },
+//             });
+//         } catch (err) {
+//             console.error("❌ Error updating item data:", err.message);
+//             res.status(500).json({ success: false, message: "Error updating data", details: err.message });
+//         }
+//     }
+// );
+
+
+// Update exit item
+// router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 }]), async (req, res) => {
+//     try {
+//         // Extract request body and parse incoming form data
+//         const { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, suppliers, availableQty, bookedQty, stockQty  } = req.body;
+//
+//         // Parse price and cost fields to float
+//         const parsedPrice = parseFloat(price) || 0;
+//         const parsedCost = parseFloat(cost) || 0;
+//
+//          // console.log("🔹 Request Data:", { I_Id, I_name, Ty_id, descrip, color, price, warrantyPeriod, cost, material, suppliers, availableQty, bookedQty, stockQty });
+//
+//         // Ensure I_Id exists in the database
+//         const itemCheckSql = `SELECT * FROM Item WHERE I_Id = ?`;
+//         const [itemCheckResult] = await db.query(itemCheckSql, [I_Id]);
+//
+//         if (itemCheckResult.length === 0) {
+//             return res.status(404).json({ success: false, message: "Item not found." });
+//         }
+//
+//         // Handle image files, if any
+//         // const imgBuffer = req.files["img"]?.[0]?.buffer || null;
+//         // const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
+//         // const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
+//         // const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
+//         const imgBuffer = req.files["img"][0].buffer;
+//         const img1Buffer = req.files["img1"][0].buffer;
+//         const img2Buffer = req.files["img2"][0].buffer ;
+//         const img3Buffer = req.files["img3"][0].buffer;
+//
+//         console.log(imgBuffer,img1Buffer,img2Buffer,img3Buffer);
+//
+
+
+
+//
+//         // Handle image updates for `Item_img` table (if any images are provided)
+//         if (img1Buffer || img2Buffer || img3Buffer) {
+//             const imgUpdateSql = `
+//                 UPDATE Item_img
+//                 SET img1 = ?, img2 = ?, img3 = ?
+//                 WHERE I_Id = ?;
+//             `;
+//             const imgValues = [
+//                 img1Buffer, img2Buffer, img3Buffer, I_Id
+//             ];
+//              console.log(imgValues);
+//             // await db.query(imgUpdateSql, imgValues);
+//         }
+//
+//  // ✅ Construct dynamic `UPDATE` query for `Item` table
+//           //   let updateFields = [];
+//           //   let updateValues = [];
+//           //
+//           //   if (I_name) updateFields.push("I_name = ?");
+//           //   if (Ty_id) updateFields.push("Ty_id = ?");
+//           //   if (descrip) updateFields.push("descrip = ?");
+//           //   if (color) updateFields.push("color = ?");
+//           //   if (material) updateFields.push("material = ?");
+//           //   if (parsedPrice) updateFields.push("price = ?");
+//           //   if (availableQty) updateFields.push("availableQty = ?");
+//           //   if (bookedQty) updateFields.push("bookedQty = ?");
+//           //   if (stockQty) updateFields.push("stockQty = ?");
+//           //   if (warrantyPeriod) updateFields.push("warrantyPeriod = ?");
+//           //   if (imgBuffer) updateFields.push("img = ?");
+//           //   if (img1Buffer) updateFields.push("img1 = ?");
+//           //   if (img2Buffer) updateFields.push("img2 = ?");
+//           //   if (img3Buffer) updateFields.push("img3 = ?");
+//           //
+//           //   updateValues = [
+//           //       I_name,
+//           //       Ty_id,
+//           //       descrip,
+//           //       color,
+//           //       material,
+//           //       parsedPrice,
+//           //       availableQty,
+//           //       bookedQty,
+//           //       stockQty,
+//           //       warrantyPeriod,
+//           //       imgBuffer,
+//           //       img1Buffer,
+//           //       img2Buffer,
+//           //       img3Buffer,
+//           //   ].filter((value) => value !== undefined);
+//           //
+//           //   if (updateFields.length > 0) {
+//           //       const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
+//           //       updateValues.push(I_Id);
+//           //       await db.query(updateQuery, updateValues);
+//           //   }
+//           //
+//           //   // ✅ Handle suppliers update (Insert or update in `item_supplier`)
+//           //   if (suppliers && Array.isArray(suppliers)) {
+//           //       for (const supplier of suppliers) {
+//           //           const { s_ID, unit_cost } = supplier;
+//           //           const parsedUnitCost = parseFloat(unit_cost) || 0;
+//           //
+//           //           const supplierUpdateSql = `
+//           //     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+//           //     VALUES (?, ?, ?)
+//           //     ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
+//           // `;
+//           //           await db.query(supplierUpdateSql, [I_Id, s_ID, parsedUnitCost]);
+//           //       }
+//           //   }
+//
+//         // Respond with success
+//         res.status(200).json({
+//             success: true,
+//             message: "Item updated successfully",
+//             data: {
+//                 I_Id,
+//                 I_name,
+//                 Ty_id,
+//                 descrip,
+//                 color,
+//                 material,
+//                 price: parsedPrice,
+//                 warrantyPeriod,
+//                 availableQty,
+//                 bookedQty,
+//                 stockQty
+//             }
+//         });
+//
+//     } catch (err) {
+//         console.error("❌ Error updating item data:", err.message);
+//         res.status(500).json({ success: false, message: "Error updating data into database", details: err.message });
+//     }
+// });
+
+
+
+{/*<div className="order-general">*/}
+                                    {/*    <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>*/}
+                                    {/*    <p><strong>Customer Email:</strong> {order.customerEmail}</p>*/}
+                                    {/*    /!* Order Status *!/*/}
+                                    {/*    {!isEditing ? (*/}
+                                    {/*        <p><strong>Order Status:</strong>*/}
+                                    {/*            <span className={`status ${order.orderStatus.toLowerCase()}`}>*/}
+                                    {/*                {order.orderStatus}*/}
+                                    {/*            </span>*/}
+                                    {/*        </p>*/}
+                                    {/*    ) : (*/}
+                                    {/*        <FormGroup>*/}
+                                    {/*            <Label><strong>Order Status:</strong></Label>*/}
+                                    {/*            <Input*/}
+                                    {/*                type="select"*/}
+                                    {/*                name="orderStatus"*/}
+                                    {/*                value={formData.orderStatus} // Bind order status to formData*/}
+                                    {/*                onChange={handleChange} // Ensure handleChange updates formData correctly*/}
+                                    {/*            >*/}
+                                    {/*                <option value="Pending">Pending</option>*/}
+                                    {/*                <option value="Accepted">Accepted</option>*/}
+                                    {/*                <option value="Processing">Processing</option>*/}
+                                    {/*                <option value="Completed">Completed</option>*/}
+                                    {/*                <option value="Cancelled">Cancelled</option>*/}
+                                    {/*            </Input>*/}
+                                    {/*        </FormGroup>*/}
+                                    {/*    )}*/}
+                                    {/*    /!* Delivery Status *!/*/}
+                                    {/*    {!isEditing ? (*/}
+                                    {/*        <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>*/}
+                                    {/*    ) : (*/}
+                                    {/*        <FormGroup>*/}
+                                    {/*            <Label><strong>Delivery Status:</strong></Label>*/}
+                                    {/*            <Input*/}
+                                    {/*                type="select"*/}
+                                    {/*                name="deliveryStatus"*/}
+                                    {/*                value={formData.deliveryStatus ?? order.deliveryStatus}*/}
+                                    {/*                onChange={handleChange}*/}
+                                    {/*            >*/}
+                                    {/*                <option value="Delivery">Delivery</option>*/}
+                                    {/*                <option value="Pick up">Pick up</option>*/}
+                                    {/*            </Input>*/}
+                                    {/*        </FormGroup>*/}
+                                    {/*    )}*/}
+                                    {/*    <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>*/}
+                                    {/*    <p><strong>Contact:</strong> {order.phoneNumber}</p>*/}
+                                    {/*    <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>*/}
+                                    {/*    <p><strong>Special Note:</strong> {order.specialNote}</p>*/}
+                                    {/*    <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>*/}
+                                    {/*    {!isEditing ? (*/}
+                                    {/*        <p><strong>Payment Status:</strong>*/}
+                                    {/*            <span >*/}
+                                    {/*                {order.payStatus}*/}
+                                    {/*            </span>*/}
+                                    {/*        </p>*/}
+                                    {/*    ) : (*/}
+                                    {/*        <FormGroup>*/}
+                                    {/*            <Label><strong>Payment Status:</strong></Label>*/}
+                                    {/*            <Input*/}
+                                    {/*                type="select"*/}
+                                    {/*                name="payStatus"*/}
+                                    {/*                value={formData.payStatus}*/}
+                                    {/*                onChange={handleChange}*/}
+                                    {/*            >*/}
+                                    {/*                <option value="Pending">Pending</option>*/}
+                                    {/*                <option value="Advanced">Advanced</option>*/}
+                                    {/*                <option value="Settled">Settled</option>*/}
+                                    {/*                <option value="COD">COD</option>*/}
+                                    {/*                <option value="Credit">Credit</option>*/}
+                                    {/*            </Input>*/}
+                                    {/*        </FormGroup>*/}
+                                    {/*    )}*/}
+                                    {/*</div>*/}

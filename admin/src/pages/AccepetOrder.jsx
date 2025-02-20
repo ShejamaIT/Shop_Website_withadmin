@@ -302,7 +302,7 @@ const OrderDetails = () => {
                                     <div className="order-general">
                                         <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
                                         <p><strong>Customer Email:</strong> {order.customerEmail}</p>
-                                        {/* Order Status */}
+
                                         {!isEditing ? (
                                             <p><strong>Order Status:</strong>
                                                 <span className={`status ${order.orderStatus.toLowerCase()}`}>
@@ -315,8 +315,8 @@ const OrderDetails = () => {
                                                 <Input
                                                     type="select"
                                                     name="orderStatus"
-                                                    value={formData.orderStatus} // Bind order status to formData
-                                                    onChange={handleChange} // Ensure handleChange updates formData correctly
+                                                    value={formData.orderStatus}
+                                                    onChange={handleChange}
                                                 >
                                                     <option value="Pending">Pending</option>
                                                     <option value="Accepted">Accepted</option>
@@ -326,16 +326,17 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
-                                        {/* Delivery Status */}
                                         {!isEditing ? (
-                                            <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
+                                            <p><strong>Delivery Status:</strong>
+                                                {order.deliveryStatus}
+                                            </p>
                                         ) : (
                                             <FormGroup>
                                                 <Label><strong>Delivery Status:</strong></Label>
                                                 <Input
                                                     type="select"
                                                     name="deliveryStatus"
-                                                    value={formData.deliveryStatus ?? order.deliveryStatus}
+                                                    value={formData.deliveryStatus}
                                                     onChange={handleChange}
                                                 >
                                                     <option value="Delivery">Delivery</option>
@@ -343,12 +344,58 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
+                                        {!isEditing ? (
+                                            <p><strong>Payment Status:</strong>
+                                                <span >
+                                                    {order.payStatus}
+                                                </span>
+                                            </p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Payment Status:</strong></Label>
+                                                <Input
+                                                    type="select"
+                                                    name="payStatus"
+                                                    value={formData.payStatus}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Advanced">Advanced</option>
+                                                    <option value="Settled">Settled</option>
+                                                    <option value="COD">COD</option>
+                                                    <option value="Credit">Credit</option>
+                                                </Input>
+                                            </FormGroup>
+                                        )}
                                         <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
-                                        <p><strong>Contact:</strong> {order.phoneNumber}</p>
-                                        <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
+                                        {!isEditing ? (
+                                            <p><strong>Contact:</strong> {order.phoneNumber}</p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Contact:</strong></Label>
+                                                <Input
+                                                    type="text"
+                                                    name="phoneNumber"
+                                                    value={formData.phoneNumber ?? order.phoneNumber}
+                                                    onChange={handleChange}
+                                                />
+                                            </FormGroup>
+                                        )}
+                                        {!isEditing ? (
+                                            <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Optional Contact:</strong></Label>
+                                                <Input
+                                                    type="text"
+                                                    name="optionalNumber"
+                                                    value={formData.optionalNumber ?? order.optionalNumber}
+                                                    onChange={handleChange}
+                                                />
+                                            </FormGroup>
+                                        )}
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
-                                        <p><strong>Is Booked:</strong> {order.bookedItems.length > 0 ? "Yes" : "No"}</p>
                                     </div>
                                     {order.deliveryInfo && (
                                         <>
@@ -381,6 +428,7 @@ const OrderDetails = () => {
                                                         />
                                                     </FormGroup>
                                                 )}
+
                                                 <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
                                                 <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
                                             </div>
@@ -458,6 +506,8 @@ const OrderDetails = () => {
                                         )
                                     )}
                                     <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
+                                    <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
+                                    <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
                                 </div>
 
                                 {/* Buttons */}
@@ -468,7 +518,7 @@ const OrderDetails = () => {
                                                 {loading ? "Loading..." : "Edit Order"}
                                             </Button>
                                             <Button color="success" className="ms-3" onClick={() => handleEditClick(order)} disabled={loading}>
-                                                Print Invoice
+                                                Payment Invoice
                                             </Button>
                                         </>
                                     ) : (

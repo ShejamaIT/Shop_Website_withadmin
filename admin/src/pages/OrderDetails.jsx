@@ -28,8 +28,8 @@ const OrderDetails = () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/order-details?orID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
-
             const data = await response.json();
+            console.log(data);
             setOrder(data.order);
             setFormData({
                 ...data.order,
@@ -219,8 +219,8 @@ const OrderDetails = () => {
                                         )}
                                         {!isEditing ? (
                                             <p><strong>Payment Status:</strong>
-                                                <span className={`status ${order.orderStatus.toLowerCase()}`}>
-                                                    {/*{order.orderStatus}*/}
+                                                <span >
+                                                    {order.payStatus}
                                                 </span>
                                             </p>
                                         ) : (
@@ -228,8 +228,8 @@ const OrderDetails = () => {
                                                 <Label><strong>Payment Status:</strong></Label>
                                                 <Input
                                                     type="select"
-                                                    name="orderStatus"
-                                                    value={formData.payementStatus}
+                                                    name="payStatus"
+                                                    value={formData.payStatus}
                                                     onChange={handleChange}
                                                 >
                                                     <option value="Pending">Pending</option>
@@ -381,8 +381,8 @@ const OrderDetails = () => {
 
                                     {/*<p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>*/}
                                     <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
-                                    <p><strong>Advance Amount:</strong> Rs. {order.paymentDetails.advance}</p>
-                                    <p><strong>Balance Amount:</strong> Rs. {order.paymentDetails.balance}</p>
+                                    <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
+                                    <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
                                 </div>
 
                                 <div className="text-center mt-4">
