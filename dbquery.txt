@@ -143,17 +143,6 @@ CREATE TABLE Orders (
     CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE accept_orders (
-    ao_ID INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    I_Id VARCHAR(25),
-    itemReceived VARCHAR(25),
-    status VARCHAR(25),
-    CONSTRAINT FK_accept_orders_orID FOREIGN KEY (orID) REFERENCES Orders (orID)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                     ON DELETE CASCADE ON UPDATE CASCADE
-);
 
 CREATE TABLE Order_Detail (
     orID VARCHAR(25),
@@ -166,6 +155,29 @@ CREATE TABLE Order_Detail (
     CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE accept_orders (
+    ao_ID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    I_Id VARCHAR(25),
+    itemReceived VARCHAR(25),
+    status VARCHAR(25),
+    CONSTRAINT FK_accept_orders_orID FOREIGN KEY (orID) REFERENCES Orders (orID)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                     ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE booked_item (
+    bi_ID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    I_Id VARCHAR(25),
+    qty INT,
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                           ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                        			ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE rejected_orders(
     rid VARCHAR(25) PRIMARY KEY,
     OrID VARCHAR(25),
@@ -224,16 +236,6 @@ CREATE TABLE stock_received (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE booked_item (
-    bi_ID INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    I_Id VARCHAR(25),
-    qty INT,
-        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                           ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                        			ON DELETE CASCADE ON UPDATE CASCADE
-);
 
 CREATE TABLE Payment(
     op_ID INT AUTO_INCREMENT PRIMARY KEY,

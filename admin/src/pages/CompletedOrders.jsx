@@ -233,15 +233,52 @@ const CompleteOrderDetails = () => {
         setShowModal1(true);
     };
 
-    const handleEditClick2 = (item) => {
+    const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
-        console.log("Opening modal for order:", item);
-        setSelectedItem(item);
+        // Add new property 'orId' with a value (e.g., item.orID or a custom value)
+        const updatedItem = {
+            ...item,
+            orId: order.orderId , // Replace 'default_orId_value' if needed
+        };
+        console.log("updatedItem "+updatedItem);
+
+        setSelectedItem(updatedItem);
         setShowModal(true);
     };
+
     const handleSubmit2 = async (formData) => {
-        console.log("Submitting form data:", formData);
-    }
+        console.log("Submitting form data:", formData.orID);
+
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    orID: formData.orID,
+                    itemId: formData.itemId,
+                    newQuantity: formData.newQuantity,
+                    updatedPrice: formData.updatedPrice,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                fetchOrder();
+                console.log("Quantity updated successfully:", data.message);
+                alert("Quantity updated successfully!");
+            } else {
+                console.error("Failed to update quantity:", data.message);
+                alert(`Failed to update quantity: ${data.message}`);
+            }
+        } catch (error) {
+            console.error("Error during quantity update:", error);
+            alert(`Error updating quantity: ${error.message}`);
+        }
+    };
+
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);
         // Destructure the necessary fields from formData
@@ -468,7 +505,7 @@ const CompleteOrderDetails = () => {
                                                         <Button
                                                             color="secondary"
                                                             className="ms-4"
-                                                            onClick={() => handleEditClick2(item)} // Ensure this is not treating `selectedItem` as a function
+                                                            onClick={() => handleEditClick2(item,order)} // Ensure this is not treating `selectedItem` as a function
                                                             disabled={loading}
                                                         >
                                                             Change Qty
@@ -526,6 +563,9 @@ const CompleteOrderDetails = () => {
                                             </Button>
                                             <Button color="success" className="ms-3" onClick={() => handleEditClick(order)} disabled={loading}>
                                                 Print Invoice
+                                            </Button>
+                                            <Button color="secondary" className="ms-3" disabled={loading}>
+                                                Issued
                                             </Button>
                                         </>
                                     ) : (

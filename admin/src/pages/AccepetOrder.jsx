@@ -240,6 +240,34 @@ const OrderDetails = () => {
 
     const handleSubmit2 = async (formData) => {
         console.log("Submitting form data:", formData);
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    orID: formData.orID,
+                    itemId: formData.itemId,
+                    newQuantity: formData.newQuantity,
+                    updatedPrice: formData.updatedPrice,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                fetchOrder();
+                console.log("Quantity updated successfully:", data.message);
+                alert("Quantity updated successfully!");
+            } else {
+                console.error("Failed to update quantity:", data.message);
+                alert(`Failed to update quantity: ${data.message}`);
+            }
+        } catch (error) {
+            console.error("Error during quantity update:", error);
+            alert(`Error updating quantity: ${error.message}`);
+        }
     }
 
     const handleSubmit = async (formData) => {
