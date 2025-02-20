@@ -5,10 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update calculate">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/Supplier.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,9 +33,9 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="2eX5SN8ZT20KsRJo9u8O7Jj8U9m" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -154,7 +158,8 @@
       <workItem from="1739849100860" duration="9889000" />
       <workItem from="1739859293203" duration="638000" />
       <workItem from="1739860319399" duration="41931000" />
-      <workItem from="1739964605433" duration="2764000" />
+      <workItem from="1739964605433" duration="3953000" />
+      <workItem from="1740023765919" duration="4745000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -499,7 +504,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="204" />
+    <option name="localTasksCounter" value="205" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

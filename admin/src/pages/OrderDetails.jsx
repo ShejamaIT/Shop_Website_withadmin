@@ -217,6 +217,29 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
+                                        {!isEditing ? (
+                                            <p><strong>Payment Status:</strong>
+                                                <span className={`status ${order.orderStatus.toLowerCase()}`}>
+                                                    {/*{order.orderStatus}*/}
+                                                </span>
+                                            </p>
+                                        ) : (
+                                            <FormGroup>
+                                                <Label><strong>Payment Status:</strong></Label>
+                                                <Input
+                                                    type="select"
+                                                    name="orderStatus"
+                                                    value={formData.payementStatus}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Advanced">Advanced</option>
+                                                    <option value="Settled">Settled</option>
+                                                    <option value="COD">COD</option>
+                                                    <option value="Credit">Credit</option>
+                                                </Input>
+                                            </FormGroup>
+                                        )}
                                         <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
                                         {!isEditing ? (
                                             <p><strong>Contact:</strong> {order.phoneNumber}</p>

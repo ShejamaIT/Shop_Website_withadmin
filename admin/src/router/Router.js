@@ -8,7 +8,7 @@ import Login from "../pages/Login";
 import ProductDetails from "../pages/ProductDetails";
 import OrderDetails from "../pages/OrderDetails";
 import ItemDetails from "../pages/ItemDetails";
-import SupplierDetails from "../pages/SupplierDetails";
+import SupplierDetails from "../pages/Supplier";
 import User from "../pages/User";
 import SignUp from "../pages/SignUp";
 import Orders from "../pages/Orders";

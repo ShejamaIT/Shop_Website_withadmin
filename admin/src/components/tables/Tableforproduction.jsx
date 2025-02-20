@@ -64,7 +64,7 @@ const TableForProduction = () => {
                                     </td>
                                     <td>{item.I_name}</td>
                                     <td>Rs.{item.price}</td>
-                                    <td>{item.qty}</td>
+                                    <td>{item.availableQty}</td>
                                     <td>{item.descrip}</td>
                                     <td className="action-buttons">
                                         <button

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
+import {Container, Row, Nav, NavItem, NavLink, TabContent, TabPane, Col} from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
 import TablePending from "../components/tables/TablePending";
 import TableAccepting from "../components/tables/TableAccepting";
@@ -11,6 +11,7 @@ import classnames from "classnames";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
 import TableCompleted from "../components/tables/TableCompleted";
 import PlaceOrder from "./Placeorder";
+import Tableforproduction from "../components/tables/Tableforproduction";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("0"); // Main tab tracking
@@ -54,8 +55,16 @@ const AllOrders = () => {
                         </NavItem>
                         <NavItem>
                             <NavLink
-                                className={classnames({ active: activeTab === "3" })}
+                                className={activeTab === "3" ? "active" : ""}
                                 onClick={() => setActiveTab("3")}
+                            >
+                                For Production
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={classnames({ active: activeTab === "4" })}
+                                onClick={() => setActiveTab("4")}
                                 style={{ cursor: "pointer" }}
                             >
                                 In Production
@@ -63,8 +72,8 @@ const AllOrders = () => {
                         </NavItem>
                         <NavItem>
                             <NavLink
-                                className={classnames({ active: activeTab === "4" })}
-                                onClick={() => setActiveTab("4")}
+                                className={classnames({ active: activeTab === "5" })}
+                                onClick={() => setActiveTab("5")}
                                 style={{ cursor: "pointer" }}
                             >
                                 Completed Orders
@@ -127,11 +136,20 @@ const AllOrders = () => {
 
                         <TabPane tabId="3">
                             <Row>
+                                <Col>
+                                    <Tableforproduction />
+                                </Col>
+                            </Row>
+                        </TabPane>
+
+
+                        <TabPane tabId="4">
+                            <Row>
                                 <TableInproduction />
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="4">
+                        <TabPane tabId="5">
                             <Row>
                                 <TableCompleted />
                             </Row>

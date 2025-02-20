@@ -45,6 +45,7 @@ CREATE TABLE Item(
       stockQty INT,
       bookedQty INT,
       availableQty INT,
+      minQTY INT,
       img LONGBLOB NOT NULL,
       img1 LONGBLOB NOT NULL,
       img2 LONGBLOB NOT NULL,
