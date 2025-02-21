@@ -13,6 +13,7 @@ import TableCompleted from "../components/tables/TableCompleted";
 import PlaceOrder from "./Placeorder";
 import Tableforproduction from "../components/tables/Tableforproduction";
 import DeliveryNotes from "./DeliveryNotes";
+import TableIssued from "../components/tables/TableIssuedOrders";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("0"); // Main tab tracking
@@ -174,7 +175,7 @@ const AllOrders = () => {
                         </TabPane>
                         <TabPane tabId="6">
                             <Row>
-                                <TableCompleted />
+                                <TableIssued />
                             </Row>
                         </TabPane>
                         <TabPane tabId="7">
