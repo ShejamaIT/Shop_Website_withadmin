@@ -12,6 +12,7 @@ import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked"
 import TableCompleted from "../components/tables/TableCompleted";
 import PlaceOrder from "./Placeorder";
 import Tableforproduction from "../components/tables/Tableforproduction";
+import DeliveryNotes from "./DeliveryNotes";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("0"); // Main tab tracking
@@ -79,6 +80,24 @@ const AllOrders = () => {
                                 Completed Orders
                             </NavLink>
                         </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={classnames({ active: activeTab === "6" })}
+                                onClick={() => setActiveTab("6")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                Issued Orders
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={classnames({ active: activeTab === "7" })}
+                                onClick={() => setActiveTab("7")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                Print GatePass
+                            </NavLink>
+                        </NavItem>
                     </Nav>
 
                     {/* Main Tab Content */}
@@ -142,7 +161,6 @@ const AllOrders = () => {
                             </Row>
                         </TabPane>
 
-
                         <TabPane tabId="4">
                             <Row>
                                 <TableInproduction />
@@ -152,6 +170,16 @@ const AllOrders = () => {
                         <TabPane tabId="5">
                             <Row>
                                 <TableCompleted />
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="6">
+                            <Row>
+                                <TableCompleted />
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="7">
+                            <Row>
+                                <DeliveryNotes />
                             </Row>
                         </TabPane>
                     </TabContent>
