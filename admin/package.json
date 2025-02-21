@@ -19,6 +19,7 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.5",
+    "reactjs-popup": "^2.0.6",
     "reactstrap": "^9.1.4",
     "remixicon": "^2.5.0",
     "sweetalert2": "^11.15.10",

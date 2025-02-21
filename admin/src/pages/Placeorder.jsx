@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 import { toast } from "react-toastify";
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap";
 import "../style/placeorder.css";
@@ -17,7 +19,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         expectedDate: "",
         couponCode: "",
     });
-
     const [items, setItems] = useState([]);
     const [selectedItems, setSelectedItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
@@ -30,7 +31,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [discountAmount, setDiscountAmount] = useState(0);
     const [totalItemPrice, setTotalItemPrice] = useState(0);
     const [totalBillPrice, setTotalBillPrice] = useState(0);
-
+    const [errors, setErrors] = useState([]);
+    const [openPopup, setOpenPopup] = useState(false);
     useEffect(() => {
         const fetchItems = async () => {
             try {
@@ -42,7 +44,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 toast.error("Error fetching items.");
             }
         };
-
         const fetchCoupons = async () => {
             try {
                 const response = await fetch("http://localhost:5001/api/admin/main/coupon-details");
@@ -64,12 +65,10 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-
         if (name === "district") {
             setDeliveryPrice(deliveryRates[value] || 0);
             fetchDeliveryDates(value);
         }
-
         if (name === "couponCode") {
             const selectedCoupon = coupons.find((c) => c.coupon_code === value);
             setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
@@ -85,7 +84,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             setDeliveryDates([]);
         }
     };
-
     useEffect(() => {
         const fetchDeliveryRates = async () => {
             try {
@@ -109,8 +107,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
         fetchDeliveryRates();
     }, []);
-
-
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
@@ -123,7 +119,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             setFilteredItems(filtered);
         }
     };
-
     const handleSelectItem = (item) => {
         if (!selectedItems.some((selected) => selected.I_Id === item.I_Id)) {
             setSelectedItems([...selectedItems, { ...item, qty: 1, price: item.price }]); // Ensure price is initialized
@@ -131,32 +126,26 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setSearchTerm("");
         setFilteredItems([]);
     };
-
     const handleQtyChange = (e, itemId) => {
         const value = parseInt(e.target.value) || 1;
         setSelectedItems((prevItems) =>
             prevItems.map((item) => item.I_Id === itemId ? { ...item, qty: value  } : item)
         );
     };
-
     const handleRemoveItem = (itemId) => {
         setSelectedItems((prevItems) => prevItems.filter((item) => item.I_Id !== itemId));
     };
-
-
     const calculateTotalPrice = () => {
         const itemTotal = selectedItems.reduce((total, item) => total + item.price * item.qty, 0);
         setTotalItemPrice(itemTotal);
         setTotalBillPrice((itemTotal - discountAmount ) + deliveryPrice);
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.customerName || !formData.email || !formData.phoneNumber || selectedItems.length === 0) {
             toast.error("Please fill all details and add at least one item.");
             return;
         }
-
         if (formData.dvStatus === "Delivery" && (!formData.address || !formData.district || !formData.expectedDate)) {
             toast.error("Please complete all delivery details.");
             return;
@@ -169,35 +158,62 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             discountAmount,
             totalBillPrice,
         };
-
-        console.log(orderData);
-        try {
-            // Make a POST request to the server to add the supplier and items
-            const response = await fetch("http://localhost:5001/api/admin/main/orders", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(orderData),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                // Show success message and clear the form
-                toast.success("Order placed successfully!");
-                handleClear();
-            } else {
-                // Show error message if something goes wrong
-                toast.error(result.message || "Something went wrong. Please try again.");
+        if (validateForm()) {
+            try {
+                // Make a POST request to the server to add the supplier and items
+                const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(orderData),
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    // Show success message and clear the form
+                    toast.success("Order placed successfully!");
+                    handleClear();
+                } else {
+                    // Show error message if something goes wrong
+                    toast.error(result.message || "Something went wrong. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error submitting supplier data:", error);
+                toast.error("Error submitting supplier data. Please try again.");
             }
-        } catch (error) {
-            console.error("Error submitting supplier data:", error);
-            toast.error("Error submitting supplier data. Please try again.");
         }
-
     };
+    const validateForm = () => {
+        const validationErrors = [];
+        if (!formData.dvStatus) validationErrors.push("Please select a delivery method.");
+        if (!formData.customerName.trim()) validationErrors.push("Customer name is required.");
+        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email))
+            validationErrors.push("A valid email address is required.");
+        if (!formData.phoneNumber.trim() || !/^\d{10}$/.test(formData.phoneNumber))
+            validationErrors.push("A valid 10-digit phone number is required.");
+        if (formData.otherNumber.trim() && !/^\d{10}$/.test(formData.otherNumber))
+            validationErrors.push("If provided, the optional number must be a valid 10-digit number.");
 
+        if (selectedItems.length === 0) validationErrors.push("Please select at least one item.");
+        selectedItems.forEach((item) => {
+            if (!item.qty || item.qty <= 0) validationErrors.push(`Quantity for ${item.I_name} must be at least 1.`);
+        });
+        if (formData.dvStatus === "Delivery") {
+            if (!formData.city.trim()) validationErrors.push("City is required for delivery.");
+            if (!formData.address.trim()) validationErrors.push("Address is required for delivery.");
+            if (!formData.district.trim()) validationErrors.push("District is required for delivery.");
+            if (!formData.expectedDate) validationErrors.push("Please select an expected delivery date.");
+        } else if (formData.dvStatus === "Pickup") {
+            if (!formData.city.trim()) validationErrors.push("City is required for pickup.");
+            if (!formData.expectedDate) validationErrors.push("Please select an expected pickup date.");
+        }
+        if (validationErrors.length > 0) {
+            setErrors(validationErrors);
+            setOpenPopup(true); // Open popup with errors
+            return false;
+        }
+        return true;
+    };
     const handleClear = () => {
         setFormData({
             customerName: "",
@@ -219,8 +235,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setTotalItemPrice(0);
         setTotalBillPrice(0);
     };
-
-
     return (
         <Container className="place-order-container">
             <Row>
@@ -250,7 +264,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <Col md={6}>
                                 <FormGroup>
                                     <Label>Email</Label>
-                                    <Input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                                    <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
                                 </FormGroup>
                             </Col>
                         </Row>
@@ -290,19 +304,16 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 <Col md={2}><Button color="danger" onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>
                             </Row>
                         ))}
-
                         {formData.dvStatus === "Delivery" && (
                             <>
                                 <FormGroup>
                                     <Label>City</Label>
                                     <Input type="text" name="city" onChange={handleChange}></Input>
                                 </FormGroup>
-
                                 <FormGroup>
                                     <Label>Address</Label>
                                     <Input type="text" name="address" value={formData.address} onChange={handleChange} required />
                                 </FormGroup>
-
                                 <FormGroup>
                                     <Label>District</Label>
                                     <Input type="select" name="district" value={formData.district} onChange={handleChange} required>
@@ -312,7 +323,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                         ))}
                                     </Input>
                                 </FormGroup>
-
                                 {deliveryDates.length > 0 && (
                                     <FormGroup>
                                         <Label>Expected Delivery Date</Label>
@@ -352,12 +362,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <Label>Special Note</Label>
                             <Input type="textarea" name="specialNote" onChange={handleChange}></Input>
                         </FormGroup>
-
-                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5>
-                        <h5>Discount: Rs.{discountAmount}</h5>
-                        <h5>Total Item Price: Rs.{totalItemPrice}</h5>
-                        <h4>Total Bill Price: Rs.{totalBillPrice}</h4>
-
+                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>
                         <Row>
                             <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
                             <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
@@ -365,8 +370,18 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </Form>
                 </Col>
             </Row>
+            <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>
+                <div className="p-4">
+                    <h4 style={{ color: "red" }}>Validation Errors</h4>
+                    <ul>
+                        {errors.map((error, index) => (
+                            <li key={index} style={{ color: "red" }}>{error}</li>
+                        ))}
+                    </ul>
+                    <button className="btn btn-primary mt-2" onClick={() => setOpenPopup(false)}>Close</button>
+                </div>
+            </Popup>
         </Container>
     );
 };
-
 export default PlaceOrder;

@@ -112,3 +112,10 @@
 .submit-buttons .clear-btn:hover {
     background: #c82333;
 }
+.popup-content {
+    border-radius: 10px;
+    padding: 20px;
+    width: 400px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
