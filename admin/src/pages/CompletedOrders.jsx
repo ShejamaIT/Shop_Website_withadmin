@@ -10,6 +10,7 @@ import "../style/orderDetails.css";
 import BillInvoice from "./AccpetBillInvoice";
 import ChangeQty from "./changeQty";
 import FinalInvoice from "./FinalInvoice";
+import ReceiptView from "./ReceiptView";
 const CompleteOrderDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate(); // Initialize useNavigate
@@ -23,6 +24,8 @@ const CompleteOrderDetails = () => {
     const [showModal, setShowModal] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
     const [showModal2, setShowModal2] = useState(false);
+    const [showReceiptView, setShowReceiptView] = useState(false);
+    const [receiptData, setReceiptData] = useState(null);
 
     useEffect(() => {
         fetchOrder();
@@ -287,36 +290,69 @@ const CompleteOrderDetails = () => {
 
     const handleSubmit3 = async (formData) => {
         console.log("Submitting form data:", formData);
+        let updatedFormData = {
+            ...formData,
+            orderId: formData.order.orderId,
+            orderDate: formData.order.orderDate,
+            salesperson: formData.order.salesTeam.employeeName,
+            phoneNumber: formData.order.phoneNumber,
+            optionalNumber: formData.order.optionalNumber,
+            items: formData.order.items, // Order items added
+            discount: formData.order.discount,
+            totalPrice: formData.order.totalPrice,
+            previousAdvance: formData.previousAdvance,
+            addedAdvance: formData.addedAdvance,
+            totalAdvance: formData.totalAdvance,
+            balance: formData.balance,
+            deliveryStatus: formData.order.deliveryStatus,
+            paymentType: formData.order.paymentType,
+        };
         setShowModal2(false);
-        // try {
-        //     const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
-        //         method: "PUT",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({
-        //             itemId: formData.itemId,
-        //             newQuantity: formData.newQuantity,
-        //             updatedPrice: formData.updatedPrice,
-        //             orId: formData.orId,
-        //         }),
-        //     });
-        //
-        //     const data = await response.json();
-        //
-        //     if (response.ok) {
-        //         fetchOrder();
-        //         console.log("Quantity updated successfully:", data.message);
-        //         alert("Quantity updated successfully!");
-        //     } else {
-        //         console.error("Failed to update quantity:", data.message);
-        //         alert(`Failed to update quantity: ${data.message}`);
-        //     }
-        // } catch (error) {
-        //     console.error("Error during quantity update:", error);
-        //     alert(`Error updating quantity: ${error.message}`);
-        // }
-    }
+
+        const delStatus = formData.deliveryStatus;
+        const balance = formData.balance;
+        let payStatus = formData.paymentType;
+
+        // If balance is 0, payment type should be Settled
+        if (balance === 0) {
+            updatedFormData.paymentType = "Settled";
+            console.log("Balance is 0, setting payment status to Settled.");
+        }
+
+        // For Pickup: Payment status can only be Settled or Credit
+        if (delStatus === "Pickup") {
+            if (payStatus !== "Settled" && payStatus !== "Credit") {
+                console.log("Invalid payment status for Pickup. Reopening modal...");
+                setShowModal2(true);
+                return;
+            }
+        }
+
+        // For Delivery: Payment status can be Settled, COD, or Credit
+        // If balance > 0 and not COD, auto-set to COD
+        if (delStatus === "Delivery") {
+            if (balance > 0 && payStatus !== "COD") {
+                updatedFormData.paymentType = "COD";
+                console.log("Delivery with balance > 0, setting payment type to COD.");
+            } else if (!["Settled", "COD", "Credit"].includes(payStatus)) {
+                console.log("Invalid payment status for Delivery. Reopening modal...");
+                setShowModal2(true);
+                return;
+            }
+        }
+
+        // Final submission after all validations
+        console.log("Final form data after validation:", updatedFormData);
+
+        // Show receipt view after successful validation
+        setReceiptData(updatedFormData);  // Set data for receipt
+        setShowReceiptView(true);         // Show receipt view
+
+        // Proceed with the final submission logic (e.g., API call)
+        // await someApiCall(updatedFormData);
+    };
+
+
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);
         // Destructure the necessary fields from formData
@@ -641,7 +677,12 @@ const CompleteOrderDetails = () => {
                                     handlePaymentUpdate={handleSubmit3}
                                 />
                             )}
-
+                            {showReceiptView && (
+                                <ReceiptView
+                                    receiptData={receiptData}
+                                    setShowReceiptView={setShowReceiptView}
+                                />
+                            )}
                         </Col>
                     </Row>
                 </Container>

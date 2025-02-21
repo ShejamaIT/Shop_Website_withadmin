@@ -5,10 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/style/finalInvoice.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/ReceiptView.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/receiptView.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -192,7 +193,7 @@
       <workItem from="1739964605433" duration="3953000" />
       <workItem from="1740023765919" duration="17061000" />
       <workItem from="1740044921396" duration="1777000" />
-      <workItem from="1740047813379" duration="23109000" />
+      <workItem from="1740047813379" duration="27789000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -537,7 +538,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="212" />
+    <option name="localTasksCounter" value="213" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -556,7 +557,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="fixed delivery status error" />
     <MESSAGE value="update with complete form" />
     <MESSAGE value="update saleteam details" />
     <MESSAGE value="finish item save api with view" />
@@ -581,6 +581,7 @@
     <MESSAGE value="update calculate" />
     <MESSAGE value="update" />
     <MESSAGE value="update some bugs" />
-    <option name="LAST_COMMIT_MESSAGE" value="update some bugs" />
+    <MESSAGE value="add final invoice" />
+    <option name="LAST_COMMIT_MESSAGE" value="add final invoice" />
   </component>
 </project>

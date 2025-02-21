@@ -31,6 +31,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
             totalAdvance: totalAdvance,
             netTotal: netTotal,
             balance: balance,
+            order: selectedOrder,
         });
         // window.print();
     };
