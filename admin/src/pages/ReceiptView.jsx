@@ -14,10 +14,6 @@ const ReceiptView = ({ receiptData, setShowReceiptView }) => {
                 <h5 className='text-center'>No.75,Sri Premarathana Mw,Moratumulla</h5>
                 <h5 className='text-center'>071 3 608 108 / 077 3 608 108</h5><hr/>
 
-                {/*<p> {receiptData.orderId}</p>*/}
-                {/*<p> {formatDate(receiptData.orderDate)}</p>*/}
-                {/*<p>{currentDateTime}</p>*/}
-                {/*<p> {receiptData.salesperson}</p>*/}
                 <p><strong>Order ID:</strong> #{receiptData.orderId}</p>
                 <p><strong>Order Date:</strong> {formatDate(receiptData.orderDate)}</p>
                 <p><strong>Date & Time:</strong> {currentDateTime}</p>
