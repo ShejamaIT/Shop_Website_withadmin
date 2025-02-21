@@ -352,7 +352,6 @@ const CompleteOrderDetails = () => {
         // await someApiCall(updatedFormData);
     };
 
-
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);
         // Destructure the necessary fields from formData
@@ -562,6 +561,7 @@ const CompleteOrderDetails = () => {
                                         {order.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
+                                                <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
                                                 <p><strong>Amount:</strong> Rs. {formData.items[index]?.price || 0}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>

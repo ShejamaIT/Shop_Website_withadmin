@@ -430,6 +430,7 @@ const OrderDetails = () => {
                                         {order.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
+                                                <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
                                                 <p><strong>Amount:</strong> Rs. {item.price}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
