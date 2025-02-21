@@ -9,6 +9,7 @@ import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
 import BillInvoice from "./AccpetBillInvoice";
 import ChangeQty from "./changeQty";
+import FinalInvoice from "./FinalInvoice";
 const CompleteOrderDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate(); // Initialize useNavigate
@@ -21,6 +22,7 @@ const CompleteOrderDetails = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
+    const [showModal2, setShowModal2] = useState(false);
 
     useEffect(() => {
         fetchOrder();
@@ -233,6 +235,12 @@ const CompleteOrderDetails = () => {
         setSelectedOrder(order);
         setShowModal1(true);
     };
+    const handleEditClick3 = (order) => {
+        if (!order) return;
+        console.log("Opening modal for order:", order);
+        setSelectedOrder(order);
+        setShowModal2(true);
+    };
 
     const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
@@ -277,6 +285,38 @@ const CompleteOrderDetails = () => {
         }
     }
 
+    const handleSubmit3 = async (formData) => {
+        console.log("Submitting form data:", formData);
+        setShowModal2(false);
+        // try {
+        //     const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
+        //         method: "PUT",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         body: JSON.stringify({
+        //             itemId: formData.itemId,
+        //             newQuantity: formData.newQuantity,
+        //             updatedPrice: formData.updatedPrice,
+        //             orId: formData.orId,
+        //         }),
+        //     });
+        //
+        //     const data = await response.json();
+        //
+        //     if (response.ok) {
+        //         fetchOrder();
+        //         console.log("Quantity updated successfully:", data.message);
+        //         alert("Quantity updated successfully!");
+        //     } else {
+        //         console.error("Failed to update quantity:", data.message);
+        //         alert(`Failed to update quantity: ${data.message}`);
+        //     }
+        // } catch (error) {
+        //     console.error("Error during quantity update:", error);
+        //     alert(`Error updating quantity: ${error.message}`);
+        // }
+    }
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);
         // Destructure the necessary fields from formData
@@ -325,6 +365,7 @@ const CompleteOrderDetails = () => {
             alert("Server error. Please try again.");
         }
     };
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
@@ -562,7 +603,7 @@ const CompleteOrderDetails = () => {
                                             <Button color="success" className="ms-3" onClick={() => handleEditClick(order)} disabled={loading}>
                                                 Print Invoice
                                             </Button>
-                                            <Button color="secondary" className="ms-3" disabled={loading}>
+                                            <Button color="secondary" className="ms-3" onClick={() => handleEditClick3(order)} disabled={loading}>
                                                 Issued
                                             </Button>
                                         </>
@@ -593,6 +634,14 @@ const CompleteOrderDetails = () => {
                                     handleSubmit2={handleSubmit2}
                                 />
                             )}
+                            {showModal2 && selectedOrder && (
+                                <FinalInvoice
+                                    selectedOrder={selectedOrder}
+                                    setShowModal2={setShowModal2}
+                                    handlePaymentUpdate={handleSubmit3}
+                                />
+                            )}
+
                         </Col>
                     </Row>
                 </Container>
