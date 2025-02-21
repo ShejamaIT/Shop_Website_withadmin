@@ -13,11 +13,16 @@ const TableForProduction = () => {
         // Fetch all items from API
         const fetchItems = async () => {
             try {
-                const response = await axios.get("http://localhost:5001/api/admin/main/allitemslessone");
-                setItems(response.data);
-            } catch (error) {
-                setError("Error fetching items.");
-                console.error("Error fetching items:", error);
+                const response = await fetch("http://localhost:5001/api/admin/main/allitemslessone"); // Adjust API URL if needed
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Failed to fetch items.");
+                }
+
+                setItems(data.data); // Assuming `data.data` contains the array of orders
+            } catch (err) {
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
@@ -30,7 +35,7 @@ const TableForProduction = () => {
     };
     return (
         <div className="table-container">
-            <h4 className="table-title">All Items</h4>
+            <h4 className="table-title">For Production Items</h4>
 
             {loading ? (
                 <p className="loading-message">Loading...</p>

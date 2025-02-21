@@ -205,6 +205,7 @@ const CompleteOrderDetails = () => {
             updatedData.orderStatus !== order.orderStatus ||
             updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryCharge !== order.deliveryCharge ||
+            updatedData.payStatus !== order.payStatus ||
             updatedData.discount !== order.discount ||
             updatedData.totalPrice !== order.totalPrice ||
 
@@ -235,20 +236,17 @@ const CompleteOrderDetails = () => {
 
     const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
-        // Add new property 'orId' with a value (e.g., item.orID or a custom value)
         const updatedItem = {
             ...item,
             orId: order.orderId , // Replace 'default_orId_value' if needed
         };
-        console.log("updatedItem "+updatedItem);
-
+        console.log("Opening modal for order:", updatedItem);
         setSelectedItem(updatedItem);
         setShowModal(true);
     };
 
     const handleSubmit2 = async (formData) => {
-        console.log("Submitting form data:", formData.orID);
-
+        console.log("Submitting form data:", formData);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
                 method: "PUT",
@@ -256,10 +254,10 @@ const CompleteOrderDetails = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    orID: formData.orID,
                     itemId: formData.itemId,
                     newQuantity: formData.newQuantity,
                     updatedPrice: formData.updatedPrice,
+                    orId: formData.orId,
                 }),
             });
 
@@ -277,7 +275,7 @@ const CompleteOrderDetails = () => {
             console.error("Error during quantity update:", error);
             alert(`Error updating quantity: ${error.message}`);
         }
-    };
+    }
 
     const handleSubmit = async (formData) => {
         console.log("Submitting form data:", formData);

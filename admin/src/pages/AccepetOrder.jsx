@@ -39,8 +39,6 @@ const OrderDetails = () => {
                 navigate("/dashboard"); // Redirect to another page
                 return;
             }
-
-
             // Ensure `isBooked` updates correctly
             const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);
             const updatedItems = data.order.items.map((item) => ({
@@ -201,6 +199,7 @@ const OrderDetails = () => {
             updatedData.orderStatus !== order.orderStatus ||
             updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryCharge !== order.deliveryCharge ||
+            updatedData.payStatus !== order.payStatus ||
             updatedData.discount !== order.discount ||
             updatedData.totalPrice !== order.totalPrice ||
             updatedData.expectedDeliveryDate !== order.expectedDeliveryDate ||
@@ -231,10 +230,14 @@ const OrderDetails = () => {
         setShowModal1(true);
     };
 
-    const handleEditClick2 = (item) => {
+    const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
-        console.log("Opening modal for order:", item);
-        setSelectedItem(item);
+        const updatedItem = {
+            ...item,
+            orId: order.orderId , // Replace 'default_orId_value' if needed
+        };
+        console.log("Opening modal for order:", updatedItem);
+        setSelectedItem(updatedItem);
         setShowModal(true);
     };
 
@@ -247,10 +250,10 @@ const OrderDetails = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    orID: formData.orID,
                     itemId: formData.itemId,
                     newQuantity: formData.newQuantity,
                     updatedPrice: formData.updatedPrice,
+                    orId: formData.orId,
                 }),
             });
 
@@ -501,7 +504,7 @@ const OrderDetails = () => {
                                                         <Button
                                                             color="secondary"
                                                             className="ms-4"
-                                                            onClick={() => handleEditClick2(item)} // Ensure this is not treating `selectedItem` as a function
+                                                            onClick={() => handleEditClick2(item,order)} // Ensure this is not treating `selectedItem` as a function
                                                             disabled={loading}
                                                         >
                                                             Change Qty

@@ -56,101 +56,189 @@ const OrderDetails = () => {
         const { name, value, type, checked } = e.target;
 
         setFormData((prevFormData) => {
-            if (name in prevFormData) {
-                return { ...prevFormData, [name]: value };
-            }
+            let updatedFormData = { ...prevFormData };
 
-            if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
-                return {
-                    ...prevFormData,
-                    deliveryInfo: {
-                        ...prevFormData.deliveryInfo,
-                        [name]: value,
-                    },
+            if (["deliveryStatus", "orderStatus", "payStatus"].includes(name)) {
+                updatedFormData[name] = value; // ✅ Handles payStatus update
+            } else if (name in prevFormData) {
+                updatedFormData[name] = value;
+            } else if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
+                updatedFormData.deliveryInfo = {
+                    ...prevFormData.deliveryInfo,
+                    [name]: value,
                 };
-            }
-
-            if (name === "booked") {
-                const updatedItems = [...prevFormData.items];
-                updatedItems[index] = {
-                    ...updatedItems[index],
-                    booked: checked
-                };
-                return { ...prevFormData, items: updatedItems };
-            }
-
-            if (name === "quantity") {
-                const updatedItems = [...prevFormData.items];
+            } else if (name === "booked") {
+                updatedFormData.items = prevFormData.items.map((item, i) =>
+                    i === index ? { ...item, booked: checked } : item
+                );
+            } else if (name === "quantity") {
                 const newQuantity = value === "" ? 0 : parseInt(value, 10);
                 if (!isNaN(newQuantity) && newQuantity >= 0) {
-                    updatedItems[index] = {
-                        ...updatedItems[index],
-                        quantity: newQuantity,
-                        price: newQuantity * updatedItems[index].unitPrice,
-                    };
+                    updatedFormData.items = prevFormData.items.map((item, i) =>
+                        i === index
+                            ? { ...item, quantity: newQuantity, price: newQuantity * item.unitPrice }
+                            : item
+                    );
                 }
-                return { ...prevFormData, items: updatedItems };
-            }
-
-            if (name === "discount" || name === "deliveryCharge") {
+            } else if (["discount", "deliveryCharge"].includes(name)) {
                 const updatedValue = value === "" ? 0 : parseFloat(value);
                 if (!isNaN(updatedValue) && updatedValue >= 0) {
-                    return {
-                        ...prevFormData,
-                        [name]: updatedValue,
-                        totalPrice: prevFormData.items.reduce((total, item) => total + item.price, 0) + (prevFormData.deliveryCharge || 0) - (prevFormData.discount || 0)
-                    };
+                    updatedFormData[name] = updatedValue;
+                    updatedFormData.totalPrice =
+                        updatedFormData.items.reduce((total, item) => total + item.price, 0) +
+                        (updatedFormData.deliveryCharge || 0) -
+                        (updatedFormData.discount || 0);
                 }
             }
 
-            return prevFormData;
+            return updatedFormData;
         });
     };
 
     const handleSave = async () => {
+        console.log(formData);
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
         console.log(updatedData);
+        let updatedGeneralOrder = null;
+        let allUpdatesSuccessful = true; // ✅ Track if all updates pass
+
         try {
+            // Step 1: Update order general details only if changed
+            if (hasGeneralDetailsChanged(updatedData)) {
+                const generalResponse = await fetch(`http://localhost:5001/api/admin/main/update-order-details`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedData),
+                });
 
-            const response = await fetch(`http://localhost:5001/api/admin/main/update-order`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedData),
-            });
+                if (!generalResponse.ok) {
+                    allUpdatesSuccessful = false;
+                    throw new Error("Failed to update order general detail.");
+                }
 
-            if (!response.ok) throw new Error("Failed to update order.");
+                updatedGeneralOrder = await generalResponse.json();
+                console.log(updatedGeneralOrder);
 
-            const updatedOrder = await response.json();
-
-            if (updatedOrder.data.orderId === updatedData.orderId) {
-                // Fetch the updated order details after update
-                if (updatedData.orderStatus === 'Accepted') {
-                    navigate(`/accept-order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Pending') {
-                    // Navigate to a specific page for Pending status
-                    navigate(`/order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Completed') {
-                    // Navigate to a page where Shipped orders are detailed
-                    navigate(`/complete-order-detail/${updatedData.orderId}`);
-                } else {
-                    // Default redirect when no specific status matches
-                    navigate("/dashboard");
+                if (!updatedGeneralOrder.success) {
+                    allUpdatesSuccessful = false;
+                    toast.error(updatedGeneralOrder.message || "Failed to update order general detail.");
+                    return;
                 }
             }
 
+            // Step 2: Update order items only if changed
+            if (hasItemsChanged(updatedData)) {
+                const itemsResponse = await fetch(`http://localhost:5001/api/admin/main/update-order-items`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedData),
+                });
+
+                if (!itemsResponse.ok) {
+                    allUpdatesSuccessful = false;
+                    throw new Error("Failed to update order item detail.");
+                }
+
+                const updatedItemsOrder = await itemsResponse.json();
+                console.log(updatedItemsOrder);
+
+                if (!updatedItemsOrder.success) {
+                    allUpdatesSuccessful = false;
+                    toast.error(updatedItemsOrder.message || "Failed to update order item detail.");
+                    return;
+                }
+            }
+
+            // Step 3: Update delivery information only if changed
+            if (hasDeliveryChanged(updatedData)) {
+                const deliveryResponse = await fetch(`http://localhost:5001/api/admin/main/update-delivery`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedData),
+                });
+
+                if (!deliveryResponse.ok) {
+                    allUpdatesSuccessful = false;
+                    throw new Error("Failed to update delivery information.");
+                }
+
+                const updatedDeliveryOrder = await deliveryResponse.json();
+                console.log(updatedDeliveryOrder);
+
+                if (!updatedDeliveryOrder.success) {
+                    allUpdatesSuccessful = false;
+                    toast.error(updatedDeliveryOrder.message || "Failed to update delivery information.");
+                    return;
+                }
+            }
+
+            // ✅ Show success message ONLY if all updates were successful
+            if (allUpdatesSuccessful) {
+                toast.success("Order updated successfully!");
+
+                // Navigate based on updated order status
+                if (updatedGeneralOrder?.orID === updatedData.orderId) {
+                    if (updatedData.orderStatus === 'Accepted') {
+                        navigate(`/accept-order-detail/${updatedData.orderId}`);
+                    } else if (updatedData.orderStatus === 'Pending') {
+                        navigate(`/order-detail/${updatedData.orderId}`);
+                    } else if (updatedData.orderStatus === 'Completed') {
+                        navigate(`/complete-order-detail/${updatedData.orderId}`);
+                    } else {
+                        navigate("/dashboard");
+                    }
+                }
+            }
 
         } catch (err) {
             console.error("Error updating order:", err);
-            alert("Failed to update order!");
+            toast.error(`Error: ${err.message}`);
         }
     };
-    const handleEditClick = (item) => {
+
+
+    // Helper functions to check for changes
+    const hasGeneralDetailsChanged = (updatedData) => {
+        return updatedData.orderDate !== order.orderDate ||
+            updatedData.phoneNumber !== order.phoneNumber ||
+            updatedData.optionalNumber !== order.optionalNumber ||
+            updatedData.orderStatus !== order.orderStatus ||
+            updatedData.deliveryStatus !== order.deliveryStatus ||
+            updatedData.deliveryCharge !== order.deliveryCharge ||
+            updatedData.discount !== order.discount ||
+            updatedData.totalPrice !== order.totalPrice ||
+            updatedData.payStatus !== order.payStatus ||
+            updatedData.expectedDeliveryDate !== order.expectedDeliveryDate ||
+            updatedData.specialNote !== order.specialNote;
+    };
+
+    const hasItemsChanged = (updatedData) => {
+        return updatedData.orderStatus !== order.orderStatus ||  // Check for orderStatus change
+            updatedData.items.some((item, index) => {
+                const originalItem = order.items[index];
+                return item.quantity !== originalItem.quantity ||
+                    item.price !== originalItem.price ||
+                    item.booked !== originalItem.booked;
+            });
+    };
+
+
+    const hasDeliveryChanged = (updatedData) => {
+        return updatedData.deliveryStatus !== order.deliveryStatus ||
+            updatedData.deliveryInfo !== order.deliveryInfo;
+    };
+    const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
-        console.log("Opening modal for order:", item);
-        setSelectedItem(item);
+        const updatedItem = {
+            ...item,
+            orId: order.orderId , // Replace 'default_orId_value' if needed
+        };
+        console.log("Opening modal for order:", updatedItem);
+        setSelectedItem(updatedItem);
         setShowModal(true);
     };
+
     const handleSubmit2 = async (formData) => {
         console.log("Submitting form data:", formData);
         try {
@@ -160,10 +248,10 @@ const OrderDetails = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    orID: formData.orID,
                     itemId: formData.itemId,
                     newQuantity: formData.newQuantity,
                     updatedPrice: formData.updatedPrice,
+                    orId: formData.orId,
                 }),
             });
 
@@ -360,7 +448,7 @@ const OrderDetails = () => {
                                                         <Button
                                                             color="secondary"
                                                             className="ms-4"
-                                                            onClick={() => handleEditClick(item)} // Ensure this is not treating `selectedItem` as a function
+                                                            onClick={() => handleEditClick2(item,order)} // Ensure this is not treating `selectedItem` as a function
                                                             disabled={loading}
                                                         >
                                                             Change Qty
