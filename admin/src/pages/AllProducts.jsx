@@ -77,14 +77,14 @@ const AllProducts = () => {
                         <TabPane tabId="2">
                             <Row>
                                 <Col>
-                                    {/*<Tableforproduction />*/}
+                                    <Tableforproduction />
                                 </Col>
                             </Row>
                         </TabPane>
                         <TabPane tabId="3">
                             <Row>
                                 <Col>
-                                    {/*<TableInProduction />*/}
+                                    <TableInProduction />
                                 </Col>
                             </Row>
                         </TabPane>

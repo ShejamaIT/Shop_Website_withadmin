@@ -18,12 +18,12 @@ const TableForProduction = ({ refreshKey }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitemslessone"); // Adjust API URL if needed
             const data = await response.json();
-
+            console.log(data);
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch items.");
             }
 
-            setItems(data.data); // Assuming `data.data` contains the array of orders
+            setItems(data); // Assuming `data.data` contains the array of orders
         } catch (err) {
             setError(err.message);
         } finally {
@@ -37,24 +37,24 @@ const TableForProduction = ({ refreshKey }) => {
     return (
         <div className="table-container">
             <h4 className="table-title">For Production Items</h4>
-            <table className="styled-table">
-                <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Item Name</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Description</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
+
                 {loading ? (
                     <p className="loading-message">Loading...</p>
                 ) : error ? (
                     <p className="error-message">{error}</p>
                 ) : (
                     <div className="table-wrapper">
-
+                        <table className="styled-table">
+                            <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Item Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
                         <tbody>
                                 {items.length === 0 ? (
                                     <tr>
@@ -84,9 +84,10 @@ const TableForProduction = ({ refreshKey }) => {
                                     ))
                                 )}
                         </tbody>
+                        </table>
                     </div>
                 )}
-            </table>
+
         </div>
     );
 };

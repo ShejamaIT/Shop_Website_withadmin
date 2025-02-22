@@ -19,6 +19,7 @@ const TableInproduction = ({ refreshKey }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders-inproduction");
             const data = await response.json();
+            console.log(data)
 
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");

@@ -245,32 +245,32 @@ const AddOtherDetails = () => {
                     </div>
 
                     {/* Add Type Section */}
-                    <div className="p-3 border rounded shadow-sm">
-                        <Label className="fw-bold">Add Type</Label>
-                        <Input type="select" className="mb-2" name="Ca_Id" value={typeData.Ca_Id} onChange={handleTypeChange} required>
-                            <option value="">Select Category</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                        </Input>
-                        {subCategoriesOne.length > 0 && (
-                            <Input type="select" className="mb-2" name="sub_one" value={typeData.sub_one} onChange={handleTypeChange} required>
-                                <option value="">Select Sub One</option>
-                                {subCategoriesOne.map((sub) => (
-                                    <option key={sub.sb_c_id} value={sub.subcategory}>{sub.subcategory}</option>
-                                ))}
-                            </Input>
-                        )}
-                        {subCategoriesTwo.length > 0 && (
-                            <Input type="select" className="mb-2" name="sub_two" value={typeData.sub_two} onChange={handleTypeChange} required>
-                                <option value="">Select Sub Two</option>
-                                {subCategoriesTwo.map((sub) => (
-                                    <option key={sub.sb_cc_id} value={sub.sb_cc_id}>{sub.subcategory}</option>
-                                ))}
-                            </Input>
-                        )}
-                        <Button color="danger" onClick={handleSubmitType}>Add Type</Button>
-                    </div>
+                    {/*<div className="p-3 border rounded shadow-sm">*/}
+                    {/*    <Label className="fw-bold">Add Type</Label>*/}
+                    {/*    <Input type="select" className="mb-2" name="Ca_Id" value={typeData.Ca_Id} onChange={handleTypeChange} required>*/}
+                    {/*        <option value="">Select Category</option>*/}
+                    {/*        {categories.map((cat) => (*/}
+                    {/*            <option key={cat.id} value={cat.id}>{cat.name}</option>*/}
+                    {/*        ))}*/}
+                    {/*    </Input>*/}
+                    {/*    {subCategoriesOne.length > 0 && (*/}
+                    {/*        <Input type="select" className="mb-2" name="sub_one" value={typeData.sub_one} onChange={handleTypeChange} required>*/}
+                    {/*            <option value="">Select Sub One</option>*/}
+                    {/*            {subCategoriesOne.map((sub) => (*/}
+                    {/*                <option key={sub.sb_c_id} value={sub.subcategory}>{sub.subcategory}</option>*/}
+                    {/*            ))}*/}
+                    {/*        </Input>*/}
+                    {/*    )}*/}
+                    {/*    {subCategoriesTwo.length > 0 && (*/}
+                    {/*        <Input type="select" className="mb-2" name="sub_two" value={typeData.sub_two} onChange={handleTypeChange} required>*/}
+                    {/*            <option value="">Select Sub Two</option>*/}
+                    {/*            {subCategoriesTwo.map((sub) => (*/}
+                    {/*                <option key={sub.sb_cc_id} value={sub.sb_cc_id}>{sub.subcategory}</option>*/}
+                    {/*            ))}*/}
+                    {/*        </Input>*/}
+                    {/*    )}*/}
+                    {/*    <Button color="danger" onClick={handleSubmitType}>Add Type</Button>*/}
+                    {/*</div>*/}
 
                 </Col>
             </Row>
