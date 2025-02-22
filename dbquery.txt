@@ -36,7 +36,6 @@ CREATE TABLE Type(
 CREATE TABLE Item(
       I_Id VARCHAR(25) PRIMARY KEY,
       I_name TEXT ,
-      Ty_id VARCHAR(15),
       descrip TEXT,
       color VARCHAR(20),
       material VARCHAR(20),
@@ -50,6 +49,9 @@ CREATE TABLE Item(
       img1 LONGBLOB NOT NULL,
       img2 LONGBLOB NOT NULL,
       img3 LONGBLOB NOT NULL,
+      mn_Cat VARCHAR(35),
+      sb_catOne VARCHAR(35),
+      sb_catTwo VARCHAR(35),
 	        CONSTRAINT FOREIGN KEY (Ty_id) REFERENCES Type (Ty_id)
 			    ON DELETE CASCADE ON UPDATE CASCADE
 );

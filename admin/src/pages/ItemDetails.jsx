@@ -16,6 +16,8 @@ const ItemDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showStockModal, setShowStockModal] = useState(false);
+    const [subCatOne, setSubCatOne] = useState([]);
+    const [subCatTwo, setSubCatTwo] = useState([]);
     const [showSupplierModal, setShowSupplierModal] = useState(false);
     const [stockData, setStockData] = useState({
         itemId:id,
@@ -33,17 +35,38 @@ const ItemDetails = () => {
     const [types, setTypes] = useState([]);
 
     // Fetch Types when Category Changes
+    // useEffect(() => {
+    //     if (formData.category_id) {
+    //         fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_id}`)
+    //             .then((res) => res.json())
+    //             .then((data) => setTypes(data.types))
+    //             .catch((err) => {
+    //                 console.error("Error fetching types:", err);
+    //                 toast.error("Failed to load types.");
+    //             });
+    //     }
+    // }, [formData.category_id]);
+
     useEffect(() => {
-        if (formData.category_id) {
-            fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_id}`)
+        if (formData.maincategory) {
+            fetch(`http://localhost:5001/api/admin/main/typesname?categoryName=${formData.maincategory}`)
                 .then((res) => res.json())
-                .then((data) => setTypes(data.types))
-                .catch((err) => {
-                    console.error("Error fetching types:", err);
-                    toast.error("Failed to load types.");
-                });
+                .then((data) => {
+                    setSubCatOne(data.data);
+                    setSubCatTwo([]);
+                    setFormData((prev) => ({ ...prev, sub_one: "", sub_two: "" }));
+                })
+                .catch(() => toast.error("Failed to load subcategories."));
         }
-    }, [formData.category_id]);
+    }, [formData.maincategory]);
+
+    useEffect(() => {
+        if (formData.sub_one) {
+            const selectedSubCatOne = subCatOne.find((cat) => cat.subCatOneId === formData.sub_one);
+            setSubCatTwo(selectedSubCatOne ? selectedSubCatOne.subCatTwo : []);
+            setFormData((prev) => ({ ...prev, sub_two: "" }));
+        }
+    }, [formData.sub_one, subCatOne]);
 
     const handleSupplierSelect = (e) => {
         const selectedSupplierID = e.target.value;
@@ -230,8 +253,6 @@ const ItemDetails = () => {
     const handleChange = (e, supplierId) => {
         const { name, value, type, files } = e.target;
 
-        console.log(name, value); // Check the input name and value
-
         // If the field is a file, handle image upload
         if (type === "file" && files) {
             const file = files[0];
@@ -275,62 +296,49 @@ const ItemDetails = () => {
 
     const handleSave = async () => {
         try {
-            // Fetch Type ID based on Category
-            const typeResponse = await fetch(
-                `http://localhost:5001/api/admin/main/find-types-cat?category_name=${formData.category_name}&sub_one=${formData.subcategory_one}&sub_two=${formData.subcategory_two}`
-            );
-
-            if (!typeResponse.ok) {
-                throw new Error("Failed to fetch Type ID");
-            }
-
-            const typeData = await typeResponse.json();
-            const typeId = typeData.type?.Ty_Id; // Extract Type ID
-
-            if (!typeId) {
-                toast.error("Add Type First");
-                return; // Stop execution if type ID is not found
-            }
-
-            // Step 2: Prepare the FormData for sending the request
             const updatedFormData = new FormData();
 
-            // Add regular fields to FormData
+            // ✅ Add regular fields to FormData
             updatedFormData.append('I_Id', formData.I_Id);
             updatedFormData.append('I_name', formData.I_name);
-            updatedFormData.append('Ty_id', typeId); // Use fetched Type ID
             updatedFormData.append('descrip', formData.descrip);
             updatedFormData.append('color', formData.color);
             updatedFormData.append('price', formData.price);
             updatedFormData.append('warrantyPeriod', formData.warrantyPeriod);
-            updatedFormData.append('cost', formData.unit_cost);
             updatedFormData.append('material', formData.material);
-            updatedFormData.append('s_Id', formData.s_ID);
             updatedFormData.append('availableQty', formData.availableQty);
             updatedFormData.append('bookedQty', formData.bookedQty);
             updatedFormData.append('stockQty', formData.stockQty);
+            updatedFormData.append('maincategory', formData.maincategory);
+            updatedFormData.append('sub_one', formData.sub_one);
+            updatedFormData.append('sub_two', formData.sub_two);
 
-            // **Handle Suppliers (Convert to JSON)**
+            // ✅ Handle Suppliers (Convert to JSON)
             if (formData.suppliers && Array.isArray(formData.suppliers)) {
                 updatedFormData.append("suppliers", JSON.stringify(formData.suppliers));
             }
 
-            // Log all FormData values
+            // ✅ Handle image fields if available
+            if (formData.img) updatedFormData.append("img", formData.img);
+            if (formData.img1) updatedFormData.append("img1", formData.img1);
+            if (formData.img2) updatedFormData.append("img2", formData.img2);
+            if (formData.img3) updatedFormData.append("img3", formData.img3);
+
+            // 🔄 Log all FormData values for debugging
             console.log("Updated FormData:");
             for (let pair of updatedFormData.entries()) {
                 console.log(pair[0], pair[1]);
             }
 
-            // Step 3: Send the update request to the backend API
+            // ✅ Send the update request to the backend API
             const updateResponse = await fetch(`http://localhost:5001/api/admin/main/update-item`, {
                 method: "PUT",
                 body: updatedFormData,
             });
 
-            // Parse the response JSON
             const updateResult = await updateResponse.json();
 
-            // Step 4: Handle response success or failure
+            // ✅ Handle response success or failure
             if (updateResponse.ok && updateResult.success) {
                 toast.success("✅ Item updated successfully!");
                 setIsEditing(false);  // Exit edit mode
@@ -339,12 +347,12 @@ const ItemDetails = () => {
                 console.error("❌ Error updating item:", updateResult.message);
                 toast.error(updateResult.message || "Failed to update item.");
             }
-
         } catch (error) {
-            console.error("Error updating item:", error);
+            console.error("❌ Error updating item:", error);
             toast.error("Error updating item: " + error.message);
         }
     };
+
 
     useEffect(() => {
         // This will run whenever the suppliers state is updated
@@ -474,39 +482,40 @@ const ItemDetails = () => {
                                             <Col>
 
                                                 {!isEditing ? (
-                                                    <p><strong>Category:</strong> {item.category_name}</p>
+                                                    <p><strong>Category:</strong> {item.maincategory}</p>
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Category:</strong></Label>
                                                         <Input type="select"
-                                                               name="category_id"
-                                                               id="category_id"
-                                                               value={formData.category_id}
+                                                               name="maincategory"
+                                                               id="maincategory"
+                                                               value={formData.maincategory}
                                                                onChange={handleChange} required>
 
                                                             {categories.map((cat) => (
-                                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                                <option key={cat.id} value={cat.name}>{cat.name}</option>
                                                             ))}
                                                         </Input>
                                                     </FormGroup>
                                                 )}
                                                 {/* Subcategory One */}
                                                 {!isEditing ? (
-                                                    <p><strong>Subcategory One:</strong> {item.subcategory_one}</p>
+                                                    <p><strong>Subcategory One:</strong> {item.sub_one}</p>
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Subcategory One:</strong></Label>
                                                         <Input
                                                             type="select"
                                                             name="sub_one"
+                                                            id="sub_one"
                                                             value={formData.sub_one}
                                                             onChange={handleChange}
                                                             required
                                                         >
                                                             <option value="">Select Sub One</option>
-                                                            {types.map((type) => (
-                                                                <option key={type.Ty_Id} value={type.sub_one}>
-                                                                    {type.sub_one}
+                                                            {subCatOne.map((sub) => (
+                                                                <option key={sub.subCatOneId} value={sub.subCatOneId}>
+                                                                    {sub.subCatOneName}
                                                                 </option>
                                                             ))}
                                                         </Input>
@@ -516,7 +525,7 @@ const ItemDetails = () => {
                                                 {/* Subcategory Two */}
                                                 {!isEditing ? (
                                                     item.subcategory_two && item.subcategory_two !== 'None' ? (
-                                                        <p><strong>Subcategory Two:</strong> {item.subcategory_two}</p>
+                                                        <p><strong>Subcategory Two:</strong> {item.sub_two}</p>
                                                     ) : null
                                                 ) : (
                                                     <FormGroup>
@@ -524,18 +533,17 @@ const ItemDetails = () => {
                                                         <Input
                                                             type="select"
                                                             name="sub_two"
+                                                            id="sub_two"
                                                             value={formData.sub_two}
                                                             onChange={handleChange}
+                                                            required
                                                         >
                                                             <option value="">Select Sub Two</option>
-                                                            {/* Filter only subcategories that belong to the selected Subcategory One */}
-                                                            {types
-                                                                .filter((type) => type.sub_one === formData.sub_one) // Filter based on selected sub_one
-                                                                .map((type) => (
-                                                                    <option key={type.Ty_Id} value={type.sub_two}>
-                                                                        {type.sub_two}
-                                                                    </option>
-                                                                ))}
+                                                            {subCatTwo.map((sub) => (
+                                                                <option key={sub.subCatTwoId} value={sub.subCatTwoId}>
+                                                                    {sub.subCatTwoName}
+                                                                </option>
+                                                            ))}
                                                         </Input>
                                                     </FormGroup>
                                                 )}
@@ -543,6 +551,19 @@ const ItemDetails = () => {
                                         </Row>
                                         <Row>
                                             <Col>
+                                                {!isEditing ? (
+                                                    <p><strong>Min Quantity:</strong> {item.minQTY}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Min Quantity:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="minQTY"
+                                                            value={formData.minQTY}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
                                                 <p><strong>Stock Quantity:</strong> {item.stockQty}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQty}</p>
                                             </Col>

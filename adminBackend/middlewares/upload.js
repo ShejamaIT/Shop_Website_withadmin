@@ -6,7 +6,6 @@ const storage = multer.memoryStorage();
 // File filter to allow only images (JPEG, PNG, WebP, GIF)
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true); // Accept the file
     } else {
@@ -14,14 +13,14 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Define Multer upload middleware
+// ✅ Updated Multer configuration with fieldSize
 const upload = multer({
     storage,
     limits: {
-        fileSize: 20 * 1024 * 1024,  // ✅ 20MB per file
+        fileSize: 25 * 1024 * 1024,  // ✅ 25MB per file
+        fieldSize: 30 * 1024 * 1024, // ✅ 30MB for form fields (adjust as needed)
     },
     fileFilter,
 });
 
-// Export the upload instance
 export default upload;
