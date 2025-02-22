@@ -49,7 +49,10 @@ const AllOrders = () => {
                         <NavItem>
                             <NavLink
                                 className={classnames({ active: activeTab === "2" })}
-                                onClick={() => setActiveTab("2")}
+                                onClick={() => {
+                                    setActiveTab("2");
+                                    setNestedActiveTab("1"); // Automatically activate All Booked Orders
+                                }}
                                 style={{ cursor: "pointer" }}
                             >
                                 Accepted Orders

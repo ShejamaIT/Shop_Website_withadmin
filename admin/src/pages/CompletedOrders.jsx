@@ -177,10 +177,13 @@ const CompleteOrderDetails = () => {
             }
 
             // If all updates are successful, show a success message
-            //toast.success("Order updated successfully!");
+            toast.success("Order updated successfully!");
+            // Fetch updated order details
+            await fetchOrder();
+            setIsEditing(false);
 
             // Fetch updated order details
-            if (updatedDeliveryOrder.orID === updatedData.orderId) {
+            if (updatedData.orderId) {
                 // Fetch the updated order details after update
                 if (updatedData.orderStatus === 'Accepted') {
                     navigate(`/accept-order-detail/${updatedData.orderId}`);
@@ -389,8 +392,8 @@ const CompleteOrderDetails = () => {
             const data = await response.json();
 
             if (response.ok) {
-                alert("Invoice and payment updated successfully!");
-
+                fetchOrder();
+                toast.success("Invoice and payment updated successfully!");
                 setShowModal(false); // Close the modal if it's open
             } else {
                 alert(data.error || "Failed to update invoice.");
@@ -637,7 +640,7 @@ const CompleteOrderDetails = () => {
                                                 {loading ? "Loading..." : "Edit Order"}
                                             </Button>
                                             <Button color="success" className="ms-3" onClick={() => handleEditClick(order)} disabled={loading}>
-                                                Print Invoice
+                                                Payment
                                             </Button>
                                             <Button color="secondary" className="ms-3" onClick={() => handleEditClick3(order)} disabled={loading}>
                                                 Issued

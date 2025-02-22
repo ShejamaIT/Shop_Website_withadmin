@@ -180,10 +180,26 @@ const OrderDetails = () => {
 
             // If all updates are successful, show a success message
             toast.success("Order updated successfully!");
-
             // Fetch updated order details
             await fetchOrder();
             setIsEditing(false);
+
+            // Fetch updated order details
+            if (updatedData.orderId) {
+                // Fetch the updated order details after update
+                if (updatedData.orderStatus === 'Accepted') {
+                    navigate(`/accept-order-detail/${updatedData.orderId}`);
+                } else if (updatedData.orderStatus === 'Pending') {
+                    // Navigate to a specific page for Pending status
+                    navigate(`/order-detail/${updatedData.orderId}`);
+                } else if (updatedData.orderStatus === 'Completed') {
+                    // Navigate to a page where Shipped orders are detailed
+                    navigate(`/complete-order-detail/${updatedData.orderId}`);
+                } else {
+                    // Default redirect when no specific status matches
+                     navigate("/dashboard");
+                }
+            }
 
         } catch (err) {
             console.error("Error updating order:", err);
@@ -312,7 +328,7 @@ const OrderDetails = () => {
 
             if (response.ok) {
                 fetchOrder();
-                alert("Invoice and payment updated successfully!");
+                toast.success("Invoice and payment updated successfully!");
 
                 setShowModal(false); // Close the modal if it's open
             } else {
@@ -562,7 +578,7 @@ const OrderDetails = () => {
                                                 {loading ? "Loading..." : "Edit Order"}
                                             </Button>
                                             <Button color="success" className="ms-3" onClick={() => handleEditClick(order)} disabled={loading}>
-                                                Payment Invoice
+                                                Payment
                                             </Button>
                                         </>
                                     ) : (

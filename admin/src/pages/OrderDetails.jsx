@@ -175,17 +175,22 @@ const OrderDetails = () => {
 
             // ✅ Show success message ONLY if all updates were successful
             if (allUpdatesSuccessful) {
-                toast.success("Order updated successfully!");
+                await fetchOrder();
+                setIsEditing(false);
 
-                // Navigate based on updated order status
-                if (updatedGeneralOrder?.orID === updatedData.orderId) {
+                // Fetch updated order details
+                if (updatedData.orderId) {
+                    // Fetch the updated order details after update
                     if (updatedData.orderStatus === 'Accepted') {
                         navigate(`/accept-order-detail/${updatedData.orderId}`);
                     } else if (updatedData.orderStatus === 'Pending') {
+                        // Navigate to a specific page for Pending status
                         navigate(`/order-detail/${updatedData.orderId}`);
                     } else if (updatedData.orderStatus === 'Completed') {
+                        // Navigate to a page where Shipped orders are detailed
                         navigate(`/complete-order-detail/${updatedData.orderId}`);
                     } else {
+                        // Default redirect when no specific status matches
                         navigate("/dashboard");
                     }
                 }

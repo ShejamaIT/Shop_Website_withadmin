@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../style/invoice.css"; // Make sure this file includes the print styles
 
 const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
+    console.log(selectedOrder.deliveryStatus);
     const invoiceDate = new Date().toLocaleDateString();
 
     const [deliveryCharge, setDeliveryCharge] = useState(selectedOrder.deliveryCharge);
@@ -9,7 +10,9 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
     const [discount, setDiscount] = useState(selectedOrder.discount);
     const [advance, setAdvance] = useState(selectedOrder.advance);
     const [nowPay, setNowPay] = useState(0);
-    const [isPickup, setIsPickup] = useState(false);
+    // const [isPickup, setIsPickup] = useState(false);
+    const [isPickup, setIsPickup] = useState(selectedOrder.deliveryStatus === "Pick up");
+
 
     const calculateTotal = (item) => item.quantity * item.unitPrice;
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
@@ -94,9 +97,10 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
                         <input
                             type="number"
                             value={isPickup ? 0 : deliveryCharge}
-                            disabled={isPickup}
+                            disabled={isPickup || selectedOrder.deliveryStatus === "Pick up"} // Disabled if pickup
                             onChange={(e) => setDeliveryCharge(e.target.value)}
                         />
+
                     </div>
 
                     <div className="invoice-summary-item">
@@ -113,7 +117,7 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
                     <p><strong>Previous Advance:</strong> Rs. {validAdvance.toFixed(2)}</p>
 
                     <div className="invoice-summary-item">
-                        <label><strong>Now Paying:</strong></label>
+                        <label><strong>Current Payment:</strong></label>
                         <input
                             type="number"
                             value={nowPay}
