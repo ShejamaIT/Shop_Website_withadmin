@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import EditOrderModal from "../../pages/EditOrderModal"; // Import the modal component
 import "../../style/inproduction.css"; // Import CSS
 
-const TableInproduction = () => {
+const TableInproduction = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,25 +13,26 @@ const TableInproduction = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/orders-inproduction");
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || "Failed to fetch orders");
-                }
-
-                setOrders(data.data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchOrders();
-    }, []);
+    }, [refreshKey]);
+    const fetchOrders = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/orders-inproduction");
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to fetch orders");
+            }
+
+            setOrders(data.data);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchOrders();
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -91,13 +92,8 @@ const TableInproduction = () => {
     return (
         <div className="table-container">
             <div className="table-wrapper">
-                {loading ? (
-                    <p className="loading-text">Loading orders...</p>
-                ) : error ? (
-                    <p className="error-text">{error}</p>
-                ) : (
-                    <table className="styled-table">
-                        <thead>
+                <table className="styled-table">
+                    <thead>
                         <tr>
                             <th>Order ID</th>
                             <th>Item ID</th>
@@ -108,31 +104,36 @@ const TableInproduction = () => {
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
-                        </thead>
-                        <tbody>
-                        {orders.length === 0 ? (
-                            <tr>
-                                <td colSpan="9" className="no-data">No orders found</td>
-                            </tr>
+                    </thead>
+                        {loading ? (
+                            <p className="loading-text text-center">Loading orders...</p>
+                        ) : error ? (
+                            <p className="error-text text-center">{error}</p>
                         ) : (
-                            orders.map((order) => (
-                                <tr key={order.p_ID}>
-                                    <td>{order.p_ID}</td>
-                                    <td>{order.I_Id}</td>
-                                    <td>{order.s_ID}</td>
-                                    <td>{order.qty}</td>
-                                    <td>{formatDate(order.expectedDate)}</td>
-                                    <td>{order.specialNote}</td>
-                                    <td>{order.status}</td>
-                                    <td className="action-buttons">
-                                        <button className="edit-btn" onClick={() => handleEditClick(order)}>✏️</button>
-                                    </td>
+                            <tbody>
+                            {orders.length === 0 ? (
+                                <tr>
+                                    <td colSpan="9" className="no-data text-center">No orders found</td>
                                 </tr>
-                            ))
+                            ) : (
+                                orders.map((order) => (
+                                    <tr key={order.p_ID}>
+                                        <td>{order.p_ID}</td>
+                                        <td>{order.I_Id}</td>
+                                        <td>{order.s_ID}</td>
+                                        <td>{order.qty}</td>
+                                        <td>{formatDate(order.expectedDate)}</td>
+                                        <td>{order.specialNote}</td>
+                                        <td>{order.status}</td>
+                                        <td className="action-buttons">
+                                            <button className="edit-btn" onClick={() => handleEditClick(order)}>✏️</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                            </tbody>
                         )}
-                        </tbody>
-                    </table>
-                )}
+                </table>
             </div>
 
             {/* Popup Modal */}

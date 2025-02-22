@@ -2,32 +2,33 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./TableThree.css"; // Importing the stylesheet
 
-const TableAccepting = () => {
+const TableAccepting = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/orders-accept"); // Adjust API URL if needed
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || "Failed to fetch orders");
-                }
-
-                setOrders(data.bookedOrders); // Assuming `data.data` contains the array of orders
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchOrders();
-    }, []);
+    }, [refreshKey]);
+
+    const fetchOrders = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/orders-accept"); // Adjust API URL if needed
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to fetch orders");
+            }
+
+            setOrders(data.bookedOrders); // Assuming `data.data` contains the array of orders
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);

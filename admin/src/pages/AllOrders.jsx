@@ -1,23 +1,29 @@
 import React, { useState } from "react";
-import {Container, Row, Nav, NavItem, NavLink, TabContent, TabPane, Col} from "reactstrap";
+import { Container, Row, Nav, NavItem, NavLink, TabContent, TabPane, Col } from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
-import TablePending from "../components/tables/TablePending";
-import TableAccepting from "../components/tables/TableAccepting";
-import TableInproduction from "../components/tables/TableInProduction";
-
 import NavBar from "../components/header/navBar";
 import '../style/Dashboard.css';
 import classnames from "classnames";
-import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
+
+import TablePending from "../components/tables/TablePending";
+import TableAccepting from "../components/tables/TableAccepting";
 import TableCompleted from "../components/tables/TableCompleted";
 import PlaceOrder from "./Placeorder";
 import Tableforproduction from "../components/tables/Tableforproduction";
 import DeliveryNotes from "./DeliveryNotes";
 import TableIssued from "../components/tables/TableIssuedOrders";
+import TableInproduction from "../components/tables/TableInProduction";
+import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
 
 const AllOrders = () => {
-    const [activeTab, setActiveTab] = useState("0"); // Main tab tracking
-    const [nestedActiveTab, setNestedActiveTab] = useState("0");
+    const [activeTab, setActiveTab] = useState("0");
+    const [nestedActiveTab, setNestedActiveTab] = useState("1");
+    const [refreshKey, setRefreshKey] = useState(0); // Forcing re-render
+
+    // Function to refresh the tab content after updates
+    const handleDataUpdate = () => {
+        setRefreshKey((prev) => prev + 1);
+    };
 
     return (
         <Helmet title={'Dashboard'}>
@@ -28,99 +34,35 @@ const AllOrders = () => {
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}
                     <Nav tabs className="mb-3">
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "0" })}
-                                onClick={() => setActiveTab("0")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Place Order
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "1" })}
-                                onClick={() => setActiveTab("1")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Pending Orders
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "2" })}
-                                onClick={() => {
-                                    setActiveTab("2");
-                                    setNestedActiveTab("1"); // Automatically activate All Booked Orders
-                                }}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Accepted Orders
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "3" ? "active" : ""}
-                                onClick={() => setActiveTab("3")}
-                            >
-                                For Production
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "4" })}
-                                onClick={() => setActiveTab("4")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                In Production
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "5" })}
-                                onClick={() => setActiveTab("5")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Completed Orders
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "6" })}
-                                onClick={() => setActiveTab("6")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Issued Orders
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "7" })}
-                                onClick={() => setActiveTab("7")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Print GatePass
-                            </NavLink>
-                        </NavItem>
+                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Issued Orders", "Print GatePass"].map((label, index) => (
+                            <NavItem key={index}>
+                                <NavLink
+                                    className={classnames({ active: activeTab === index.toString() })}
+                                    onClick={() => setActiveTab(index.toString())}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    {label}
+                                </NavLink>
+                            </NavItem>
+                        ))}
                     </Nav>
 
                     {/* Main Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        <TabPane tabId="0">
+                        <TabPane tabId="0" key={refreshKey}>
                             <Row>
-                                <PlaceOrder />
+                                <PlaceOrder onOrderPlaced={handleDataUpdate} />
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="1">
+                        <TabPane tabId="1" key={refreshKey}>
                             <Row>
                                 <TablePending />
                             </Row>
                         </TabPane>
 
                         {/* Accepted Orders with Nested Tabs */}
-                        <TabPane tabId="2">
-                            {/* Nested Navigation Tabs */}
+                        <TabPane tabId="2" key={refreshKey}>
                             <Nav tabs className="mb-3">
                                 <NavItem>
                                     <NavLink
@@ -142,14 +84,13 @@ const AllOrders = () => {
                                 </NavItem>
                             </Nav>
 
-                            {/* Nested Tab Content */}
                             <TabContent activeTab={nestedActiveTab}>
-                                <TabPane tabId="1">
+                                <TabPane tabId="1" key={refreshKey}>
                                     <Row>
                                         <TableAccepting />
                                     </Row>
                                 </TabPane>
-                                <TabPane tabId="2">
+                                <TabPane tabId="2" key={refreshKey}>
                                     <Row>
                                         <TableAcceptingUnbooked />
                                     </Row>
@@ -157,7 +98,7 @@ const AllOrders = () => {
                             </TabContent>
                         </TabPane>
 
-                        <TabPane tabId="3">
+                        <TabPane tabId="3" key={refreshKey}>
                             <Row>
                                 <Col>
                                     <Tableforproduction />
@@ -165,23 +106,25 @@ const AllOrders = () => {
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="4">
+                        <TabPane tabId="4" key={refreshKey}>
                             <Row>
                                 <TableInproduction />
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="5">
+                        <TabPane tabId="5" key={refreshKey}>
                             <Row>
                                 <TableCompleted />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="6">
+
+                        <TabPane tabId="6" key={refreshKey}>
                             <Row>
                                 <TableIssued />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="7">
+
+                        <TabPane tabId="7" key={refreshKey}>
                             <Row>
                                 <DeliveryNotes />
                             </Row>

@@ -1,49 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import "./TableThree.css"; // Importing the stylesheet
+import { useNavigate } from "react-router-dom";
+import "./TableThree.css";
 
-const TablePending = () => {
+const TablePending = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/orders-pending"); // Adjust API URL if needed
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || "Failed to fetch orders");
-                }
-
-                setOrders(data.data); // Assuming `data.data` contains the array of orders
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchOrders();
-    }, []);
+    }, [refreshKey]);
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1)
-            .toString()
-            .padStart(2, "0")}-${date.getFullYear()}`;
+    const fetchOrders = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/orders-pending");
+            if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch`);
+            const data = await response.json();
+            setOrders(data.data);
+        } catch (err) {
+            setError(err.message || "Unexpected error occurred.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // Function to navigate to order details page
+    const formatDate = (dateString) =>
+        new Intl.DateTimeFormat("en-GB").format(new Date(dateString));
+
     const handleViewOrder = (orderId) => {
-        navigate(`/order-detail/${orderId}`); // Navigate to OrderDetails page
+        navigate(`/order-detail/${orderId}`);
     };
 
     return (
         <div className="table-container">
             <div className="table-wrapper">
+                {/*<button className="refresh-btn" onClick={fetchOrders}>🔄 Refresh</button>*/}
                 {loading ? (
                     <p className="loading-text">Loading orders...</p>
                 ) : error ? (
@@ -67,7 +60,9 @@ const TablePending = () => {
                         <tbody>
                         {orders.length === 0 ? (
                             <tr>
-                                <td colSpan="9" className="no-data">No orders found</td>
+                                <td colSpan="10" className="no-data">
+                                    🚫 No pending orders found.
+                                </td>
                             </tr>
                         ) : (
                             orders.map((order) => (
@@ -78,17 +73,23 @@ const TablePending = () => {
                                     <td>{formatDate(order.expectedDeliveryDate)}</td>
                                     <td>{order.customerEmail}</td>
                                     <td>
-                                        <span className={`status ${order.orStatus.toLowerCase()}`}>
-                                            {order.orStatus}
-                                        </span>
+                                            <span className={`status ${order.orStatus.toLowerCase()}`}>
+                                                {order.orStatus}
+                                            </span>
                                     </td>
                                     <td>{order.dvStatus}</td>
-                                    <td>Rs.{order.totPrice.toFixed(2)}</td>
+                                    <td>
+                                        {new Intl.NumberFormat("en-IN", {
+                                            style: "currency",
+                                            currency: "LKR",
+                                        }).format(order.totPrice)}
+                                    </td>
                                     <td>{order.stID}</td>
                                     <td className="action-buttons">
                                         <button
                                             className="view-btn"
                                             onClick={() => handleViewOrder(order.OrID)}
+                                            aria-label={`View order ${order.OrID}`}
                                         >
                                             👁️
                                         </button>
