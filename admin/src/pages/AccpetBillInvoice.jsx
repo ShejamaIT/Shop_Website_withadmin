@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "../style/invoice.css"; // Make sure this file includes the print styles
 
 const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
-    console.log(selectedOrder.deliveryStatus);
     const invoiceDate = new Date().toLocaleDateString();
 
     const [deliveryCharge, setDeliveryCharge] = useState(selectedOrder.deliveryCharge);

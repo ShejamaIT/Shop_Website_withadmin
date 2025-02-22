@@ -29,7 +29,6 @@ const OrderDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/order-details?orID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
             const data = await response.json();
-            console.log(data);
             setOrder(data.order);
             setFormData({
                 ...data.order,
@@ -96,10 +95,8 @@ const OrderDetails = () => {
     };
 
     const handleSave = async () => {
-        console.log(formData);
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
-        console.log(updatedData);
         let updatedGeneralOrder = null;
         let allUpdatesSuccessful = true; // ✅ Track if all updates pass
 
@@ -118,7 +115,6 @@ const OrderDetails = () => {
                 }
 
                 updatedGeneralOrder = await generalResponse.json();
-                console.log(updatedGeneralOrder);
 
                 if (!updatedGeneralOrder.success) {
                     allUpdatesSuccessful = false;
@@ -141,7 +137,6 @@ const OrderDetails = () => {
                 }
 
                 const updatedItemsOrder = await itemsResponse.json();
-                console.log(updatedItemsOrder);
 
                 if (!updatedItemsOrder.success) {
                     allUpdatesSuccessful = false;
@@ -164,7 +159,6 @@ const OrderDetails = () => {
                 }
 
                 const updatedDeliveryOrder = await deliveryResponse.json();
-                console.log(updatedDeliveryOrder);
 
                 if (!updatedDeliveryOrder.success) {
                     allUpdatesSuccessful = false;
@@ -239,13 +233,11 @@ const OrderDetails = () => {
             ...item,
             orId: order.orderId , // Replace 'default_orId_value' if needed
         };
-        console.log("Opening modal for order:", updatedItem);
         setSelectedItem(updatedItem);
         setShowModal(true);
     };
 
     const handleSubmit2 = async (formData) => {
-        console.log("Submitting form data:", formData);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
                 method: "PUT",

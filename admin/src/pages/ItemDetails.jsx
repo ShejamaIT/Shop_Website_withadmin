@@ -34,19 +34,6 @@ const ItemDetails = () => {
     });
     const [types, setTypes] = useState([]);
 
-    // Fetch Types when Category Changes
-    // useEffect(() => {
-    //     if (formData.category_id) {
-    //         fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.category_id}`)
-    //             .then((res) => res.json())
-    //             .then((data) => setTypes(data.types))
-    //             .catch((err) => {
-    //                 console.error("Error fetching types:", err);
-    //                 toast.error("Failed to load types.");
-    //             });
-    //     }
-    // }, [formData.category_id]);
-
     useEffect(() => {
         if (formData.maincategory) {
             fetch(`http://localhost:5001/api/admin/main/typesname?categoryName=${formData.maincategory}`)
@@ -112,7 +99,6 @@ const ItemDetails = () => {
             try {
                 const response = await fetch(`http://localhost:5001/api/admin/main/find-cost?s_ID=${value}&I_Id=${id}`);
                 const data = await response.json();
-                console.log(data);
                 if (response.ok) {
                     setStockData((prev) => ({
                         ...prev,
@@ -136,8 +122,6 @@ const ItemDetails = () => {
 
     const handleAddStock = async () => {
         try {
-            console.log("Stock Data to be sent:", stockData);
-
             const response = await fetch("http://localhost:5001/api/admin/main/add-stock-received", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -241,7 +225,6 @@ const ItemDetails = () => {
             setItem(data.item);
             setSuppliers(data.item.suppliers || []); // Set suppliers
             setFormData(data.item); // Copy item details for editing
-            console.log(data.item);
             setLoading(false);
         } catch (err) {
             console.error("Error fetching item details:", err);
@@ -352,13 +335,6 @@ const ItemDetails = () => {
             toast.error("Error updating item: " + error.message);
         }
     };
-
-
-    useEffect(() => {
-        // This will run whenever the suppliers state is updated
-        console.log("Updated Suppliers:", types);
-    }, [types]);  // The dependency array ensures it runs when suppliers change
-
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;

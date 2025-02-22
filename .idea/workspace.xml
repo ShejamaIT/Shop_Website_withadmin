@@ -12,9 +12,17 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2D-5-3.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableInProduction.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/Tableforproduction.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccpetBillInvoice.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddSupplier.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddSupplier.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Orders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Orders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/ProductDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ProductDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -198,7 +206,7 @@
       <workItem from="1739964605433" duration="3953000" />
       <workItem from="1740023765919" duration="17061000" />
       <workItem from="1740044921396" duration="1777000" />
-      <workItem from="1740047813379" duration="56025000" />
+      <workItem from="1740047813379" duration="57917000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -543,7 +551,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="221" />
+    <option name="localTasksCounter" value="222" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -585,8 +593,8 @@
     <MESSAGE value="add final invoice" />
     <MESSAGE value="add delivery note view" />
     <MESSAGE value="update final invoice" />
-    <MESSAGE value="bug fixing" />
     <MESSAGE value="update item(add new colun)" />
-    <option name="LAST_COMMIT_MESSAGE" value="update item(add new colun)" />
+    <MESSAGE value="bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="bug fixing" />
   </component>
 </project>

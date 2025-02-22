@@ -3,8 +3,6 @@ import { Container, Row, Col, Label, Input, Button } from "reactstrap";
 import { toast } from "react-toastify";
 
 const AddOtherDetails = () => {
-    const [subCategoriesOne, setSubCategoriesOne] = useState([]);
-    const [subCategoriesTwo, setSubCategoriesTwo] = useState([]);
     const [categories, setCategories] = useState([]);
     const [catname , setCatname] = useState({  Catname: ""});
     const [formData, setFormData] = useState({ Ca_Id: "", sub_one: "", sub_two: "", subcatone_img: null, subcattwo_img: null,});
@@ -19,44 +17,6 @@ const AddOtherDetails = () => {
             });
     }, []);
 
-    // Fetch SubCategory One when Category Changes for Type Section
-    useEffect(() => {
-        if (typeData.Ca_Id) {
-            fetch(`http://localhost:5001/api/admin/main/getSubcategories?Ca_Id=${typeData.Ca_Id}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success) {
-                        setSubCategoriesOne(data.data);
-                        setTypeData((prev) => ({ ...prev, sub_one: "", sub_two: "" })); // Reset selections
-                    }
-                })
-                .catch((err) => {
-                    toast.error("Failed to load subcategories.");
-                });
-        } else {
-            setSubCategoriesOne([]);
-            setSubCategoriesTwo([]);
-        }
-    }, [typeData.Ca_Id]);
-    // Fetch SubCategory Two when SubCategory One Changes for Type Section
-    useEffect(() => {
-        if (typeData.sub_one) {
-            fetch(`http://localhost:5001/api/admin/main/getSubcategoriesTwo?sb_c_id=${typeData.sub_one}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success) {
-                        setSubCategoriesTwo(data.data);
-                        setTypeData((prev) => ({ ...prev, sub_two: "" })); // Reset sub_two selection
-                    }
-                })
-                .catch((err) => {
-                    toast.error("Failed to load subcategories.");
-                });
-        } else {
-            setSubCategoriesTwo([]);
-        }
-    }, [typeData.sub_one]);
-
     // Handle Input Changes for formData
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -69,12 +29,6 @@ const AddOtherDetails = () => {
         if (files.length > 0) {
             setFormData((prev) => ({ ...prev, [name]: files[0] })); // Store file in formData
         }
-    };
-
-    // Handle Input Changes for typeData
-    const handleTypeChange = (e) => {
-        const { name, value } = e.target;
-        setTypeData((prev) => ({ ...prev, [name]: value }));
     };
 
     // Handle Input Changes for catname
@@ -159,59 +113,6 @@ const AddOtherDetails = () => {
         }
     };
 
-    // Handle Form Submission for Types
-    const handleSubmitType = async () => {
-        try {
-            // Destructure typeData
-            const { Ca_Id, sub_one, sub_two } = typeData;
-
-            // Perform basic validation
-            if (!Ca_Id || !sub_one) {
-                toast.error("Ca_Id and sub_one are required.");
-                return;
-            }
-
-            console.log("Submitting Type Data:", typeData);
-
-            // Prepare the request payload
-            const formDataToSend = {
-                Ca_Id,
-                sub_one,
-                sub_two,
-            };
-
-            // Send POST request to your API
-            const response = await fetch("http://localhost:5001/api/admin/main/type", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formDataToSend),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Show success toast and reset form state
-                toast.success(result.message);
-                setTypeData({
-                    Ca_Id: "",
-                    sub_one: "",
-                    sub_two: "",
-                });
-            } else {
-                // Show error message from the API response
-                toast.error(result.message);
-            }
-        } catch (error) {
-            // Handle network or server errors
-            toast.error("Failed to add type. Please try again.");
-            console.error("Error submitting Type:", error);
-        }
-    };
-
-
-
     return (
         <Container className="add-item-container">
             <Row className="justify-content-center">
@@ -243,35 +144,6 @@ const AddOtherDetails = () => {
 
                         <Button color="success" onClick={handleSubmitSubCategory}>Add Sub-Category</Button>
                     </div>
-
-                    {/* Add Type Section */}
-                    {/*<div className="p-3 border rounded shadow-sm">*/}
-                    {/*    <Label className="fw-bold">Add Type</Label>*/}
-                    {/*    <Input type="select" className="mb-2" name="Ca_Id" value={typeData.Ca_Id} onChange={handleTypeChange} required>*/}
-                    {/*        <option value="">Select Category</option>*/}
-                    {/*        {categories.map((cat) => (*/}
-                    {/*            <option key={cat.id} value={cat.id}>{cat.name}</option>*/}
-                    {/*        ))}*/}
-                    {/*    </Input>*/}
-                    {/*    {subCategoriesOne.length > 0 && (*/}
-                    {/*        <Input type="select" className="mb-2" name="sub_one" value={typeData.sub_one} onChange={handleTypeChange} required>*/}
-                    {/*            <option value="">Select Sub One</option>*/}
-                    {/*            {subCategoriesOne.map((sub) => (*/}
-                    {/*                <option key={sub.sb_c_id} value={sub.subcategory}>{sub.subcategory}</option>*/}
-                    {/*            ))}*/}
-                    {/*        </Input>*/}
-                    {/*    )}*/}
-                    {/*    {subCategoriesTwo.length > 0 && (*/}
-                    {/*        <Input type="select" className="mb-2" name="sub_two" value={typeData.sub_two} onChange={handleTypeChange} required>*/}
-                    {/*            <option value="">Select Sub Two</option>*/}
-                    {/*            {subCategoriesTwo.map((sub) => (*/}
-                    {/*                <option key={sub.sb_cc_id} value={sub.sb_cc_id}>{sub.subcategory}</option>*/}
-                    {/*            ))}*/}
-                    {/*        </Input>*/}
-                    {/*    )}*/}
-                    {/*    <Button color="danger" onClick={handleSubmitType}>Add Type</Button>*/}
-                    {/*</div>*/}
-
                 </Col>
             </Row>
         </Container>

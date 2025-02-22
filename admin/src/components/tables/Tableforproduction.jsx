@@ -18,7 +18,6 @@ const TableForProduction = ({ refreshKey }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitemslessone"); // Adjust API URL if needed
             const data = await response.json();
-            console.log(data);
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch items.");
             }

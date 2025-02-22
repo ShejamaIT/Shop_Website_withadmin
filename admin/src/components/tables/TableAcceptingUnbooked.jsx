@@ -15,7 +15,6 @@ const TableAcceptingUnbooked = ({ refreshKey }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders-accept"); // Adjust API URL if needed
             const data = await response.json();
-            console.log(data.unbookedOrders);
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }

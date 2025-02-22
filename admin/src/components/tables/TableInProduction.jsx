@@ -19,8 +19,6 @@ const TableInproduction = ({ refreshKey }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders-inproduction");
             const data = await response.json();
-            console.log(data)
-
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }
@@ -48,8 +46,6 @@ const TableInproduction = ({ refreshKey }) => {
 
     // Handle form submission (Update order status)
     const handleSubmit = async (formData) => {
-        console.log("Submitting form data:", formData);
-
         const { newStatus, isOrderComplete, rDate, recCount, detail } = formData;
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/update-stock", {

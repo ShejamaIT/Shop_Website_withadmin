@@ -30,7 +30,6 @@ const ProductDetails = () => {
 
     const imageUrl = product.imgUrl; // Assuming product.imgUrl is like "http://localhost:4000/uploads/images/1719478644510.png"
     const relativeImagePath = imageUrl.split('http://localhost:4000')[1];
-    console.log(relativeImagePath);
 
     if (loading) {
         return <p>Loading...</p>;

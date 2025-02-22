@@ -22,7 +22,6 @@ const AddSupplier = ({ onAddSupplier }) => {
             try {
                 const response = await fetch("http://localhost:5001/api/admin/main/allitems");
                 const data = await response.json();
-                console.log("Fetched items:", data);
                 setItems(data || []);
                 setFilteredItems(data || []);
             } catch (error) {
@@ -152,19 +151,6 @@ const AddSupplier = ({ onAddSupplier }) => {
                 <Col lg="8" className="mx-auto">
                     <h3 className="text-center">Add New Supplier</h3>
                     <Form onSubmit={handleSubmit}>
-                        {/* Supplier Form Fields */}
-                        {/*<FormGroup>*/}
-                        {/*    <Label for="s_ID">Supplier ID</Label>*/}
-                        {/*    <Input*/}
-                        {/*        type="text"*/}
-                        {/*        name="s_ID"*/}
-                        {/*        id="s_ID"*/}
-                        {/*        value={formData.s_ID}*/}
-                        {/*        onChange={handleChange}*/}
-                        {/*        required*/}
-                        {/*    />*/}
-                        {/*</FormGroup>*/}
-
                         <FormGroup>
                             <Label for="name">Supplier Name</Label>
                             <Input

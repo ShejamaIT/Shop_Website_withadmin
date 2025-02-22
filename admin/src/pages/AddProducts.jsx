@@ -264,7 +264,24 @@ const AddItem = () => {
 
                         <FormGroup>
                             <Label for="material">Material</Label>
-                            <Input type="text" name="material" id="material" value={formData.material} onChange={handleChange} required />
+                            <Input
+                                type="select"
+                                name="material"
+                                value={formData.material}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Material</option>
+                                <option value="Teak">Teak</option>
+                                <option value="Mahogani">Mahogani</option>
+                                <option value="Mara">Mara</option>
+                                <option value="Attoriya">Attoriya</option>
+                                <option value="Sapu">Sapu</option>
+                                <option value="Steel">Steel</option>
+                                <option value="MDF">MDF</option>
+                                <option value="MM">MM</option>
+                                <option value="Other">Other</option>
+                            </Input>
                         </FormGroup>
 
                         <FormGroup>

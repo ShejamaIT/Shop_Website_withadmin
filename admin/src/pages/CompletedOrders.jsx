@@ -126,7 +126,6 @@ const CompleteOrderDetails = () => {
                 }
 
                 const updatedGeneralOrder = await generalResponse.json();
-                console.log(updatedGeneralOrder);
 
                 if (!updatedGeneralOrder.success) {
                     toast.error(updatedGeneralOrder.message || "Failed to update order general detail.");
@@ -147,7 +146,6 @@ const CompleteOrderDetails = () => {
                 }
 
                 const updatedItemsOrder = await itemsResponse.json();
-                console.log(updatedItemsOrder);
 
                 if (!updatedItemsOrder.success) {
                     toast.error(updatedItemsOrder.message || "Failed to update order item detail.");
@@ -168,7 +166,6 @@ const CompleteOrderDetails = () => {
                 }
 
                 updatedDeliveryOrder = await deliveryResponse.json();
-                console.log(updatedDeliveryOrder);
 
                 if (!updatedDeliveryOrder.success) {
                     toast.error(updatedDeliveryOrder.message || "Failed to update delivery information.");
@@ -237,13 +234,11 @@ const CompleteOrderDetails = () => {
 
     const handleEditClick = (order) => {
         if (!order) return;
-        console.log("Opening modal for order:", order);
         setSelectedOrder(order);
         setShowModal1(true);
     };
     const handleEditClick3 = (order) => {
         if (!order) return;
-        console.log("Opening modal for order:", order);
         setSelectedOrder(order);
         setShowModal2(true);
     };
@@ -254,13 +249,11 @@ const CompleteOrderDetails = () => {
             ...item,
             orId: order.orderId , // Replace 'default_orId_value' if needed
         };
-        console.log("Opening modal for order:", updatedItem);
         setSelectedItem(updatedItem);
         setShowModal(true);
     };
 
     const handleSubmit2 = async (formData) => {
-        console.log("Submitting form data:", formData);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
                 method: "PUT",
@@ -292,7 +285,6 @@ const CompleteOrderDetails = () => {
     }
 
     const handleSubmit3 = async (formData) => {
-        console.log("Submitting form data:", formData);
         let updatedFormData = {
             ...formData,
             orderId: formData.order.orderId,
@@ -319,13 +311,11 @@ const CompleteOrderDetails = () => {
         // If balance is 0, payment type should be Settled
         if (balance === 0) {
             updatedFormData.paymentType = "Settled";
-            console.log("Balance is 0, setting payment status to Settled.");
         }
 
         // For Pickup: Payment status can only be Settled or Credit
         if (delStatus === "Pickup") {
             if (payStatus !== "Settled" && payStatus !== "Credit") {
-                console.log("Invalid payment status for Pickup. Reopening modal...");
                 setShowModal2(true);
                 return;
             }
@@ -336,9 +326,7 @@ const CompleteOrderDetails = () => {
         if (delStatus === "Delivery") {
             if (balance > 0 && payStatus !== "COD") {
                 updatedFormData.paymentType = "COD";
-                console.log("Delivery with balance > 0, setting payment type to COD.");
             } else if (!["Settled", "COD", "Credit"].includes(payStatus)) {
-                console.log("Invalid payment status for Delivery. Reopening modal...");
                 setShowModal2(true);
                 return;
             }
@@ -356,7 +344,6 @@ const CompleteOrderDetails = () => {
     };
 
     const handleSubmit = async (formData) => {
-        console.log("Submitting form data:", formData);
         // Destructure the necessary fields from formData
         const { orID,
             isPickup,
@@ -367,7 +354,7 @@ const CompleteOrderDetails = () => {
             addedAdvance,
             updatedDeliveryCharge,
             updatedDiscount } = formData;
-        console.log(formData);
+
         try {
             // Send request to the "update-invoice" API
             const response = await fetch("http://localhost:5001/api/admin/main/update-invoice", {

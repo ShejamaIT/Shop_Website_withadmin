@@ -109,11 +109,8 @@ const OrderDetails = () => {
 
 
     const handleSave = async () => {
-        console.log(formData);
         const updatedTotal = calculateTotal();
         const updatedData = { ...formData, totalPrice: updatedTotal };
-        console.log(updatedData);
-
         try {
             // Step 1: Update order general details only if changed
             if (hasGeneralDetailsChanged(updatedData)) {
@@ -128,7 +125,6 @@ const OrderDetails = () => {
                 }
 
                 const updatedGeneralOrder = await generalResponse.json();
-                console.log(updatedGeneralOrder);
 
                 if (!updatedGeneralOrder.success) {
                     toast.error(updatedGeneralOrder.message || "Failed to update order general detail.");
@@ -149,7 +145,6 @@ const OrderDetails = () => {
                 }
 
                 const updatedItemsOrder = await itemsResponse.json();
-                console.log(updatedItemsOrder);
 
                 if (!updatedItemsOrder.success) {
                     toast.error(updatedItemsOrder.message || "Failed to update order item detail.");
@@ -170,7 +165,6 @@ const OrderDetails = () => {
                 }
 
                 const updatedDeliveryOrder = await deliveryResponse.json();
-                console.log(updatedDeliveryOrder);
 
                 if (!updatedDeliveryOrder.success) {
                     toast.error(updatedDeliveryOrder.message || "Failed to update delivery information.");
@@ -241,7 +235,6 @@ const OrderDetails = () => {
 
     const handleEditClick = (order) => {
         if (!order) return;
-        console.log("Opening modal for order:", order);
         setSelectedOrder(order);
         setShowModal1(true);
     };
@@ -252,13 +245,11 @@ const OrderDetails = () => {
             ...item,
             orId: order.orderId , // Replace 'default_orId_value' if needed
         };
-        console.log("Opening modal for order:", updatedItem);
         setSelectedItem(updatedItem);
         setShowModal(true);
     };
 
     const handleSubmit2 = async (formData) => {
-        console.log("Submitting form data:", formData);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
                 method: "PUT",
@@ -277,10 +268,8 @@ const OrderDetails = () => {
 
             if (response.ok) {
                 fetchOrder();
-                console.log("Quantity updated successfully:", data.message);
                 alert("Quantity updated successfully!");
             } else {
-                console.error("Failed to update quantity:", data.message);
                 alert(`Failed to update quantity: ${data.message}`);
             }
         } catch (error) {
@@ -290,8 +279,6 @@ const OrderDetails = () => {
     }
 
     const handleSubmit = async (formData) => {
-        console.log("Submitting form data:", formData);
-
         // Destructure the necessary fields from formData
         const { orID,
             isPickup,
@@ -302,7 +289,6 @@ const OrderDetails = () => {
             addedAdvance,
             updatedDeliveryCharge,
             updatedDiscount } = formData;
-        console.log(formData);
         try {
             // Send request to the "update-invoice" API
             const response = await fetch("http://localhost:5001/api/admin/main/update-invoice", {
