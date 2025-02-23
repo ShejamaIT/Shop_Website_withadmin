@@ -765,10 +765,10 @@ router.get("/item-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "Item ID is required" });
         }
 
-        // ✅ Fetch item details without category and subcategory information
+        // ✅ Fetch item details from Item table
         const itemQuery = `
             SELECT
-                I.I_Id, I.I_name, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty,I.minQTY,
+                I.I_Id, I.I_name, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty, I.minQTY,
                 I.warrantyPeriod, I.img, I.img1, I.img2, I.img3, I.color, I.material, I.mn_Cat, I.sb_catOne, I.sb_catTwo
             FROM Item I
             WHERE I.I_Id = ?`;
@@ -787,11 +787,11 @@ router.get("/item-details", async (req, res) => {
         const img2Base64 = itemData.img2 ? Buffer.from(itemData.img2).toString("base64") : null;
         const img3Base64 = itemData.img3 ? Buffer.from(itemData.img3).toString("base64") : null;
 
-        // ✅ Fetch all suppliers that provide this item along with unit_cost
+        // ✅ Fetch suppliers providing this item
         const supplierQuery = `
             SELECT S.s_ID, S.name, S.contact, ISUP.unit_cost
             FROM Supplier S
-            JOIN item_supplier ISUP ON S.s_ID = ISUP.s_ID
+                     JOIN item_supplier ISUP ON S.s_ID = ISUP.s_ID
             WHERE ISUP.I_Id = ?`;
 
         const [suppliersResult] = await db.query(supplierQuery, [I_Id]);
@@ -800,7 +800,24 @@ router.get("/item-details", async (req, res) => {
             s_ID: supplier.s_ID,
             name: supplier.name,
             contact: supplier.contact,
-            unit_cost: supplier.unit_cost // Include unit cost
+            unit_cost: supplier.unit_cost
+        }));
+
+        // ✅ Fetch stock details **excluding** 'Issued' status, only include 'Available', 'Damage', 'Reserved'
+        const stockQuery = `
+            SELECT srd_Id, stock_Id, sr_ID, status
+            FROM m_s_r_detail
+            WHERE I_Id = ?
+              AND status IN ('Available', 'Damage', 'Reserved')
+            ORDER BY srd_Id ASC , FIELD(status, 'Available', 'Reserved', 'Damage')`;
+
+        const [stockResults] = await db.query(stockQuery, [I_Id]);
+
+        const stockDetails = stockResults.map(stock => ({
+            srd_Id: stock.srd_Id,
+            stock_Id: stock.stock_Id,
+            sr_ID: stock.sr_ID,
+            status: stock.status
         }));
 
         // ✅ Construct final response
@@ -821,11 +838,12 @@ router.get("/item-details", async (req, res) => {
                 maincategory: itemData.mn_Cat,
                 sub_one: itemData.sb_catOne,
                 sub_two: itemData.sb_catTwo,
-                img: mainImgBase64,  // Main image from Item table
-                img1: img1Base64,     // Additional Image 1
-                img2: img2Base64,     // Additional Image 2
-                img3: img3Base64,     // Additional Image 3
-                suppliers: suppliers // List of suppliers with unit cost
+                img: mainImgBase64,
+                img1: img1Base64,
+                img2: img2Base64,
+                img3: img3Base64,
+                suppliers: suppliers,
+                stockDetails: stockDetails // Only 'Available', 'Reserved', 'Damage'
             }
         };
 
@@ -2935,6 +2953,43 @@ router.put("/change-quantity", async (req, res) => {
         return res.status(500).json({ message: "Error updating quantity.", error: error.message });
     }
 });
+
+router.post("/get-stock-details", async (req, res) => {
+    try {
+        // Ensure req.body is an array
+        if (!Array.isArray(req.body) || req.body.length === 0) {
+            return res.status(400).json({ error: "Invalid request. Provide an array of item IDs." });
+        }
+
+        const itemIds = req.body.map(id => id.trim()); // Trim whitespace
+
+        // Construct dynamic SQL query with placeholders
+        const placeholders = itemIds.map(() => "?").join(", ");
+        const sql = `SELECT * FROM m_s_r_detail WHERE I_Id IN (${placeholders})`;
+
+        // Execute query
+        const [results] = await db.query(sql, itemIds);
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                message: "No stock details found for the provided item IDs",
+                itemIds: itemIds,
+                stockDetails: []
+            });
+        }
+
+        return res.status(200).json({
+            message: "Stock details retrieved successfully",
+            itemIds: itemIds,
+            stockDetails: results
+        });
+
+    } catch (error) {
+        console.error("Error fetching stock details:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 
 
 // Function to generate new ida
