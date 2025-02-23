@@ -1353,7 +1353,7 @@ router.post('/update-stock', async (req, res) => {
 
     try {
         // Get the current quantity for the production order
-        const [rows] = await db.query("SELECT qty, I_Id FROM production WHERE p_ID = ?", [p_ID]);
+        const [rows] = await db.query("SELECT qty, I_Id,s_ID  FROM production WHERE p_ID = ?", [p_ID]);
 
         if (rows.length === 0) {
             return res.status(404).json({ error: "Production order not found" });
