@@ -8,6 +8,7 @@ import "../style/ItemDetails.css";
 const ItemDetails = () => {
     const { id } = useParams(); // Get item ID from URL
     const [item, setItem] = useState(null);
+    const [stock, setStock] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [suppliers, setSuppliers] = useState([]); // State to store supplier data
     const [suppliers1, setSuppliers1] = useState([]); // State to store supplier data
@@ -179,103 +180,6 @@ const ItemDetails = () => {
         }
     };
 
-    useEffect(() => {
-        fetchItem();
-    }, [id]);
-
-    // Fetch Categories
-    useEffect(() => {
-        fetch("http://localhost:5001/api/admin/main/categories")
-            .then((res) => res.json())
-            .then((data) => setCategories(data))
-            .catch((err) => {
-                console.error("Error fetching categories:", err);
-                toast.error("Failed to load categories.");
-            });
-    }, []);
-
-    // Fetch all suppliers when the modal opens
-    useEffect(() => {
-        const fetchSuppliers = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
-                if (!response.ok) throw new Error("Failed to fetch suppliers");
-                const data = await response.json();
-                if (data.success) {
-                    setSuppliers1(data.suppliers); // Set the suppliers list
-                } else {
-                    toast.error(data.message);
-                }
-            } catch (error) {
-                toast.error("Error loading suppliers");
-            }
-        };
-
-        if (showSupplierModal) {
-            fetchSuppliers();
-        }
-    }, [showSupplierModal]); // Re-run this when the modal is opened
-
-    const fetchItem = async () => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/item-details?I_Id=${id}`);
-            if (!response.ok) throw new Error("Failed to fetch item details.");
-            const data = await response.json();
-            setItem(data.item);
-            setSuppliers(data.item.suppliers || []); // Set suppliers
-            setFormData(data.item); // Copy item details for editing
-            setLoading(false);
-        } catch (err) {
-            console.error("Error fetching item details:", err);
-            setError(err.message);
-            setLoading(false);
-        }
-    };
-
-    const handleChange = (e, supplierId) => {
-        const { name, value, type, files } = e.target;
-
-        // If the field is a file, handle image upload
-        if (type === "file" && files) {
-            const file = files[0];
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    [name]: reader.result.split(',')[1], // Removing the "data:image/png;base64," part
-                }));
-            };
-
-            reader.readAsDataURL(file);
-        } else {
-            // Handle regular text input changes
-            setFormData((prevFormData) => ({
-                ...prevFormData,
-                [name]: value,
-            }));
-        }
-
-        // Update the specific supplier's data in the suppliers array
-        setSuppliers((prevSuppliers) =>
-            prevSuppliers.map((supplier) =>
-                supplier.s_ID === supplierId
-                    ? { ...supplier, [name]: value } // Update the supplier's cost
-                    : supplier
-            )
-        );
-
-        // Also update the supplier information in formData
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            suppliers: prevFormData.suppliers.map((supplier) =>
-                supplier.s_ID === supplierId
-                    ? { ...supplier, [name]: value } // Update the supplier's cost in the formData
-                    : supplier
-            )
-        }));
-    };
-
     const handleSave = async () => {
         try {
             const updatedFormData = new FormData();
@@ -333,6 +237,105 @@ const ItemDetails = () => {
             console.error("❌ Error updating item:", error);
             toast.error("Error updating item: " + error.message);
         }
+    };
+
+    useEffect(() => {
+        fetchItem();
+    }, [id]);
+
+    // Fetch Categories
+    useEffect(() => {
+        fetch("http://localhost:5001/api/admin/main/categories")
+            .then((res) => res.json())
+            .then((data) => setCategories(data))
+            .catch((err) => {
+                console.error("Error fetching categories:", err);
+                toast.error("Failed to load categories.");
+            });
+    }, []);
+
+    // Fetch all suppliers when the modal opens
+    useEffect(() => {
+        const fetchSuppliers = async () => {
+            try {
+                const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
+                if (!response.ok) throw new Error("Failed to fetch suppliers");
+                const data = await response.json();
+                if (data.success) {
+                    setSuppliers1(data.suppliers); // Set the suppliers list
+                } else {
+                    toast.error(data.message);
+                }
+            } catch (error) {
+                toast.error("Error loading suppliers");
+            }
+        };
+
+        if (showSupplierModal) {
+            fetchSuppliers();
+        }
+    }, [showSupplierModal]); // Re-run this when the modal is opened
+
+    const fetchItem = async () => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/item-details?I_Id=${id}`);
+            if (!response.ok) throw new Error("Failed to fetch item details.");
+            const data = await response.json();
+            setItem(data.item);
+            console.log(data.item.stockDetails);
+            setSuppliers(data.item.suppliers || []); // Set suppliers
+            setStock(data.item.stockDetails || []); // set stockDetails
+            setFormData(data.item); // Copy item details for editing
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching item details:", err);
+            setError(err.message);
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (e, supplierId) => {
+        const { name, value, type, files } = e.target;
+
+        // If the field is a file, handle image upload
+        if (type === "file" && files) {
+            const file = files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+                setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    [name]: reader.result.split(',')[1], // Removing the "data:image/png;base64," part
+                }));
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            // Handle regular text input changes
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                [name]: value,
+            }));
+        }
+
+        // Update the specific supplier's data in the suppliers array
+        setSuppliers((prevSuppliers) =>
+            prevSuppliers.map((supplier) =>
+                supplier.s_ID === supplierId
+                    ? { ...supplier, [name]: value } // Update the supplier's cost
+                    : supplier
+            )
+        );
+
+        // Also update the supplier information in formData
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            suppliers: prevFormData.suppliers.map((supplier) =>
+                supplier.s_ID === supplierId
+                    ? { ...supplier, [name]: value } // Update the supplier's cost in the formData
+                    : supplier
+            )
+        }));
     };
 
     if (loading) return <p>Loading...</p>;
@@ -729,6 +732,38 @@ const ItemDetails = () => {
                                     <Button color="secondary" onClick={() => setShowSupplierModal(false)}>Cancel</Button>
                                 </ModalFooter>
                             </Modal>
+                        </Col>
+
+                        <Col lg="12">
+                            <h4 className="mb-3 text-center topic">Stock Details</h4>
+                            <div className="item-details">
+                                <div className="item-details">
+                                    {stock && stock.length > 0 ? (
+                                        <table className="table table-striped table-bordered">
+                                            <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Stock ID</th>
+                                                <th>Batch ID</th>
+                                                <th>Status</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {stock.map((stockItem) => (
+                                                <tr key={stockItem.srd_Id}>
+                                                    <td>{stockItem.srd_Id}</td>
+                                                    <td>{stockItem.stock_Id}</td>
+                                                    <td>{stockItem.sr_ID}</td>
+                                                    <td>{stockItem.status}</td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <p className="text-center">No stock details available</p>
+                                    )}
+                                </div>
+                            </div>
                         </Col>
                     </Row>
                 </Container>
