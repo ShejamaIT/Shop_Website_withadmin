@@ -239,6 +239,7 @@ const CompleteOrderDetails = () => {
     };
     const handleEditClick3 = (order) => {
         if (!order) return;
+        console.log(order);
         setSelectedOrder(order);
         setShowModal2(true);
     };
@@ -285,22 +286,23 @@ const CompleteOrderDetails = () => {
     }
 
     const handleSubmit3 = async (formData) => {
+        console.log(formData);
         let updatedFormData = {
             ...formData,
-            orderId: formData.order.orderId,
-            orderDate: formData.order.orderDate,
-            salesperson: formData.order.salesTeam.employeeName,
-            phoneNumber: formData.order.phoneNumber,
-            optionalNumber: formData.order.optionalNumber,
-            items: formData.order.items, // Order items added
-            discount: formData.order.discount,
-            totalPrice: formData.order.totalPrice,
-            previousAdvance: formData.previousAdvance,
-            addedAdvance: formData.addedAdvance,
-            totalAdvance: formData.totalAdvance,
-            balance: formData.balance,
-            deliveryStatus: formData.order.deliveryStatus,
-            paymentType: formData.order.paymentType,
+            // orderId: formData.order.orderId,
+            // orderDate: formData.order.orderDate,
+            // salesperson: formData.order.salesTeam.employeeName,
+            // phoneNumber: formData.order.phoneNumber,
+            // optionalNumber: formData.order.optionalNumber,
+            // items: formData.order.items, // Order items added
+            // discount: formData.order.discount,
+            // totalPrice: formData.order.totalPrice,
+            // previousAdvance: formData.previousAdvance,
+            // addedAdvance: formData.addedAdvance,
+            // totalAdvance: formData.totalAdvance,
+            // balance: formData.balance,
+            // deliveryStatus: formData.order.deliveryStatus,
+            // paymentType: formData.order.paymentType,
         };
         setShowModal2(false);
 
@@ -334,6 +336,30 @@ const CompleteOrderDetails = () => {
 
         // Final submission after all validations
         console.log("Final form data after validation:", updatedFormData);
+
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/process-order`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedFormData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                fetchOrder();
+                console.log("Quantity updated successfully:", data.message);
+                alert("Quantity updated successfully!");
+            } else {
+                console.error("Failed to update quantity:", data.message);
+                alert(`Failed to update quantity: ${data.message}`);
+            }
+        } catch (error) {
+            console.error("Error during quantity update:", error);
+            alert(`Error updating quantity: ${error.message}`);
+        }
 
         // Show receipt view after successful validation
         setReceiptData(updatedFormData);  // Set data for receipt

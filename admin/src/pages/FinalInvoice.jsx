@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from "react";
-import "../style/finalInvoice.css"; // Ensure this file includes the necessary styles
+import "../style/finalInvoice.css";
+import {Button, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader} from "reactstrap";
+import {toast} from "react-toastify"; // Ensure this file includes the necessary styles
 
 const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => {
     const invoiceDate = new Date().toLocaleDateString();
-
     const [paymentType, setPaymentType] = useState(selectedOrder.payStatus);
     const [deliveryStatus, setDeliveryStatus] = useState(selectedOrder.deliveryStatus);
     const [advance, setAdvance] = useState(selectedOrder.advance);
     const [nowPay, setNowPay] = useState(0);
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [items, setItems] = useState([]); // State to store supplier data
+    const [selectedItems, setSelectedItems] = useState([]); // State to store selected stock items
 
     const calculateTotal = (item) => item.quantity * item.unitPrice;
+    const delivery = Number(selectedOrder.deliveryCharge);
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
     const totalAdvance = Number(advance) + Number(nowPay);
-    const netTotal = subtotal - Number(selectedOrder.discount);
+    const netTotal = (subtotal + delivery) - Number(selectedOrder.discount);
     const balance = netTotal - totalAdvance;
+
 
     useEffect(() => {
         if (balance === 0) {
@@ -31,10 +37,46 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
             totalAdvance: totalAdvance,
             netTotal: netTotal,
             balance: balance,
+            delivery:delivery,
             order: selectedOrder,
         });
-        // window.print();
     };
+
+    useEffect(() => {
+        console.log(deliveryStatus);
+        const itemIds = [...new Set(selectedOrder.items.map(item => item.itemId))];
+        const fetchItems = async () => {
+            try {
+                if (itemIds.length === 0) {
+                    toast.error("No valid item IDs to fetch stock details.");
+                    return;
+                }
+
+                const response = await fetch("http://localhost:5001/api/admin/main/get-stock-details", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(itemIds) // Send itemIds as an array (valid JSON)
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch stock details");
+
+                const data = await response.json();
+                if (data.stockDetails && data.stockDetails.length > 0) {
+                    setItems(data.stockDetails);
+                } else {
+                    toast.error("No stock details found for selected items.");
+                }
+            } catch (error) {
+                toast.error("Error loading stock details.");
+            }
+        };
+
+        if (showStockModal && selectedOrder.items.length > 0) {
+            fetchItems();
+        }
+    }, [showStockModal, selectedOrder.items]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -43,6 +85,19 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
 
     const handlePaymentTypeChange = (e) => {
         setPaymentType(e.target.value);
+    };
+
+    const handleItemSelect = (e) => {
+        const selectedItemId = e.target.value;
+        console.log(selectedItemId);
+        console.log(items);
+        if (selectedItemId) {
+            const selectedItem = items.find(item => item.srd_Id === selectedItemId);
+            console.log(selectedItem)
+            if (selectedItem) {
+                setSelectedItems([...selectedItems, selectedItem]); // Add selected item to the table
+            }
+        }
     };
 
     return (
@@ -74,6 +129,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                             {balance === 0 && <option value="Settled">Settled</option>} {/* Auto-set to Settled if balance is 0 */}
                         </select>
                     </div>
+
                     <div className="delivery-status">
                         <label><strong>Delivery Status:</strong></label>
                         <p>{selectedOrder.deliveryStatus}</p>
@@ -103,12 +159,13 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
 
                 <div className="invoice-summary">
                     <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
+                    <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p>
                     <p><strong>Discount:</strong> Rs. {selectedOrder.discount.toFixed(2)}</p>
                     <p><strong>Net Total:</strong> Rs. {netTotal.toFixed(2)}</p>
                     <p><strong>Previous Advance:</strong> Rs. {advance.toFixed(2)}</p>
 
                     <div className="invoice-summary-item">
-                        <label><strong>Now Paying:</strong></label>
+                        <label><strong>Current Payment:</strong></label>
                         <input
                             type="number"
                             value={nowPay}
@@ -121,10 +178,52 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                 </div>
 
                 <div className="modal-buttons">
+                    <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
                     <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
                     <button className="close-btn" onClick={() => setShowModal2(false)}>Close</button>
                 </div>
             </div>
+
+            <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
+                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
+                <ModalBody>
+                    <FormGroup>
+                        <Label>Items ID</Label>
+                        <Input type="select" name="itemId" onChange={handleItemSelect}>
+                            <option value="">Select Item</option>
+                            {items.map((item) => (
+                                <option key={item.sr_ID} value={item.srd_Id}>
+                                    {item.I_Id} - {item.stock_Id} - {item.srd_Id} - {item.sr_ID}
+                                </option>
+                            ))}
+                        </Input>
+                    </FormGroup>
+
+                    <Label>Issued Items</Label>
+                    <table className="selected-items-table">
+                        <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Stock ID</th>
+                            <th>Details</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {selectedItems.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.I_Id}</td>
+                                <td>{item.stock_Id}</td>
+                                <td>{item.srd_Id}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="primary">Pass</Button>
+                    <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
+                </ModalFooter>
+            </Modal>
         </div>
     );
 };

@@ -10,9 +10,14 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2D-3-3.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2D-4-3.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2D-5-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/testdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddSupplier.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddSupplier.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ItemDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/finalInvoice.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/finalInvoice.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,9 +93,6 @@
     </key>
   </component>
   <component name="RunManager" selected="npm.start adminBackend">
-    <configuration name="mainRoutes.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" working-dir="$PROJECT_DIR$/adminBackend/Routes">
-      <method v="2" />
-    </configuration>
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -132,17 +134,11 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Node.js.mainRoutes.js" />
       <item itemvalue="npm.start admin" />
       <item itemvalue="npm.start adminBackend" />
       <item itemvalue="npm.start client" />
       <item itemvalue="npm.start clientBackend" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Node.js.mainRoutes.js" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -204,7 +200,8 @@
       <workItem from="1739964605433" duration="3953000" />
       <workItem from="1740023765919" duration="17061000" />
       <workItem from="1740044921396" duration="1777000" />
-      <workItem from="1740047813379" duration="61389000" />
+      <workItem from="1740047813379" duration="61878000" />
+      <workItem from="1740280484644" duration="19262000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -549,7 +546,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="223" />
+    <option name="localTasksCounter" value="224" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -585,50 +582,14 @@
     <MESSAGE value="update api" />
     <MESSAGE value="modify errores" />
     <MESSAGE value="update calculate" />
-    <MESSAGE value="update" />
     <MESSAGE value="update some bugs" />
     <MESSAGE value="add final invoice" />
     <MESSAGE value="add delivery note view" />
     <MESSAGE value="update final invoice" />
     <MESSAGE value="update item(add new colun)" />
-    <MESSAGE value="bug fixing" />
     <MESSAGE value="remove unwanted console log" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove unwanted console log" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>2944</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="32" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>2945</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="33" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>2946</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="34" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>2947</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="35" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>2948</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="36" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="bug fixing" />
+    <MESSAGE value="update" />
+    <option name="LAST_COMMIT_MESSAGE" value="update" />
   </component>
 </project>

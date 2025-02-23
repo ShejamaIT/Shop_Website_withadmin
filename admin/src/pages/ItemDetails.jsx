@@ -32,7 +32,6 @@ const ItemDetails = () => {
         contactInfo: "",
         cost:""
     });
-    const [types, setTypes] = useState([]);
 
     useEffect(() => {
         if (formData.maincategory) {
