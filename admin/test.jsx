@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../style/finalInvoice.css";
-import { Button, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
-import { toast } from "react-toastify";
+import {Button, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader} from "reactstrap";
+import {toast} from "react-toastify"; // Ensure this file includes the necessary styles
 
 const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => {
     const invoiceDate = new Date().toLocaleDateString();
@@ -25,7 +25,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
 
     useEffect(() => {
         if (balance === 0) {
-            setPaymentType('Settled');
+            setPaymentType('Settled'); // Automatically set payment status to 'Settled' when balance is 0
         }
     }, [balance]);
 
@@ -36,8 +36,8 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
             netTotal: netTotal, balance: balance,delivery:delivery,order: selectedOrder,
         });
     };
-
     useEffect(() => {
+        console.log(deliveryStatus);
         const itemIds = [...new Set(selectedOrder.items.map(item => item.itemId))];
         const fetchItems = async () => {
             try {
@@ -47,8 +47,10 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                 }
                 const response = await fetch("http://localhost:5001/api/admin/main/get-stock-details", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(itemIds)
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(itemIds) // Send itemIds as an array (valid JSON)
                 });
 
                 if (!response.ok) throw new Error("Failed to fetch stock details");
@@ -63,29 +65,10 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                 toast.error("Error loading stock details.");
             }
         };
-
         if (showStockModal && selectedOrder.items.length > 0) {
             fetchItems();
         }
     }, [showStockModal, selectedOrder.items]);
-
-    const handleSearchChange = (e) => {
-        const term = e.target.value;
-        setSearchTerm(term);
-        const filtered = items.filter((item) =>
-            item.I_Id.toString().includes(term) || item.I_Id.toLowerCase().includes(term.toLowerCase())
-        );
-        setFilteredItems(filtered);
-        setDropdownOpen(filtered.length > 0);
-    };
-
-    const handleSelectItem = (item) => {
-        if (!selectedItems.some(selected => selected.I_Id === item.I_Id)) {
-            setSelectedItems([...selectedItems, item]);
-        }
-        setSearchTerm('');
-        setDropdownOpen(false);
-    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -96,6 +79,23 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         setPaymentType(e.target.value);
     };
 
+    const handleSelectItem = (item) => {
+        setSelectedItem(item);
+        setSearchTerm(`${item.I_Id} - ${item.stock_Id} - ${item.srd_Id} - ${item.sr_ID}`);
+        setDropdownOpen(false);  // Close the dropdown after selection
+    };
+
+    // Handle search term change
+    const handleSearchChange = (e) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+        // Filter items based on the search term (item code or name)
+        const filtered = items.filter((item) =>
+            item.I_Id.toString().includes(term) || item.I_Id.toLowerCase().includes(term.toLowerCase())
+        );
+        setFilteredItems(filtered);
+        setDropdownOpen(filtered.length > 0);  // Open dropdown if matching items exist
+    };
 
     return (
         <div className="modal-overlay">
@@ -104,9 +104,8 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                 <div className="invoice-section">
                     <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
                     <p><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
-                    <p><strong>Invoice Date:</strong> {formatDate(invoiceDate)}</p>
+                    <p><strong>Invoice Date:</strong> {invoiceDate}</p>
                     <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
-
                     <div className="payment-type">
                         <label><strong>Payment Status:</strong></label>
                         <select value={paymentType} onChange={handlePaymentTypeChange}>
@@ -181,17 +180,30 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                     <button className="close-btn" onClick={() => setShowModal2(false)}>Close</button>
                 </div>
             </div>
-
             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
                 <ModalBody>
                     <FormGroup style={{ position: "relative" }}>
                         <Label>Items ID</Label>
-                        <Input type="text" value={searchTerm} onChange={handleSearchChange} placeholder="Search for item..." />
+                        <Input
+                            type="text"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            placeholder="Search for item..."
+                        />
+                        {/* Dropdown to select items */}
                         {dropdownOpen && (
-                            <div className="dropdown" style={{ position: "absolute", zIndex: 100, backgroundColor: "white", border: "1px solid #ddd", width: "100%" }}>
+                            <div
+                                className="dropdown"
+                                style={{position: "absolute", zIndex: 100, backgroundColor: "white", border: "1px solid #ddd", width: "100%",}}
+                            >
                                 {filteredItems.map((item) => (
-                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item" style={{ padding: "8px", cursor: "pointer" }}>
+                                    <div
+                                        key={item.I_Id}
+                                        onClick={() => handleSelectItem(item)}
+                                        className="dropdown-item"
+                                        style={{ padding: "8px", cursor: "pointer" }}
+                                    >
                                         {item.I_Id} - {item.stock_Id} - {item.srd_Id} - {item.sr_ID}
                                     </div>
                                 ))}

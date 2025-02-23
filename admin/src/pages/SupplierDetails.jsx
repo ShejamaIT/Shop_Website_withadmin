@@ -156,8 +156,6 @@ const SupplierDetails = ({ supplier }) => {
         }
     };
 
-
-
     return (
         <Row>
             <Col>
