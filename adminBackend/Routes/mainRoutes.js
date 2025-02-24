@@ -2622,7 +2622,6 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
     }
 });
 
-
 // Find cost by sid and iid
 router.get("/find-cost", async (req, res) => {
     try {
