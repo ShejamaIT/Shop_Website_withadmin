@@ -7,6 +7,7 @@ const EditOrderModal = ({ selectedOrder, setShowModal, handleSubmit }) => {
     const [rDate, setRDate] = useState("");
     const [recCount, setRecCount] = useState("");
     const [detail, setDetail] = useState("");
+    const [cost, setCost] = useState("");
 
     // Function to check order completion
     const checkOrderCompletion = () => {
@@ -34,7 +35,7 @@ const EditOrderModal = ({ selectedOrder, setShowModal, handleSubmit }) => {
     const handleFormSubmit = (e) => {
         e.preventDefault();
 
-        handleSubmit({ newStatus, isOrderComplete, rDate, recCount, detail });
+        handleSubmit({ newStatus, isOrderComplete, rDate, recCount, cost, detail });
 
     };
 
@@ -63,6 +64,10 @@ const EditOrderModal = ({ selectedOrder, setShowModal, handleSubmit }) => {
                     {/* Received Count Input */}
                     <label><strong>Received Count:</strong></label>
                     <input type="number" value={recCount} onChange={(e) => setRecCount(e.target.value)} min="1" required />
+
+                    {/* Received Items Cost */}
+                    <label><strong>Received Item Cost:</strong></label>
+                    <input type="number" value={cost} onChange={(e) => setCost(e.target.value)}  required />
 
                     {/* Detail Input */}
                     <label><strong>Detail:</strong></label>
