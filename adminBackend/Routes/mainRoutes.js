@@ -1342,18 +1342,17 @@ router.get("/getcategory", async (req, res) => {
     }
 });
 
-// Check and update stock receive
-router.post('/update-stock', async (req, res) => {
-    const { p_ID, rDate, recCount, detail } = req.body;
+router.post("/update-stock", upload.single("image"), async (req, res) => {
+    const { p_ID, rDate, recCount, cost, detail } = req.body;
+    const imageFile = req.file;
 
-    // Validate input fields
     if (!p_ID || !rDate || !recCount) {
-        return res.status(400).json({ error: 'All fields are required' });
+        return res.status(400).json({ error: "All fields are required" });
     }
 
     try {
-        // Get the current quantity for the production order
-        const [rows] = await db.query("SELECT qty, I_Id,s_ID  FROM production WHERE p_ID = ?", [p_ID]);
+        // Fetch current quantity and item details from production
+        const [rows] = await db.query("SELECT qty, I_Id, s_ID FROM production WHERE p_ID = ?", [p_ID]);
 
         if (rows.length === 0) {
             return res.status(404).json({ error: "Production order not found" });
@@ -1361,27 +1360,93 @@ router.post('/update-stock', async (req, res) => {
 
         const currentQty = rows[0].qty;
         const itemId = rows[0].I_Id;
-        const receivedQty = parseInt(recCount, 10); // Convert received count to integer
+        const supId = rows[0].s_ID;
+        const receivedQty = parseInt(recCount, 10);
 
-        // Insert received stock details into the stock_received table
-        const sqlInsert = `INSERT INTO stock_received (p_ID, rDate, rec_count, detail) VALUES (?, ?, ?, ?)`;
-        await db.query(sqlInsert, [p_ID, rDate, receivedQty, detail]);
+        // Validate that the item exists in the `item` table
+        const [itemExists] = await db.query("SELECT I_Id FROM item WHERE I_Id = ?", [itemId]);
 
-        // Determine the new status and remaining quantity
+        if (itemExists.length === 0) {
+            return res.status(400).json({ error: "Item ID does not exist in item table" });
+        }
+
+        console.log("Validated Item ID:", itemId);
+
+        // Handle image upload
+        let imagePath = null;
+        if (imageFile) {
+            const imageName = `item_${itemId}_${Date.now()}.${imageFile.mimetype.split("/")[1]}`;
+            const savePath = path.join("./uploads/images", imageName);
+            fs.writeFileSync(savePath, imageFile.buffer);
+            imagePath = `/uploads/images/${imageName}`;
+        }
+
+        // Insert into main_stock_received
+        const insertQuery = `
+            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail)
+            VALUES (?, ?, ?, ?, ?, ?)`;
+        const [result] = await db.query(insertQuery, [supId, itemId, rDate, receivedQty, cost, detail || ""]);
+        const receivedStockId = result.insertId;
+
+        // Fetch last stock_Id for this item
+        const [lastStockResult] = await db.query(
+            `SELECT MAX(stock_Id) AS lastStockId FROM m_s_r_detail WHERE I_Id = ?`,
+            [itemId]
+        );
+        let lastStockId = lastStockResult[0]?.lastStockId || 0;
+
+        const insertDetailQuery = `
+            INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode,status,orID,datetime) 
+            VALUES (?, ?, ?, ?,'Avaliable','','')`;
+
+        // Ensure barcode folder exists
+        const barcodeFolderPath = path.join("./uploads/barcodes");
+        if (!fs.existsSync(barcodeFolderPath)) {
+            fs.mkdirSync(barcodeFolderPath, { recursive: true });
+        }
+
+        // Ensure `stockCount` is properly defined
+        const stockCount = receivedQty;
+
+        for (let i = 1; i <= stockCount; i++) {
+            lastStockId++;
+
+            // Generate barcode data
+            const barcodeData = `${itemId}-${lastStockId}-${receivedStockId}`;
+            const barcodeImageName = `barcode_${barcodeData}.png`;
+            const barcodeImagePath = path.join(barcodeFolderPath, barcodeImageName);
+
+            // Generate barcode image
+            const pngBuffer = await bwipjs.toBuffer({
+                bcid: "code128",
+                text: barcodeData,
+                scale: 3,
+                height: 10,
+                includetext: true,
+                textxalign: "center",
+            });
+
+            // Save barcode image to folder
+            fs.writeFileSync(barcodeImagePath, pngBuffer);
+
+            // Save barcode data in the database
+            await db.query(insertDetailQuery, [itemId, lastStockId, receivedStockId, pngBuffer]);
+        }
+
+        // Determine new stock status
         let newStatus = "Incomplete";
         let newQty = currentQty - receivedQty;
 
         if (receivedQty >= currentQty) {
-            // Mark order as complete if received qty is equal or more than the order qty
             newStatus = "Complete";
             newQty = 0;
         }
 
-        // Update the production table with the new status and remaining quantity
+        // Update production table
         const sqlUpdate = `UPDATE production SET qty = ?, status = ? WHERE p_ID = ?`;
         await db.query(sqlUpdate, [newQty, newStatus, p_ID]);
 
-        // Update the Item table stock quantity
+        // Update stock quantity in Item table
         const sqlUpdateItem = `UPDATE Item SET stockQty = stockQty + ? WHERE I_Id = ?`;
         await db.query(sqlUpdateItem, [receivedQty, itemId]);
 
@@ -1392,15 +1457,14 @@ router.post('/update-stock', async (req, res) => {
             success: true,
             message: "Stock received updated successfully",
             updatedStatus: newStatus,
-            remainingQty: newQty
+            remainingQty: newQty,
         });
 
     } catch (error) {
         console.error("Error updating stock received:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });
-
 // Update order in invoice part
 router.put("/update-invoice", async (req, res) => {
     try {
@@ -2458,7 +2522,7 @@ router.post('/add-item-supplier', async (req, res) => {
 // Route for adding stock with barcode generation
 router.post("/add-stock-received", upload.single("image"), async (req, res) => {
     try {
-        const { supplierId, itemId, date, stockCount, comment } = req.body;
+        const { supplierId, itemId, date, cost, stockCount, comment } = req.body;
         const imageFile = req.file;
 
         // Validate required fields
@@ -2477,9 +2541,9 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
 
         // Insert into main_stock_received
         const insertQuery = `
-            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, detail)
-            VALUES (?, ?, ?, ?, ?)`;
-        const [result] = await db.query(insertQuery, [supplierId, itemId, date, stockCount, comment || ""]);
+            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail)
+            VALUES (?, ?, ?, ?, ?,?)`;
+        const [result] = await db.query(insertQuery, [supplierId, itemId, date, stockCount, cost, comment || ""]);
         const receivedStockId = result.insertId;
 
         // Update Item table stock
@@ -2492,7 +2556,7 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
         const [lastStockResult] = await db.query(`SELECT MAX(stock_Id) AS lastStockId FROM m_s_r_detail WHERE I_Id = ?`, [itemId]);
         let lastStockId = lastStockResult[0]?.lastStockId || 0;
 
-        const insertDetailQuery = `INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode_path) VALUES (?, ?, ?, ?)`;
+        const insertDetailQuery = `INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode,status,orID,datetime) VALUES (?, ?, ?, ?,'Avaliable','','')`;
 
         // Ensure barcodes folder exists
         const barcodeFolderPath = path.join("./uploads/barcodes");
