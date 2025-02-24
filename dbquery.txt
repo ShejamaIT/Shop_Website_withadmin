@@ -226,17 +226,6 @@ CREATE TABLE production(
         CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
                     			    ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE stock_received (
-    sr_ID INT AUTO_INCREMENT PRIMARY KEY,
-    p_ID VARCHAR(25) NOT NULL,
-    rDate DATE NOT NULL,
-    rec_count INT,
-    detail TEXT,
-    CONSTRAINT FOREIGN KEY (p_ID) REFERENCES production (p_ID)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-
 CREATE TABLE Payment(
     op_ID INT AUTO_INCREMENT PRIMARY KEY,
     orID VARCHAR(25),
