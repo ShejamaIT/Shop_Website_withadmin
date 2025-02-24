@@ -302,6 +302,8 @@ const CompleteOrderDetails = () => {
             paymentAmount: formData.addedAdvance,
             selectedItems: formData.selectedItems,
             balance: formData.billTotal - formData.totalAdvance, // assuming balance calculation
+            salesperson: order.salesTeam.employeeName,
+            items: order.items,
         };
 
         try {

@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
-import Swal from 'sweetalert2';
 import Helmet from "../components/Helmet/Helmet";
-import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Button,
+    Input,
+    FormGroup,
+    Label,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Modal
+} from "reactstrap";
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
@@ -22,6 +33,9 @@ const OrderDetails = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);  // To handle dropdown visibility
 
     useEffect(() => {
         fetchOrder();
@@ -106,7 +120,6 @@ const OrderDetails = () => {
             return updatedFormData;
         });
     };
-
 
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
@@ -201,7 +214,6 @@ const OrderDetails = () => {
         }
     };
 
-// Helper functions to check for changes
     const hasGeneralDetailsChanged = (updatedData) => {
         return updatedData.orderDate !== order.orderDate ||
             updatedData.phoneNumber !== order.phoneNumber ||
@@ -231,7 +243,6 @@ const OrderDetails = () => {
         return updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryInfo !== order.deliveryInfo;
     };
-
 
     const handleEditClick = (order) => {
         if (!order) return;
@@ -325,7 +336,6 @@ const OrderDetails = () => {
             alert("Server error. Please try again.");
         }
     };
-
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -579,6 +589,51 @@ const OrderDetails = () => {
                                     )}
                                 </div>
                             </div>
+
+                            <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
+                                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
+                                <ModalBody>
+                                    <FormGroup style={{ position: "relative" }}>
+                                        <Label>Items ID</Label>
+                                        <Input type="text" value={searchTerm} onChange={handleSearchChange} placeholder="Search for item..." />
+                                        {dropdownOpen && (
+                                            <div className="dropdown" style={{ position: "absolute", zIndex: 100, backgroundColor: "white", border: "1px solid #ddd", width: "100%" }}>
+                                                {filteredItems.map((item) => (
+                                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item" style={{ padding: "8px", cursor: "pointer" }}>
+                                                        {item.I_Id} - {item.stock_Id} - {item.srd_Id} - {item.sr_ID}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </FormGroup>
+
+                                    <Label>Issued Items</Label>
+                                    <table className="selected-items-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Item ID</th>
+                                            <th>Batch ID</th>
+                                            <th>Stock ID</th>
+                                            <th>Key</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {selectedItems.map((item, index) => (
+                                            <tr key={index}>
+                                                <td>{item.I_Id}</td>
+                                                <td>{item.sr_ID}</td>
+                                                <td>{item.stock_Id}</td>
+                                                <td>{item.srd_Id}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" onClick={() => passReservedItem(selectedItems)}>Pass</Button>
+                                    <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
 
                             {showModal1 && selectedOrder && (
                                 <BillInvoice
