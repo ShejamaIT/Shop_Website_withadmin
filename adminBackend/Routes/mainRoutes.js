@@ -488,7 +488,7 @@ router.get("/accept-order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2,o.advance,o.balance,o.payStatus,
-                o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype,
+                o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype,o.stID,
                 o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN sales_team s ON o.stID = s.stID
@@ -542,6 +542,7 @@ router.get("/accept-order-details", async (req, res) => {
             deliveryStatus: orderData.delStatus,
             deliveryCharge: orderData.delPrice,
             discount: orderData.discount,
+            saleID: orderData.stID,
             totalPrice: orderData.total,
             advance: orderData.advance,
             balance: orderData.balance,
@@ -3075,7 +3076,74 @@ router.post("/get-stock-details", async (req, res) => {
     }
 });
 
+// Issued order
+router.post("/isssued-order", async (req, res) => {
+    const { orID, delStatus, delPrice, discount, total, advance, balance, payStatus, stID, paymentAmount, selectedItems } = req.body;
 
+    if (!orID || !stID || paymentAmount === undefined || !selectedItems || selectedItems.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    try {
+        // 1. Update Orders table
+        await db.query(
+            `UPDATE Orders 
+             SET delStatus = ?, orStatus = 'Issued', delPrice = ?, discount = ?, total = ?, advance = ?, balance = ?, payStatus = ?, stID = ?
+             WHERE OrID = ?`,
+            [delStatus, delPrice, discount, total, advance, balance, payStatus, stID, orID]
+        );
+
+        // 2. Update m_s_r_detail table (Mark selected items as issued)
+        for (const item of selectedItems) {
+            await db.query(
+                `UPDATE m_s_r_detail 
+                 SET status = 'Issued', orID = ?, datetime = NOW() 
+                 WHERE srd_Id = ?`,
+                [orID, item.srd_Id]
+            );
+        }
+
+        // 3. Update sales_team table
+        await db.query(
+            `UPDATE sales_team 
+             SET currentRate = currentRate + ? 
+             WHERE stID = ?`,
+            [total, stID]
+        );
+
+        // 4. Update Item stock quantities using Order_Detail table
+        const [orderItems] = await db.query(
+            `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
+            [orID]
+        );
+
+        for (const item of orderItems) {
+            await db.query(
+                `UPDATE Item 
+                 SET stockQty = stockQty - ?, bookedQty = bookedQty - ?
+                 WHERE I_Id = ?`,
+                [item.qty, item.qty, item.I_Id]
+            );
+        }
+
+        // 5. Delete from booked_item & accept_orders
+        await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
+        await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
+
+        // 6. Insert into Payment table
+        await db.query(
+            `INSERT INTO Payment (orID, amount, dateTime) 
+             VALUES (?, ?, NOW())`,
+            [orID, paymentAmount]
+        );
+
+        return res.status(200).json({ success: true, message: "Order updated successfully" });
+
+    } catch (error) {
+        console.error("Error updating order:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
