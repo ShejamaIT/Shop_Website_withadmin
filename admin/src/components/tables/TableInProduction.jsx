@@ -46,7 +46,7 @@ const TableInproduction = ({ refreshKey }) => {
 
     // Handle form submission (Update order status)
     const handleSubmit = async (formData) => {
-        const { newStatus, isOrderComplete, rDate, recCount, detail } = formData;
+        const { newStatus, isOrderComplete, rDate, recCount, cost, detail } = formData;
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/update-stock", {
                 method: "POST",
@@ -57,6 +57,7 @@ const TableInproduction = ({ refreshKey }) => {
                     p_ID: selectedOrder.p_ID,
                     rDate,
                     recCount,
+                    cost,
                     detail
                 })
             });
