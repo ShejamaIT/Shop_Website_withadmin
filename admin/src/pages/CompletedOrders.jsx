@@ -286,88 +286,53 @@ const CompleteOrderDetails = () => {
     }
 
     const handleSubmit3 = async (formData) => {
+        console.log(order);
         console.log(formData);
-        let updatedFormData = {
-            ...formData,
-            // orderId: formData.order.orderId,
-            // orderDate: formData.order.orderDate,
-            // salesperson: formData.order.salesTeam.employeeName,
-            // phoneNumber: formData.order.phoneNumber,
-            // optionalNumber: formData.order.optionalNumber,
-            // items: formData.order.items, // Order items added
-            // discount: formData.order.discount,
-            // totalPrice: formData.order.totalPrice,
-            // previousAdvance: formData.previousAdvance,
-            // addedAdvance: formData.addedAdvance,
-            // totalAdvance: formData.totalAdvance,
-            // balance: formData.balance,
-            // deliveryStatus: formData.order.deliveryStatus,
-            // paymentType: formData.order.paymentType,
-        };
         setShowModal2(false);
 
-        const delStatus = formData.deliveryStatus;
-        const balance = formData.balance;
-        let payStatus = formData.paymentType;
-
-        // If balance is 0, payment type should be Settled
-        if (balance === 0) {
-            updatedFormData.paymentType = "Settled";
-        }
-
-        // For Pickup: Payment status can only be Settled or Credit
-        if (delStatus === "Pickup") {
-            if (payStatus !== "Settled" && payStatus !== "Credit") {
-                setShowModal2(true);
-                return;
-            }
-        }
-
-        // For Delivery: Payment status can be Settled, COD, or Credit
-        // If balance > 0 and not COD, auto-set to COD
-        if (delStatus === "Delivery") {
-            if (balance > 0 && payStatus !== "COD") {
-                updatedFormData.paymentType = "COD";
-            } else if (!["Settled", "COD", "Credit"].includes(payStatus)) {
-                setShowModal2(true);
-                return;
-            }
-        }
-
-        // Final submission after all validations
-        console.log("Final form data after validation:", updatedFormData);
+        const updatedData = {
+            orID: order.orderId,
+            delStatus: formData.deliveryStatus,
+            delPrice: formData.delivery,
+            discount: order.discount,
+            total: formData.billTotal,
+            advance: formData.totalAdvance,
+            payStatus: formData.paymentType,
+            stID: order.saleID,
+            paymentAmount: formData.addedAdvance,
+            selectedItems: formData.selectedItems,
+            balance: formData.billTotal - formData.totalAdvance, // assuming balance calculation
+        };
 
         try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/process-order`, {
-                method: "POST",
+            // Make API request to the /isssued-order endpoint
+            const response = await fetch('http://localhost:5001/api/admin/main/isssued-order', {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updatedFormData),
+                body: JSON.stringify(updatedData),
             });
 
-            const data = await response.json();
+            const result = await response.json();
 
             if (response.ok) {
-                fetchOrder();
-                console.log("Quantity updated successfully:", data.message);
-                alert("Quantity updated successfully!");
+                // Successfully updated
+                console.log("Order updated successfully:", result.message);
+                // Optionally, handle success, e.g., navigate or show a success message
+                setReceiptData(updatedData);  // Set data for receipt
+                setShowReceiptView(true);         // Show receipt view
             } else {
-                console.error("Failed to update quantity:", data.message);
-                alert(`Failed to update quantity: ${data.message}`);
+                // Handle error response
+                console.error("Error:", result.message);
+                // Optionally, show error message to the user
             }
         } catch (error) {
-            console.error("Error during quantity update:", error);
-            alert(`Error updating quantity: ${error.message}`);
+            console.error("Error making API request:", error.message);
+            // Handle network error, show error message to the user
         }
-
-        // Show receipt view after successful validation
-        setReceiptData(updatedFormData);  // Set data for receipt
-        setShowReceiptView(true);         // Show receipt view
-
-        // Proceed with the final submission logic (e.g., API call)
-        // await someApiCall(updatedFormData);
     };
+
 
     const handleSubmit = async (formData) => {
         // Destructure the necessary fields from formData

@@ -20,6 +20,7 @@
     width: 80%;
     max-width: 900px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 /* Invoice Title */
@@ -42,13 +43,12 @@
     width: 48%;
     font-size: 1rem;
     margin: 0.5rem 0;
-    color: #333;  /* Darken the text color of p tags */
+    color: #333;
 }
 
-/* Update the font color and size of strong text */
 .invoice-section strong {
-    color: #333;  /* Darker color */
-    font-size: 1.1rem;  /* Slightly larger font */
+    color: #333;
+    font-size: 1.1rem;
 }
 
 /* Invoice Table */
@@ -74,12 +74,13 @@
     margin-top: 1.5rem;
     font-size: 1rem;
 }
+
 .invoice-summary p {
-    /*width: 48%;*/
     font-size: 1rem;
     margin: 0.5rem 0;
-    color: #333;  /* Darken the text color of p tags */
+    color: #333;
 }
+
 .invoice-summary-item {
     display: flex;
     align-items: center;
@@ -133,12 +134,54 @@
 .close-btn:hover {
     background-color: #e53935;
 }
+
 .scan-btn {
     background-color: #4c70af;
     color: #fff;
 }
-.scan-btn:hover{
+
+.scan-btn:hover {
     background-color: #3558e5;
+}
+
+/* Dropdown Styling */
+.dropdown {
+    position: absolute;
+    z-index: 100;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #f0f0f0;
+}
+
+/* Selected Items Table */
+.selected-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.selected-items-table th, .selected-items-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.selected-items-table th {
+    background: #f8f8f8;
+    font-weight: bold;
 }
 
 /* Print Styles */
@@ -162,14 +205,19 @@
         font-size: 0.9rem;
     }
 
-    /* Increase font size and darken strong text and p tags for print */
     .invoice-section strong {
         color: #333;
         font-size: 1.2rem;
     }
 
     .invoice-section p {
-        color: #333;  /* Darken the text color of p tags for print */
-        font-size: 1.1rem;  /* Slightly larger font for print */
+        color: #333;
+        font-size: 1.1rem;
     }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
 }

@@ -1,54 +1,38 @@
-// Drop
+// Update
 CREATE TABLE Orders (
-    OrID VARCHAR(25) PRIMARY KEY,orDate DATE,custName VARCHAR(30),customerEmail TEXT,
+    OrID VARCHAR(25) PRIMARY KEY,delStatus VARCHAR(10),orStatus VARCHAR(15),delPrice DOUBLE,
+    discount DOUBLE,total DOUBLE,advance DOUBLE,balance DOUBLE,payStatus DOUBLE,stID VARCHAR(25),
     CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE Order_Detail (
-    orID VARCHAR(25),I_Id VARCHAR(25),qty INT,tprice DOUBLE,PRIMARY KEY (orID, I_Id),
-    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE booked_item (
-    bi_ID INT AUTO_INCREMENT PRIMARY KEY,orID VARCHAR(25),I_Id VARCHAR(25),qty INT,
-    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                           ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                        	ON DELETE CASCADE ON UPDATE CASCADE
-);
 CREATE TABLE m_s_r_detail(
-    srd_Id INT AUTO_INCREMENT PRIMARY KEY,I_Id varchar(25) NOT NULL,stock_Id varchar(25) NOT NULL,sr_ID INT NOT NULL,
+    srd_Id INT AUTO_INCREMENT PRIMARY KEY,I_Id varchar(25) NOT NULL,
+    stock_Id varchar(25) NOT NULL,sr_ID INT NOT NULL,
+    status VARCHAR(15),orID VARCHAR(25),datetime DATETIME,
     CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
                       ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (sr_ID) REFERENCES main_stock_received (sr_ID)
                         ON DELETE CASCADE ON UPDATE CASCADE
-);
-//Update
-CREATE TABLE Item(
-      I_Id VARCHAR(25) PRIMARY KEY,I_name TEXT ,stockQty INT,bookedQty INT,availableQty INT,minQTY INT,
 );
 CREATE TABLE sales_team(
     stID VARCHAR(25) PRIMARY KEY,E_Id VARCHAR(15),target DOUBLE,currentRate DOUBLE,
         CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
                                    ON DELETE CASCADE ON UPDATE CASCADE
 );
-//New added
+CREATE TABLE Item(
+      I_Id VARCHAR(25) PRIMARY KEY,stockQty INT,bookedQty INT,availableQty INT,
+);
+//Drop rows
+accept_orders , booked_item
+delete all row which content orid
+// New row
 CREATE TABLE Payment(
-    op_ID INT AUTO_INCREMENT PRIMARY KEY,orID VARCHAR(25),amount DOUBLE,dateTime DATETIME ,
+    op_ID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    amount DOUBLE,
+    dateTime DATETIME ,
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                          ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE Issued_order(
-    io_ID INT AUTO_INCREMENT PRIMARY KEY,orID VARCHAR(25),orDate DATE,custName VARCHAR(30),customerEmail TEXT,
-    contact1 VARCHAR(14) NOT NULL, contact2 VARCHAR(14),city VARCHAR(25),delStatus VARCHAR(10),delPrice DOUBLE,
-    discount DOUBLE,total DOUBLE,payStatus DOUBLE,stID VARCHAR(25),expectedDate DATE,specialNote TEXT,ordertype VARCHAR(10),
-    CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
-                       ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE Issued_history(
-    ih_id INT AUTO_INCREMENT PRIMARY KEY,orID VARCHAR(25),srd_Id INT,dateTime DATETIME
 );
 
 

@@ -15,7 +15,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
     const [searchTerm, setSearchTerm] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState(false);  // To handle dropdown visibility
     const [filteredItems, setFilteredItems] = useState([]); // List to store filtered items based on search term
-    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedItem, setSelectedItem] = useState([]);
     const calculateTotal = (item) => item.quantity * item.unitPrice;
     const delivery = Number(selectedOrder.deliveryCharge);
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
@@ -29,12 +29,24 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         }
     }, [balance]);
 
+    useEffect(() => {
+        if (advance !== 0) {
+            setPaymentType('Advanced');
+        }
+    }, [advance]);
     const handlePrintAndSubmit = () => {
-        handlePaymentUpdate({
-            orderId: selectedOrder.orderId,paymentType: paymentType,deliveryStatus: deliveryStatus,
-            previousAdvance: advance,addedAdvance: nowPay,totalAdvance: totalAdvance,
-            netTotal: netTotal, balance: balance,delivery:delivery,order: selectedOrder,
-        });
+        if (balance !== 0) {
+            toast.error("Balance is not settled.");
+        } else if (selectedItems.length === 0) {  // Fix: Check if selectedItems is empty
+            toast.error("No reserved items selected.");
+        } else {
+            handlePaymentUpdate({
+                orderId: selectedOrder.orderId,paymentType: paymentType,deliveryStatus: deliveryStatus,
+                previousAdvance: advance,addedAdvance: nowPay,totalAdvance: totalAdvance, subtotal:subtotal,
+                billTotal: netTotal, balance: balance,delivery:delivery,selectedItems:selectedItems,
+
+            });
+        }
     };
 
     useEffect(() => {
@@ -96,6 +108,10 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         setPaymentType(e.target.value);
     };
 
+    const passReservedItem = () => {
+        setSelectedItem(selectedItems);
+        setShowStockModal(false);
+    };
 
     return (
         <div className="modal-overlay">
@@ -204,14 +220,16 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                         <thead>
                         <tr>
                             <th>Item ID</th>
+                            <th>Batch ID</th>
                             <th>Stock ID</th>
-                            <th>Details</th>
+                            <th>Key</th>
                         </tr>
                         </thead>
                         <tbody>
                         {selectedItems.map((item, index) => (
                             <tr key={index}>
                                 <td>{item.I_Id}</td>
+                                <td>{item.sr_ID}</td>
                                 <td>{item.stock_Id}</td>
                                 <td>{item.srd_Id}</td>
                             </tr>
@@ -220,7 +238,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                     </table>
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="primary">Pass</Button>
+                    <Button color="primary" onClick={() => passReservedItem(selectedItems)}>Pass</Button>
                     <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
                 </ModalFooter>
             </Modal>
