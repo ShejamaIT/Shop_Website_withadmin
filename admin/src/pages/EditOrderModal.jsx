@@ -34,7 +34,6 @@ const EditOrderModal = ({ selectedOrder, setShowModal, handleSubmit }) => {
     // Handle form submission
     const handleFormSubmit = (e) => {
         e.preventDefault();
-
         handleSubmit({ newStatus, isOrderComplete, rDate, recCount, cost, detail });
 
     };

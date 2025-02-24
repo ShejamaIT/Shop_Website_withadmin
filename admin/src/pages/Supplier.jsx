@@ -78,7 +78,7 @@ const SupplierDetails = () => {
 
         const payload = {
             itemId: formData.itemId,
-            qty: parseInt(formData.qty, 10),
+            qty: parseInt(formData.qty,10),
             supplierId: formData.supplierId,
             expectedDate: formData.expectdate,
             specialnote: formData.specialnote

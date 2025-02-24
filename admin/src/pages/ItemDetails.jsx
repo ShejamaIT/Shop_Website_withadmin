@@ -282,6 +282,7 @@ const ItemDetails = () => {
             if (!response.ok) throw new Error("Failed to fetch item details.");
             const data = await response.json();
             setItem(data.item);
+            console.log(data.item);
             console.log(data.item.stockDetails);
             setSuppliers(data.item.suppliers || []); // Set suppliers
             setStock(data.item.stockDetails || []); // set stockDetails
