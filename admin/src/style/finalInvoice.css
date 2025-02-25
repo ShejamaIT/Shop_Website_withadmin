@@ -10,6 +10,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    overflow-y: auto; /* Allow scrolling if content overflows */
 }
 
 /* Modal Content */
@@ -17,10 +18,20 @@
     background-color: #fff;
     padding: 2rem;
     border-radius: 12px;
-    width: 80%;
+    width: 90%;
     max-width: 900px;
+    max-height: 90vh; /* Ensure the modal is fully visible */
+    overflow-y: auto; /* Scrollable content if it exceeds max-height */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Ensure modal fits properly in larger screens */
+@media (min-width: 1200px) {
+    .modal-content {
+        width: 70%; /* Reduce width on large screens to fit better */
+        max-width: 1000px;
+    }
 }
 
 /* Invoice Title */
@@ -193,6 +204,7 @@
     .modal-content {
         width: 100%;
         height: auto;
+        max-height: none;
         box-shadow: none;
         border: none;
     }
