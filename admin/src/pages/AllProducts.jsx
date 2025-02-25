@@ -21,15 +21,15 @@ const AllProducts = () => {
 
                 <Container className="all-products">
                     {/* Tab Navigation */}
-                    <NavItem>
-                        <NavLink
-                            className={activeTab === "1" ? "active" : ""}
-                            onClick={() => setActiveTab("1")}
-                        >
-                            Add Item
-                        </NavLink>
-                    </NavItem>
                     <Nav tabs>
+                        <NavItem>
+                            <NavLink
+                                className={activeTab === "1" ? "active" : ""}
+                                onClick={() => setActiveTab("1")}
+                            >
+                                Add Item
+                            </NavLink>
+                        </NavItem>
                         <NavItem>
                             <NavLink
                                 className={activeTab === "2" ? "active" : ""}

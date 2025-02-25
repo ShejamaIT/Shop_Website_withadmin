@@ -4,14 +4,20 @@ import { toast } from "react-toastify";
 
 const AddOtherDetails = () => {
     const [categories, setCategories] = useState([]);
-    const [catname , setCatname] = useState({  Catname: ""});
-    const [formData, setFormData] = useState({ Ca_Id: "", sub_one: "", sub_two: "", subcatone_img: null, subcattwo_img: null,});
+    const [catname, setCatname] = useState({ Catname: "" });
+    const [formData, setFormData] = useState({
+        Ca_Id: "",
+        sub_one: "",
+        sub_two: "",
+        subcatone_img: null,
+        subcattwo_img: null,
+    });
 
     // Fetch Categories
     useEffect(() => {
         fetch("http://localhost:5001/api/admin/main/categories")
             .then((res) => res.json())
-            .then((data) => setCategories(data))
+            .then((data) => setCategories(data.length > 0 ? data : [])) // Handle empty category list
             .catch((err) => {
                 toast.error("Failed to load categories.");
             });
@@ -37,7 +43,7 @@ const AddOtherDetails = () => {
         setCatname((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle Form Submission for Sub-Categories
+    // Handle Form Submission for Category
     const handleSubmitCategory = async () => {
         if (!catname.Catname.trim()) {
             toast.error("Category name cannot be empty!");
@@ -76,7 +82,7 @@ const AddOtherDetails = () => {
         formDataToSend.append("Ca_Id", formData.Ca_Id);
         formDataToSend.append("sub_one", formData.sub_one);
 
-        // If sub_two is "None", don't send it
+        // If sub_two is "None" or empty, don't send it
         if (formData.sub_two && formData.sub_two !== "None") {
             formDataToSend.append("sub_two", formData.sub_two);
         } else {
@@ -120,33 +126,85 @@ const AddOtherDetails = () => {
                     {/* Add Category Section */}
                     <div className="p-3 border rounded shadow-sm">
                         <Label className="fw-bold">Add Category</Label>
-                        <Input type="text" placeholder="Enter category name" className="mb-2" name="Catname" value={catname.Catname} onChange={handleCatChange}/>
-                        <Button color="primary" onClick={handleSubmitCategory}>Add Category</Button>
+                        <Input
+                            type="text"
+                            placeholder="Enter category name"
+                            className="mb-2"
+                            name="Catname"
+                            value={catname.Catname}
+                            onChange={handleCatChange}
+                        />
+                        <Button color="primary" onClick={handleSubmitCategory}>
+                            Add Category
+                        </Button>
                     </div>
 
                     {/* Add Sub-Category Section */}
                     <div className="p-3 border rounded shadow-sm">
                         <Label className="fw-bold">Select Category</Label>
-                        <Input type="select" className="mb-2" name="Ca_Id" id="Ca_Id" value={formData.Ca_Id} onChange={handleChange} required>
+                        <Input
+                            type="select"
+                            className="mb-2"
+                            name="Ca_Id"
+                            id="Ca_Id"
+                            value={formData.Ca_Id}
+                            onChange={handleChange}
+                            required
+                        >
                             <option value="">Select Category</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
+                            {categories.length > 0 ? (
+                                categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </option>
+                                ))
+                            ) : (
+                                <option value="">No Categories Available</option>
+                            )}
                         </Input>
 
                         <Label className="fw-bold">Add Sub-Category One</Label>
-                        <Input type="text" placeholder="Enter first sub-category" className="mb-2" name="sub_one" value={formData.sub_one} onChange={handleChange} />
-                        <Input type="file" accept="image/*" className="mb-2" name="subcatone_img" onChange={handleFileChange} />
+                        <Input
+                            type="text"
+                            placeholder="Enter first sub-category"
+                            className="mb-2"
+                            name="sub_one"
+                            value={formData.sub_one}
+                            onChange={handleChange}
+                        />
+                        <Input
+                            type="file"
+                            accept="image/*"
+                            className="mb-2"
+                            name="subcatone_img"
+                            onChange={handleFileChange}
+                        />
 
                         <Label className="fw-bold">Add Sub-Category Two</Label>
-                        <Input type="text" placeholder="Enter second sub-category" className="mb-2" name="sub_two" value={formData.sub_two} onChange={handleChange} />
-                        <Input type="file" accept="image/*" className="mb-2" name="subcattwo_img" onChange={handleFileChange} />
+                        <Input
+                            type="text"
+                            placeholder="Enter second sub-category"
+                            className="mb-2"
+                            name="sub_two"
+                            value={formData.sub_two}
+                            onChange={handleChange}
+                        />
+                        <Input
+                            type="file"
+                            accept="image/*"
+                            className="mb-2"
+                            name="subcattwo_img"
+                            onChange={handleFileChange}
+                        />
 
-                        <Button color="success" onClick={handleSubmitSubCategory}>Add Sub-Category</Button>
+                        <Button color="success" onClick={handleSubmitSubCategory}>
+                            Add Sub-Category
+                        </Button>
                     </div>
                 </Col>
             </Row>
         </Container>
     );
 };
+
 export default AddOtherDetails;

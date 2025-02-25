@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../../style/TableTwo.css"; // Import the stylesheet
-import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const TableForProduction = ({ refreshKey }) => {
     const [items, setItems] = useState([]);
@@ -22,7 +21,7 @@ const TableForProduction = ({ refreshKey }) => {
                 throw new Error(data.message || "Failed to fetch items.");
             }
 
-            setItems(data); // Assuming `data.data` contains the array of orders
+            setItems(data); // Assuming `data` contains the array of items
         } catch (err) {
             setError(err.message);
         } finally {
@@ -31,62 +30,66 @@ const TableForProduction = ({ refreshKey }) => {
     };
 
     const handleViewSuppliers = (itemId) => {
-        navigate(`/supplier-detail/${itemId}`); // Navigate to OrderDetails page
+        navigate(`/supplier-detail/${itemId}`); // Navigate to Supplier Details page
     };
+
     return (
         <div className="table-container">
             <h4 className="table-title">For Production Items</h4>
 
-                {loading ? (
-                    <p className="loading-message">Loading...</p>
-                ) : error ? (
-                    <p className="error-message">{error}</p>
-                ) : (
-                    <div className="table-wrapper">
-                        <table className="styled-table">
-                            <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Item Name</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Description</th>
-                                <th>Action</th>
+            <div className="table-wrapper">
+                <table className="styled-table">
+                    <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Item Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {loading ? (
+                        <tr>
+                            <td colSpan="6" className="loading-text text-center">Loading...</td>
+                        </tr>
+                    ) : error ? (
+                        <tr>
+                            <td colSpan="6" className="error-text text-center">{error}</td>
+                        </tr>
+                    ) : items.length === 0 ? (
+                        <tr>
+                            <td colSpan="6" className="no-items-message text-center">No items for production</td>
+                        </tr>
+                    ) : (
+                        items.map((item) => (
+                            <tr key={item.I_Id}>
+                                <td>
+                                    <img
+                                        src={item.img}
+                                        alt={item.I_name}
+                                        className="product-image"
+                                    />
+                                </td>
+                                <td>{item.I_name}</td>
+                                <td>Rs.{item.price}</td>
+                                <td>{item.availableQty}</td>
+                                <td>{item.descrip}</td>
+                                <td className="action-buttons">
+                                    <button
+                                        className="view-btn"
+                                        onClick={() => handleViewSuppliers(item.I_Id)}
+                                    >
+                                        👁️ Get Suppliers
+                                    </button>
+                                </td>
                             </tr>
-                            </thead>
-                        <tbody>
-                                {items.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="5" className="no-data">
-                                            No items found
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    items.map((item) => (
-                                        <tr key={item.I_Id}>
-                                            <td>
-                                                <img src={item.img} alt={item.I_name} className="product-image" />
-                                            </td>
-                                            <td>{item.I_name}</td>
-                                            <td>Rs.{item.price}</td>
-                                            <td>{item.availableQty}</td>
-                                            <td>{item.descrip}</td>
-                                            <td className="action-buttons">
-                                                <button
-                                                    className="view-btn"
-                                                     onClick={() => handleViewSuppliers(item.I_Id)}
-                                                >
-                                                    👁️ Get Suppliers
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                        </tbody>
-                        </table>
-                    </div>
-                )}
-
+                        ))
+                    )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

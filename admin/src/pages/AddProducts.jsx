@@ -5,57 +5,58 @@ import "../style/addProduct.css"; // Import CSS
 
 const AddItem = () => {
     const [formData, setFormData] = useState({
-        I_Id: "",
-        I_name: "",
-        Ca_Id: "",
-        sub_one: "",
-        sub_two: "",
-        descrip: "",
-        color: "",
-        material: "",
-        price: "",
-        warrantyPeriod: "",
-        cost: "",
-        img: null,
-        img1: null,
-        img2: null,
-        img3: null,
-        s_Id: "",
-        minQty: ""
+        I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "", material: "", otherMaterial: "", price: "", warrantyPeriod: "", cost: "", img: null, img1: null, img2: null, img3: null, s_Id: "", minQty: ""
     });
-
     const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
     const [subCatOne, setSubCatOne] = useState([]);
     const [subCatTwo, setSubCatTwo] = useState([]);
 
+    // Fetch Categories
     useEffect(() => {
         fetch("http://localhost:5001/api/admin/main/categories")
             .then((res) => res.json())
-            .then((data) => setCategories(data))
-            .catch((err) => toast.error("Failed to load categories."));
+            .then((data) => setCategories(data.length > 0 ? data : [])) // Ensure empty array if no data
+            .catch((err) => {
+                console.error("Error fetching categories:", err);
+                setCategories([]); // Default to empty array on error
+            });
     }, []);
 
+    // Fetch Suppliers
     useEffect(() => {
         fetch("http://localhost:5001/api/admin/main/suppliers")
             .then((res) => res.json())
             .then((data) => {
-                if (data.success) setSuppliers(data.suppliers);
-                else toast.error("Failed to load suppliers.");
+                if (data.success) {
+                    setSuppliers(data.suppliers.length > 0 ? data.suppliers : []); // Ensure empty array if no data
+                } else {
+                    setSuppliers([]);
+                }
             })
-            .catch(() => toast.error("Error fetching suppliers."));
+            .catch((err) => {
+                console.error("Error fetching suppliers:", err);
+                setSuppliers([]); // Default to empty array on error
+            });
     }, []);
 
+    // Fetch Subcategories when Category changes
     useEffect(() => {
         if (formData.Ca_Id) {
             fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.Ca_Id}`)
                 .then((res) => res.json())
                 .then((data) => {
-                    setSubCatOne(data.data);
-                    setSubCatTwo([]);
-                    setFormData((prev) => ({ ...prev, sub_one: "", sub_two: "" }));
+                    setSubCatOne(data.data.length > 0 ? data.data : []); // Ensure empty array if no data
+                    setSubCatTwo([]); // Reset subcategory two
+                    setFormData((prev) => ({ ...prev, sub_one: "", sub_two: "" })); // Reset form fields
                 })
-                .catch(() => toast.error("Failed to load subcategories."));
+                .catch((err) => {
+                    console.error("Error fetching subcategories:", err);
+                    setSubCatOne([]); // Default to empty array on error
+                });
+        } else {
+            setSubCatOne([]);
+            setSubCatTwo([]);
         }
     }, [formData.Ca_Id]);
 
@@ -80,7 +81,7 @@ const AddItem = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Submitting Form:", formData);
-
+        // Add API request to submit form data here
         try {
             // ✅ Handle "Other" material selection
             const materialToSend = formData.material === "Other" ? formData.otherMaterial : formData.material;
@@ -119,30 +120,12 @@ const AddItem = () => {
                 method: "POST",
                 body: formDataToSend,
             });
-
             const submitData = await submitResponse.json();
 
             if (submitResponse.ok) {
                 toast.success("✅ Item added successfully!");
                 setFormData({
-                    I_Id: "",
-                    I_name: "",
-                    Ca_Id: "",
-                    sub_one: "",
-                    sub_two: "",
-                    descrip: "",
-                    color: "",
-                    material: "",
-                    otherMaterial: "",
-                    price: "",
-                    warrantyPeriod: "",
-                    cost: "",
-                    img: null,
-                    img1: null,
-                    img2: null,
-                    img3: null,
-                    s_Id: "",
-                    minQty: ""
+                    I_Id: "",I_name: "",Ca_Id: "",sub_one: "",sub_two: "",descrip: "",color: "",material: "",otherMaterial: "",price: "",warrantyPeriod: "",cost: "",img: null,img1: null,img2: null,img3: null,s_Id: "",minQty: ""
                 });
             } else {
                 toast.error(submitData.message || "❌ Failed to add item.");
@@ -153,26 +136,9 @@ const AddItem = () => {
         }
     };
 
-
     const handleClear = () => {
         setFormData({
-            I_Id: "",
-            I_name: "",
-            Ca_Id: "",
-            sub_one: "",
-            sub_two: "",
-            descrip: "",
-            color: "",
-            material: "",
-            price: "",
-            warrantyPeriod: "",
-            cost: "",
-            img: null,
-            img1: null,
-            img2: null,
-            img3: null,
-            s_Id: "",
-            minQty: ""
+            I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "", material: "", otherMaterial: "", price: "", warrantyPeriod: "", cost: "", img: null, img1: null, img2: null, img3: null, s_Id: "", minQty: ""
         });
         setSubCatOne([]);
         setSubCatTwo([]);
@@ -198,9 +164,9 @@ const AddItem = () => {
                             <Label for="Ca_Id">Category</Label>
                             <Input type="select" name="Ca_Id" id="Ca_Id" value={formData.Ca_Id} onChange={handleChange} required>
                                 <option value="">Select Category</option>
-                                {categories.map((cat) => (
+                                {categories.length > 0 ? categories.map((cat) => (
                                     <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                ))}
+                                )) : <option value="">No Categories Available</option>}
                             </Input>
                         </FormGroup>
 
@@ -218,14 +184,13 @@ const AddItem = () => {
                                             required
                                         >
                                             <option value="">Select Sub One</option>
-                                            {subCatOne.map((sub) => (
+                                            {subCatOne.length > 0 ? subCatOne.map((sub) => (
                                                 <option key={sub.subCatOneId} value={sub.subCatOneId}>
                                                     {sub.subCatOneName}
                                                 </option>
-                                            ))}
+                                            )) : <option value="">No Subcategories Available</option>}
                                         </Input>
                                     </Col>
-
                                     <Col md={6}>
                                         {formData.sub_one && (
                                             <>
@@ -239,11 +204,11 @@ const AddItem = () => {
                                                     required
                                                 >
                                                     <option value="">Select Sub Two</option>
-                                                    {subCatTwo.map((sub) => (
+                                                    {subCatTwo.length > 0 ? subCatTwo.map((sub) => (
                                                         <option key={sub.subCatTwoId} value={sub.subCatTwoId}>
                                                             {sub.subCatTwoName}
                                                         </option>
-                                                    ))}
+                                                    )) : <option value="">No Subcategories Available</option>}
                                                 </Input>
                                             </>
                                         )}
@@ -298,14 +263,17 @@ const AddItem = () => {
                             <Label for="img">Main Image (Required)</Label>
                             <Input type="file" name="img" id="img" accept="image/*" onChange={handleImageChange} required />
                         </FormGroup>
+
                         <FormGroup>
                             <Label for="img1">Additional Image 1 (Required)</Label>
-                            <Input type="file" name="img1" id="img1" accept="image/*" onChange={handleImageChange}  />
+                            <Input type="file" name="img1" id="img1" accept="image/*" onChange={handleImageChange} />
                         </FormGroup>
+
                         <FormGroup>
                             <Label for="img2">Additional Image 2 (Optional)</Label>
-                            <Input type="file" name="img2" id="img2" accept="image/*" onChange={handleImageChange}  />
+                            <Input type="file" name="img2" id="img2" accept="image/*" onChange={handleImageChange} />
                         </FormGroup>
+
                         <FormGroup>
                             <Label for="img3">Additional Image 3 (Optional)</Label>
                             <Input type="file" name="img3" id="img3" accept="image/*" onChange={handleImageChange} />
@@ -315,11 +283,11 @@ const AddItem = () => {
                             <Label for="s_Id">Select Supplier</Label>
                             <Input type="select" name="s_Id" id="s_Id" value={formData.s_Id} onChange={handleChange} required>
                                 <option value="">Select Supplier</option>
-                                {suppliers.map((supplier) => (
+                                {suppliers.length > 0 ? suppliers.map((supplier) => (
                                     <option key={supplier.s_ID} value={supplier.s_ID}>
                                         {supplier.name} ({supplier.contact})
                                     </option>
-                                ))}
+                                )) : <option value="">No Suppliers Available</option>}
                             </Input>
                         </FormGroup>
 
@@ -351,7 +319,5 @@ const AddItem = () => {
         </Container>
     );
 };
-
-
 
 export default AddItem;

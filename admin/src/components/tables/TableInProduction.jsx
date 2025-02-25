@@ -15,6 +15,8 @@ const TableInproduction = ({ refreshKey }) => {
     useEffect(() => {
         fetchOrders();
     }, [refreshKey]);
+
+    // Fetch orders from API
     const fetchOrders = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders-inproduction");
@@ -22,16 +24,13 @@ const TableInproduction = ({ refreshKey }) => {
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }
-
-            setOrders(data.data);
+            setOrders(data.data); // Assuming the orders are in data.data
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
     };
-
-    fetchOrders();
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -86,51 +85,52 @@ const TableInproduction = ({ refreshKey }) => {
         }
     };
 
-
     return (
         <div className="table-container">
             <div className="table-wrapper">
                 <table className="styled-table">
                     <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Item ID</th>
-                            <th>Supplier ID</th>
-                            <th>Quantity</th>
-                            <th>Expected Date</th>
-                            <th>Special Note</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Item ID</th>
+                        <th>Supplier ID</th>
+                        <th>Quantity</th>
+                        <th>Expected Date</th>
+                        <th>Special Note</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
                     </thead>
-                        {loading ? (
-                            <p className="loading-text text-center">Loading orders...</p>
-                        ) : error ? (
-                            <p className="error-text text-center">{error}</p>
-                        ) : (
-                            <tbody>
-                            {orders.length === 0 ? (
-                                <tr>
-                                    <td colSpan="9" className="no-data text-center">No orders found</td>
-                                </tr>
-                            ) : (
-                                orders.map((order) => (
-                                    <tr key={order.p_ID}>
-                                        <td>{order.p_ID}</td>
-                                        <td>{order.I_Id}</td>
-                                        <td>{order.s_ID}</td>
-                                        <td>{order.qty}</td>
-                                        <td>{formatDate(order.expectedDate)}</td>
-                                        <td>{order.specialNote}</td>
-                                        <td>{order.status}</td>
-                                        <td className="action-buttons">
-                                            <button className="edit-btn" onClick={() => handleEditClick(order)}>✏️</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                            </tbody>
-                        )}
+                    <tbody>
+                    {loading ? (
+                        <tr>
+                            <td colSpan="8" className="loading-text text-center">Loading orders...</td>
+                        </tr>
+                    ) : error ? (
+                        <tr>
+                            <td colSpan="8" className="error-text text-center">{error}</td>
+                        </tr>
+                    ) : orders.length === 0 ? (
+                        <tr>
+                            <td colSpan="8" className="no-data text-center">No orders for production</td>
+                        </tr>
+                    ) : (
+                        orders.map((order) => (
+                            <tr key={order.p_ID}>
+                                <td>{order.p_ID}</td>
+                                <td>{order.I_Id}</td>
+                                <td>{order.s_ID}</td>
+                                <td>{order.qty}</td>
+                                <td>{formatDate(order.expectedDate)}</td>
+                                <td>{order.specialNote}</td>
+                                <td>{order.status}</td>
+                                <td className="action-buttons">
+                                    <button className="edit-btn" onClick={() => handleEditClick(order)}>✏️</button>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                    </tbody>
                 </table>
             </div>
 
