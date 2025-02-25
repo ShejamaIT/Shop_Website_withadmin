@@ -13,15 +13,19 @@ const AddOtherDetails = () => {
         subcattwo_img: null,
     });
 
-    // Fetch Categories
     useEffect(() => {
-        fetch("http://localhost:5001/api/admin/main/categories")
-            .then((res) => res.json())
-            .then((data) => setCategories(data.length > 0 ? data : [])) // Handle empty category list
-            .catch((err) => {
-                toast.error("Failed to load categories.");
-            });
+        fetchCategories();
     }, []);
+
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/categories");
+            const data = await response.json();
+            setCategories(data.length > 0 ? data : []);
+        } catch (err) {
+            toast.error("Failed to load categories.");
+        }
+    };
 
     // Handle Input Changes for formData
     const handleChange = (e) => {
@@ -63,6 +67,7 @@ const AddOtherDetails = () => {
             if (saveData.success) {
                 toast.success("Category added successfully!");
                 setCatname({ Catname: "" }); // Reset input field
+                await fetchCategories();
             } else {
                 throw new Error(saveData.message);
             }

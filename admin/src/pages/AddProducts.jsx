@@ -14,52 +14,64 @@ const AddItem = () => {
 
     // Fetch Categories
     useEffect(() => {
-        fetch("http://localhost:5001/api/admin/main/categories")
-            .then((res) => res.json())
-            .then((data) => setCategories(data.length > 0 ? data : [])) // Ensure empty array if no data
-            .catch((err) => {
-                console.error("Error fetching categories:", err);
-                setCategories([]); // Default to empty array on error
-            });
+        fetchCategories();
     }, []);
 
-    // Fetch Suppliers
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/categories");
+            const data = await response.json();
+            setCategories(data.length > 0 ? data : []);
+        } catch (err) {
+            console.error("Error fetching categories:", err);
+            setCategories([]); // Default to empty array on error
+        }
+    };
+
+// Fetch Suppliers
     useEffect(() => {
-        fetch("http://localhost:5001/api/admin/main/suppliers")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success) {
-                    setSuppliers(data.suppliers.length > 0 ? data.suppliers : []); // Ensure empty array if no data
-                } else {
-                    setSuppliers([]);
-                }
-            })
-            .catch((err) => {
-                console.error("Error fetching suppliers:", err);
-                setSuppliers([]); // Default to empty array on error
-            });
+        fetchSuppliers();
     }, []);
 
-    // Fetch Subcategories when Category changes
+    const fetchSuppliers = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
+            const data = await response.json();
+            if (data.success) {
+                setSuppliers(data.suppliers.length > 0 ? data.suppliers : []);
+            } else {
+                setSuppliers([]);
+            }
+        } catch (err) {
+            console.error("Error fetching suppliers:", err);
+            setSuppliers([]); // Default to empty array on error
+        }
+    };
+
+// Fetch Subcategories when Category changes
     useEffect(() => {
         if (formData.Ca_Id) {
-            fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${formData.Ca_Id}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    setSubCatOne(data.data.length > 0 ? data.data : []); // Ensure empty array if no data
-                    setSubCatTwo([]); // Reset subcategory two
-                    setFormData((prev) => ({ ...prev, sub_one: "", sub_two: "" })); // Reset form fields
-                })
-                .catch((err) => {
-                    console.error("Error fetching subcategories:", err);
-                    setSubCatOne([]); // Default to empty array on error
-                });
+            fetchSubcategories(formData.Ca_Id);
         } else {
             setSubCatOne([]);
             setSubCatTwo([]);
         }
     }, [formData.Ca_Id]);
 
+    const fetchSubcategories = async (Ca_Id) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${Ca_Id}`);
+            const data = await response.json();
+            setSubCatOne(data.data.length > 0 ? data.data : []); // Ensure empty array if no data
+            setSubCatTwo([]); // Reset subcategory two
+            setFormData((prev) => ({ ...prev, sub_one: "", sub_two: "" })); // Reset form fields
+        } catch (err) {
+            console.error("Error fetching subcategories:", err);
+            setSubCatOne([]); // Default to empty array on error
+        }
+    };
+
+// Fetch Subcategories Two when Subcategory One changes
     useEffect(() => {
         if (formData.sub_one) {
             const selectedSubCatOne = subCatOne.find((cat) => cat.subCatOneId === formData.sub_one);
