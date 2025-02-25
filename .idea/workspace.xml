@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with item stock">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/AddDeliveryShedule.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/AllDelivery.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_BCTR01-1-13.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_BCTR01-1-14.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_BCTR01-1-15.png" afterDir="false" />
@@ -80,10 +82,10 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-3-26.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-4-26.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/ReceiptView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ReceiptView.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/orderDetails.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/orderDetails.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,37 +120,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;js.last.introduce.type&quot;: &quot;CONST&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Dell/Desktop/Shop_Website_withadmin/admin/src/pages&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.new.ui&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "js.last.introduce.type": "CONST",
+    "last_opened_file_path": "C:/Users/LENOVO/Desktop/Shop_Website_withadmin/admin/src/pages",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.new.ui",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\LENOVO\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\tables" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\assets\images" />
-      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\header" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website" />
@@ -158,7 +160,7 @@
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\backend\models" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start adminBackend">
+  <component name="RunManager" selected="npm.start admin">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -268,7 +270,7 @@
       <workItem from="1740044921396" duration="1777000" />
       <workItem from="1740047813379" duration="61878000" />
       <workItem from="1740280484644" duration="25770000" />
-      <workItem from="1740371892552" duration="19967000" />
+      <workItem from="1740371892552" duration="24235000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -613,7 +615,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="228" />
+    <option name="localTasksCounter" value="229" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -655,8 +657,8 @@
     <MESSAGE value="remove unwanted console log" />
     <MESSAGE value="update" />
     <MESSAGE value="bug fixing" />
-    <MESSAGE value="update with item stock" />
     <MESSAGE value="update with issued" />
-    <option name="LAST_COMMIT_MESSAGE" value="update with issued" />
+    <MESSAGE value="update with item stock" />
+    <option name="LAST_COMMIT_MESSAGE" value="update with item stock" />
   </component>
 </project>

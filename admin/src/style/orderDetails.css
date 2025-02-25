@@ -75,6 +75,10 @@
     background-color: rgba(155, 89, 182, 0.2);
     color: #9b59b6;
 }
+.status.issued {
+    background-color: rgba(89, 94, 182, 0.2);
+    color: #596fb6;
+}
 /* Ordered Items List */
 .order-items {
     list-style: none;

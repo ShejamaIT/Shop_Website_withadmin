@@ -6,7 +6,7 @@ const AddOtherDetails = () => {
     const [categories, setCategories] = useState([]);
     const [catname , setCatname] = useState({  Catname: ""});
     const [formData, setFormData] = useState({ Ca_Id: "", sub_one: "", sub_two: "", subcatone_img: null, subcattwo_img: null,});
-    const [typeData, setTypeData] = useState({ Ca_Id: "", sub_one: "", sub_two: "" });
+
     // Fetch Categories
     useEffect(() => {
         fetch("http://localhost:5001/api/admin/main/categories")
