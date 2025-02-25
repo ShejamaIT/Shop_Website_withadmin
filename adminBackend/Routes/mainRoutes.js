@@ -3215,6 +3215,50 @@ router.post("/delivery-dates", async (req, res) => {
     }
 });
 
+// Save new employee and saleteam
+router.post("/employees", async (req, res) => {
+    try {
+        const { name, address, nic, dob, contact, job, basic, target } = req.body;
+        console.log(req.body);
+
+        if (!name || !address || !nic || !dob || !contact || !job || !basic) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required except target and currentRate (only for Sales)."
+            });
+        }
+
+        const E_Id = await generateNewId("Employee", "E_Id", "E"); // Generate new Employee ID
+
+        const sql = `INSERT INTO Employee (E_Id, name, address, nic, dob, contact, job, basic) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        await db.query(sql, [E_Id, name, address, nic, dob, contact, job, basic]);
+
+        // If job is Sales, insert into sales_team table
+        let salesData = null;
+        if (job === "Sales" && target) {
+            const stID = await generateNewId("sales_team", "stID", "ST");
+            const sqlSales = `INSERT INTO sales_team (stID, E_Id, target, currentRate) VALUES (?, ?, ?, '0')`;
+            await db.query(sqlSales,[stID, E_Id, target]);
+
+            salesData = { stID, target };
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Employee added successfully",
+            data:  {E_Id,salesData},
+        });
+
+    } catch (err) {
+        console.error("Error adding employee:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Error adding employee",
+            details: err.message
+        });
+    }
+});
+
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
