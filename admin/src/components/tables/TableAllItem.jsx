@@ -3,7 +3,7 @@ import "./TableTwo.css"; // Import the stylesheet
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
-const TableTwo = () => {
+const TableAllItem = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -92,4 +92,4 @@ const TableTwo = () => {
     );
 };
 
-export default TableTwo;
+export default TableAllItem;

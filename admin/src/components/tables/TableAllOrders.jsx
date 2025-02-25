@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./TableThree.css"; // Importing the stylesheet
 
-const TableThree = () => {
+const TableAllOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -104,4 +104,4 @@ const TableThree = () => {
     );
 };
 
-export default TableThree;
+export default TableAllOrders;

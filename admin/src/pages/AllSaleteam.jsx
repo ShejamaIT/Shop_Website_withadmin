@@ -3,7 +3,7 @@ import {Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button}
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
-import TableTwo from "../components/tables/TableTwo";
+import TableAllItem from "../components/tables/TableAllItem";
 import SaleteamDetail from "./SaleteamDetail";
 import {useNavigate} from "react-router-dom";
 

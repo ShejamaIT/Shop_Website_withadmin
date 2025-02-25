@@ -3,7 +3,7 @@ import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from 
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
-import TableTwo from "../components/tables/TableTwo";
+import TableAllItem from "../components/tables/TableAllItem";
 import AddDeliveryShedule from "./AddDeliveryShedule";
 
 
@@ -43,7 +43,7 @@ const AllDelivery = () => {
                         {/* First Tab - Table */}
                         <TabPane tabId="1">
                             <Row>
-                                <TableTwo />
+                                <TableAllItem />
                             </Row>
                         </TabPane>
                         <TabPane tabId="2">
