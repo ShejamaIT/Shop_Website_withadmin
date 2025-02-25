@@ -21,6 +21,7 @@ const AddSupplier = ({ onAddSupplier }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validation to ensure required fields are filled
         if (!formData.name || !formData.address || !formData.contact) {
             toast.error("Please fill out all supplier details.");
             return;
@@ -47,7 +48,9 @@ const AddSupplier = ({ onAddSupplier }) => {
             const result = await response.json();
 
             if (response.ok) {
+                // On success, call the parent function to update the supplier list in the parent component
                 toast.success(result.message);
+                onAddSupplier(supplierData); // Pass the new supplier to the parent component
                 handleClear(); // Clear form after successful submission
             } else {
                 toast.error(result.message || "Something went wrong. Please try again.");

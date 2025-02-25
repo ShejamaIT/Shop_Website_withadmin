@@ -20,7 +20,9 @@ const AllSuppliers = () => {
             const data = await response.json();
             if (data.suppliers && data.suppliers.length > 0) {
                 setSuppliers(data.suppliers);
-                setActiveTab(data.suppliers[0].s_ID);
+                setActiveTab(data.suppliers[0].s_ID); // Set the first supplier as the default active tab
+            } else {
+                setActiveTab("addSupplier"); // Default to Add Supplier if no suppliers are present
             }
         } catch (error) {
             console.error("Error fetching suppliers:", error);
@@ -31,7 +33,13 @@ const AllSuppliers = () => {
     // Fetch suppliers when the component mounts or after adding a supplier
     useEffect(() => {
         fetchSuppliers();
-    }, []);
+    }, []); // Run only once when component mounts
+
+    // Function to handle adding a new supplier
+    const handleAddSupplier = (newSupplier) => {
+        setSuppliers((prevSuppliers) => [...prevSuppliers, newSupplier]); // Add new supplier to the list
+        setActiveTab(newSupplier.s_ID); // Set the new supplier as the active tab
+    };
 
     return (
         <Helmet title={'All-Suppliers'}>
@@ -41,6 +49,7 @@ const AllSuppliers = () => {
                 </Row>
 
                 <Container className="all-products">
+                    {/* Tab Navigation */}
                     <Nav tabs>
                         {suppliers.map((supplier) => (
                             <NavItem key={supplier.s_ID}>
@@ -48,30 +57,35 @@ const AllSuppliers = () => {
                                     className={activeTab === supplier.s_ID ? "active" : ""}
                                     onClick={() => setActiveTab(supplier.s_ID)}
                                 >
-                                    {supplier.name}
+                                    {supplier.name} {/* Displaying supplier's name */}
                                 </NavLink>
                             </NavItem>
                         ))}
+
+                        {/* Add Supplier Tab */}
                         <NavItem>
                             <NavLink
-                                className={activeTab === "5" ? "active" : ""}
-                                onClick={() => setActiveTab("5")}
+                                className={activeTab === "addSupplier" ? "active" : ""}
+                                onClick={() => setActiveTab("addSupplier")}
                             >
                                 Add New Supplier
                             </NavLink>
                         </NavItem>
                     </Nav>
 
+                    {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
                         {suppliers.map((supplier) => (
                             <TabPane tabId={supplier.s_ID} key={supplier.s_ID}>
                                 <SupplierDetails supplier={supplier} />
                             </TabPane>
                         ))}
-                        <TabPane tabId="5">
+
+                        {/* Add Supplier Tab Content */}
+                        <TabPane tabId="addSupplier">
                             <Row>
                                 <Col>
-                                    <AddSupplier onAddSupplier={fetchSuppliers} />
+                                    <AddSupplier onAddSupplier={handleAddSupplier} />
                                 </Col>
                             </Row>
                         </TabPane>

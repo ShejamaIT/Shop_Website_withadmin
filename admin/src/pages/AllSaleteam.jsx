@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from "react";
-import {Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button} from "reactstrap";
+import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button } from "reactstrap";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
-import TableAllItem from "../components/tables/TableAllItem";
-import SaleteamDetail from "./SaleteamDetail";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import AddEmployee from "./AddEmployee";
 
 const AllSaleteam = () => {
-    const [activeTab, setActiveTab] = useState(""); // Initially empty, will set dynamically
-    const [salesteamMembers, setSalesteamMembers] = useState([]); // State to store sales team members
-    const navigate = useNavigate(); // Initialize navigate
+    const [activeTab, setActiveTab] = useState("");
+    const [salesteamMembers, setSalesteamMembers] = useState([]);
+    const navigate = useNavigate();
 
-    // Fetch sales team members when the component mounts
     useEffect(() => {
         const fetchSalesTeamMembers = async () => {
             try {
-                const response = await fetch("http://localhost:5001/api/admin/main/salesteam"); // Adjusted API endpoint
+                const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
                 const data = await response.json();
 
                 if (data.data && data.data.length > 0) {
-                    setSalesteamMembers(data.data); // Store the fetched data in state
-                    setActiveTab(data.data[0].stID); // Set first member as default active tab
+                    setSalesteamMembers(data.data);
+                    setActiveTab(data.data[0].stID);
+                } else {
+                    setActiveTab("addEmployee");
                 }
             } catch (error) {
                 console.error("Error fetching sales team members:", error);
@@ -29,12 +29,28 @@ const AllSaleteam = () => {
         };
 
         fetchSalesTeamMembers();
-    }, []); // Run only once when component mounts
+    }, []);
 
     function handleNavigate(stid) {
-        console.log(stid);
-        navigate(`/saleteam-detail/${stid}`); // Navigate to OrderDetails page
+        navigate(`/saleteam-detail/${stid}`);
     }
+
+    const handleAddEmployee = (newEmployee) => {
+        if (newEmployee.job === "Sales") {
+            const newSalesMember = {
+                stID: `ST-${newEmployee.E_Id}`,
+                E_Id: newEmployee.E_Id,
+                employeeName: newEmployee.name,
+                job: newEmployee.job,
+                contact: newEmployee.contact,
+                target: newEmployee.target || 0,
+                currentRate: newEmployee.currentRate || 0,
+            };
+
+            setSalesteamMembers((prevMembers) => [...prevMembers, newSalesMember]);
+            setActiveTab(newSalesMember.stID);
+        }
+    };
 
     return (
         <Helmet title={'All-Saleteam'}>
@@ -44,7 +60,6 @@ const AllSaleteam = () => {
                 </Row>
 
                 <Container className="all-products">
-                    {/* Tab Navigation */}
                     <Nav tabs>
                         {salesteamMembers.map((member) => (
                             <NavItem key={member.stID}>
@@ -52,13 +67,21 @@ const AllSaleteam = () => {
                                     className={activeTab === member.stID ? "active" : ""}
                                     onClick={() => setActiveTab(member.stID)}
                                 >
-                                    {member.employeeName} {/* Displaying employee's name */}
+                                    {member.employeeName}
                                 </NavLink>
                             </NavItem>
                         ))}
+
+                        <NavItem>
+                            <NavLink
+                                className={activeTab === "addEmployee" ? "active" : ""}
+                                onClick={() => setActiveTab("addEmployee")}
+                            >
+                                Add Employee
+                            </NavLink>
+                        </NavItem>
                     </Nav>
 
-                    {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
                         {salesteamMembers.map((member) => (
                             <TabPane tabId={member.stID} key={member.stID}>
@@ -69,13 +92,19 @@ const AllSaleteam = () => {
                                         <p><strong>Job Role:</strong> {member.job}</p>
                                         <p><strong>Contact:</strong> {member.contact}</p>
                                         <p><strong>Target:</strong> {member.target}</p>
-
-                                        {/* Example Table Component (Replace with relevant content) */}
                                         <Button color="success" onClick={() => handleNavigate(member.stID)}>View detail</Button>
                                     </Col>
                                 </Row>
                             </TabPane>
                         ))}
+
+                        <TabPane tabId="addEmployee">
+                            <Row>
+                                <Col>
+                                    <AddEmployee onAddEmployee={handleAddEmployee} />
+                                </Col>
+                            </Row>
+                        </TabPane>
                     </TabContent>
                 </Container>
             </section>
