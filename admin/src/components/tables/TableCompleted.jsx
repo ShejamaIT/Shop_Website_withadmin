@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import "./TableThree.css"; // Importing the stylesheet
+import "../../style/TableThree.css"; // Importing the stylesheet
 
 const TableCompleted = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);

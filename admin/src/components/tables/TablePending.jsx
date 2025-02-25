@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./TableThree.css";
+import "../../style/TableThree.css";
 
 const TablePending = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);

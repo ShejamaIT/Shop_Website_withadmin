@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./TableTwo.css"; // Import the stylesheet
+import "../../style/TableTwo.css"; // Import the stylesheet
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
