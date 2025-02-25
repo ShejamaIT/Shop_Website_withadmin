@@ -2362,136 +2362,6 @@ router.get("/typesname", async (req, res) => {
     }
 });
 
-// find type by cat name
-router.get("/types-cat", async (req, res) => {
-    try {
-        const { category_name } = req.query; // Get Category name from the query parameters
-
-        if (!category_name) {
-            return res.status(400).json({ message: "Category name is required." });
-        }
-
-        // Step 1: Query the Category table to get the Ca_Id based on the category_name
-        const [categoryResult] = await db.query(`
-            SELECT Ca_Id
-            FROM Category
-            WHERE name = ?;
-        `, [category_name]);
-
-        // If no category found, return an error
-        if (categoryResult.length === 0) {
-            return res.status(404).json({ message: "Category not found." });
-        }
-
-        const Ca_Id = categoryResult[0].Ca_Id; // Extract the Ca_Id from the result
-
-        // Step 2: Query the Type table to fetch all types for the given Ca_Id
-        const [types] = await db.query(`
-            SELECT Ty_Id, sub_one, sub_two
-            FROM Type
-            WHERE Ca_Id = ?;
-        `, [Ca_Id]);
-
-        // If no types found for this category, return a 404 status
-        if (types.length === 0) {
-            return res.status(404).json({ message: "No types found for this category." });
-        }
-
-        // Step 3: Return the found types
-        return res.status(200).json({
-            message: "Types found.",
-            types: types,
-        });
-
-    } catch (error) {
-        console.error("Error fetching types:", error.message);
-        return res.status(500).json({ message: "Error fetching types" });
-    }
-});
-
-// Find Type id
-router.get("/find-types", async (req, res) => {
-    try {
-        const { Ca_Id, sub_one, sub_two } = req.query; // Get Category ID, sub_one, and sub_two from the query parameters
-
-        if (!Ca_Id || !sub_one || !sub_two) {
-            return res.status(400).json({ message: "Category ID, Sub One, and Sub Two are required." });
-        }
-
-        // Query the database to fetch the type for the given Ca_Id, sub_one, and sub_two
-        const [types] = await db.query(`
-            SELECT Ty_Id, sub_one, sub_two
-            FROM Type
-            WHERE Ca_Id = ? AND sub_one = ? AND sub_two = ?;
-        `, [Ca_Id, sub_one, sub_two]);
-
-        // If no type found for this combination, return a 404 status
-        if (types.length === 0) {
-            return res.status(404).json({ message: "No type found for this category and sub-one/sub-two combination." });
-        }
-        console.log(types[0]);
-
-        // Send the type as a JSON response
-        return res.status(200).json({
-            message: "Type found.",
-            type: types[0],  // Return only the first matching type
-        });
-
-    } catch (error) {
-        console.error("Error fetching types:", error.message);
-        return res.status(500).json({ message: "Error fetching types" });
-    }
-});
-
-// Find type id when category name comes
-router.get("/find-types-cat", async (req, res) => {
-    try {
-        const { category_name, sub_one, sub_two } = req.query; // Get Category name, sub_one, and sub_two from the query parameters
-
-        if (!category_name || !sub_one || !sub_two) {
-            return res.status(400).json({ message: "Category name, Sub One, and Sub Two are required." });
-        }
-
-        // Step 1: Query the Category table to get the Ca_Id based on the category name
-        const [categoryResult] = await db.query(`
-            SELECT Ca_Id
-            FROM Category
-            WHERE name = ?;
-        `, [category_name]);
-
-        // If no category found, return an error
-        if (categoryResult.length === 0) {
-            return res.status(404).json({ message: "Category not found." });
-        }
-
-        const Ca_Id = categoryResult[0].Ca_Id; // Extract the Ca_Id from the result
-
-        // Step 2: Query the Type table to find the Ty_Id based on Ca_Id, sub_one, and sub_two
-        const [types] = await db.query(`
-            SELECT Ty_Id, sub_one, sub_two
-            FROM Type
-            WHERE Ca_Id = ? AND sub_one = ? AND sub_two = ?;
-        `, [Ca_Id, sub_one, sub_two]);
-
-        // If no type found for this combination, return a 404 status
-        if (types.length === 0) {
-            return res.status(404).json({ message: "No type found for this category and sub-one/sub-two combination." });
-        }
-
-        console.log(types[0]);
-
-        // Step 3: Return the found Type data
-        return res.status(200).json({
-            message: "Type found.",
-            type: types[0],  // Return only the first matching type
-        });
-
-    } catch (error) {
-        console.error("Error fetching types:", error.message);
-        return res.status(500).json({ message: "Error fetching types" });
-    }
-});
-
 // API endpoint to save item-supplier association
 router.post('/add-item-supplier', async (req, res) => {
     const { I_Id, s_ID ,cost } = req.body;
@@ -3039,6 +2909,7 @@ router.put("/change-quantity", async (req, res) => {
     }
 });
 
+// save new stock in item update stock
 router.post("/get-stock-details", async (req, res) => {
     try {
         // Ensure req.body is an array
@@ -3258,7 +3129,6 @@ router.post("/employees", async (req, res) => {
         });
     }
 });
-
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
