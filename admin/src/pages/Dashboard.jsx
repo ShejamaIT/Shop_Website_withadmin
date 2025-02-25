@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
-import TableThree from "../components/tables/TableThree";
-import TablePending from "../components/tables/TablePending";
-import TableAccepting from "../components/tables/TableAccepting";
-import TableInproduction from "../components/tables/TableInProduction";
 import NavBar from "../components/header/navBar";
 import '../style/Dashboard.css';
 import classnames from "classnames";
+import AddDeliveryShedule from "./AddDeliveryShedule";
+import PlaceOrder from "./Placeorder";
+import AddProduct from "./AddProducts";
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState("1"); // Track active tab
 
+    const [refreshKey, setRefreshKey] = useState(0); // Forcing re-render
+
+    // Function to refresh the tab content after updates
+    const handleDataUpdate = () => {
+        setRefreshKey((prev) => prev + 1);
+    };
     return (
         <Helmet title={'Dashboard'}>
             <section>
@@ -27,7 +32,7 @@ const Dashboard = () => {
                                 onClick={() => setActiveTab("1")}
                                 style={{ cursor: "pointer" }}
                             >
-                                All Orders
+                                Place Order
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -36,7 +41,7 @@ const Dashboard = () => {
                                 onClick={() => setActiveTab("2")}
                                 style={{ cursor: "pointer" }}
                             >
-                                Pending Orders
+                                Add Item
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -45,40 +50,26 @@ const Dashboard = () => {
                                 onClick={() => setActiveTab("3")}
                                 style={{ cursor: "pointer" }}
                             >
-                                Accepted Orders
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={classnames({ active: activeTab === "4" })}
-                                onClick={() => setActiveTab("4")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                In Production
+                                Add Scheduled Dates
                             </NavLink>
                         </NavItem>
                     </Nav>
 
                     {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        <TabPane tabId="1">
+                        <TabPane tabId="0" key={refreshKey}>
                             <Row>
-                                <TableThree />
+                                {/*<PlaceOrder onOrderPlaced={handleDataUpdate} />*/}
                             </Row>
                         </TabPane>
                         <TabPane tabId="2">
                             <Row>
-                                <TablePending />
+                                {/*<AddProduct />*/}
                             </Row>
                         </TabPane>
                         <TabPane tabId="3">
                             <Row>
-                                <TableAccepting />
-                            </Row>
-                        </TabPane>
-                        <TabPane tabId="4">
-                            <Row>
-                                <TableInproduction />
+                                {/*<AddDeliveryShedule />*/}
                             </Row>
                         </TabPane>
                     </TabContent>

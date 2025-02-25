@@ -16,3 +16,8 @@ td,th{
     margin-bottom: 20px;
     margin-left: 90%;
 }
+.custom-table-header th {
+    background-color: black;
+    color: gold;
+    text-align: center;
+}

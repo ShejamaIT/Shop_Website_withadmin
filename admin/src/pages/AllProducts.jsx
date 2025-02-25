@@ -21,21 +21,21 @@ const AllProducts = () => {
 
                 <Container className="all-products">
                     {/* Tab Navigation */}
+                    <NavItem>
+                        <NavLink
+                            className={activeTab === "1" ? "active" : ""}
+                            onClick={() => setActiveTab("1")}
+                        >
+                            Add Item
+                        </NavLink>
+                    </NavItem>
                     <Nav tabs>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "1" ? "active" : ""}
-                                onClick={() => setActiveTab("1")}
-                            >
-                                All Products
-                            </NavLink>
-                        </NavItem>
                         <NavItem>
                             <NavLink
                                 className={activeTab === "2" ? "active" : ""}
                                 onClick={() => setActiveTab("2")}
                             >
-                                For Production
+                                All Products
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -43,7 +43,7 @@ const AllProducts = () => {
                                 className={activeTab === "3" ? "active" : ""}
                                 onClick={() => setActiveTab("3")}
                             >
-                                In Production
+                                For Production
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -51,7 +51,7 @@ const AllProducts = () => {
                                 className={activeTab === "4" ? "active" : ""}
                                 onClick={() => setActiveTab("4")}
                             >
-                                Add Item
+                                In Production
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -69,32 +69,33 @@ const AllProducts = () => {
                         {/* First Tab - Table */}
                         <TabPane tabId="1">
                             <Row>
+                                <Col>
+                                    <AddProduct />
+                                </Col>
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="2">
+                            <Row>
                                 <TableTwo />
                             </Row>
                         </TabPane>
 
                         {/* Second Tab - Placeholder (Add any content here) */}
-                        <TabPane tabId="2">
+                        <TabPane tabId="3">
                             <Row>
                                 <Col>
                                     <Tableforproduction />
                                 </Col>
                             </Row>
                         </TabPane>
-                        <TabPane tabId="3">
+                        <TabPane tabId="4">
                             <Row>
                                 <Col>
                                     <TableInProduction />
                                 </Col>
                             </Row>
                         </TabPane>
-                        <TabPane tabId="4">
-                            <Row>
-                                <Col>
-                                    <AddProduct />
-                                </Col>
-                            </Row>
-                        </TabPane>
+
                         <TabPane tabId="5">
                             <Row>
                                 <Col>

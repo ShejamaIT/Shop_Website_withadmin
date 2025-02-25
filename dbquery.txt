@@ -108,7 +108,7 @@ CREATE TABLE deli_Rates(
     amount DOUBLE
 );
 CREATE TABLE delivery_schedule(
-    id int PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     ds_date DATE,
     district VARCHAR(25)
 );
