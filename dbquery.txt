@@ -25,14 +25,6 @@ CREATE TABLE subCat_two(
         CONSTRAINT FOREIGN KEY (sb_c_id) REFERENCES subCat_one (sb_c_id)
         			ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE Type(
-     Ty_Id VARCHAR(15) PRIMARY KEY,
-     Ca_Id VARCHAR(15),
-     sub_one VARCHAR(40),
-     sub_two VARCHAR(40),
-	    CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
-			ON DELETE CASCADE ON UPDATE CASCADE
-);
 CREATE TABLE Item(
       I_Id VARCHAR(25) PRIMARY KEY,
       I_name TEXT ,
