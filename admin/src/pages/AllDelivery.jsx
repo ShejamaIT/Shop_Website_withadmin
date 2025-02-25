@@ -43,7 +43,7 @@ const AllDelivery = () => {
                         {/* First Tab - Table */}
                         <TabPane tabId="1">
                             <Row>
-                                <TableAllItem />
+                                {/*<TableAllItem />*/}
                             </Row>
                         </TabPane>
                         <TabPane tabId="2">

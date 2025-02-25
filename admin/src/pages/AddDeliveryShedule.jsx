@@ -235,34 +235,6 @@ const AddDeliverySchedule = () => {
 
                         <Button color="success" className="mt-2" onClick={handleSubmitDates}>Submit Dates</Button>
                     </div>
-                </Col>
-                <Col lg="6" className="d-flex flex-column gap-4">
-                    <div className="p-3 border rounded shadow-sm">
-                        <Label className="fw-bold">Delivery Rates</Label>
-                        {/* Table to display delivery rates from DB */}
-                        <Table bordered size="sm" className="mt-2">
-                            <thead className="custom-table-header">
-                            <tr>
-                                <th>District</th>
-                                <th>Rate</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {dbRates.length === 0 ? (
-                                <tr>
-                                    <td colSpan="2" className="text-center">No Data</td>
-                                </tr>
-                            ) : (
-                                dbRates.map((rate, index) => (
-                                    <tr key={index}>
-                                        <td>{rate.district}</td>
-                                        <td>{rate.amount}</td>
-                                    </tr>
-                                ))
-                            )}
-                            </tbody>
-                        </Table>
-                    </div>
 
                     <div className="p-3 border rounded shadow-sm">
                         <Label className="fw-bold">Select District for Delivery Schedule</Label>
@@ -300,6 +272,34 @@ const AddDeliverySchedule = () => {
                                     <tr key={index}>
                                         <td>{selectedDistrict}</td>
                                         <td>{date}</td>
+                                    </tr>
+                                ))
+                            )}
+                            </tbody>
+                        </Table>
+                    </div>
+                </Col>
+                <Col lg="6" className="d-flex flex-column gap-4">
+                    <div className="p-3 border rounded shadow-sm">
+                        <Label className="fw-bold">Delivery Rates</Label>
+                        {/* Table to display delivery rates from DB */}
+                        <Table bordered size="sm" className="mt-2">
+                            <thead className="custom-table-header">
+                            <tr>
+                                <th>District</th>
+                                <th>Rate</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {dbRates.length === 0 ? (
+                                <tr>
+                                    <td colSpan="2" className="text-center">No Data</td>
+                                </tr>
+                            ) : (
+                                dbRates.map((rate, index) => (
+                                    <tr key={index}>
+                                        <td>{rate.district}</td>
+                                        <td>{rate.amount}</td>
                                     </tr>
                                 ))
                             )}
