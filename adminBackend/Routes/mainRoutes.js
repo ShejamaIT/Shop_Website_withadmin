@@ -2697,7 +2697,7 @@ router.get("/getSubcategories", async (req, res) => {
     }
 });
 
-// // Get subcat two detail by ca_id
+// Get subcat two detail by ca_id
 router.get("/getSubcategoriesTwo", async (req, res) => {
     const { sb_c_id } = req.query;
 
@@ -2896,7 +2896,7 @@ router.get("/coupon-details", async (req, res) => {
     }
 });
 
-// Fetch all coupons
+// Fetch all Delivery rates
 router.get("/delivery-rates", async (req, res) => {
     try {
         const query = `SELECT * FROM deli_rates`;
@@ -3143,6 +3143,78 @@ router.post("/isssued-order", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
+// Save new Delivery Rate
+router.post("/delivery-rates", async (req, res) => {
+    try {
+        // SQL query to insert new category
+        const sql = `INSERT INTO deli_Rates (district, amount) VALUES (?, ?)`;
+        const values = [req.body.District,req.body.rate];
+
+        // Execute the insert query
+        await db.query(sql, values);
+
+        // Return success response with the new category details
+        return res.status(201).json({
+            success: true,
+            message: "Rate added successfully",
+            data: {
+                District: req.body.District,
+                rate: req.body.rate
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting rates data:", err.message);
+
+        // Respond with error details
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+// Save Scheduled dates
+router.post("/delivery-dates", async (req, res) => {
+    try {
+        console.log(req.body);
+
+        const { District, dates } = req.body; // Extract district and dates array
+
+        if (!District || !Array.isArray(dates) || dates.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "District and at least one date are required"
+            });
+        }
+
+        // SQL query to insert multiple dates
+        const sql = `INSERT INTO delivery_schedule (district, ds_date) VALUES ?`;
+        const values = dates.map(date => [District, date]); // Create array of values
+
+        // Execute the insert query
+        await db.query(sql, [values]);
+
+        return res.status(201).json({
+            success: true,
+            message: "Delivery dates added successfully",
+            data: {
+                District,
+                dates,
+            },
+        });
+
+    } catch (err) {
+        console.error("Error inserting delivery dates:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
