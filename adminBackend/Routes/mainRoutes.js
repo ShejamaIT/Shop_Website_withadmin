@@ -4,7 +4,6 @@ import db from '../utils/db.js';
 import bwipjs from 'bwip-js';
 import path from "path";
 import fs from "fs";
-
 const router = express.Router();
 
 // Save  new item
@@ -2078,8 +2077,10 @@ router.get("/salesteam", async (req, res) => {
         const [salesTeam] = await db.query(`
             SELECT 
                 st.stID, 
-                st.target, 
-                st.currentRate, 
+                st.orderTarget, 
+                st.issuedTarget, 
+                st.totalOrder,
+                st.totalIssued,
                 e.E_Id, 
                 e.name AS employeeName, 
                 e.address, 
@@ -2108,8 +2109,10 @@ router.get("/salesteam", async (req, res) => {
             contact: member.contact,
             job: member.job,
             basic: member.basic,
-            target: member.target,
-            currentRate: member.currentRate
+            orderTarget: member.orderTarget,
+            issuedTarget: member.issuedTarget,
+            totalOrder: member.totalOrder,
+            totalIssued: member.totalIssued
         }));
 
         // Send the formatted data as a JSON response
@@ -2130,7 +2133,6 @@ router.get("/orders/by-sales-team", async (req, res) => {
         const { stID } = req.query;
         console.log(stID);
 
-        // Query the database to fetch sales team member details and their orders using a JOIN
         const [results] = await db.query(`
             SELECT 
                 e.name AS employeeName, 
@@ -2141,23 +2143,31 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 e.job AS employeeJob,
                 e.basic AS employeeBasic,
                 st.stID,
-                st.target,
-                st.currentRate,
+                st.orderTarget,
+                st.issuedTarget,
+                st.totalOrder,
+                st.totalIssued,
+                COUNT(o.OrID) AS totalCount, 
+                SUM(CASE WHEN o.orStatus = 'issued' THEN 1 ELSE 0 END) AS issuedCount,
+                COALESCE(SUM(o.total), 0) AS totalOrderValue, 
+                COALESCE(SUM(CASE WHEN o.orStatus = 'issued' THEN o.total ELSE 0 END), 0) AS issuedOrderValue,
                 o.OrID AS orderId,
                 o.orDate AS orderDate,
-                o.total AS totalPrice
+                o.total AS totalPrice,
+                o.orStatus AS orderStatus
             FROM sales_team st
             JOIN Employee e ON e.E_Id = st.E_Id
             LEFT JOIN Orders o ON o.stID = st.stID
-            WHERE st.stID = ?;
+            WHERE st.stID = ?
+            GROUP BY st.stID, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic, 
+                     st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued, o.OrID, o.orDate, o.total, o.orStatus;
         `, [stID]);
 
-        // Check if we have any data for the given sales team
         if (results.length === 0) {
-            return res.status(404).json({ message: "No orders found for this sales team member." });
+            return res.status(404).json({ message: "No data found for this sales team member." });
         }
 
-        // Prepare the response with sales team details and orders
+        // Extract member details from the first row
         const memberDetails = {
             employeeName: results[0].employeeName,
             employeeContact: results[0].employeeContact,
@@ -2167,22 +2177,27 @@ router.get("/orders/by-sales-team", async (req, res) => {
             employeeJob: results[0].employeeJob,
             employeeBasic: results[0].employeeBasic,
             stID: results[0].stID,
-            target: results[0].target,
-            currentRate: results[0].currentRate,
+            orderTarget: results[0].orderTarget,
+            issuedTarget: results[0].issuedTarget,
+            totalOrder: results[0].totalOrder,  // Total sales value of all orders
+            totalIssued: results[0].totalIssued,  // Total sales value of issued orders
+            totalCount: results[0].totalCount,  // Total number of orders
+            issuedCount: results[0].issuedCount  // Number of issued orders
         };
 
-        const orders = results.map(order => ({
+        // Filter out null orders and return an empty array if none exist
+        const orders = results.filter(order => order.orderId !== null).map(order => ({
             orderId: order.orderId,
             orderDate: order.orderDate,
-            totalPrice: order.totalPrice
+            totalPrice: order.totalPrice,
+            orderStatus: order.orderStatus
         }));
 
-        // Send the member details and orders as a JSON response
         return res.status(200).json({
             message: "Sales team details and orders fetched successfully.",
             data: {
                 memberDetails,
-                orders
+                orders: orders.length > 0 ? orders : [] // Ensure orders array is empty if there are no valid orders
             }
         });
 
@@ -3087,10 +3102,10 @@ router.post("/delivery-dates", async (req, res) => {
 // Save new employee and saleteam
 router.post("/employees", async (req, res) => {
     try {
-        const { name, address, nic, dob, contact, job, basic, target } = req.body;
+        const { name, address, nic, dob, contact, job, basic, orderTarget , issuedTarget } = req.body;
         console.log(req.body);
 
-        if (!name || !address || !nic || !dob || !contact || !job || !basic) {
+        if (!name || !address || !nic || !dob || !contact || !job || !basic || !orderTarget || !issuedTarget) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required except target and currentRate (only for Sales)."
@@ -3104,12 +3119,12 @@ router.post("/employees", async (req, res) => {
 
         // If job is Sales, insert into sales_team table
         let salesData = null;
-        if (job === "Sales" && target) {
+        if (job === "Sales" && orderTarget && issuedTarget) {
             const stID = await generateNewId("sales_team", "stID", "ST");
-            const sqlSales = `INSERT INTO sales_team (stID, E_Id, target, currentRate) VALUES (?, ?, ?, '0')`;
-            await db.query(sqlSales,[stID, E_Id, target]);
+            const sqlSales = `INSERT INTO sales_team (stID, E_Id, orderTarget,issuedTarget, totalOrder, totalIssued) VALUES (?, ?, ?,?,'0', '0')`;
+            await db.query(sqlSales,[stID, E_Id, orderTarget , issuedTarget]);
 
-            salesData = { stID, target };
+            salesData = { stID, orderTarget , issuedTarget };
         }
 
         return res.status(201).json({
