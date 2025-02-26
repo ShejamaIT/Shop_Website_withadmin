@@ -260,6 +260,7 @@ router.post("/orders", async (req, res) => {
             totalBillPrice,
             deliveryPrice,
             discountAmount,
+            totalItemPrice,
             couponCode,
             expectedDate,
             specialNote,
@@ -293,6 +294,15 @@ router.post("/orders", async (req, res) => {
 
             // Set the sales team ID (stID) from the coupon
             stID = couponResult[0].stID;
+
+            // Update sales_team table: update totalOrder
+            const newTotalOrder = (parseFloat(totalItemPrice) - parseFloat(discountAmount));  // (Total Bill Price - discountAmount)
+            const updateSalesTeamQuery = `
+                UPDATE sales_team
+                SET totalOrder = totalOrder + ?
+                WHERE stID = ?
+            `;
+            await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
 
         // Insert Order
@@ -333,6 +343,8 @@ router.post("/orders", async (req, res) => {
             let couponParams = [ocID, orID, couponCode];
 
             await db.query(couponQuery, couponParams);
+
+
         }
 
         return res.status(201).json({
@@ -2934,7 +2946,11 @@ router.post("/get-stock-details", async (req, res) => {
 
         // Construct dynamic SQL query with placeholders
         const placeholders = itemIds.map(() => "?").join(", ");
-        const sql = `SELECT * FROM m_s_r_detail WHERE I_Id IN (${placeholders})`;
+        const sql = `
+            SELECT * FROM m_s_r_detail
+            WHERE I_Id IN (${placeholders})
+              AND status = 'Available'
+        `;
 
         // Execute query
         const [results] = await db.query(sql, itemIds);
@@ -2961,11 +2977,12 @@ router.post("/get-stock-details", async (req, res) => {
 
 // Issued order
 router.post("/isssued-order", async (req, res) => {
-    const { orID, delStatus, delPrice, discount, total, advance, balance, payStatus, stID, paymentAmount, selectedItems } = req.body;
+    const { orID, delStatus, delPrice, discount,subtotal, total, advance, balance, payStatus, stID, paymentAmount, selectedItems } = req.body;
 
     if (!orID || !stID || paymentAmount === undefined || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
+     const IssuedPrice = parseFloat(subtotal) - parseFloat(discount);
 
     try {
         // 1. Update Orders table
@@ -2989,9 +3006,9 @@ router.post("/isssued-order", async (req, res) => {
         // 3. Update sales_team table
         await db.query(
             `UPDATE sales_team 
-             SET currentRate = currentRate + ? 
+             SET totalIssued = totalIssued + ? 
              WHERE stID = ?`,
-            [total, stID]
+            [IssuedPrice, stID]
         );
 
         // 4. Update Item stock quantities using Order_Detail table
