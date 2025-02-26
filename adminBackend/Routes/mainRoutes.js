@@ -1207,9 +1207,7 @@ router.get("/supplier-items", async (req, res) => {
 router.get("/suppliers", async (req, res) => {
     try {
         // Step 1: Fetch all suppliers
-        const suppliersQuery = `
-            SELECT s_ID, name, contact,address
-            FROM Supplier`;
+        const suppliersQuery = `SELECT s_ID, name, contact,address FROM Supplier`;
 
         const [suppliersResult] = await db.query(suppliersQuery);
         // Step 2: Check if suppliers were found
@@ -2147,7 +2145,7 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 st.currentRate,
                 o.OrID AS orderId,
                 o.orDate AS orderDate,
-                o.totPrice AS totalPrice
+                o.total AS totalPrice
             FROM sales_team st
             JOIN Employee e ON e.E_Id = st.E_Id
             LEFT JOIN Orders o ON o.stID = st.stID
