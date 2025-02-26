@@ -10,13 +10,13 @@ import BillInvoice from "./AccpetBillInvoice";
 import ChangeQty from "./changeQty";
 
 const OrderDetails = () => {
-    const { id } = useParams(); // Get order ID from URL
+    const { id } = useParams();
     const [order, setOrder] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({}); // Stores editable fields
+    const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
     const [selectedItem, setSelectedItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
@@ -34,7 +34,7 @@ const OrderDetails = () => {
                 ...data.order,
                 items: data.order.items.map(item => ({
                     ...item,
-                    booked: item.booked || false // Ensure booked field is included
+                    booked: item.booked || false,
                 }))
             });
             setLoading(false);
@@ -46,9 +46,57 @@ const OrderDetails = () => {
     };
     const calculateTotal = () => {
         const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
-       const delivery = Number(formData.deliveryCharge || 0);
-       const discount = Number(formData.discount || 0);
+        const delivery = Number(formData.deliveryCharge || 0);
+        const discount = Number(formData.discount || 0);
         return itemTotal + delivery - discount;
+    };
+
+    const handleAddItem = () => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            items: [
+                ...prevFormData.items,
+                {
+                    itemId: `temp-${Date.now()}`, // Temporary ID for frontend use
+                    itemName: "",
+                    color: "",
+                    quantity: 1,
+                    unitPrice: 0,
+                    price: 0,
+                    booked: false,
+                    newItem: true, // Flag to indicate a new item
+                },
+            ],
+        }));
+    };
+
+    const handleRemoveItem = (index, item) => {
+        if (item.newItem) {
+            // Remove unsaved items from UI
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                items: prevFormData.items.filter((_, i) => i !== index),
+            }));
+        } else {
+            // Remove item from the backend
+            // fetch(`http://localhost:5001/api/admin/main/remove-item`, {
+            //     method: "DELETE",
+            //     headers: { "Content-Type": "application/json" },
+            //     body: JSON.stringify({ orId: order.orderId, itemId: item.itemId }),
+            // })
+            //     .then((response) => response.json())
+            //     .then((data) => {
+            //         if (data.success) {
+            //             fetchOrder();
+            //         } else {
+            //             alert(`Failed to remove item: ${data.message}`);
+            //         }
+            //     })
+            //     .catch((error) => {
+            //         console.error("Error removing item:", error);
+            //         alert(`Error removing item: ${error.message}`);
+            //     });
+        }
     };
 
     const handleChange = (e, index) => {
@@ -421,11 +469,10 @@ const OrderDetails = () => {
                                         </>
                                     )}
                                 </div>
-
                                 <h5 className="mt-4">Ordered Items</h5>
                                 <ul className="order-items">
                                     <div className="order-general">
-                                        {order.items.map((item, index) => (
+                                        {formData.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
                                                 <p><strong>Color:</strong> {item.color}</p>
@@ -444,22 +491,19 @@ const OrderDetails = () => {
                                                             />
                                                             Mark as Booked
                                                         </Label>
-                                                        <Button
-                                                            color="secondary"
-                                                            className="ms-4"
-                                                            onClick={() => handleEditClick2(item,order)} // Ensure this is not treating `selectedItem` as a function
-                                                            disabled={loading}
-                                                        >
-                                                            Change Qty
-                                                        </Button>
+                                                        <Button color="danger" className="ms-2" onClick={() => handleRemoveItem(index, item)}>Remove</Button>
+                                                        <Button color="secondary" className="ms-2" onClick={() => handleEditClick2(item, order)}>Change Qty</Button>
                                                     </FormGroup>
-                                                )}
 
+                                                )}
                                             </li>
                                         ))}
                                     </div>
-                                </ul>
 
+                                </ul>
+                                {isEditing && (
+                                    <Button color="primary" className="mt-3" onClick={handleAddItem}>+ Add New Item</Button>
+                                )}
                                 {/* Order Summary */}
                                 <div className="order-summary">
                                     {!isEditing ? (
@@ -511,7 +555,6 @@ const OrderDetails = () => {
                                     )}
                                 </div>
                             </div>
-
                             {showModal && selectedItem && (
                                 <ChangeQty
                                     selectedItem={selectedItem} // Pass selectedItem as an object
