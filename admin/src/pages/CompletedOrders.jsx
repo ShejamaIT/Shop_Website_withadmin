@@ -266,6 +266,7 @@ const CompleteOrderDetails = () => {
                     newQuantity: formData.newQuantity,
                     updatedPrice: formData.updatedPrice,
                     orId: formData.orId,
+                    booked: formData.booked,
                 }),
             });
 

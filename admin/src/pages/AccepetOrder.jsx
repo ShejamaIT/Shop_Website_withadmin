@@ -261,7 +261,6 @@ const OrderDetails = () => {
     };
 
     const handleSubmit2 = async (formData) => {
-        console.log(formData);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
                 method: "PUT",
