@@ -295,6 +295,7 @@ const CompleteOrderDetails = () => {
             delStatus: formData.deliveryStatus,
             delPrice: formData.delivery,
             discount: order.discount,
+            subtotal: formData.subtotal,
             total: formData.billTotal,
             advance: formData.totalAdvance,
             payStatus: formData.paymentType,

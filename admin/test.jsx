@@ -10,13 +10,12 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
     const [advance, setAdvance] = useState(selectedOrder.advance);
     const [nowPay, setNowPay] = useState(0);
     const [showStockModal, setShowStockModal] = useState(false);
-    const [items, setItems] = useState([]);
-    const [selectedItems, setSelectedItems] = useState([]);
+    const [items, setItems] = useState([]); // State to store supplier data
+    const [selectedItems, setSelectedItems] = useState([]); // State to store selected stock items
     const [searchTerm, setSearchTerm] = useState('');
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [filteredItems, setFilteredItems] = useState([]);
-    const [selectedItem, setSelectedItem] = useState([]);
-
+    const [dropdownOpen, setDropdownOpen] = useState(false);  // To handle dropdown visibility
+    const [filteredItems, setFilteredItems] = useState([]); // List to store filtered items based on search term
+    const [selectedItem, setSelectedItem] = useState(null);
     const calculateTotal = (item) => item.quantity * item.unitPrice;
     const delivery = Number(selectedOrder.deliveryCharge);
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
@@ -31,16 +30,11 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
     }, [balance]);
 
     const handlePrintAndSubmit = () => {
-        if (balance !== 0) {
-            toast.error("Select correct payment type first");
-        } else if (selectedItems.length === 0) {  // Fix: Check if selectedItems is empty
-            toast.error("No reserved items selected.");
-        } else {
-            console.log(
-                selectedOrder.orderId, paymentType, deliveryStatus, advance, nowPay, totalAdvance,
-                netTotal, balance, delivery, selectedOrder, selectedItems
-            );
-        }
+        handlePaymentUpdate({
+            orderId: selectedOrder.orderId,paymentType: paymentType,deliveryStatus: deliveryStatus,
+            previousAdvance: advance,addedAdvance: nowPay,totalAdvance: totalAdvance,
+            netTotal: netTotal, balance: balance,delivery:delivery,order: selectedOrder,
+        });
     };
 
     useEffect(() => {
@@ -102,10 +96,6 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         setPaymentType(e.target.value);
     };
 
-    const passReservedItem = () => {
-        setSelectedItem(selectedItems);
-        setShowStockModal(false);
-    };
 
     return (
         <div className="modal-overlay">
@@ -120,6 +110,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                     <div className="payment-type">
                         <label><strong>Payment Status:</strong></label>
                         <select value={paymentType} onChange={handlePaymentTypeChange}>
+                            {/* Conditionally render options based on deliveryStatus */}
                             {deliveryStatus === "Pickup" && (
                                 <>
                                     <option value="Settled">Settled</option>
@@ -133,7 +124,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                                     <option value="Credit">Credit</option>
                                 </>
                             )}
-                            {balance === 0 && <option value="Settled">Settled</option>}
+                            {balance === 0 && <option value="Settled">Settled</option>} {/* Auto-set to Settled if balance is 0 */}
                         </select>
                     </div>
 
@@ -164,6 +155,26 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                     </tbody>
                 </table>
 
+                <div className="invoice-summary">
+                    <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
+                    <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p>
+                    <p><strong>Discount:</strong> Rs. {selectedOrder.discount.toFixed(2)}</p>
+                    <p><strong>Net Total:</strong> Rs. {netTotal.toFixed(2)}</p>
+                    <p><strong>Previous Advance:</strong> Rs. {advance.toFixed(2)}</p>
+
+                    <div className="invoice-summary-item">
+                        <label><strong>Current Payment:</strong></label>
+                        <input
+                            type="number"
+                            value={nowPay}
+                            onChange={(e) => setNowPay(e.target.value)}
+                        />
+                    </div>
+
+                    <p><strong>Total Advance:</strong> Rs. {totalAdvance.toFixed(2)}</p>
+                    <p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
+                </div>
+
                 <div className="modal-buttons">
                     <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
                     <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
@@ -174,13 +185,42 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
                 <ModalBody>
-                    <FormGroup>
+                    <FormGroup style={{ position: "relative" }}>
                         <Label>Items ID</Label>
                         <Input type="text" value={searchTerm} onChange={handleSearchChange} placeholder="Search for item..." />
+                        {dropdownOpen && (
+                            <div className="dropdown" style={{ position: "absolute", zIndex: 100, backgroundColor: "white", border: "1px solid #ddd", width: "100%" }}>
+                                {filteredItems.map((item) => (
+                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item" style={{ padding: "8px", cursor: "pointer" }}>
+                                        {item.I_Id} - {item.stock_Id} - {item.srd_Id} - {item.sr_ID}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </FormGroup>
+
+                    <Label>Issued Items</Label>
+                    <table className="selected-items-table">
+                        <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Stock ID</th>
+                            <th>Details</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {selectedItems.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.I_Id}</td>
+                                <td>{item.stock_Id}</td>
+                                <td>{item.srd_Id}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
                 </ModalBody>
                 <ModalFooter>
-                    <Button color="primary" onClick={passReservedItem}>Pass</Button>
+                    <Button color="primary">Pass</Button>
                     <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
                 </ModalFooter>
             </Modal>

@@ -48,7 +48,6 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
             });
         }
     };
-
     useEffect(() => {
         const itemIds = [...new Set(selectedOrder.items.map(item => item.itemId))];
         const fetchItems = async () => {
@@ -90,18 +89,20 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         setFilteredItems(filtered);
         setDropdownOpen(filtered.length > 0);
     };
-
     const handleSelectItem = (item) => {
-        if (!selectedItems.some(selected => selected.I_Id === item.I_Id)) {
-            setSelectedItems([...selectedItems, item]);
+        // Check if the item is already selected
+        if (!selectedItems.some(selected => selected.stock_Id === item.stock_Id)) {
+            // If not, add it to the selectedItems array
+            setSelectedItems(prevItems => [...prevItems, item]);
         }
         setSearchTerm('');
         setDropdownOpen(false);
     };
 
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
+        return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
     };
 
     const handlePaymentTypeChange = (e) => {
@@ -120,7 +121,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                 <div className="invoice-section">
                     <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
                     <p><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
-                    <p><strong>Invoice Date:</strong> {formatDate(invoiceDate)}</p>
+                    <p><strong>Invoice Date:</strong> {invoiceDate}</p>
                     <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
 
                     <div className="payment-type">
@@ -170,11 +171,34 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                     ))}
                     </tbody>
                 </table>
+                <div>
+                    <Label>Issued Items</Label>
+                    <table className="selected-items-table">
+                        <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Batch ID</th>
+                            <th>Stock ID</th>
+                            <th>Key</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {selectedItem.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.I_Id}</td>
+                                <td>{item.sr_ID}</td>
+                                <td>{item.stock_Id}</td>
+                                <td>{item.srd_Id}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
 
                 <div className="invoice-summary">
                     <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
-                    <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p>
                     <p><strong>Discount:</strong> Rs. {selectedOrder.discount.toFixed(2)}</p>
+                    <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p>
                     <p><strong>Net Total:</strong> Rs. {netTotal.toFixed(2)}</p>
                     <p><strong>Previous Advance:</strong> Rs. {advance.toFixed(2)}</p>
 

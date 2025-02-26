@@ -156,6 +156,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty ,price: item.price * item.qty })),
             deliveryPrice,
             discountAmount,
+            totalItemPrice,
             totalBillPrice,
         };
         if (validateForm()) {
@@ -367,7 +368,10 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <Label>Special Note</Label>
                             <Input type="textarea" name="specialNote" onChange={handleChange}></Input>
                         </FormGroup>
-                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>
+                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5>
+                        <h5>Discount: Rs.{discountAmount}</h5>
+                        <h5>Total Item Price: Rs.{totalItemPrice}</h5>
+                        <h4>Total Bill Price: Rs.{totalBillPrice}</h4>
                         <Row>
                             <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
                             <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
