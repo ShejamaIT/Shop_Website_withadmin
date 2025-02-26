@@ -261,6 +261,7 @@ const OrderDetails = () => {
     };
 
     const handleSubmit2 = async (formData) => {
+        console.log(formData);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
                 method: "PUT",
@@ -272,6 +273,7 @@ const OrderDetails = () => {
                     newQuantity: formData.newQuantity,
                     updatedPrice: formData.updatedPrice,
                     orId: formData.orId,
+                    booked: formData.booked,
                 }),
             });
 
@@ -589,52 +591,6 @@ const OrderDetails = () => {
                                     )}
                                 </div>
                             </div>
-
-                            {/*<Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>*/}
-                            {/*    <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>*/}
-                            {/*    <ModalBody>*/}
-                            {/*        <FormGroup style={{ position: "relative" }}>*/}
-                            {/*            <Label>Items ID</Label>*/}
-                            {/*            <Input type="text" value={searchTerm} onChange={handleSearchChange} placeholder="Search for item..." />*/}
-                            {/*            {dropdownOpen && (*/}
-                            {/*                <div className="dropdown" style={{ position: "absolute", zIndex: 100, backgroundColor: "white", border: "1px solid #ddd", width: "100%" }}>*/}
-                            {/*                    {filteredItems.map((item) => (*/}
-                            {/*                        <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item" style={{ padding: "8px", cursor: "pointer" }}>*/}
-                            {/*                            {item.I_Id} - {item.stock_Id} - {item.srd_Id} - {item.sr_ID}*/}
-                            {/*                        </div>*/}
-                            {/*                    ))}*/}
-                            {/*                </div>*/}
-                            {/*            )}*/}
-                            {/*        </FormGroup>*/}
-
-                            {/*        <Label>Issued Items</Label>*/}
-                            {/*        <table className="selected-items-table">*/}
-                            {/*            <thead>*/}
-                            {/*            <tr>*/}
-                            {/*                <th>Item ID</th>*/}
-                            {/*                <th>Batch ID</th>*/}
-                            {/*                <th>Stock ID</th>*/}
-                            {/*                <th>Key</th>*/}
-                            {/*            </tr>*/}
-                            {/*            </thead>*/}
-                            {/*            <tbody>*/}
-                            {/*            {selectedItems.map((item, index) => (*/}
-                            {/*                <tr key={index}>*/}
-                            {/*                    <td>{item.I_Id}</td>*/}
-                            {/*                    <td>{item.sr_ID}</td>*/}
-                            {/*                    <td>{item.stock_Id}</td>*/}
-                            {/*                    <td>{item.srd_Id}</td>*/}
-                            {/*                </tr>*/}
-                            {/*            ))}*/}
-                            {/*            </tbody>*/}
-                            {/*        </table>*/}
-                            {/*    </ModalBody>*/}
-                            {/*    <ModalFooter>*/}
-                            {/*        <Button color="primary" onClick={() => passReservedItem(selectedItems)}>Pass</Button>*/}
-                            {/*        <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>*/}
-                            {/*    </ModalFooter>*/}
-                            {/*</Modal>*/}
-
                             {showModal1 && selectedOrder && (
                                 <BillInvoice
                                     selectedOrder={selectedOrder}
