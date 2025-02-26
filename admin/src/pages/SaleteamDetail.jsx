@@ -111,14 +111,14 @@ const SaleteamDetail = ({ Saleteam }) => {
                                 <Table bordered className="orders-table">
                                     <tbody>
                                     <tr>
-                                        <td><strong>Total Received Orders</strong></td>
+                                        <td><strong>Received Orders Count</strong></td>
                                         <td>{salesteamMember.totalCount}</td>
                                         <td>{salesteamMember.issuedCount}</td>
-                                        <td><strong>Total Issued Orders</strong></td>
+                                        <td><strong>Issued Orders Count</strong></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Total Order Received</strong></td>
-                                        <td>Rs. {salesteamMember.totalOrders}</td>
+                                        <td>Rs. {salesteamMember.totalOrder}</td>
                                         <td>Rs. {salesteamMember.orderTarget}</td>
                                         <td><strong>Order Received Target</strong></td>
 
