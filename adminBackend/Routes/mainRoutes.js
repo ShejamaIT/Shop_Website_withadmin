@@ -2862,7 +2862,7 @@ router.get("/delivery-schedule", async (req, res) => {
 
 // Update change qty
 router.put("/change-quantity", async (req, res) => {
-    const { orId, itemId, newQuantity, updatedPrice } = req.body;
+    const { orId, itemId, newQuantity, updatedPrice, booked } = req.body;
     console.log(req.body);
 
     // Validation: Check required fields
@@ -2895,12 +2895,16 @@ router.put("/change-quantity", async (req, res) => {
         //  Correctly accessing the first row values
         const qtyDifference = Number(newQuantity) - Number(currentOrder[0].qty);
 
-        const newBookedQty = Number(currentItem[0].bookedQty) + qtyDifference;
+        let newBookedQty = Number(currentItem[0].bookedQty);
+        let newAvailableQty = Number(currentItem[0].availableQty);
 
-        const newAvailableQty = Number(currentItem[0].availableQty) - qtyDifference;
+        if (booked) {
+            newBookedQty += qtyDifference;
+            newAvailableQty -= qtyDifference;
 
-        if (newAvailableQty < 0) {
-            return res.status(400).json({ message: "Insufficient available quantity." });
+            if (newAvailableQty < 0) {
+                return res.status(400).json({ message: "Insufficient available quantity." });
+            }
         }
 
         // Update Order_Detail
@@ -2909,17 +2913,18 @@ router.put("/change-quantity", async (req, res) => {
             [newQuantity, updatedPrice, orId, itemId]
         );
 
-        // Update booked_item
-        await db.query(
-            "UPDATE booked_item SET qty = ? WHERE orID = ? AND I_Id = ?",
-            [newQuantity, orId, itemId]
-        );
+        // Only update booked_item and Item when booked is true
+        if (booked) {
+            await db.query(
+                "UPDATE booked_item SET qty = ? WHERE orID = ? AND I_Id = ?",
+                [newQuantity, orId, itemId]
+            );
 
-        // Update Item quantities
-        await db.query(
-            "UPDATE Item SET bookedQty = ?, availableQty = ? WHERE I_Id = ?",
-            [newBookedQty, newAvailableQty, itemId]
-        );
+            await db.query(
+                "UPDATE Item SET bookedQty = ?, availableQty = ? WHERE I_Id = ?",
+                [newBookedQty, newAvailableQty, itemId]
+            );
+        }
 
         // Success response
         return res.status(200).json({ message: "Quantity updated successfully." });
@@ -2928,6 +2933,7 @@ router.put("/change-quantity", async (req, res) => {
         return res.status(500).json({ message: "Error updating quantity.", error: error.message });
     }
 });
+
 
 // save new stock in item update stock
 router.post("/get-stock-details", async (req, res) => {
