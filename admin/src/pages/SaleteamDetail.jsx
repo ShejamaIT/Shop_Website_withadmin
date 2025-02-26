@@ -11,7 +11,6 @@ const SaleteamDetail = ({ Saleteam }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         if (!Saleteam.stID) {
@@ -28,30 +27,37 @@ const SaleteamDetail = ({ Saleteam }) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/orders/by-sales-team?stID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
+
             const data = await response.json();
             console.log(data.data.orders);
+
             if (data.data) {
-                setOrders(data.data.orders);
+                setSalesteamMember(data.data.memberDetails || null); // Ensure member details are set properly
+                setOrders(data.data.orders || []); // If no orders, set an empty array
             } else {
-                setError("No order details available for this sales team.");
+                setError("No data available for this sales team.");
+                setOrders([]); // Ensure orders remain an empty array if there's no data
+                setSalesteamMember(null); // Ensure member details are cleared
             }
-            if (data.data) {
-                setSalesteamMember(data.data.memberDetails);
-            } else {
-                setError("No member details available for this sales team.");
-            }
+
             setLoading(false);
         } catch (err) {
             console.error("Error fetching order details:", err);
             setError(err.message);
+            setOrders([]); // Ensure orders remain empty on error
+            setSalesteamMember(null); // Clear member details on error
             setLoading(false);
         }
     };
 
+
     const calculateOrderSummary = () => {
-        const totalOrders = orders.length;
-        const totalPrice = orders.reduce((acc, order) => acc + order.totalPrice, 0); // Adjust to field name from your response
-        return { totalOrders, totalPrice };
+        const totalOrders = salesteamMember.totalCount;
+        const issuedOrders = salesteamMember.issuedCount;
+        const totalOrderPrice = salesteamMember.totalOrder;
+        const totalIssuedPrice = salesteamMember.totalIssued;
+        // const totalPrice = orders.reduce((acc, order) => acc + order.totalPrice, 0); // Adjust to field name from your response
+        return { totalOrders, issuedOrders , totalOrderPrice, totalIssuedPrice};
     };
 
     const formatDate = (dateString) => {
@@ -62,14 +68,14 @@ const SaleteamDetail = ({ Saleteam }) => {
     if (loading) return <p className="loading-text">Loading team details...</p>;
     if (error) return <p className="error-text">Something went wrong: {error}</p>;
 
-    const { totalOrders, totalPrice } = calculateOrderSummary();
+    const { totalOrders, issuedOrders , totalOrderPrice, totalIssuedPrice } = calculateOrderSummary();
     return (
         <Helmet title={`Sales Team Detail`}>
             <section>
                 <Container>
                     <Row>
                         <Col lg="12">
-                            <h2 className="salesteam-title">Sales Team Member: {salesteamMember?.employeeName}</h2>
+                            {/*<h4 className="salesteam-title">Sales Team Member: {salesteamMember?.employeeName}</h4>*/}
 
                             {/* Sales Team Member Details */}
                             <div className="salesteam-details">
@@ -92,10 +98,6 @@ const SaleteamDetail = ({ Saleteam }) => {
                                         <td>{salesteamMember?.employeeNic}</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Target</strong></td>
-                                        <td>Rs.{salesteamMember?.target}</td>
-                                    </tr>
-                                    <tr>
                                         <td><strong>Job</strong></td>
                                         <td>{salesteamMember?.employeeJob}</td>
                                     </tr>
@@ -109,12 +111,24 @@ const SaleteamDetail = ({ Saleteam }) => {
                                 <Table bordered className="orders-table">
                                     <tbody>
                                     <tr>
-                                        <td><strong>Total Orders</strong></td>
-                                        <td>{totalOrders}</td>
+                                        <td><strong>Total Received Orders</strong></td>
+                                        <td>{salesteamMember.totalCount}</td>
+                                        <td>{salesteamMember.issuedCount}</td>
+                                        <td><strong>Total Issued Orders</strong></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Total Sales Value</strong></td>
-                                        <td>Rs. {totalPrice}</td>
+                                        <td><strong>Total Order Received</strong></td>
+                                        <td>Rs. {salesteamMember.totalOrders}</td>
+                                        <td>Rs. {salesteamMember.orderTarget}</td>
+                                        <td><strong>Order Received Target</strong></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total Order Issued</strong></td>
+                                        <td>Rs. {salesteamMember.totalIssued}</td>
+                                        <td>Rs. {salesteamMember.issuedTarget}</td>
+                                        <td><strong>Order Issued Target</strong></td>
+
                                     </tr>
                                     </tbody>
                                 </Table>

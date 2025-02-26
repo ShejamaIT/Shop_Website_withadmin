@@ -12,14 +12,15 @@ const AddEmployee = ({ onAddEmployee }) => {
         contact: "",
         job: "",
         basic: "",
-        target: "",
+        orderTarget: "",
+        issuedTarget: "",
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: name === "basic" || name === "target" ? parseFloat(value) || "" : value,
+            [name]: name === "basic" || name === "orderTarget" || name === "issuedTarget" ? parseFloat(value) || "" : value,
         }));
     };
 
@@ -31,7 +32,7 @@ const AddEmployee = ({ onAddEmployee }) => {
             return;
         }
 
-        if (formData.job === "Sales" && !formData.target) {
+        if (formData.job === "Sales" && !formData.orderTarget && !formData.issuedTarget) {
             toast.error("Please enter sales team details.");
             return;
         }
@@ -45,7 +46,8 @@ const AddEmployee = ({ onAddEmployee }) => {
                 contact: formData.contact,
                 job: formData.job,
                 basic: formData.basic,
-                target: formData.target,
+                orderTarget: formData.orderTarget,
+                issuedTarget: formData.issuedTarget,
             };
 
             const response = await fetch("http://localhost:5001/api/admin/main/employees", {
@@ -134,8 +136,12 @@ const AddEmployee = ({ onAddEmployee }) => {
                         {formData.job === "Sales" && (
                             <>
                                 <FormGroup>
-                                    <Label for="target">Sales Target</Label>
-                                    <Input type="number" name="target" id="target" value={formData.target} onChange={handleChange} required />
+                                    <Label for="target">Received Target</Label>
+                                    <Input type="number" name="orderTarget" id="orderTarget" value={formData.orderTarget} onChange={handleChange} required />
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label for="target">Issued Target</Label>
+                                    <Input type="number" name="issuedTarget" id="issuedTarget" value={formData.issuedTarget} onChange={handleChange} required />
                                 </FormGroup>
                             </>
                         )}

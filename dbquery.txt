@@ -69,8 +69,10 @@ CREATE TABLE Employee(
 CREATE TABLE sales_team(
     stID VARCHAR(25) PRIMARY KEY,
     E_Id VARCHAR(15),
-    target DOUBLE,
-    currentRate DOUBLE,
+    orderTarget DOUBLE,
+    issuedTarget DOUBLE,
+    totalOrder DOUBLE,
+    totalIssued DOUBLE,
         CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
                                    ON DELETE CASCADE ON UPDATE CASCADE
 );
