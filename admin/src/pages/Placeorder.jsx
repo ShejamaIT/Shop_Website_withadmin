@@ -323,7 +323,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                         ))}
                                     </Input>
                                 </FormGroup>
-                                {deliveryDates.length > 0 && (
+                                {deliveryDates.length > 0 ? (
                                     <FormGroup>
                                         <Label>Expected Delivery Date</Label>
                                         <Input type="select" name="expectedDate" onChange={handleChange}>
@@ -332,6 +332,11 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                                 <option key={index} value={date}>{date}</option>
                                             ))}
                                         </Input>
+                                    </FormGroup>
+                                ) : (
+                                    <FormGroup>
+                                        <Label>Expected Delivery Date</Label>
+                                        <Input type="date" name="expectedDate" onChange={handleChange}></Input>
                                     </FormGroup>
                                 )}
                             </>

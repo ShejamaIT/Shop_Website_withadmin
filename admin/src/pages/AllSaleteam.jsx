@@ -5,29 +5,30 @@ import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import { useNavigate } from "react-router-dom";
 import AddEmployee from "./AddEmployee";
+import SaleteamDetail from "./SaleteamDetail";
 
 const AllSaleteam = () => {
     const [activeTab, setActiveTab] = useState("");
     const [salesteamMembers, setSalesteamMembers] = useState([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchSalesTeamMembers = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
-                const data = await response.json();
-
-                if (data.data && data.data.length > 0) {
-                    setSalesteamMembers(data.data);
-                    setActiveTab(data.data[0].stID);
-                } else {
-                    setActiveTab("addEmployee");
-                }
-            } catch (error) {
-                console.error("Error fetching sales team members:", error);
+    const fetchSalesTeamMembers = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
+            const data = await response.json();
+            console.log(data.data);
+            if (data.data && data.data.length > 0) {
+                setSalesteamMembers(data.data);
+                setActiveTab(data.data[0].stID);
+            } else {
+                setActiveTab("addEmployee");
             }
-        };
+        } catch (error) {
+            console.error("Error fetching sales team members:", error);
+        }
+    };
 
+    useEffect(() => {
         fetchSalesTeamMembers();
     }, []);
 
@@ -85,16 +86,7 @@ const AllSaleteam = () => {
                     <TabContent activeTab={activeTab}>
                         {salesteamMembers.map((member) => (
                             <TabPane tabId={member.stID} key={member.stID}>
-                                <Row>
-                                    <Col>
-                                        <h4>Details for {member.employeeName}</h4>
-                                        <p><strong>Employee ID:</strong> {member.E_Id}</p>
-                                        <p><strong>Job Role:</strong> {member.job}</p>
-                                        <p><strong>Contact:</strong> {member.contact}</p>
-                                        <p><strong>Target:</strong> {member.target}</p>
-                                        <Button color="success" onClick={() => handleNavigate(member.stID)}>View detail</Button>
-                                    </Col>
-                                </Row>
+                                <SaleteamDetail Saleteam={member} />
                             </TabPane>
                         ))}
 

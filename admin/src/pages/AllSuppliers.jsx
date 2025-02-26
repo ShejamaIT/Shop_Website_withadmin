@@ -18,6 +18,7 @@ const AllSuppliers = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
             const data = await response.json();
+            console.log(data.suppliers);
             if (data.suppliers && data.suppliers.length > 0) {
                 setSuppliers(data.suppliers);
                 setActiveTab(data.suppliers[0].s_ID); // Set the first supplier as the default active tab
