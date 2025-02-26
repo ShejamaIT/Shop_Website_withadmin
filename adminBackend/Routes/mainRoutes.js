@@ -2128,74 +2128,6 @@ router.get("/salesteam", async (req, res) => {
 });
 
 // Get orders for a specific sales team member (stID)
-// router.get("/orders/by-sales-team", async (req, res) => {
-//     try {
-//         const { stID } = req.query;
-//         console.log(stID);
-//
-//         const [results] = await db.query(`
-//             SELECT
-//                 e.name AS employeeName,
-//                 e.contact AS employeeContact,
-//                 e.nic AS employeeNic,
-//                 e.dob AS employeeDob,
-//                 e.address AS employeeAddress,
-//                 e.job AS employeeJob,
-//                 e.basic AS employeeBasic,
-//                 st.stID,
-//                 st.orderTarget,
-//                 st.issuedTarget,
-//                 st.totalOrder,
-//                 st.totalIssued,
-//                 o.OrID AS orderId,
-//                 o.orDate AS orderDate,
-//                 o.total AS totalPrice
-//             FROM sales_team st
-//             JOIN Employee e ON e.E_Id = st.E_Id
-//             LEFT JOIN Orders o ON o.stID = st.stID
-//             WHERE st.stID = ?;
-//         `, [stID]);
-//
-//         if (results.length === 0) {
-//             return res.status(404).json({ message: "No data found for this sales team member." });
-//         }
-//
-//         // Extract member details from the first row
-//         const memberDetails = {
-//             employeeName: results[0].employeeName,
-//             employeeContact: results[0].employeeContact,
-//             employeeNic: results[0].employeeNic,
-//             employeeDob: results[0].employeeDob,
-//             employeeAddress: results[0].employeeAddress,
-//             employeeJob: results[0].employeeJob,
-//             employeeBasic: results[0].employeeBasic,
-//             stID: results[0].stID,
-//             orderTarget: results[0].orderTarget,
-//             issuedTarget: results[0].issuedTarget,
-//             totalOrder: results[0].totalOrder,
-//             totalIssued: results[0].totalIssued
-//         };
-//
-//         // Filter out null orders and return an empty array if none exist
-//         const orders = results.filter(order => order.orderId !== null).map(order => ({
-//             orderId: order.orderId,
-//             orderDate: order.orderDate,
-//             totalPrice: order.totalPrice
-//         }));
-//
-//         return res.status(200).json({
-//             message: "Sales team details and orders fetched successfully.",
-//             data: {
-//                 memberDetails,
-//                 orders: orders.length > 0 ? orders : [] // Ensure orders array is empty if there are no valid orders
-//             }
-//         });
-//
-//     } catch (error) {
-//         console.error("Error fetching orders and member details:", error.message);
-//         return res.status(500).json({ message: "Error fetching orders and member details." });
-//     }
-// });
 router.get("/orders/by-sales-team", async (req, res) => {
     try {
         const { stID } = req.query;
@@ -2274,8 +2206,6 @@ router.get("/orders/by-sales-team", async (req, res) => {
         return res.status(500).json({ message: "Error fetching orders and member details." });
     }
 });
-
-
 
 // Get all categories
 router.get("/categories", async (req, res) => {
