@@ -621,6 +621,130 @@ router.get("/accept-order-details", async (req, res) => {
         });
     }
 });
+// Get Details of isssued order
+router.get("/issued-order-details", async (req, res) => {
+    try {
+        const { orID } = req.query;
+        if (!orID) {
+            return res.status(400).json({ success: false, message: "Order ID is required" });
+        }
+
+        // 1️⃣ Fetch Order Info with Sales Team Details
+        const orderQuery = `
+            SELECT
+                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.advance, o.balance, o.payStatus,
+                o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype, o.stID,
+                o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
+            FROM Orders o
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            WHERE o.OrID = ?`;
+
+        const [orderResult] = await db.query(orderQuery, [orID]);
+        if (orderResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        const orderData = orderResult[0];
+
+        // 2️⃣ Fetch Ordered Items with Updated Stock Fields
+        const itemsQuery = `
+            SELECT
+                od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
+                i.bookedQty, i.availableQty
+            FROM Order_Detail od
+            JOIN Item i ON od.I_Id = i.I_Id
+            WHERE od.orID = ?`;
+
+        const [itemsResult] = await db.query(itemsQuery, [orID]);
+
+        // 3️⃣ Fetch Issued Items for this Order from `m_s_r_detail`
+        const issuedItemsQuery = `
+            SELECT
+                m.I_Id, i.I_name, m.stock_Id, m.sr_ID, m.barcode, m.status, m.datetime
+            FROM m_s_r_detail m
+            JOIN Item i ON m.I_Id = i.I_Id
+            WHERE m.orID = ?`;
+
+        const [issuedItemsResult] = await db.query(issuedItemsQuery, [orID]);
+
+        // 4️⃣ Initialize Response Object
+        const orderResponse = {
+            orderId: orderData.OrID,
+            orderDate: orderData.orDate,
+            customerEmail: orderData.customerEmail,
+            ordertype: orderData.ordertype,
+            phoneNumber: orderData.contact1,
+            optionalNumber: orderData.contact2,
+            orderStatus: orderData.orStatus,
+            deliveryStatus: orderData.delStatus,
+            deliveryCharge: orderData.delPrice,
+            discount: orderData.discount,
+            saleID: orderData.stID,
+            totalPrice: orderData.total,
+            advance: orderData.advance,
+            balance: orderData.balance,
+            payStatus: orderData.payStatus,
+            expectedDeliveryDate: orderData.expectedDate,
+            specialNote: orderData.specialNote,
+            salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
+            items: itemsResult.map(item => ({
+                itemId: item.I_Id,
+                itemName: item.I_name,
+                quantity: item.qty,
+                color: item.color,
+                price: item.tprice,
+                unitPrice: item.unitPrice,
+                bookedQuantity: item.bookedQty,
+                availableQuantity: item.availableQty
+            })),
+            issuedItems: issuedItemsResult.map(item => ({
+                itemId: item.I_Id,
+                itemName: item.I_name,
+                stockId: item.stock_Id,
+                srID: item.sr_ID,
+                barcode: item.barcode.toString('base64'), // Convert to readable format if needed
+                status: item.status,
+                datetime: item.datetime
+            }))
+        };
+
+        // 5️⃣ Fetch Delivery Info If Order is for Delivery
+        if (orderData.delStatus === "Delivery") {
+            const deliveryQuery = `
+                SELECT dv_id, address, district, contact, status, schedule_Date
+                FROM delivery
+                WHERE orID = ?`;
+
+            const [deliveryResult] = await db.query(deliveryQuery, [orID]);
+
+            if (deliveryResult.length > 0) {
+                const deliveryData = deliveryResult[0];
+                orderResponse.deliveryInfo = {
+                    deliveryId: deliveryData.dv_id,
+                    address: deliveryData.address,
+                    district: deliveryData.district,
+                    status: deliveryData.status,
+                    scheduleDate: deliveryData.schedule_Date,
+                };
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Order details fetched successfully",
+            order: orderResponse
+        });
+
+    } catch (error) {
+        console.error("Error fetching order details:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching order details",
+            details: error.message,
+        });
+    }
+});
+
 
 // Get one order in-detail
 router.get("/order-details", async (req, res) => {
