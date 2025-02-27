@@ -3,7 +3,19 @@ import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import Swal from 'sweetalert2';
 import Helmet from "../components/Helmet/Helmet";
-import { Container, Row, Col, Button, Input, FormGroup, Label } from "reactstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Button,
+    Input,
+    FormGroup,
+    Label,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Modal
+} from "reactstrap";
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
@@ -26,10 +38,39 @@ const CompleteOrderDetails = () => {
     const [showModal2, setShowModal2] = useState(false);
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [items, setItems] = useState([]); // State to store supplier data
+    const [filteredItems, setFilteredItems] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
 
     useEffect(() => {
         fetchOrder();
     }, [id]);
+    useEffect(() => {
+        const fetchItems = async () => {
+            try {
+                const response = await fetch("http://localhost:5001/api/admin/main/allitems");
+                const data = await response.json();
+                setItems(data || []);
+                setFilteredItems(data || []);
+            } catch (error) {
+                toast.error("Error fetching items.");
+            }
+        };
+        fetchItems();
+    }, []);
+    const calculateBalance = (total,advance) => {
+        return Number(total) - Number(advance);
+    }
+
+    const handleRemoveItem = (index) => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            items: prevFormData.items.filter((_, i) => i !== index),
+        }));
+    };
+
 
     const fetchOrder = async () => {
         try {
@@ -107,11 +148,10 @@ const CompleteOrderDetails = () => {
     };
 
     const handleSave = async () => {
-        console.log(formData);
         const updatedTotal = calculateTotal();
-        const updatedData = { ...formData, totalPrice: updatedTotal };
-        console.log(updatedData);
-        let updatedDeliveryOrder = null;
+        const updatedBalance = calculateBalance(updatedTotal,formData.advance);
+        const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance };
+        let updatedGeneralOrder = null;
         try {
             // Step 1: Update order general details only if changed
             if (hasGeneralDetailsChanged(updatedData)) {
@@ -121,15 +161,12 @@ const CompleteOrderDetails = () => {
                     body: JSON.stringify(updatedData),
                 });
 
-                if (!generalResponse.ok) {
-                    throw new Error("Failed to update order general detail.");
-                }
+                const generalResult = await generalResponse.json();
 
-                const updatedGeneralOrder = await generalResponse.json();
-
-                if (!updatedGeneralOrder.success) {
-                    toast.error(updatedGeneralOrder.message || "Failed to update order general detail.");
-                    return;
+                if (!generalResponse.ok || !generalResult.success) {
+                    toast.error(generalResult.message || "Failed to update order general details.");
+                } else {
+                    updatedGeneralOrder = generalResult;
                 }
             }
 
@@ -141,15 +178,10 @@ const CompleteOrderDetails = () => {
                     body: JSON.stringify(updatedData),
                 });
 
-                if (!itemsResponse.ok) {
-                    throw new Error("Failed to update order item detail.");
-                }
+                const itemsResult = await itemsResponse.json();
 
-                const updatedItemsOrder = await itemsResponse.json();
-
-                if (!updatedItemsOrder.success) {
-                    toast.error(updatedItemsOrder.message || "Failed to update order item detail.");
-                    return;
+                if (!itemsResponse.ok || !itemsResult.success) {
+                    toast.error(itemsResult.message || "Failed to update order items.");
                 }
             }
 
@@ -161,48 +193,32 @@ const CompleteOrderDetails = () => {
                     body: JSON.stringify(updatedData),
                 });
 
-                if (!deliveryResponse.ok) {
-                    throw new Error("Failed to update delivery information.");
-                }
+                const deliveryResult = await deliveryResponse.json();
 
-                updatedDeliveryOrder = await deliveryResponse.json();
-
-                if (!updatedDeliveryOrder.success) {
-                    toast.error(updatedDeliveryOrder.message || "Failed to update delivery information.");
-                    return;
+                if (!deliveryResponse.ok || !deliveryResult.success) {
+                    toast.error(deliveryResult.message || "Failed to update delivery details.");
                 }
             }
 
-            // If all updates are successful, show a success message
-            toast.success("Order updated successfully!");
-            // Fetch updated order details
+            // ✅ Show success message & navigate if all updates succeed
             await fetchOrder();
             setIsEditing(false);
-
-            // Fetch updated order details
+            toast.success("Order Updated successfully...");
             if (updatedData.orderId) {
-                // Fetch the updated order details after update
-                if (updatedData.orderStatus === 'Accepted') {
-                    navigate(`/accept-order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Pending') {
-                    // Navigate to a specific page for Pending status
-                    navigate(`/order-detail/${updatedData.orderId}`);
-                } else if (updatedData.orderStatus === 'Completed') {
-                    // Navigate to a page where Shipped orders are detailed
-                    navigate(`/complete-order-detail/${updatedData.orderId}`);
-                } else {
-                    // Default redirect when no specific status matches
-                    navigate("/dashboard");
-                }
+                const orderRoutes = {
+                    Accepted: `/accept-order-detail/${updatedData.orderId}`,
+                    Pending: `/order-detail/${updatedData.orderId}`,
+                    Completed: `/complete-order-detail/${updatedData.orderId}`,
+                };
+                navigate(orderRoutes[updatedData.orderStatus] || "/dashboard");
             }
-
         } catch (err) {
             console.error("Error updating order:", err);
             toast.error(`Error: ${err.message}`);
         }
     };
 
-    // Helper functions to check for changes
+    // ✅ Improved change detection functions
     const hasGeneralDetailsChanged = (updatedData) => {
         return updatedData.orderDate !== order.orderDate ||
             updatedData.phoneNumber !== order.phoneNumber ||
@@ -210,20 +226,30 @@ const CompleteOrderDetails = () => {
             updatedData.orderStatus !== order.orderStatus ||
             updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryCharge !== order.deliveryCharge ||
-            updatedData.payStatus !== order.payStatus ||
             updatedData.discount !== order.discount ||
             updatedData.totalPrice !== order.totalPrice ||
-
+            updatedData.payStatus !== order.payStatus ||
             updatedData.expectedDeliveryDate !== order.expectedDeliveryDate ||
             updatedData.specialNote !== order.specialNote;
     };
 
     const hasItemsChanged = (updatedData) => {
-        return updatedData.items.some((item, index) => {
-            const originalItem = order.items[index];
-            return item.quantity !== originalItem.quantity ||
-                item.price !== originalItem.price ||
-                item.booked !== originalItem.booked;
+        // Check for added or removed items
+        const updatedItemIds = new Set(updatedData.items.map(item => item.itemId));
+        const originalItemIds = new Set(order.items.map(item => item.itemId));
+
+        if (updatedItemIds.size !== originalItemIds.size || [...updatedItemIds].some(id => !originalItemIds.has(id))) {
+            return true; // Items were added or removed
+        }
+
+        // Check for quantity, price, or booking status changes
+        return updatedData.items.some(updatedItem => {
+            const originalItem = order.items.find(item => item.itemId === updatedItem.itemId);
+            return originalItem && (
+                updatedItem.quantity !== originalItem.quantity ||
+                updatedItem.price !== originalItem.price ||
+                updatedItem.booked !== originalItem.booked
+            );
         });
     };
 
@@ -385,6 +411,61 @@ const CompleteOrderDetails = () => {
             alert("Server error. Please try again.");
         }
     };
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (!value.trim()) {
+            setFilteredItems(items);
+        } else {
+            const filtered = items.filter((item) =>
+                item.I_Id.toString().includes(value) || item.I_name.toLowerCase().includes(value.toLowerCase())
+            );
+            setFilteredItems(filtered);
+        }
+    };
+    const handleSelectItem = (item) => {
+        if (!selectedItems.some((selected) => selected.I_Id === item.I_Id)) {
+            setSelectedItems([...selectedItems, { ...item, qty: 1, price: item.price }]); // Ensure price is initialized
+        }
+        setSearchTerm("");
+        setFilteredItems([]);
+    };
+    const handleQtyChange = (e, itemId) => {
+        const value = parseInt(e.target.value) || 1;
+        setSelectedItems((prevItems) =>
+            prevItems.map((item) => item.I_Id === itemId ? { ...item, qty: value  } : item)
+        );
+    };
+    const handleRemoveItem1 = (itemId) => {
+        setSelectedItems((prevItems) => prevItems.filter((item) => item.I_Id !== itemId));
+    };
+    const passReservedItem = (selectedItems) => {
+        setSelectedItem(selectedItems);
+        handleAddItem(selectedItems);
+        setShowStockModal(false);
+    };
+
+    const handleAddItem = (selectedItems) => {
+        console.log(selectedItems);
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            items: [
+                ...prevFormData.items,
+                ...selectedItems.map(item => ({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    color: item.color,
+                    availableQuantity: item.availableQty,
+                    quantity: item.qty || 0,
+                    unitPrice: item.price,
+                    price: item.qty * item.price, // Calculate price
+                    booked: false, // Default booked status
+                    stockQuantity: item.stockQty,
+                    bookedQuantity: item.bookedQuantity || 0,
+                })),
+            ],
+        }));
+    };
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -543,12 +624,12 @@ const CompleteOrderDetails = () => {
                                 <h5 className="mt-4">Ordered Items</h5>
                                 <ul className="order-items">
                                     <div className="order-general">
-                                        {order.items.map((item, index) => (
+                                        {formData.items.map((item, index) => (
                                             <li key={index}>
                                                 <p><strong>Item:</strong> {item.itemName}</p>
                                                 <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                <p><strong>Amount:</strong> Rs. {formData.items[index]?.price || 0}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.price}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
                                                 {isEditing && (
@@ -562,19 +643,17 @@ const CompleteOrderDetails = () => {
                                                             />
                                                             Mark as Booked
                                                         </Label>
-                                                        <Button
-                                                            color="secondary"
-                                                            className="ms-4"
-                                                            onClick={() => handleEditClick2(item,order)} // Ensure this is not treating `selectedItem` as a function
-                                                            disabled={loading}
-                                                        >
-                                                            Change Qty
-                                                        </Button>
+                                                        <Button color="danger" className="ms-2" onClick={() => handleRemoveItem(index, item)}>Remove</Button>
+                                                        <Button color="secondary" className="ms-2" onClick={() => handleEditClick2(item, order)}>Change Qty</Button>
                                                     </FormGroup>
+
                                                 )}
                                             </li>
                                         ))}
                                     </div>
+                                    {isEditing && (
+                                        <Button color="primary" className="mt-3" onClick={() => setShowStockModal(true)}>+ Add New Item</Button>
+                                    )}
                                 </ul>
 
                                 <div className="order-summary">
@@ -640,6 +719,36 @@ const CompleteOrderDetails = () => {
                                     )}
                                 </div>
                             </div>
+                            <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
+                                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Add Item</ModalHeader>
+                                <ModalBody>
+                                    <FormGroup style={{ position: "relative" }}>
+                                        <Label>Items ID</Label>
+                                        <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
+                                        {searchTerm && filteredItems.length > 0 && (
+                                            <div className="dropdown">
+                                                {filteredItems.map((item) => (
+                                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
+                                                        {item.I_name} - Rs.{item.price}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </FormGroup>
+                                    <Label>Selected Items</Label>
+                                    {selectedItems.map((item) => (
+                                        <Row key={item.I_Id} className="mt-2">
+                                            <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
+                                            <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
+                                            <Col md={2}><Button color="danger" onClick={() => handleRemoveItem1(item.I_Id)}>Remove</Button></Col>
+                                        </Row>
+                                    ))}
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" onClick={() => passReservedItem(selectedItems)}>Pass</Button>
+                                    <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
 
                             {showModal1 && selectedOrder && (
                                 <BillInvoice

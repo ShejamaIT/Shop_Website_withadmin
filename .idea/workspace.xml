@@ -5,23 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update sale  team part">
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-1-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-2-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-3-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-4-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-5-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-1-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-10-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-2-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-3-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-4-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-5-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-6-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-7-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-8-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-9-3.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +85,7 @@
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start admin">
+  <component name="RunManager" selected="npm.start adminBackend">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -208,6 +197,7 @@
       <workItem from="1740280484644" duration="25770000" />
       <workItem from="1740371892552" duration="25999000" />
       <workItem from="1740462857266" duration="14458000" />
+      <workItem from="1740628052973" duration="11856000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -552,7 +542,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="243" />
+    <option name="localTasksCounter" value="244" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -594,8 +584,8 @@
     <MESSAGE value="rename file name" />
     <MESSAGE value="change file place" />
     <MESSAGE value="update" />
-    <MESSAGE value="update sale  team part" />
     <MESSAGE value="update changeqty" />
-    <option name="LAST_COMMIT_MESSAGE" value="update changeqty" />
+    <MESSAGE value="update sale  team part" />
+    <option name="LAST_COMMIT_MESSAGE" value="update sale  team part" />
   </component>
 </project>
