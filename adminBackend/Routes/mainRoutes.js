@@ -745,7 +745,6 @@ router.get("/issued-order-details", async (req, res) => {
     }
 });
 
-
 // Get one order in-detail
 router.get("/order-details", async (req, res) => {
     try {
@@ -1678,6 +1677,7 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });
+
 // Update order in invoice part
 router.put("/update-invoice", async (req, res) => {
     try {
@@ -1822,229 +1822,6 @@ router.get("/orders-accept", async (req, res) => {
 });
 
 // Update order
-router.put("/update-order", async (req, res) => {
-    try {
-        const {
-            orderId,
-            orderDate,
-            customerEmail,
-            phoneNumber,
-            optionalNumber,
-            orderStatus,
-            deliveryStatus,
-            deliveryCharge,
-            discount,
-            totalPrice,
-            expectedDeliveryDate,
-            specialNote,
-            salesTeam,
-            items,
-            deliveryInfo
-        } = req.body;
-
-        console.log(orderStatus);
-
-        // Check if the order exists
-        const orderCheckQuery = `SELECT * FROM orders WHERE OrID = ?`;
-        const [orderResult] = await db.query(orderCheckQuery, [orderId]);
-
-        //console.log(orderResult);
-
-        if (orderResult.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Order not found",
-            });
-        }
-
-        // Ensure order status is 'Accepted' if any item is booked
-        const isAnyItemBooked = items.some(item => item.booked);
-        if (isAnyItemBooked && orderStatus !== "Accepted") {
-            return res.status(400).json({
-                success: false,
-                message: "Order status must be 'Accepted' if any item is booked.",
-            });
-        }
-
-        // Update the order details
-        const orderUpdateQuery = `
-            UPDATE orders
-            SET orDate = ?, customerEmail = ?, contact1 = ?, contact2 = ?, orStatus = ?,
-                delStatus = ?, delPrice = ?, discount = ?, total = ?, expectedDate = ?, specialNote = ?
-            WHERE OrID = ?`;
-        const orderUpdateParams = [
-            orderDate, customerEmail, phoneNumber, optionalNumber, orderStatus,
-            deliveryStatus, deliveryCharge, discount, totalPrice, expectedDeliveryDate, specialNote, orderId
-        ];
-        const query = await db.query(orderUpdateQuery, orderUpdateParams);
-
-        console.log(query);
-
-        // Handle accept_orders table update
-        for (const item of items) {
-            const itemReceived = item.booked ? "Yes" : "No";
-            const itemStatus = item.booked ? "Complete" : "Incomplete";
-
-            // Check if the record already exists in accept_orders
-            const checkAcceptOrderQuery = `SELECT * FROM accept_orders WHERE orID = ? AND I_Id = ?`;
-            const [existingRecord] = await db.query(checkAcceptOrderQuery, [orderId, item.itemId]);
-
-            console.log(existingRecord);
-
-            if (existingRecord.length > 0) {
-                // If the record exists, update it
-                const updateAcceptOrderQuery = `
-                    UPDATE accept_orders
-                    SET itemReceived = ?, status = ?
-                    WHERE orID = ? AND I_Id = ?`;
-                await db.query(updateAcceptOrderQuery, [
-                    itemReceived, itemStatus, orderId, item.itemId
-                ]);
-            } else {
-                // If the record does not exist, insert a new one
-                const insertAcceptOrderQuery = `
-                    INSERT INTO accept_orders (orID, I_Id, itemReceived, status)
-                    VALUES (?, ?, ?, ?)`;
-                await db.query(insertAcceptOrderQuery, [
-                    orderId, item.itemId, itemReceived, itemStatus
-                ]);
-            }
-        }
-
-        // Handle booked items & inventory update
-        for (const item of items) {
-            if (item.booked) {
-                const checkBookedItemQuery = `SELECT * FROM booked_item WHERE orID = ? AND I_Id = ?`;
-                const [existingBookedItem] = await db.query(checkBookedItemQuery, [orderId, item.itemId]);
-
-                console.log(existingBookedItem);
-
-                if (existingBookedItem.length === 0) {
-                    // Insert only if the item is not already booked
-                    const bookItemQuery = `
-                        INSERT INTO booked_item (orID, I_Id, qty)
-                        VALUES (?, ?, ?)`;
-                    await db.query(bookItemQuery, [orderId, item.itemId, item.quantity]);
-
-                    // Update inventory (only if booked is TRUE)
-                    const updateItemQtyQuery = `
-                        UPDATE Item
-                        SET bookedQty = bookedQty + ?, availableQty = availableQty - ?
-                        WHERE I_Id = ?`;
-                    await db.query(updateItemQtyQuery, [item.quantity, item.quantity, item.itemId]);
-                }
-            } else {
-                // If unchecked, remove from booked_item table & restore inventory
-                const deleteBookedItemQuery = `DELETE FROM booked_item WHERE orID = ? AND I_Id = ?`;
-                await db.query(deleteBookedItemQuery, [orderId, item.itemId]);
-
-                // Restore inventory (only if item was previously booked)
-                const checkIfBookedQuery = `SELECT * FROM Item WHERE I_Id = ? AND bookedQty >= ?`;
-                const [bookedCheck] = await db.query(checkIfBookedQuery, [item.itemId, item.quantity]);
-
-                if (bookedCheck.length > 0) {
-                    const restoreStockQuery = `
-                        UPDATE Item
-                        SET bookedQty = bookedQty - ?, availableQty = availableQty + ?
-                        WHERE I_Id = ?`;
-                    await db.query(restoreStockQuery, [item.quantity, item.quantity, item.itemId]);
-                }
-            }
-        }
-
-        // If order status changes to "Pending", remove all bookings and restore stock
-        if (orderStatus === "Pending") {
-            const bookedItemsQuery = `SELECT I_Id, qty FROM booked_item WHERE orID = ?`;
-            const [bookedItems] = await db.query(bookedItemsQuery, [orderId]);
-
-            console.log(bookedItems);
-
-            for (const item of bookedItems) {
-                const restoreStockQuery = `
-                    UPDATE Item
-                    SET bookedQty = bookedQty - ?, availableQty = availableQty + ?
-                    WHERE I_Id = ?`;
-                await db.query(restoreStockQuery, [item.qty, item.qty, item.I_Id]);
-            }
-
-            const deleteBookedItemsQuery = `DELETE FROM booked_item WHERE orID = ?`;
-            await db.query(deleteBookedItemsQuery, [orderId]);
-
-            const deleteAcceptOrderQuery = `DELETE FROM accept_orders WHERE orID = ?`;
-            await db.query(deleteAcceptOrderQuery, [orderId]);
-        }
-
-        // Update order details (items)
-        for (const item of items) {
-            const orderDetailUpdateQuery = `
-                UPDATE Order_Detail
-                SET qty = ?, tprice = ?
-                WHERE orID = ? AND I_Id = ?`;
-            await db.query(orderDetailUpdateQuery, [item.quantity, item.price, orderId, item.itemId]);
-        }
-
-        // **Handling delivery status change:**
-        if (deliveryStatus === "Delivery" && deliveryInfo) {
-            // Check if delivery record exists, if not, insert it
-            const checkDeliveryQuery = `SELECT * FROM delivery WHERE orID = ?`;
-            const [existingDelivery] = await db.query(checkDeliveryQuery, [orderId]);
-
-            if (existingDelivery.length === 0) {
-                const deliveryInsertQuery = `
-                    INSERT INTO delivery (orID, address, district, contact, schedule_Date)
-                    VALUES (?, ?, ?, ?, ?)`;
-                await db.query(deliveryInsertQuery, [
-                    orderId, deliveryInfo.address, deliveryInfo.district, phoneNumber, deliveryInfo.scheduleDate
-                ]);
-            } else {
-                // Update delivery info if already exists
-                const deliveryUpdateQuery = `
-                    UPDATE delivery
-                    SET address = ?, district = ?, contact = ?, schedule_Date = ?
-                    WHERE orID = ?`;
-                await db.query(deliveryUpdateQuery, [
-                    deliveryInfo.address, deliveryInfo.district, phoneNumber, deliveryInfo.scheduleDate, orderId
-                ]);
-            }
-        }
-
-        // **Handle the case when changing from Delivery to Pickup**
-        if (deliveryStatus === "Pick Up") {
-            // Delete existing delivery record if exists
-            const checkDeliveryQuery = `SELECT * FROM delivery WHERE orID = ?`;
-            const [existingDelivery] = await db.query(checkDeliveryQuery, [orderId]);
-
-            console.log(existingDelivery);
-
-            if (existingDelivery.length > 0) {
-                const deleteDeliveryQuery = `DELETE FROM delivery WHERE orID = ?`;
-                await db.query(deleteDeliveryQuery, [orderId]);
-            }
-
-            // Reset delivery charge (dvPrice) when changing to Pickup
-            const updateDeliveryQuery = `UPDATE orders SET dvPrice = 0 WHERE OrID = ?`;
-            await db.query(updateDeliveryQuery, [orderId]);
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: "Order updated successfully",
-            data: {
-                orderId: orderId,
-                orderDate: orderDate,
-                expectedDeliveryDate: expectedDeliveryDate,
-            },
-        });
-
-    } catch (error) {
-        console.error("Error updating order data:", error.message);
-        return res.status(500).json({
-            success: false,
-            message: "Error updating data in database",
-            details: error.message,
-        });
-    }
-});
 router.put("/update-order-details", async (req, res) => {
     try {
         const { orderId, orderDate, customerEmail, phoneNumber, optionalNumber, orderStatus,payStatus,
@@ -2194,7 +1971,6 @@ router.put("/update-order-items", async (req, res) => {
         return res.status(500).json({ success: false, message: "Database update failed", details: error.message });
     }
 });
-
 router.put("/update-delivery", async (req, res) => {
     try {
         const { orderId, deliveryStatus, phoneNumber, deliveryInfo } = req.body;
@@ -2706,6 +2482,50 @@ router.get("/find-cost", async (req, res) => {
     }
 });
 
+//find issuded order by district
+router.get("/find-issued-orders", async (req, res) => {
+    try {
+        const { district } = req.query;
+
+        // Ensure district is provided in the query params
+        if (!district) {
+            return res.status(400).json({ message: "District is required." });
+        }
+
+        // Query the database to fetch orders with matching district and status "issued"
+        const [orders] = await db.query(`
+            SELECT 
+                o.orId,
+                O.custName, 
+                O.contact1, 
+                O.contact2, 
+                D.address, 
+                O.total, 
+                O.advance, 
+                O.balance
+            FROM Orders O
+            JOIN delivery D ON O.OrID = D.orID
+            WHERE D.district = ? AND O.orStatus = 'Issued';
+        `, [district]);
+
+        // If no orders are found, return a 404
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No issued orders found for this district." });
+        }
+
+        // Return the orders as a JSON response
+        return res.status(200).json({
+            message: "Issued orders found.",
+            orders: orders,  // Return all matching orders
+        });
+
+    } catch (error) {
+        console.error("Error fetching issued orders:", error.message);
+        return res.status(500).json({ message: "Error fetching issued orders." });
+    }
+});
+
+
 // Get subcat one detail by ca_id
 router.get("/getSubcategories", async (req, res) => {
     const { Ca_Id } = req.query;
@@ -3094,7 +2914,6 @@ router.put("/change-quantity", async (req, res) => {
         return res.status(500).json({ message: "Error updating quantity.", error: error.message });
     }
 });
-
 
 // save new stock in item update stock
 router.post("/get-stock-details", async (req, res) => {
