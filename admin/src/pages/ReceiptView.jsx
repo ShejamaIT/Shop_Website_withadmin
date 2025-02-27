@@ -2,6 +2,7 @@ import React from "react";
 import "../style/receiptView.css";
 
 const ReceiptView = ({ receiptData, setShowReceiptView }) => {
+    console.log(receiptData);
     const currentDateTime = new Date().toLocaleString();
 
     const formatDate = (dateString) => {
@@ -37,9 +38,9 @@ const ReceiptView = ({ receiptData, setShowReceiptView }) => {
                     {receiptData.items.map((item, index) => (
                         <tr key={index}>
                             <td>{item.itemName}</td>
-                            <td>{item.qty}</td>
+                            <td>{item.bookedQuantity}</td>
                             <td>Rs. {item.unitPrice.toFixed(2)}</td>
-                            <td>Rs. {(item.qty * item.unitPrice).toFixed(2)}</td>
+                            <td>Rs. {(item.bookedQuantity * item.unitPrice).toFixed(2)}</td>
                         </tr>
                     ))}
                     </tbody>

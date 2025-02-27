@@ -1,21 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
-import Swal from 'sweetalert2';
 import Helmet from "../components/Helmet/Helmet";
-import {
-    Container,
-    Row,
-    Col,
-    Button,
-    Input,
-    FormGroup,
-    Label,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Modal
-} from "reactstrap";
+import {Container, Row, Col, Button, Input, FormGroup, Label, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
@@ -209,6 +196,7 @@ const CompleteOrderDetails = () => {
                     Accepted: `/accept-order-detail/${updatedData.orderId}`,
                     Pending: `/order-detail/${updatedData.orderId}`,
                     Completed: `/complete-order-detail/${updatedData.orderId}`,
+                    Issued: `/issued-order-detail/${updatedData.orderId}`,
                 };
                 navigate(orderRoutes[updatedData.orderStatus] || "/dashboard");
             }
@@ -362,7 +350,6 @@ const CompleteOrderDetails = () => {
             // Handle network error, show error message to the user
         }
     };
-
 
     const handleSubmit = async (formData) => {
         // Destructure the necessary fields from formData

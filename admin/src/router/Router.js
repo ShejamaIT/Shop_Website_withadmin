@@ -18,6 +18,7 @@ import AllSaleteam from "../pages/AllSaleteam";
 import SaleteamDetail  from "../pages/SaleteamDetail";
 import AllSuppliers from "../pages/AllSuppliers";
 import AllDelivery from "../pages/AllDelivery";
+import IssuedOrderDetails from "../pages/IssuedOrder";
 const Router = () => {
     return(
         <Routes>
@@ -36,6 +37,7 @@ const Router = () => {
             <Route path="dashboard/product-detail/:id" element={<ProductDetails />} />
             <Route path="order-detail/:id" element={<OrderDetails />} />
             <Route path="accept-order-detail/:id" element={<AccepetOrderDetails />} />
+            <Route path="issued-order-detail/:id" element={<IssuedOrderDetails />} />
             <Route path="complete-order-detail/:id" element={<CompleteOrderDetails />} />
             <Route path="item-detail/:id" element={<ItemDetails />} />
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />

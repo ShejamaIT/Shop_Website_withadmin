@@ -2,19 +2,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import Helmet from "../components/Helmet/Helmet";
-import {
-    Container,
-    Row,
-    Col,
-    Button,
-    Input,
-    FormGroup,
-    Label,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Modal
-} from "reactstrap";
+import {Container, Row, Col, Button, Input, FormGroup, Label, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
 import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";

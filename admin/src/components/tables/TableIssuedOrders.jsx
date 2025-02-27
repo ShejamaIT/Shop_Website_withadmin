@@ -38,7 +38,7 @@ const TableIssued = ({ refreshKey }) => {
 
     // Function to navigate to order details page
     const handleViewOrder = (orderId) => {
-        navigate(`/complete-order-detail/${orderId}`); // Navigate to OrderDetails page
+        navigate(`/issued-order-detail/${orderId}`); // Navigate to OrderDetails page
     };
 
     return (

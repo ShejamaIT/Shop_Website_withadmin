@@ -235,32 +235,6 @@
 }
 /* Hide everything except the modal content */
 @media print {
-    body * {
-        display: none; /* Hide all elements initially */
-    }
-
-    /* Make sure modal content is visible */
-    .modal-overlay, .modal-content.bill-invoice, .modal-content.bill-invoice * {
-        display: block; /* Ensure elements within the modal are displayed */
-    }
-
-    /* Optional: Adjust the modal for printing */
-    .modal-overlay {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
-
-    .modal-content.bill-invoice {
-        width: 100%;
-        max-width: 800px; /* Adjust as needed */
-        margin: 0 auto;
-        padding: 20px;
-    }
-
     /* Hide buttons and any other UI elements that shouldn't be printed */
     .modal-buttons {
         display: none;
