@@ -180,18 +180,56 @@ const ItemDetails = () => {
         }
     };
 
+    // const handleSave = async () => {
+    //     try {
+    //         console.log("Original Form Data:", formData);
+    //
+    //         let formDataToSend = formData instanceof FormData ? formData : new FormData();
+    //
+    //         // If formData is an object, convert it into FormData
+    //         if (!(formData instanceof FormData)) {
+    //             Object.entries(formData).forEach(([key, value]) => {
+    //                 formDataToSend.append(key, value);
+    //             });
+    //         }
+    //
+    //         console.log("Final Form Data:", formDataToSend);
+    //
+    //         const updateResponse = await fetch("http://localhost:5001/api/admin/main/update-item", {
+    //             method: "PUT",
+    //             body: formDataToSend,
+    //         });
+    //
+    //         const updateResult = await updateResponse.json();
+    //
+    //         if (updateResponse.ok && updateResult.success) {
+    //             toast.success("✅ Item updated successfully!");
+    //             setIsEditing(false);
+    //             setFormData(updateResult.data);
+    //         } else {
+    //             console.error("❌ Error updating item:", updateResult.message);
+    //             toast.error(updateResult.message || "Failed to update item.");
+    //         }
+    //     } catch (error) {
+    //         console.error("❌ Error updating item:", error);
+    //         toast.error("Error updating item: " + error.message);
+    //     }
+    // };
+
     const handleSave = async () => {
         try {
             console.log("Original Form Data:", formData);
 
-            let formDataToSend = formData instanceof FormData ? formData : new FormData();
+            let formDataToSend = new FormData();
 
-            // If formData is an object, convert it into FormData
-            if (!(formData instanceof FormData)) {
-                Object.entries(formData).forEach(([key, value]) => {
+            // Convert object data to FormData
+            Object.entries(formData).forEach(([key, value]) => {
+                if (typeof value === "object" && value !== null) {
+                    formDataToSend.append(key, JSON.stringify(value)); // Convert objects/arrays to JSON
+                } else {
                     formDataToSend.append(key, value);
-                });
-            }
+                }
+            });
 
             console.log("Final Form Data:", formDataToSend);
 
@@ -215,7 +253,6 @@ const ItemDetails = () => {
             toast.error("Error updating item: " + error.message);
         }
     };
-
 
 
     useEffect(() => {
