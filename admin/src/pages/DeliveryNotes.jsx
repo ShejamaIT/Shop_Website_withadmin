@@ -152,7 +152,7 @@ const DeliveryNotes = () => {
 
 
                     <div className="text-center mt-4">
-                        <Button color="primary" onClick={handlePrint}>Print Delivery Note</Button>
+                        <Button color="primary" onClick={handlePrint}>Get Delivery Note</Button>
                     </div>
                 </Col>
             </Row>

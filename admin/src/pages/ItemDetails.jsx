@@ -182,53 +182,30 @@ const ItemDetails = () => {
 
     const handleSave = async () => {
         try {
-            const updatedFormData = new FormData();
+            console.log("Original Form Data:", formData);
 
-            // ✅ Add regular fields to FormData
-            updatedFormData.append('I_Id', formData.I_Id);
-            updatedFormData.append('I_name', formData.I_name);
-            updatedFormData.append('descrip', formData.descrip);
-            updatedFormData.append('color', formData.color);
-            updatedFormData.append('price', formData.price);
-            updatedFormData.append('warrantyPeriod', formData.warrantyPeriod);
-            updatedFormData.append('material', formData.material);
-            updatedFormData.append('availableQty', formData.availableQty);
-            updatedFormData.append('bookedQty', formData.bookedQty);
-            updatedFormData.append('stockQty', formData.stockQty);
-            updatedFormData.append('maincategory', formData.maincategory);
-            updatedFormData.append('sub_one', formData.sub_one);
-            updatedFormData.append('sub_two', formData.sub_two);
+            let formDataToSend = formData instanceof FormData ? formData : new FormData();
 
-            // ✅ Handle Suppliers (Convert to JSON)
-            if (formData.suppliers && Array.isArray(formData.suppliers)) {
-                updatedFormData.append("suppliers", JSON.stringify(formData.suppliers));
+            // If formData is an object, convert it into FormData
+            if (!(formData instanceof FormData)) {
+                Object.entries(formData).forEach(([key, value]) => {
+                    formDataToSend.append(key, value);
+                });
             }
 
-            // ✅ Handle image fields if available
-            if (formData.img) updatedFormData.append("img", formData.img);
-            if (formData.img1) updatedFormData.append("img1", formData.img1);
-            if (formData.img2) updatedFormData.append("img2", formData.img2);
-            if (formData.img3) updatedFormData.append("img3", formData.img3);
+            console.log("Final Form Data:", formDataToSend);
 
-            // 🔄 Log all FormData values for debugging
-            console.log("Updated FormData:");
-            for (let pair of updatedFormData.entries()) {
-                console.log(pair[0], pair[1]);
-            }
-
-            // ✅ Send the update request to the backend API
-            const updateResponse = await fetch(`http://localhost:5001/api/admin/main/update-item`, {
+            const updateResponse = await fetch("http://localhost:5001/api/admin/main/update-item", {
                 method: "PUT",
-                body: updatedFormData,
+                body: formDataToSend,
             });
 
             const updateResult = await updateResponse.json();
 
-            // ✅ Handle response success or failure
             if (updateResponse.ok && updateResult.success) {
                 toast.success("✅ Item updated successfully!");
-                setIsEditing(false);  // Exit edit mode
-                setFormData(updateResult.data); // Update formData with backend response
+                setIsEditing(false);
+                setFormData(updateResult.data);
             } else {
                 console.error("❌ Error updating item:", updateResult.message);
                 toast.error(updateResult.message || "Failed to update item.");
@@ -238,6 +215,8 @@ const ItemDetails = () => {
             toast.error("Error updating item: " + error.message);
         }
     };
+
+
 
     useEffect(() => {
         fetchItem();
