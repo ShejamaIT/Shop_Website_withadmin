@@ -430,6 +430,7 @@ router.get("/allitems", async (req, res) => {
             availableQty : item.availableQty, // available stock
             warrantyPeriod: item.warrantyPeriod,
             img: `data:image/png;base64,${item.img.toString("base64")}`, // Convert LONGBLOB image to Base64
+            color: item.color,
         }));
 
         // Send the formatted items as a JSON response
@@ -1696,7 +1697,6 @@ router.get("/orders-accept", async (req, res) => {
     }
 });
 
-
 // Update order
 router.put("/update-order", async (req, res) => {
     try {
@@ -1976,6 +1976,42 @@ router.put("/update-order-items", async (req, res) => {
         if (!items || items.length === 0) {
             return res.status(400).json({ success: false, message: "No items provided." });
         }
+// Fetch existing order details from the database
+        const checkOrderItemsQuery = `SELECT I_Id FROM Order_Detail WHERE orID = ?`;
+        const [existingRecords] = await db.query(checkOrderItemsQuery, [orderId]);
+
+        const existingItemIds = existingRecords.map(item => item.I_Id);
+        const newItemIds = items.map(item => item.itemId);
+
+// Identify items to remove (exist in DB but not in the request)
+        const itemsToRemove = existingItemIds.filter(id => !newItemIds.includes(id));
+
+        console.log("Existing records:", existingItemIds);
+        console.log("New records:", newItemIds);
+        console.log("Items to remove:", itemsToRemove);
+
+// Remove missing items from Order_Detail
+        for (const itemId of itemsToRemove) {
+            const deleteOrderDetailQuery = `DELETE FROM Order_Detail WHERE orID = ? AND I_Id = ?`;
+            await db.query(deleteOrderDetailQuery, [orderId, itemId]);
+            const deleteAccceptDetailQuery = `DELETE FROM accept_orders WHERE orID = ? AND I_Id = ?`;
+            await db.query(deleteAccceptDetailQuery, [orderId, itemId]);
+        }
+
+// Update or Insert new items
+        for (const item of items){
+            //Check if the record exists in order detail table
+            const checkOrderDetailQuery = `SELECT * FROM Order_Detail WHERE orID = ? AND I_Id = ?`;
+            const [existingRecord] = await db.query(checkOrderDetailQuery, [orderId, item.itemId]);
+
+            if (existingRecord.length > 0) {
+                const updateAcceptOrderQuery = `UPDATE Order_Detail SET qty = ?, tprice = ? WHERE orID = ? AND I_Id = ?`;
+                await db.query(updateAcceptOrderQuery, [item.quantity , item.price , orderId, item.itemId]);
+            } else {
+                const insertAcceptOrderQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice) VALUES (?, ?, ?, ?)`;
+                await db.query(insertAcceptOrderQuery, [orderId, item.itemId, item.quantity , item.price]);
+            }
+        }
 
         // Ensure order status is 'Accepted' if any item is booked
         const isAnyItemBooked = items.some(item => item.booked);
@@ -2034,6 +2070,7 @@ router.put("/update-order-items", async (req, res) => {
         return res.status(500).json({ success: false, message: "Database update failed", details: error.message });
     }
 });
+
 router.put("/update-delivery", async (req, res) => {
     try {
         const { orderId, deliveryStatus, phoneNumber, deliveryInfo } = req.body;
