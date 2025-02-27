@@ -106,22 +106,8 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 // Update item
 router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 },]), async (req, res) => {
     try {
-        const {
-            I_Id,
-            I_name,
-            descrip,
-            color,
-            material,
-            price,
-            warrantyPeriod,
-            stockQty,
-            bookedQty,
-            availableQty,
-            maincategory,
-            sub_one,
-            sub_two,
-            suppliers
-        } = req.body;
+        const {I_Id, I_name, descrip,color, material, price, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, sub_one, sub_two, suppliers} = req.body;
+        console.log(req.body);
 
         if (!I_Id) {
             return res.status(400).json({ success: false, message: "Item ID is required." });
@@ -172,24 +158,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
         if (img2Buffer) updateFields.push("img2 = ?");
         if (img3Buffer) updateFields.push("img3 = ?");
 
-        updateValues = [
-            I_name,
-            descrip,
-            color,
-            material,
-            parsedPrice,
-            warrantyPeriod,
-            stockQty,
-            bookedQty,
-            availableQty,
-            maincategory,
-            subCatOneName,
-            subCatTwoName,
-            imgBuffer,
-            img1Buffer,
-            img2Buffer,
-            img3Buffer
-        ].filter((value) => value !== undefined);
+        updateValues = [I_name, descrip, color, material, parsedPrice, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, subCatOneName, subCatTwoName, imgBuffer, img1Buffer, img2Buffer, img3Buffer].filter((value) => value !== undefined);
 
         if (updateFields.length > 0) {
             const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
@@ -212,7 +181,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
                     const supplierUpdateSql = `
                         INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
                         VALUES (?, ?, ?)
-                        ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
+                            ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
                     `;
                     await db.query(supplierUpdateSql, [I_Id, s_ID, parsedUnitCost]);
                 }
@@ -223,19 +192,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
             success: true,
             message: "Item updated successfully",
             data: {
-                I_Id,
-                I_name,
-                descrip,
-                color,
-                material,
-                price: parsedPrice,
-                warrantyPeriod,
-                stockQty,
-                bookedQty,
-                availableQty,
-                maincategory,
-                subCatOneName,
-                subCatTwoName
+                I_Id, I_name,
             },
         });
     } catch (err) {
@@ -243,6 +200,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
         res.status(500).json({ success: false, message: "Error updating data", details: err.message });
     }
 });
+
 
 // Save a order
 router.post("/orders", async (req, res) => {
@@ -1550,6 +1508,7 @@ router.get("/getcategory", async (req, res) => {
     }
 });
 
+//Update stock
 router.post("/update-stock", upload.single("image"), async (req, res) => {
     const { p_ID, rDate, recCount, cost, detail } = req.body;
     const imageFile = req.file;
@@ -2524,7 +2483,6 @@ router.get("/find-issued-orders", async (req, res) => {
         return res.status(500).json({ message: "Error fetching issued orders." });
     }
 });
-
 
 // Get subcat one detail by ca_id
 router.get("/getSubcategories", async (req, res) => {
