@@ -137,7 +137,6 @@ CREATE TABLE Orders (
     CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 CREATE TABLE Order_Detail (
     orID VARCHAR(25),
     I_Id VARCHAR(25),
@@ -148,6 +147,18 @@ CREATE TABLE Order_Detail (
         ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
         ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE delivery(
+    dv_id VARCHAR(25) PRIMARY KEY,
+    orID VARCHAR(25),
+    address TEXT,
+    district VARCHAR(25) NOT NULL,
+    contact VARCHAR(15) NOT NULL,
+    status VARCHAR(15),
+    schedule_Date DATE,
+    delivery_Date DATE,
+        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE accept_orders (
     ao_ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -179,18 +190,7 @@ CREATE TABLE rejected_orders(
        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                            ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE delivery(
-    dv_id VARCHAR(25) PRIMARY KEY,
-    orID VARCHAR(25),
-    address TEXT,
-    district VARCHAR(25) NOT NULL,
-    contact VARCHAR(15) NOT NULL,
-    status VARCHAR(15),
-    schedule_Date DATE,
-    delivery_Date DATE,
-        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                   ON DELETE CASCADE ON UPDATE CASCADE
-);
+
 CREATE TABLE canceled_delivery(
     d_id VARCHAR(25) PRIMARY KEY,
     dv_id VARCHAR(25),
