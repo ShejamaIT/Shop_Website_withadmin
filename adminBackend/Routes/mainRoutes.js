@@ -385,6 +385,33 @@ router.get("/allitems", async (req, res) => {
     }
 });
 
+// Get all delivery notes
+router.get("/alldeliverynotes", async (req, res) => {
+    try {
+        // Query the database to fetch all items
+        const [deliveryNotes] = await db.query("SELECT * FROM delivery_note");
+
+        // If no items found, return a 404 status
+        if (deliveryNotes.length === 0) {
+            return res.status(404).json({ message: "No deliveries found" });
+        }
+
+        // Format the items data
+        const formattedDeliveryNotes = deliveryNotes.map(deliverynote => ({
+            delNoID: deliverynote.delNoID,
+            driverName: deliverynote.driverName,
+            date: deliverynote.date,
+            district: deliverynote.district
+        }));
+
+        // Send the formatted items as a JSON response
+        return res.status(200).json(formattedDeliveryNotes);
+    } catch (error) {
+        console.error("Error fetching deliveries:", error.message);
+        return res.status(500).json({ message: "Error fetching deliveries" });
+    }
+});
+
 // Get all deliveries
 router.get("/alldeliveries", async (req, res) => {
     try {
@@ -1738,7 +1765,6 @@ router.put("/update-invoice", async (req, res) => {
         });
     }
 });
-
 
 // Fetch Accept orders in booked-unbooked
 router.get("/orders-accept", async (req, res) => {
@@ -3141,7 +3167,7 @@ router.post("/employees", async (req, res) => {
 // Save Delivery Notes
 router.post("/create-delivery-note", async (req, res) => {
     try {
-        const { driverName, vehicleName, hire, date, orderIds } = req.body;
+        const { driverName, vehicleName, hire, date, district, orderIds } = req.body;
         console.log(req.body);
 
         const delHire = parseFloat(hire);
@@ -3157,9 +3183,9 @@ router.post("/create-delivery-note", async (req, res) => {
 
         // Insert into the delivery_note table
         const [result] = await db.query(`
-            INSERT INTO delivery_note (driverName, vehicalName, date, hire)
-            VALUES (?, ?, ?, ?)
-        `, [driverName, vehicleName, formattedDate, delHire]);
+            INSERT INTO delivery_note (driverName, vehicalName, date, hire, district)
+            VALUES (?, ?, ?, ?,?)
+        `, [driverName, vehicleName, formattedDate, delHire,district]);
 
         // Get the generated delNoID (Delivery Note ID)
         const delNoID = result.insertId;
