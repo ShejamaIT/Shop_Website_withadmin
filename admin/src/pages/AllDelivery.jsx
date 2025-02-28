@@ -6,6 +6,7 @@ import NavBar from "../components/header/navBar";
 import TableAllItem from "../components/tables/TableAllItem";
 import AddDeliveryShedule from "./AddDeliveryShedule";
 import TableAllDelivery from "../components/tables/TableAllDelivery";
+import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
 
 
 const AllDelivery = () => {
@@ -58,7 +59,7 @@ const AllDelivery = () => {
                         <TabPane tabId="2">
                             <Row>
                                 <Col>
-                                    <AddDeliveryShedule />
+                                    <TableAllDeliveryNotes />
                                 </Col>
                             </Row>
                         </TabPane>

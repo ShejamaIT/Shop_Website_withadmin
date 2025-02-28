@@ -261,7 +261,8 @@ CREATE TABLE delivery_note(
     driverName VARCHAR(25),
     vehicalName VARCHAR(25),
     date DATE,
-    hire DOUBLE
+    hire DOUBLE,
+    district VARCHAR(35)
 );
 CREATE TABLE delivery_note_orders(
     delNoID INT,

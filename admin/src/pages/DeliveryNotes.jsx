@@ -28,6 +28,7 @@ const DeliveryNotes = () => {
                 hire:formData.hire,
                 balanceToCollect: formData.balanceToCollect,
                 selectedDeliveryDate: selectedDeliveryDate,
+                district: selectedRoute,
             };
 
             // Prepare the data for API call (including necessary fields)
@@ -37,7 +38,10 @@ const DeliveryNotes = () => {
                 hire:formData.hire,
                 date: selectedDeliveryDate,  // The selected delivery date
                 orderIds: selectedOrders.map(order => order.orId),  // Extracting order IDs
+                district: selectedRoute,
             };
+            console.log(updatedReceiptData);
+            console.log(deliveryNoteData);
 
             // Make the API call to create a delivery note and save the orders
             const response = await fetch("http://localhost:5001/api/admin/main/create-delivery-note", {
