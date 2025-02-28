@@ -2470,7 +2470,8 @@ router.get("/find-issued-orders", async (req, res) => {
                 D.address, 
                 O.total, 
                 O.advance, 
-                O.balance
+                O.balance,
+                o.city
             FROM Orders O
             JOIN delivery D ON O.OrID = D.orID
             WHERE D.district = ? AND O.orStatus = 'Issued';
