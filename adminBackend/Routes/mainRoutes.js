@@ -3167,8 +3167,7 @@ router.post("/employees", async (req, res) => {
 // Save Delivery Notes
 router.post("/create-delivery-note", async (req, res) => {
     try {
-        const { driverName, vehicleName, hire, date, district, orderIds } = req.body;
-        console.log(req.body);
+        const { driverName, vehicleName, hire, date, district, orderIds ,balanceToCollect } = req.body;
 
         const delHire = parseFloat(hire);
 
@@ -3183,9 +3182,9 @@ router.post("/create-delivery-note", async (req, res) => {
 
         // Insert into the delivery_note table
         const [result] = await db.query(`
-            INSERT INTO delivery_note (driverName, vehicalName, date, hire, district)
-            VALUES (?, ?, ?, ?,?)
-        `, [driverName, vehicleName, formattedDate, delHire,district]);
+            INSERT INTO delivery_note (driverName, vehicalName, date, hire, district , balanceToCollect , status)
+            VALUES (?, ?, ?, ?,? , ?,'Incomplete')
+        `, [driverName, vehicleName, formattedDate, delHire,district, balanceToCollect]);
 
         // Get the generated delNoID (Delivery Note ID)
         const delNoID = result.insertId;
@@ -3224,6 +3223,73 @@ router.post("/create-delivery-note", async (req, res) => {
     }
 });
 
+// Get Delivery Note detail
+router.get("/delivery-note", async (req, res) => {
+    try {
+        const { delNoID } = req.query;
+        console.log("Requested Delivery Note ID:", delNoID);
+
+        if (!delNoID) {
+            return res.status(400).json({ success: false, message: "Delivery Note ID is required" });
+        }
+
+        // Fetch delivery note details
+        const [deliveryNote] = await db.query(
+            "SELECT * FROM delivery_note WHERE delNoID = ?",
+            [delNoID]
+        );
+
+        if (deliveryNote.length === 0) {
+            return res.status(404).json({ success: false, message: "Delivery note not found" });
+        }
+
+        // Fetch associated orders (only required fields)
+        const [orders] = await db.query(
+            `SELECT o.OrID, o.orStatus AS orderStatus, o.delStatus AS deliveryStatus
+             FROM Orders o
+                      INNER JOIN delivery_note_orders dno ON o.OrID = dno.orID
+             WHERE dno.delNoID = ?`,
+            [delNoID]
+        );
+
+        if (orders.length === 0) {
+            return res.status(404).json({ success: false, message: "No orders found for this delivery note" });
+        }
+
+        // Fetch issued items grouped by order ID
+        const orderIds = orders.map(order => order.OrID);
+        let issuedItems = [];
+        if (orderIds.length > 0) {
+            [issuedItems] = await db.query(
+                `SELECT m.orID, m.srd_Id, m.I_Id, m.stock_Id, m.barcode, m.datetime
+                 FROM m_s_r_detail m
+                 WHERE m.orID IN (?) AND m.status = 'Issued'`,
+                [orderIds]
+            );
+        }
+
+        // Organize issued items under their respective orders
+        const ordersWithIssuedItems = orders.map(order => ({
+            ...order,
+            issuedItems: issuedItems.filter(item => item.orID === order.OrID)
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Delivery note details fetched successfully",
+            details: deliveryNote[0], // Delivery note details
+            orders: ordersWithIssuedItems // Orders with issued items grouped
+        });
+
+    } catch (error) {
+        console.error("Error fetching delivery note details:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching delivery note details",
+            error: error.message
+        });
+    }
+});
 
 // Save Delivery Notes
 router.post("/create-delivery-note", async (req, res) => {
