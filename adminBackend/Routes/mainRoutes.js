@@ -105,102 +105,88 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 
 // Update item
 router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 },]), async (req, res) => {
-    try {
-        const {I_Id, I_name, descrip,color, material, price, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, sub_one, sub_two, suppliers} = req.body;
-        console.log(req.body);
+        try {
+            const {I_Id, I_name, descrip, color, material, price, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, sub_one, sub_two, suppliers,} = req.body;
 
-        if (!I_Id) {
-            return res.status(400).json({ success: false, message: "Item ID is required." });
-        }
-
-        const [itemCheckResult] = await db.query(`SELECT * FROM Item WHERE I_Id = ?`, [I_Id]);
-        if (itemCheckResult.length === 0) {
-            return res.status(404).json({ success: false, message: "Item not found." });
-        }
-
-        const parsedPrice = parseFloat(price) || 0;
-        const imgBuffer = req.files["img"]?.[0]?.buffer || null;
-        const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
-        const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
-        const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
-
-        // Fetch subcategory names based on IDs
-        let subCatOneName = null;
-        let subCatTwoName = null;
-
-        if (sub_one) {
-            const [subOneResult] = await db.query(`SELECT subcategory FROM subCat_one WHERE sb_c_id = ?`, [sub_one]);
-            subCatOneName = subOneResult[0]?.subcategory || null;
-        }
-
-        if (sub_two) {
-            const [subTwoResult] = await db.query(`SELECT subcategory FROM subCat_two WHERE sb_cc_id = ?`, [sub_two]);
-            subCatTwoName = subTwoResult[0]?.subcategory || null;
-        }
-
-        let updateFields = [];
-        let updateValues = [];
-
-        if (I_name) updateFields.push("I_name = ?");
-        if (descrip) updateFields.push("descrip = ?");
-        if (color) updateFields.push("color = ?");
-        if (material) updateFields.push("material = ?");
-        if (parsedPrice) updateFields.push("price = ?");
-        if (warrantyPeriod) updateFields.push("warrantyPeriod = ?");
-        if (stockQty !== undefined) updateFields.push("stockQty = ?");
-        if (bookedQty !== undefined) updateFields.push("bookedQty = ?");
-        if (availableQty !== undefined) updateFields.push("availableQty = ?");
-        if (maincategory) updateFields.push("mn_Cat = ?");
-        if (subCatOneName) updateFields.push("sb_catOne = ?");
-        if (subCatTwoName) updateFields.push("sb_catTwo = ?");
-        if (imgBuffer) updateFields.push("img = ?");
-        if (img1Buffer) updateFields.push("img1 = ?");
-        if (img2Buffer) updateFields.push("img2 = ?");
-        if (img3Buffer) updateFields.push("img3 = ?");
-
-        updateValues = [I_name, descrip, color, material, parsedPrice, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, subCatOneName, subCatTwoName, imgBuffer, img1Buffer, img2Buffer, img3Buffer].filter((value) => value !== undefined);
-
-        if (updateFields.length > 0) {
-            const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
-            updateValues.push(I_Id);
-            await db.query(updateQuery, updateValues);
-        }
-
-        // Handle suppliers
-        if (suppliers) {
-            let supplierData = suppliers;
-            if (typeof suppliers === "string") {
-                supplierData = JSON.parse(suppliers);
+            if (!I_Id) {
+                return res.status(400).json({ success: false, message: "Item ID is required." });
             }
 
-            if (Array.isArray(supplierData)) {
-                for (const supplier of supplierData) {
-                    const { s_ID, unit_cost } = supplier;
-                    const parsedUnitCost = parseFloat(unit_cost) || 0;
+            // ✅ Log received files and form data
+            const [itemCheckResult] = await db.query(`SELECT * FROM Item WHERE I_Id = ?`, [I_Id]);
+            if (itemCheckResult.length === 0) {
+                return res.status(404).json({ success: false, message: "Item not found." });
+            }
 
-                    const supplierUpdateSql = `
-                        INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
-                        VALUES (?, ?, ?)
-                            ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost);
-                    `;
-                    await db.query(supplierUpdateSql, [I_Id, s_ID, parsedUnitCost]);
+            const parsedPrice = parseFloat(price) || 0;
+
+            // ✅ Properly extract image buffers
+            const imgBuffer = req.files["img"]?.[0]?.buffer || null;
+            const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
+            const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
+            const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
+
+            // ✅ Fetch subcategory names
+            let subCatOneName = null;
+            let subCatTwoName = sub_two !== "None" ? null : "None";
+
+            if (sub_one) {
+                const [subOneResult] = await db.query(`SELECT subcategory FROM subCat_one WHERE sb_c_id = ?`, [sub_one]);
+                subCatOneName = subOneResult[0]?.subcategory || null;
+            }
+
+            if (sub_two !== "None") {
+                const [subTwoResult] = await db.query(`SELECT subcategory FROM subCat_two WHERE sb_cc_id = ?`, [sub_two]);
+                subCatTwoName = subTwoResult[0]?.subcategory || null;
+            }
+
+            let updateFields = [];
+            let updateValues = [];
+
+            // ✅ Dynamic field updates
+            const fields = {
+                I_name, descrip, color, material, price: parsedPrice, warrantyPeriod, stockQty, bookedQty, availableQty, mn_Cat: maincategory, sb_catOne: subCatOneName, sb_catTwo: subCatTwoName, img: imgBuffer, img1: img1Buffer, img2: img2Buffer, img3: img3Buffer,
+            };
+
+            for (const key in fields) {
+                if (fields[key] !== undefined && fields[key] !== null) {
+                    updateFields.push(`${key} = ?`);
+                    updateValues.push(fields[key]);
                 }
             }
+
+            if (updateFields.length > 0) {
+                const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
+                updateValues.push(I_Id);
+                await db.query(updateQuery, updateValues);
+            }
+
+            // ✅ Handle suppliers
+            if (suppliers) {
+                let supplierData = typeof suppliers === "string" ? JSON.parse(suppliers) : suppliers;
+                if (Array.isArray(supplierData)) {
+                    for (const { s_ID, unit_cost } of supplierData) {
+                        const parsedUnitCost = parseFloat(unit_cost) || 0;
+                        await db.query(
+                            `INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+                            VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)`,
+                            [I_Id, s_ID, parsedUnitCost]
+                        );
+                    }
+                }
+            }
+
+            res.status(200).json({
+                success: true,
+                message: "Item updated successfully",
+                data: { I_Id, I_name },
+            });
+        } catch (err) {
+            console.error("❌ Error updating item:", err.message);
+            res.status(500).json({ success: false, message: "Error updating item", details: err.message });
         }
-
-        res.status(200).json({
-            success: true,
-            message: "Item updated successfully",
-            data: {
-                I_Id, I_name,
-            },
-        });
-    } catch (err) {
-        console.error("❌ Error updating item data:", err.message);
-        res.status(500).json({ success: false, message: "Error updating data", details: err.message });
     }
-});
-
+);
 
 // Save a order
 router.post("/orders", async (req, res) => {
