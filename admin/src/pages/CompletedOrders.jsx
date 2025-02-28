@@ -58,7 +58,6 @@ const CompleteOrderDetails = () => {
         }));
     };
 
-
     const fetchOrder = async () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`);

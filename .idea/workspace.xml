@@ -4,10 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update sale  team part">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/MakeDeliveryNote.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/style/deleiverynote.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -196,7 +199,7 @@
       <workItem from="1740462857266" duration="14458000" />
       <workItem from="1740628052973" duration="25674000" />
       <workItem from="1740664860893" duration="679000" />
-      <workItem from="1740714333448" duration="6944000" />
+      <workItem from="1740714333448" duration="9360000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -541,7 +544,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="251" />
+    <option name="localTasksCounter" value="252" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -560,7 +563,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="supplier view" />
     <MESSAGE value="update with api" />
     <MESSAGE value="ad image" />
     <MESSAGE value="update css" />
@@ -585,6 +587,7 @@
     <MESSAGE value="update" />
     <MESSAGE value="update changeqty" />
     <MESSAGE value="update sale  team part" />
-    <option name="LAST_COMMIT_MESSAGE" value="update sale  team part" />
+    <MESSAGE value="update payment" />
+    <option name="LAST_COMMIT_MESSAGE" value="update payment" />
   </component>
 </project>

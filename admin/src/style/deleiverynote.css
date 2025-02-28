@@ -1,0 +1,198 @@
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal Content (Receipt View) */
+.make-delivery-note {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    width: 90%; /* Adjusted to fit better on smaller screens */
+    max-width: 900px; /* Adjust the max-width for larger screens */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Allow horizontal scrolling on small screens */
+}
+
+/* Title */
+.invoice-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+/* Paragraph Styling */
+p {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    color: #333;
+}
+
+/* Receipt Table */
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    table-layout: auto; /* Allow columns to adjust based on content */
+}
+
+.receipt-table th,
+.receipt-table td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: center;
+    word-wrap: break-word; /* Ensures content breaks if too long */
+}
+
+.receipt-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Balance Table */
+.balance-to-collect table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.balance-to-collect th,
+.balance-to-collect td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.balance-to-collect th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Vehicle and Driver Info */
+.delivery-details {
+    margin-top: 2rem;
+}
+
+.vehicle-info,
+.driver-info {
+    margin-bottom: 1rem;
+}
+
+.vehicle-info label,
+.driver-info label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.vehicle-info input,
+.driver-info input {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+}
+
+/* Action Buttons */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.print-btn,
+.close-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.print-btn {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.print-btn:hover {
+    background-color: #45a049;
+}
+
+.close-btn {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.close-btn:hover {
+    background-color: #e53935;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .make-delivery-note {
+        width: 95%; /* Make the modal slightly narrower on smaller screens */
+        padding: 1rem;
+    }
+
+    .receipt-table th,
+    .receipt-table td,
+    .balance-to-collect th,
+    .balance-to-collect td {
+        padding: 0.5rem; /* Reduce padding for smaller screens */
+        font-size: 0.9rem;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .print-btn,
+    .close-btn {
+        width: 100%; /* Make buttons full width on small screens */
+        padding: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .vehicle-info input,
+    .driver-info input {
+        font-size: 0.9rem; /* Adjust input field font size */
+    }
+}
+
+/* Print Styles */
+@media print {
+    .modal-overlay,
+    .close-btn {
+        display: none;
+    }
+
+    .make-delivery-note {
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+        border: none;
+    }
+
+    .receipt-table th,
+    .receipt-table td,
+    .balance-to-collect th,
+    .balance-to-collect td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+}

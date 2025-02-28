@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import {Container, Row, Col, Form, FormGroup, Label, Input, Button, Table} from "reactstrap";
 import { toast } from "react-toastify";
 import "../style/deliverynotes.css";
+import FinalInvoice from "./FinalInvoice";
+import ReceiptView from "./ReceiptView";
+import MakeDeliveryNote from "./MakeDeliveryNote";
 
 const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);
@@ -12,6 +15,9 @@ const DeliveryNotes = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [noScheduleMessage, setNoScheduleMessage] = useState("");
     const [selectedDeliveryDate, setSelectedDeliveryDate] = useState(""); // Added state for selected date
+    const [showModal2, setShowModal2] = useState(false);
+    const [showReceiptView, setShowReceiptView] = useState(false);
+    const [receiptData, setReceiptData] = useState(null);
 
     useEffect(() => {
         fetchRoutes();
@@ -78,7 +84,62 @@ const DeliveryNotes = () => {
         setTotalAmount(total);
     };
 
-    const handlePrint = () => window.print();
+    const handleEditClick3 = (selectedOrders) => {
+        if (!selectedOrders) return;
+        console.log(selectedOrders);
+        setSelectedOrders(selectedOrders);
+        setShowModal2(true);
+    };
+    const handleSubmit2 = async (formData) => {
+        console.log(formData);
+        setShowModal2(false);
+
+        // const updatedData = {
+        //     orID: order.orderId,
+        //     delStatus: formData.deliveryStatus,
+        //     delPrice: formData.delivery,
+        //     discount: order.discount,
+        //     subtotal: formData.subtotal,
+        //     total: formData.billTotal,
+        //     advance: formData.totalAdvance,
+        //     payStatus: formData.paymentType,
+        //     stID: order.saleID,
+        //     paymentAmount: formData.addedAdvance,
+        //     selectedItems: formData.selectedItems,
+        //     balance: formData.billTotal - formData.totalAdvance, // assuming balance calculation
+        //     salesperson: order.salesTeam.employeeName,
+        //     items: order.items,
+        // };
+        //
+        // try {
+        //     // Make API request to the /isssued-order endpoint
+        //     const response = await fetch('http://localhost:5001/api/admin/main/isssued-order', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify(updatedData),
+        //     });
+        //
+        //     const result = await response.json();
+        //
+        //     if (response.ok) {
+        //         // Successfully updated
+        //         console.log("Order updated successfully:", result.message);
+        //         // Optionally, handle success, e.g., navigate or show a success message
+        //         setReceiptData(updatedData);  // Set data for receipt
+        //         setShowReceiptView(true);         // Show receipt view
+        //     } else {
+        //         // Handle error response
+        //         console.error("Error:", result.message);
+        //         // Optionally, show error message to the user
+        //     }
+        // } catch (error) {
+        //     console.error("Error making API request:", error.message);
+        //     // Handle network error, show error message to the user
+        // }
+    };
+
 
     return (
         <Container className="delivery-notes-container">
@@ -152,8 +213,21 @@ const DeliveryNotes = () => {
 
 
                     <div className="text-center mt-4">
-                        <Button color="primary" onClick={handlePrint}>Get Delivery Note</Button>
+                        <Button color="primary" onClick={() => handleEditClick3(selectedOrders)} >Get Delivery Note</Button>
                     </div>
+                    {showModal2 && selectedOrders && (
+                        <MakeDeliveryNote
+                            selectedOrders={selectedOrders}
+                            setShowModal={setShowModal2}
+                            handleDeliveryUpdate={handleSubmit2}
+                        />
+                    )}
+                    {showReceiptView && (
+                        <ReceiptView
+                            receiptData={receiptData}
+                            setShowReceiptView={setShowReceiptView}
+                        />
+                    )}
                 </Col>
             </Row>
         </Container>
