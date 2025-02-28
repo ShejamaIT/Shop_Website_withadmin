@@ -3113,7 +3113,8 @@ router.post("/employees", async (req, res) => {
 router.post("/create-delivery-note", async (req, res) => {
     try {
         const { driverName, vehicleName, hire, date, orderIds } = req.body;
-       
+        console.log(req.body);
+
         const delHire = parseFloat(hire);
 
         // Check if the required fields are present in the request body
@@ -3144,10 +3145,21 @@ router.post("/create-delivery-note", async (req, res) => {
 
         // Execute all the queries in parallel
         await Promise.all(orderQueries);
+        
+        const deliveryQueries = orderIds.map((orID) => {
+            return db.query(`
+                UPDATE delivery
+                SET status = 'Delivered', delivery_Date = ?
+                WHERE orID = ?
+            `, [formattedDate, orID]);
+        });
+
+        // Execute all delivery updates in parallel
+        await Promise.all(deliveryQueries);
 
         // Send a success response
         return res.status(201).json({
-            message: "Delivery note and orders created successfully.",
+            message: "Delivery note and orders created successfully, and delivery status updated.",
             delNoID,  // Return the generated Delivery Note ID
         });
 
@@ -3156,6 +3168,7 @@ router.post("/create-delivery-note", async (req, res) => {
         return res.status(500).json({ message: "Error creating delivery note" });
     }
 });
+
 
 // Save Delivery Notes
 router.post("/create-delivery-note", async (req, res) => {
