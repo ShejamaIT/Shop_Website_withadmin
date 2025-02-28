@@ -3109,6 +3109,55 @@ router.post("/employees", async (req, res) => {
     }
 });
 
+// Save Delivery Notes
+router.post("/create-delivery-note", async (req, res) => {
+    try {
+        const { driverName, vehicleName, hire, date, orderIds } = req.body;
+       
+        const delHire = parseFloat(hire);
+
+        // Check if the required fields are present in the request body
+        if (!driverName || !vehicleName || !date || !hire || !orderIds || orderIds.length === 0) {
+            return res.status(400).json({ message: "Driver name, vehicle name, hire, date, and order IDs are required." });
+        }
+
+        // Convert the date from DD/MM/YY format to YYYY-MM-DD
+        const [day, month, year] = date.split('/');
+        const formattedDate = `20${year.length === 2 ? year : year.slice(2)}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+
+        // Insert into the delivery_note table
+        const [result] = await db.query(`
+            INSERT INTO delivery_note (driverName, vehicalName, date, hire)
+            VALUES (?, ?, ?, ?)
+        `, [driverName, vehicleName, formattedDate, delHire]);
+
+        // Get the generated delNoID (Delivery Note ID)
+        const delNoID = result.insertId;
+
+        // Insert the orders into the delivery_note_orders table
+        const orderQueries = orderIds.map((orID) => {
+            return db.query(`
+                INSERT INTO delivery_note_orders (delNoID, orID)
+                VALUES (?, ?)
+            `, [delNoID, orID]);
+        });
+
+        // Execute all the queries in parallel
+        await Promise.all(orderQueries);
+
+        // Send a success response
+        return res.status(201).json({
+            message: "Delivery note and orders created successfully.",
+            delNoID,  // Return the generated Delivery Note ID
+        });
+
+    } catch (error) {
+        console.error("Error creating delivery note:", error.message);
+        return res.status(500).json({ message: "Error creating delivery note" });
+    }
+});
+
+
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
     const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
