@@ -129,7 +129,7 @@ CREATE TABLE Orders (
     total DOUBLE,
     advance DOUBLE,
     balance DOUBLE,
-    payStatus DOUBLE,
+    payStatus VARCHAR(20),
     stID VARCHAR(25),
     expectedDate DATE,
     specialNote TEXT,
