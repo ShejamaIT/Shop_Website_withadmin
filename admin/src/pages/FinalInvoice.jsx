@@ -35,16 +35,26 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         }
     }, [advance]);
     const handlePrintAndSubmit = () => {
-        if (balance !== 0) {
-            toast.error("Balance is not settled.");
-        } else if (selectedItems.length === 0) {  // Fix: Check if selectedItems is empty
+        console.log(paymentType);
+
+        // Ensure balance is 0 or paymentType is either 'COD' or 'Credit'
+        if (balance !== 0 && (paymentType !== 'COD' && paymentType !== 'Credit')) {
+            toast.error("If balance is not settled, the payment type must be either 'COD' or 'Credit'.");
+        } else if (selectedItems.length === 0) {
             toast.error("No reserved items selected.");
         } else {
             handlePaymentUpdate({
-                orderId: selectedOrder.orderId,paymentType: paymentType,deliveryStatus: deliveryStatus,
-                previousAdvance: advance,addedAdvance: nowPay,totalAdvance: totalAdvance, subtotal:subtotal,
-                billTotal: netTotal, balance: balance,delivery:delivery,selectedItems:selectedItems,
-
+                orderId: selectedOrder.orderId,
+                paymentType: paymentType,
+                deliveryStatus: deliveryStatus,
+                previousAdvance: advance,
+                addedAdvance: nowPay,
+                totalAdvance: totalAdvance,
+                subtotal: subtotal,
+                billTotal: netTotal,
+                balance: balance,
+                delivery: delivery,
+                selectedItems: selectedItems,
             });
         }
     };

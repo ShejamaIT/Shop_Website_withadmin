@@ -220,7 +220,6 @@ const CompleteOrderDetails = () => {
             updatedData.expectedDeliveryDate !== order.expectedDeliveryDate ||
             updatedData.specialNote !== order.specialNote;
     };
-
     const hasItemsChanged = (updatedData) => {
         // Check for added or removed items
         const updatedItemIds = new Set(updatedData.items.map(item => item.itemId));
@@ -240,7 +239,6 @@ const CompleteOrderDetails = () => {
             );
         });
     };
-
     const hasDeliveryChanged = (updatedData) => {
         return updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryInfo !== order.deliveryInfo;
