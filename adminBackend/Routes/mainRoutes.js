@@ -1627,6 +1627,7 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
 router.put("/update-invoice", async (req, res) => {
     try {
         console.log(req.body);
+
         const {
             orID,
             isPickup,
@@ -1639,7 +1640,14 @@ router.put("/update-invoice", async (req, res) => {
             updatedDiscount
         } = req.body;
 
-        // Check if the order exists
+        if (!orID) {
+            return res.status(400).json({
+                success: false,
+                message: "Order ID is required",
+            });
+        }
+
+        // 🔍 Check if the order exists
         const orderCheckQuery = `SELECT * FROM Orders WHERE OrID = ?`;
         const [orderResult] = await db.query(orderCheckQuery, [orID]);
 
@@ -1650,36 +1658,50 @@ router.put("/update-invoice", async (req, res) => {
             });
         }
 
-        // Update the Orders table
-        let orderUpdateQuery = `
+        // 🔄 Determine Payment Status
+        let payStatus = "Pending"; // Default status
+
+        if (totalAdvance > 0) {
+            payStatus = "Advanced"; // Some advance payment has been made
+        }
+
+        if (balance === 0) {
+            payStatus = "Settled"; // Fully paid order
+        }
+
+        // 🔄 Update Orders table
+        const orderUpdateQuery = `
             UPDATE Orders
-            SET total = ?, discount = ?, delPrice = ?, advance = ?, balance = ?
+            SET total = ?, discount = ?, delPrice = ?, advance = ?, balance = ?, payStatus = ?
             WHERE OrID = ?`;
-        const orderUpdateParams = [netTotal, updatedDiscount, updatedDeliveryCharge, totalAdvance, balance, orID];
+        const orderUpdateParams = [netTotal, updatedDiscount, updatedDeliveryCharge, totalAdvance, balance, payStatus, orID];
         await db.query(orderUpdateQuery, orderUpdateParams);
 
-        // If isPickup is true, update the delivery table
+        // 🛑 If it's a pickup order, remove it from the delivery table
         if (isPickup) {
             const deleteDeliveryQuery = `DELETE FROM delivery WHERE orID = ?`;
             await db.query(deleteDeliveryQuery, [orID]);
         }
 
-        // Get the current date and time
-        const currentDateTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        // 🕒 Get the current date and time
+        const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
 
-        // Insert the new entry into the Payment table
-        const insertPaymentQuery = `
-            INSERT INTO Payment (orID, amount, dateTime)
-            VALUES (?, ?, ?)`;
-        const paymentParams = [orID, addedAdvance, currentDateTime];
-        await db.query(insertPaymentQuery, paymentParams);
+        // 💰 Insert a new entry into the Payment table
+        if (addedAdvance > 0) {
+            const insertPaymentQuery = `
+                INSERT INTO Payment (orID, amount, dateTime)
+                VALUES (?, ?, ?)`;
+            const paymentParams = [orID, addedAdvance, currentDateTime];
+            await db.query(insertPaymentQuery, paymentParams);
+        }
 
         return res.status(200).json({
             success: true,
             message: "Order and payment updated successfully",
+            payStatus,
         });
     } catch (error) {
-        console.error("Error updating invoice:", error.message);
+        console.error("❌ Error updating invoice:", error.message);
         return res.status(500).json({
             success: false,
             message: "Error updating invoice data",
@@ -1687,6 +1709,7 @@ router.put("/update-invoice", async (req, res) => {
         });
     }
 });
+
 
 // Fetch Accept orders in booked-unbooked
 router.get("/orders-accept", async (req, res) => {
