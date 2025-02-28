@@ -1,0 +1,470 @@
+Index: admin/src/pages/Placeorder.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React, { useState, useEffect } from \"react\";\r\nimport Popup from 'reactjs-popup';\r\nimport 'reactjs-popup/dist/index.css';\r\nimport { toast } from \"react-toastify\";\r\nimport { Container, Row, Col, Form, FormGroup, Label, Input, Button } from \"reactstrap\";\r\nimport \"../style/placeorder.css\";\r\n\r\nconst PlaceOrder = ({ onPlaceOrder }) => {\r\n    const [formData, setFormData] = useState({\r\n        customerName: \"\",\r\n        email: \"\",\r\n        phoneNumber: \"\",\r\n        otherNumber: \"\",\r\n        address: \"\",\r\n        city: \"\",\r\n        district: \"\",\r\n        specialNote: \"\",\r\n        dvStatus: \"\",\r\n        expectedDate: \"\",\r\n        couponCode: \"\",\r\n    });\r\n    const [items, setItems] = useState([]);\r\n    const [selectedItems, setSelectedItems] = useState([]);\r\n    const [filteredItems, setFilteredItems] = useState([]);\r\n    const [searchTerm, setSearchTerm] = useState(\"\"); // Fixed: should be a string\r\n    const [coupons, setCoupons] = useState([]);\r\n    const [deliveryDates, setDeliveryDates] = useState([]);\r\n    const [deliveryPrice, setDeliveryPrice] = useState(0);\r\n    const [districts, setDistricts] = useState([]);\r\n    const [deliveryRates, setDeliveryRates] = useState({});\r\n    const [discountAmount, setDiscountAmount] = useState(0);\r\n    const [totalItemPrice, setTotalItemPrice] = useState(0);\r\n    const [totalBillPrice, setTotalBillPrice] = useState(0);\r\n    const [errors, setErrors] = useState([]);\r\n    const [openPopup, setOpenPopup] = useState(false);\r\n    useEffect(() => {\r\n        const fetchItems = async () => {\r\n            try {\r\n                const response = await fetch(\"http://localhost:5001/api/admin/main/allitems\");\r\n                const data = await response.json();\r\n                setItems(data || []);\r\n                setFilteredItems(data || []);\r\n            } catch (error) {\r\n                toast.error(\"Error fetching items.\");\r\n            }\r\n        };\r\n        const fetchCoupons = async () => {\r\n            try {\r\n                const response = await fetch(\"http://localhost:5001/api/admin/main/coupon-details\");\r\n                const data = await response.json();\r\n                setCoupons(data.data || []);\r\n            } catch (error) {\r\n                toast.error(\"Error fetching coupons.\");\r\n            }\r\n        };\r\n\r\n        fetchItems();\r\n        fetchCoupons();\r\n    }, []);\r\n\r\n    useEffect(() => {\r\n        calculateTotalPrice();\r\n    }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change\r\n\r\n    const handleChange = (e) => {\r\n        const { name, value } = e.target;\r\n        setFormData((prev) => ({ ...prev, [name]: value }));\r\n        if (name === \"district\") {\r\n            setDeliveryPrice(deliveryRates[value] || 0);\r\n            fetchDeliveryDates(value);\r\n        }\r\n        if (name === \"couponCode\") {\r\n            const selectedCoupon = coupons.find((c) => c.coupon_code === value);\r\n            setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);\r\n        }\r\n    };\r\n    const fetchDeliveryDates = async (district) => {\r\n        try {\r\n            const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);\r\n            const data = await response.json();\r\n            setDeliveryDates(data.upcomingDates || []);\r\n        } catch (error) {\r\n            toast.error(\"Error fetching delivery dates.\");\r\n            setDeliveryDates([]);\r\n        }\r\n    };\r\n    useEffect(() => {\r\n        const fetchDeliveryRates = async () => {\r\n            try {\r\n                const response = await fetch(\"http://localhost:5001/api/admin/main/delivery-rates\");\r\n                const data = await response.json();\r\n\r\n                if (data.success) {\r\n                    const districtList = data.data.map((rate) => rate.district);\r\n                    const rateMap = {};\r\n                    data.data.forEach((rate) => {\r\n                        rateMap[rate.district] = rate.amount; // Store delivery price for each district\r\n                    });\r\n\r\n                    setDistricts(districtList);\r\n                    setDeliveryRates(rateMap);\r\n                }\r\n            } catch (error) {\r\n                toast.error(\"Error fetching delivery rates.\");\r\n            }\r\n        };\r\n\r\n        fetchDeliveryRates();\r\n    }, []);\r\n    const handleSearchChange = (e) => {\r\n        const value = e.target.value;\r\n        setSearchTerm(value);\r\n        if (!value.trim()) {\r\n            setFilteredItems(items);\r\n        } else {\r\n            const filtered = items.filter((item) =>\r\n                item.I_Id.toString().includes(value) || item.I_name.toLowerCase().includes(value.toLowerCase())\r\n            );\r\n            setFilteredItems(filtered);\r\n        }\r\n    };\r\n    const handleSelectItem = (item) => {\r\n        if (!selectedItems.some((selected) => selected.I_Id === item.I_Id)) {\r\n            setSelectedItems([...selectedItems, { ...item, qty: 1, price: item.price }]); // Ensure price is initialized\r\n        }\r\n        setSearchTerm(\"\");\r\n        setFilteredItems([]);\r\n    };\r\n    const handleQtyChange = (e, itemId) => {\r\n        const value = parseInt(e.target.value) || 1;\r\n        setSelectedItems((prevItems) =>\r\n            prevItems.map((item) => item.I_Id === itemId ? { ...item, qty: value  } : item)\r\n        );\r\n    };\r\n    const handleRemoveItem = (itemId) => {\r\n        setSelectedItems((prevItems) => prevItems.filter((item) => item.I_Id !== itemId));\r\n    };\r\n    const calculateTotalPrice = () => {\r\n        const itemTotal = selectedItems.reduce((total, item) => total + item.price * item.qty, 0);\r\n        setTotalItemPrice(itemTotal);\r\n        setTotalBillPrice((itemTotal - discountAmount ) + deliveryPrice);\r\n    };\r\n    const handleSubmit = async (e) => {\r\n        e.preventDefault();\r\n        if (!formData.customerName || !formData.email || !formData.phoneNumber || selectedItems.length === 0) {\r\n            toast.error(\"Please fill all details and add at least one item.\");\r\n            return;\r\n        }\r\n        if (formData.dvStatus === \"Delivery\" && (!formData.address || !formData.district || !formData.expectedDate)) {\r\n            toast.error(\"Please complete all delivery details.\");\r\n            return;\r\n        }\r\n\r\n        const orderData = {\r\n            ...formData,\r\n            items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty ,price: item.price * item.qty })),\r\n            deliveryPrice,\r\n            discountAmount,\r\n            totalBillPrice,\r\n        };\r\n        if (validateForm()) {\r\n            try {\r\n                // Make a POST request to the server to add the supplier and items\r\n                const response = await fetch(\"http://localhost:5001/api/admin/main/orders\", {\r\n                    method: \"POST\",\r\n                    headers: {\r\n                        \"Content-Type\": \"application/json\",\r\n                    },\r\n                    body: JSON.stringify(orderData),\r\n                });\r\n                const result = await response.json();\r\n                if (response.ok) {\r\n                    // Show success message and clear the form\r\n                    toast.success(\"Order placed successfully!\");\r\n                    handleClear();\r\n                } else {\r\n                    // Show error message if something goes wrong\r\n                    toast.error(result.message || \"Something went wrong. Please try again.\");\r\n                }\r\n            } catch (error) {\r\n                console.error(\"Error submitting supplier data:\", error);\r\n                toast.error(\"Error submitting supplier data. Please try again.\");\r\n            }\r\n        }\r\n    };\r\n    const validateForm = () => {\r\n        const validationErrors = [];\r\n        if (!formData.dvStatus) validationErrors.push(\"Please select a delivery method.\");\r\n        if (!formData.customerName.trim()) validationErrors.push(\"Customer name is required.\");\r\n        if (!formData.email.trim() || !/\\S+@\\S+\\.\\S+/.test(formData.email))\r\n            validationErrors.push(\"A valid email address is required.\");\r\n        if (!formData.phoneNumber.trim() || !/^\\d{10}$/.test(formData.phoneNumber))\r\n            validationErrors.push(\"A valid 10-digit phone number is required.\");\r\n        if (formData.otherNumber.trim() && !/^\\d{10}$/.test(formData.otherNumber))\r\n            validationErrors.push(\"If provided, the optional number must be a valid 10-digit number.\");\r\n\r\n        if (selectedItems.length === 0) validationErrors.push(\"Please select at least one item.\");\r\n        selectedItems.forEach((item) => {\r\n            if (!item.qty || item.qty <= 0) validationErrors.push(`Quantity for ${item.I_name} must be at least 1.`);\r\n        });\r\n        if (formData.dvStatus === \"Delivery\") {\r\n            if (!formData.city.trim()) validationErrors.push(\"City is required for delivery.\");\r\n            if (!formData.address.trim()) validationErrors.push(\"Address is required for delivery.\");\r\n            if (!formData.district.trim()) validationErrors.push(\"District is required for delivery.\");\r\n            if (!formData.expectedDate) validationErrors.push(\"Please select an expected delivery date.\");\r\n        } else if (formData.dvStatus === \"Pickup\") {\r\n            if (!formData.city.trim()) validationErrors.push(\"City is required for pickup.\");\r\n            if (!formData.expectedDate) validationErrors.push(\"Please select an expected pickup date.\");\r\n        }\r\n        if (validationErrors.length > 0) {\r\n            setErrors(validationErrors);\r\n            setOpenPopup(true); // Open popup with errors\r\n            return false;\r\n        }\r\n        return true;\r\n    };\r\n    const handleClear = () => {\r\n        setFormData({\r\n            customerName: \"\",\r\n            email: \"\",\r\n            phoneNumber: \"\",\r\n            otherNumber: \"\",\r\n            address: \"\",\r\n            city: \"\",\r\n            district: \"\",\r\n            specialNote: \"\",\r\n            expectedDate: \"\",\r\n            couponCode: \"\",\r\n            dvStatus: \"\",\r\n        });\r\n        setSelectedItems([]);\r\n        setSearchTerm(\"\");\r\n        setDeliveryPrice(0);\r\n        setDiscountAmount(0);\r\n        setTotalItemPrice(0);\r\n        setTotalBillPrice(0);\r\n    };\r\n    return (\r\n        <Container className=\"place-order-container\">\r\n            <Row>\r\n                <Col lg=\"8\" className=\"mx-auto\">\r\n                    <h3 className=\"text-center\">Place an Order</h3>\r\n                    <Form onSubmit={handleSubmit}>\r\n                        <FormGroup>\r\n                            <Label>Delivery Method</Label>\r\n                            <div className=\"d-flex gap-3\">\r\n                                <Label>\r\n                                    <Input type=\"radio\" name=\"dvStatus\" value=\"Delivery\" onChange={handleChange} /> Delivery\r\n                                </Label>\r\n                                <Label>\r\n                                    <Input type=\"radio\" name=\"dvStatus\" value=\"Pickup\" onChange={handleChange} /> Pickup\r\n                                </Label>\r\n                            </div>\r\n                        </FormGroup>\r\n\r\n                        <Row>\r\n                            <Col md={6}>\r\n                                <FormGroup>\r\n                                    <Label>Customer Name</Label>\r\n                                    <Input type=\"text\" name=\"customerName\" value={formData.customerName} onChange={handleChange} required />\r\n                                </FormGroup>\r\n                            </Col>\r\n\r\n                            <Col md={6}>\r\n                                <FormGroup>\r\n                                    <Label>Email</Label>\r\n                                    <Input type=\"text\" name=\"email\" value={formData.email} onChange={handleChange} required />\r\n                                </FormGroup>\r\n                            </Col>\r\n                        </Row>\r\n                        <Row>\r\n                            <Col md={6}>\r\n                                <FormGroup>\r\n                                    <Label>Phone Number</Label>\r\n                                    <Input type=\"text\" name=\"phoneNumber\" value={formData.phoneNumber} onChange={handleChange} required />\r\n                                </FormGroup>\r\n                            </Col>\r\n\r\n                            <Col md={6}>\r\n                                <FormGroup>\r\n                                    <Label>Optional Number</Label>\r\n                                    <Input type=\"text\" name=\"otherNumber\" value={formData.otherNumber} onChange={handleChange} required />\r\n                                </FormGroup>\r\n                            </Col>\r\n                        </Row>\r\n                        <FormGroup>\r\n                            <Label>Item Selection</Label>\r\n                            <Input type=\"text\" placeholder=\"Search items\" value={searchTerm} onChange={handleSearchChange} />\r\n                            {searchTerm && filteredItems.length > 0 && (\r\n                                <div className=\"dropdown\">\r\n                                    {filteredItems.map((item) => (\r\n                                        <div key={item.I_Id} onClick={() => handleSelectItem(item)} className=\"dropdown-item\">\r\n                                            {item.I_name} - Rs.{item.price}\r\n                                        </div>\r\n                                    ))}\r\n                                </div>\r\n                            )}\r\n                        </FormGroup>\r\n\r\n                        {selectedItems.map((item) => (\r\n                            <Row key={item.I_Id} className=\"mt-2\">\r\n                                <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>\r\n                                <Col md={4}><Input type=\"number\" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>\r\n                                <Col md={2}><Button color=\"danger\" onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>\r\n                            </Row>\r\n                        ))}\r\n                        {formData.dvStatus === \"Delivery\" && (\r\n                            <>\r\n                                <FormGroup>\r\n                                    <Label>City</Label>\r\n                                    <Input type=\"text\" name=\"city\" onChange={handleChange}></Input>\r\n                                </FormGroup>\r\n                                <FormGroup>\r\n                                    <Label>Address</Label>\r\n                                    <Input type=\"text\" name=\"address\" value={formData.address} onChange={handleChange} required />\r\n                                </FormGroup>\r\n                                <FormGroup>\r\n                                    <Label>District</Label>\r\n                                    <Input type=\"select\" name=\"district\" value={formData.district} onChange={handleChange} required>\r\n                                        <option value=\"\">Select District</option>\r\n                                        {districts.map((district) => (\r\n                                            <option key={district} value={district}>{district}</option>\r\n                                        ))}\r\n                                    </Input>\r\n                                </FormGroup>\r\n                                {deliveryDates.length > 0 && (\r\n                                    <FormGroup>\r\n                                        <Label>Expected Delivery Date</Label>\r\n                                        <Input type=\"select\" name=\"expectedDate\" onChange={handleChange}>\r\n                                            <option value=\"\">Select Date</option>\r\n                                            {deliveryDates.map((date, index) => (\r\n                                                <option key={index} value={date}>{date}</option>\r\n                                            ))}\r\n                                        </Input>\r\n                                    </FormGroup>\r\n                                )}\r\n                            </>\r\n                        )}\r\n                        {formData.dvStatus === \"Pickup\" && (\r\n                            <>\r\n                                <FormGroup>\r\n                                    <Label>City</Label>\r\n                                    <Input type=\"text\" name=\"city\" onChange={handleChange}></Input>\r\n                                </FormGroup>\r\n                                <FormGroup>\r\n                                    <Label>Expected Date</Label>\r\n                                    <Input type=\"date\" name=\"expectedDate\" onChange={handleChange}></Input>\r\n                                </FormGroup>\r\n                            </>\r\n                        )}\r\n                        <FormGroup>\r\n                            <Label>Coupon Code</Label>\r\n                            <Input type=\"select\" name=\"couponCode\" onChange={handleChange}>\r\n                                <option value=\"\">Select Coupon</option>\r\n                                {coupons.map((coupon) => (\r\n                                    <option key={coupon.id} value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name}) - {coupon.discount} Off</option>\r\n                                ))}\r\n                            </Input>\r\n                        </FormGroup>\r\n\r\n                        <FormGroup>\r\n                            <Label>Special Note</Label>\r\n                            <Input type=\"textarea\" name=\"specialNote\" onChange={handleChange}></Input>\r\n                        </FormGroup>\r\n                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>\r\n                        <Row>\r\n                            <Col md=\"6\"><Button type=\"submit\" color=\"primary\" block>Place Order</Button></Col>\r\n                            <Col md=\"6\"><Button type=\"button\" color=\"danger\" block onClick={handleClear}>Clear</Button></Col>\r\n                        </Row>\r\n                    </Form>\r\n                </Col>\r\n            </Row>\r\n            <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>\r\n                <div className=\"p-4\">\r\n                    <h4 style={{ color: \"red\" }}>Validation Errors</h4>\r\n                    <ul>\r\n                        {errors.map((error, index) => (\r\n                            <li key={index} style={{ color: \"red\" }}>{error}</li>\r\n                        ))}\r\n                    </ul>\r\n                    <button className=\"btn btn-primary mt-2\" onClick={() => setOpenPopup(false)}>Close</button>\r\n                </div>\r\n            </Popup>\r\n        </Container>\r\n    );\r\n};\r\nexport default PlaceOrder;\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admin/src/pages/Placeorder.jsx b/admin/src/pages/Placeorder.jsx
+--- a/admin/src/pages/Placeorder.jsx	(revision 4e1bae508fa6bbb569d9b20e45b4ab1e98edab8b)
++++ b/admin/src/pages/Placeorder.jsx	(date 1740479890464)
+@@ -22,7 +22,7 @@
+     const [items, setItems] = useState([]);
+     const [selectedItems, setSelectedItems] = useState([]);
+     const [filteredItems, setFilteredItems] = useState([]);
+-    const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
++    const [searchTerm, setSearchTerm] = useState("");
+     const [coupons, setCoupons] = useState([]);
+     const [deliveryDates, setDeliveryDates] = useState([]);
+     const [deliveryPrice, setDeliveryPrice] = useState(0);
+@@ -33,47 +33,52 @@
+     const [totalBillPrice, setTotalBillPrice] = useState(0);
+     const [errors, setErrors] = useState([]);
+     const [openPopup, setOpenPopup] = useState(false);
++
+     useEffect(() => {
+-        const fetchItems = async () => {
+-            try {
+-                const response = await fetch("http://localhost:5001/api/admin/main/allitems");
+-                const data = await response.json();
+-                setItems(data || []);
+-                setFilteredItems(data || []);
+-            } catch (error) {
+-                toast.error("Error fetching items.");
+-            }
+-        };
+-        const fetchCoupons = async () => {
+-            try {
+-                const response = await fetch("http://localhost:5001/api/admin/main/coupon-details");
+-                const data = await response.json();
+-                setCoupons(data.data || []);
+-            } catch (error) {
+-                toast.error("Error fetching coupons.");
+-            }
+-        };
++        fetchItems();
++        fetchCoupons();
++    }, []);
++
++    const fetchItems = async () => {
++        try {
++            const response = await fetch("http://localhost:5001/api/admin/main/allitems");
++            const data = await response.json();
++            setItems(data || []);
++            setFilteredItems(data || []);
++        } catch (error) {
++            toast.error("Error fetching items.");
++        }
++    };
++
++    const fetchCoupons = async () => {
++        try {
++            const response = await fetch("http://localhost:5001/api/admin/main/coupon-details");
++            const data = await response.json();
++            setCoupons(data.data || []);
++        } catch (error) {
++            toast.error("Error fetching coupons.");
++        }
++    };
+ 
+-        fetchItems();
+-        fetchCoupons();
+-    }, []);
+-
+     useEffect(() => {
+         calculateTotalPrice();
+-    }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change
++    }, [selectedItems, deliveryPrice, discountAmount]);
+ 
+     const handleChange = (e) => {
+         const { name, value } = e.target;
+         setFormData((prev) => ({ ...prev, [name]: value }));
++
+         if (name === "district") {
+             setDeliveryPrice(deliveryRates[value] || 0);
+             fetchDeliveryDates(value);
+         }
++
+         if (name === "couponCode") {
+             const selectedCoupon = coupons.find((c) => c.coupon_code === value);
+             setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
+         }
+     };
++
+     const fetchDeliveryDates = async (district) => {
+         try {
+             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
+@@ -84,6 +89,7 @@
+             setDeliveryDates([]);
+         }
+     };
++
+     useEffect(() => {
+         const fetchDeliveryRates = async () => {
+             try {
+@@ -94,7 +100,7 @@
+                     const districtList = data.data.map((rate) => rate.district);
+                     const rateMap = {};
+                     data.data.forEach((rate) => {
+-                        rateMap[rate.district] = rate.amount; // Store delivery price for each district
++                        rateMap[rate.district] = rate.amount;
+                     });
+ 
+                     setDistricts(districtList);
+@@ -107,6 +113,7 @@
+ 
+         fetchDeliveryRates();
+     }, []);
++
+     const handleSearchChange = (e) => {
+         const value = e.target.value;
+         setSearchTerm(value);
+@@ -119,27 +126,13 @@
+             setFilteredItems(filtered);
+         }
+     };
+-    const handleSelectItem = (item) => {
+-        if (!selectedItems.some((selected) => selected.I_Id === item.I_Id)) {
+-            setSelectedItems([...selectedItems, { ...item, qty: 1, price: item.price }]); // Ensure price is initialized
+-        }
+-        setSearchTerm("");
+-        setFilteredItems([]);
+-    };
+-    const handleQtyChange = (e, itemId) => {
+-        const value = parseInt(e.target.value) || 1;
+-        setSelectedItems((prevItems) =>
+-            prevItems.map((item) => item.I_Id === itemId ? { ...item, qty: value  } : item)
+-        );
+-    };
+-    const handleRemoveItem = (itemId) => {
+-        setSelectedItems((prevItems) => prevItems.filter((item) => item.I_Id !== itemId));
+-    };
++
+     const calculateTotalPrice = () => {
+         const itemTotal = selectedItems.reduce((total, item) => total + item.price * item.qty, 0);
+         setTotalItemPrice(itemTotal);
+-        setTotalBillPrice((itemTotal - discountAmount ) + deliveryPrice);
++        setTotalBillPrice((itemTotal - discountAmount) + deliveryPrice);
+     };
++
+     const handleSubmit = async (e) => {
+         e.preventDefault();
+         if (!formData.customerName || !formData.email || !formData.phoneNumber || selectedItems.length === 0) {
+@@ -153,14 +146,13 @@
+ 
+         const orderData = {
+             ...formData,
+-            items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty ,price: item.price * item.qty })),
++            items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
+             deliveryPrice,
+             discountAmount,
+             totalBillPrice,
+         };
+         if (validateForm()) {
+             try {
+-                // Make a POST request to the server to add the supplier and items
+                 const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+                     method: "POST",
+                     headers: {
+@@ -170,30 +162,24 @@
+                 });
+                 const result = await response.json();
+                 if (response.ok) {
+-                    // Show success message and clear the form
+                     toast.success("Order placed successfully!");
+                     handleClear();
+                 } else {
+-                    // Show error message if something goes wrong
+                     toast.error(result.message || "Something went wrong. Please try again.");
+                 }
+             } catch (error) {
+-                console.error("Error submitting supplier data:", error);
+-                toast.error("Error submitting supplier data. Please try again.");
++                toast.error("Error submitting order data. Please try again.");
+             }
+         }
+     };
++
+     const validateForm = () => {
+         const validationErrors = [];
+         if (!formData.dvStatus) validationErrors.push("Please select a delivery method.");
+         if (!formData.customerName.trim()) validationErrors.push("Customer name is required.");
+-        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email))
+-            validationErrors.push("A valid email address is required.");
+-        if (!formData.phoneNumber.trim() || !/^\d{10}$/.test(formData.phoneNumber))
+-            validationErrors.push("A valid 10-digit phone number is required.");
+-        if (formData.otherNumber.trim() && !/^\d{10}$/.test(formData.otherNumber))
+-            validationErrors.push("If provided, the optional number must be a valid 10-digit number.");
+-
++        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) validationErrors.push("A valid email address is required.");
++        if (!formData.phoneNumber.trim() || !/^\d{10}$/.test(formData.phoneNumber)) validationErrors.push("A valid 10-digit phone number is required.");
++        if (formData.otherNumber.trim() && !/^\d{10}$/.test(formData.otherNumber)) validationErrors.push("If provided, the optional number must be a valid 10-digit number.");
+         if (selectedItems.length === 0) validationErrors.push("Please select at least one item.");
+         selectedItems.forEach((item) => {
+             if (!item.qty || item.qty <= 0) validationErrors.push(`Quantity for ${item.I_name} must be at least 1.`);
+@@ -209,11 +195,12 @@
+         }
+         if (validationErrors.length > 0) {
+             setErrors(validationErrors);
+-            setOpenPopup(true); // Open popup with errors
++            setOpenPopup(true);
+             return false;
+         }
+         return true;
+     };
++
+     const handleClear = () => {
+         setFormData({
+             customerName: "",
+@@ -235,6 +222,7 @@
+         setTotalItemPrice(0);
+         setTotalBillPrice(0);
+     };
++
+     return (
+         <Container className="place-order-container">
+             <Row>
+@@ -243,72 +231,20 @@
+                     <Form onSubmit={handleSubmit}>
+                         <FormGroup>
+                             <Label>Delivery Method</Label>
+-                            <div className="d-flex gap-3">
+-                                <Label>
+-                                    <Input type="radio" name="dvStatus" value="Delivery" onChange={handleChange} /> Delivery
+-                                </Label>
+-                                <Label>
+-                                    <Input type="radio" name="dvStatus" value="Pickup" onChange={handleChange} /> Pickup
+-                                </Label>
+-                            </div>
++                            <Input
++                                type="text"
++                                name="dvStatus"
++                                value={formData.dvStatus}
++                                onChange={handleChange}
++                                placeholder="Enter 'Delivery' or 'Pickup'"
++                            />
+                         </FormGroup>
+-
+-                        <Row>
+-                            <Col md={6}>
+-                                <FormGroup>
+-                                    <Label>Customer Name</Label>
+-                                    <Input type="text" name="customerName" value={formData.customerName} onChange={handleChange} required />
+-                                </FormGroup>
+-                            </Col>
+-
+-                            <Col md={6}>
+-                                <FormGroup>
+-                                    <Label>Email</Label>
+-                                    <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
+-                                </FormGroup>
+-                            </Col>
+-                        </Row>
+-                        <Row>
+-                            <Col md={6}>
+-                                <FormGroup>
+-                                    <Label>Phone Number</Label>
+-                                    <Input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+-                                </FormGroup>
+-                            </Col>
+ 
+-                            <Col md={6}>
+-                                <FormGroup>
+-                                    <Label>Optional Number</Label>
+-                                    <Input type="text" name="otherNumber" value={formData.otherNumber} onChange={handleChange} required />
+-                                </FormGroup>
+-                            </Col>
+-                        </Row>
+-                        <FormGroup>
+-                            <Label>Item Selection</Label>
+-                            <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
+-                            {searchTerm && filteredItems.length > 0 && (
+-                                <div className="dropdown">
+-                                    {filteredItems.map((item) => (
+-                                        <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
+-                                            {item.I_name} - Rs.{item.price}
+-                                        </div>
+-                                    ))}
+-                                </div>
+-                            )}
+-                        </FormGroup>
+-
+-                        {selectedItems.map((item) => (
+-                            <Row key={item.I_Id} className="mt-2">
+-                                <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
+-                                <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
+-                                <Col md={2}><Button color="danger" onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>
+-                            </Row>
+-                        ))}
+                         {formData.dvStatus === "Delivery" && (
+                             <>
+                                 <FormGroup>
+                                     <Label>City</Label>
+-                                    <Input type="text" name="city" onChange={handleChange}></Input>
++                                    <Input type="text" name="city" onChange={handleChange} />
+                                 </FormGroup>
+                                 <FormGroup>
+                                     <Label>Address</Label>
+@@ -316,26 +252,58 @@
+                                 </FormGroup>
+                                 <FormGroup>
+                                     <Label>District</Label>
+-                                    <Input type="select" name="district" value={formData.district} onChange={handleChange} required>
+-                                        <option value="">Select District</option>
+-                                        {districts.map((district) => (
+-                                            <option key={district} value={district}>{district}</option>
+-                                        ))}
+-                                    </Input>
++                                    <Input
++                                        type="text"
++                                        name="district"
++                                        value={formData.district}
++                                        onChange={handleChange}
++                                        placeholder="Enter district name"
++                                    />
++                                    {formData.district && districts.includes(formData.district) && (
++                                        <Input
++                                            type="select"
++                                            name="district"
++                                            value={formData.district}
++                                            onChange={handleChange}
++                                        >
++                                            <option value="">Select District</option>
++                                            {districts.map((district) => (
++                                                <option key={district} value={district}>
++                                                    {district}
++                                                </option>
++                                            ))}
++                                        </Input>
++                                    )}
+                                 </FormGroup>
+-                                {deliveryDates.length > 0 && (
++
++                                {deliveryDates.length > 0 ? (
+                                     <FormGroup>
+                                         <Label>Expected Delivery Date</Label>
+-                                        <Input type="select" name="expectedDate" onChange={handleChange}>
++                                        <Input
++                                            type="select"
++                                            name="expectedDate"
++                                            onChange={handleChange}
++                                        >
+                                             <option value="">Select Date</option>
+                                             {deliveryDates.map((date, index) => (
+                                                 <option key={index} value={date}>{date}</option>
+                                             ))}
+                                         </Input>
+                                     </FormGroup>
++                                ) : (
++                                    <FormGroup>
++                                        <Label>Expected Delivery Date</Label>
++                                        <Input
++                                            type="date"
++                                            name="expectedDate"
++                                            value={formData.expectedDate}
++                                            onChange={handleChange}
++                                        />
++                                    </FormGroup>
+                                 )}
+                             </>
+                         )}
++
+                         {formData.dvStatus === "Pickup" && (
+                             <>
+                                 <FormGroup>
+@@ -348,28 +316,24 @@
+                                 </FormGroup>
+                             </>
+                         )}
+-                        <FormGroup>
+-                            <Label>Coupon Code</Label>
+-                            <Input type="select" name="couponCode" onChange={handleChange}>
+-                                <option value="">Select Coupon</option>
+-                                {coupons.map((coupon) => (
+-                                    <option key={coupon.id} value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name}) - {coupon.discount} Off</option>
+-                                ))}
+-                            </Input>
+-                        </FormGroup>
+-
+-                        <FormGroup>
+-                            <Label>Special Note</Label>
+-                            <Input type="textarea" name="specialNote" onChange={handleChange}></Input>
+-                        </FormGroup>
+-                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>
++
++                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5>
++                        <h5>Discount: Rs.{discountAmount}</h5>
++                        <h5>Total Item Price: Rs.{totalItemPrice}</h5>
++                        <h4>Total Bill Price: Rs.{totalBillPrice}</h4>
++
+                         <Row>
+-                            <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
+-                            <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
++                            <Col md="6">
++                                <Button type="submit" color="primary" block>Place Order</Button>
++                            </Col>
++                            <Col md="6">
++                                <Button type="button" color="danger" block onClick={handleClear}>Clear</Button>
++                            </Col>
+                         </Row>
+                     </Form>
+                 </Col>
+             </Row>
++
+             <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>
+                 <div className="p-4">
+                     <h4 style={{ color: "red" }}>Validation Errors</h4>
+@@ -384,4 +348,5 @@
+         </Container>
+     );
+ };
++
+ export default PlaceOrder;
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"1668d6f8-a283-4394-b710-4811e83b129f\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"JavaScript File\" />\r\n        <option value=\"CSS File\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProblemsViewState\">\r\n    <option name=\"selectedTabId\" value=\"CurrentFile\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 8\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2eX5SN8ZT20KsRJo9u8O7Jj8U9m\" />\r\n  <component name=\"ProjectLevelVcsManager\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,\r\n    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;main&quot;,\r\n    &quot;js.last.introduce.type&quot;: &quot;CONST&quot;,\r\n    &quot;last_opened_file_path&quot;: &quot;C:/Users/LENOVO/Desktop/Shop_Website_withadmin/admin/src/pages&quot;,\r\n    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,\r\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\r\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\r\n    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,\r\n    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,\r\n    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,\r\n    &quot;ts.external.directory.path&quot;: &quot;C:\\\\Program Files\\\\JetBrains\\\\IntelliJ IDEA 2023.1.2\\\\plugins\\\\javascript-impl\\\\jsLanguageServicesImpl\\\\external&quot;,\r\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\LENOVO\\Desktop\\Shop_Website_withadmin\\admin\\src\\pages\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\Shop_Website_withadmin\\admin\\src\\pages\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\Shop_Mangement_Website\\admin\\src\\pages\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\Shop_Mangement_Website\\admin\\src\\components\\tables\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\Shop_Mangement_Website\\admin\\src\\assets\\images\" />\r\n    </key>\r\n    <key name=\"MoveFile.RECENT_KEYS\">\r\n      <recent name=\"D:\\shejama\\Shop_Website_withadmin\\admin\\src\\style\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\Shop_Mangement_Website\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\Shop_Mangement_Website\\admin\\src\\style\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\Shop_Mangement_Website\\admin\\src\\components\\tables\" />\r\n      <recent name=\"C:\\Users\\Dell\\Desktop\\New folder\\test\\Shop_Mangement_Website\\admin\\src\\style\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"npm.start adminBackend\">\r\n    <configuration name=\"start admin\" type=\"js.build_tools.npm\">\r\n      <package-json value=\"$PROJECT_DIR$/admin/package.json\" />\r\n      <command value=\"run\" />\r\n      <scripts>\r\n        <script value=\"start\" />\r\n      </scripts>\r\n      <node-interpreter value=\"project\" />\r\n      <envs />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"start adminBackend\" type=\"js.build_tools.npm\">\r\n      <package-json value=\"$PROJECT_DIR$/adminBackend/package.json\" />\r\n      <command value=\"run\" />\r\n      <scripts>\r\n        <script value=\"start\" />\r\n      </scripts>\r\n      <node-interpreter value=\"project\" />\r\n      <envs />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"start client\" type=\"js.build_tools.npm\">\r\n      <package-json value=\"$PROJECT_DIR$/frontend/package.json\" />\r\n      <command value=\"run\" />\r\n      <scripts>\r\n        <script value=\"start\" />\r\n      </scripts>\r\n      <node-interpreter value=\"project\" />\r\n      <envs />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"start clientBackend\" type=\"js.build_tools.npm\">\r\n      <package-json value=\"$PROJECT_DIR$/backend/package.json\" />\r\n      <command value=\"run\" />\r\n      <scripts>\r\n        <script value=\"start\" />\r\n      </scripts>\r\n      <node-interpreter value=\"project\" />\r\n      <envs />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <list>\r\n      <item itemvalue=\"npm.start admin\" />\r\n      <item itemvalue=\"npm.start adminBackend\" />\r\n      <item itemvalue=\"npm.start client\" />\r\n      <item itemvalue=\"npm.start clientBackend\" />\r\n    </list>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"1668d6f8-a283-4394-b710-4811e83b129f\" name=\"Changes\" comment=\"\" />\r\n      <created>1712038085840</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1712038085840</updated>\r\n      <workItem from=\"1712038089559\" duration=\"1254000\" />\r\n      <workItem from=\"1712061815527\" duration=\"42385000\" />\r\n      <workItem from=\"1712683936144\" duration=\"1185000\" />\r\n      <workItem from=\"1712890621782\" duration=\"16918000\" />\r\n      <workItem from=\"1713154836527\" duration=\"1959000\" />\r\n      <workItem from=\"1713161444627\" duration=\"9708000\" />\r\n      <workItem from=\"1713191088279\" duration=\"1372000\" />\r\n      <workItem from=\"1714129071461\" duration=\"6426000\" />\r\n      <workItem from=\"1715076636336\" duration=\"950000\" />\r\n      <workItem from=\"1716695843344\" duration=\"9861000\" />\r\n      <workItem from=\"1717566900182\" duration=\"39112000\" />\r\n      <workItem from=\"1718040941935\" duration=\"2024000\" />\r\n      <workItem from=\"1718044332752\" duration=\"37999000\" />\r\n      <workItem from=\"1718599951129\" duration=\"10909000\" />\r\n      <workItem from=\"1719050971865\" duration=\"693000\" />\r\n      <workItem from=\"1719122181082\" duration=\"23743000\" />\r\n      <workItem from=\"1719211864565\" duration=\"146000\" />\r\n      <workItem from=\"1719217532390\" duration=\"61214000\" />\r\n      <workItem from=\"1719574122386\" duration=\"23793000\" />\r\n      <workItem from=\"1737533194050\" duration=\"11167000\" />\r\n      <workItem from=\"1737977134186\" duration=\"829000\" />\r\n      <workItem from=\"1738036813441\" duration=\"761000\" />\r\n      <workItem from=\"1738209924209\" duration=\"2815000\" />\r\n      <workItem from=\"1738215694249\" duration=\"2155000\" />\r\n      <workItem from=\"1738217914412\" duration=\"20565000\" />\r\n      <workItem from=\"1738245070725\" duration=\"14660000\" />\r\n      <workItem from=\"1738309279987\" duration=\"32872000\" />\r\n      <workItem from=\"1738400628957\" duration=\"239000\" />\r\n      <workItem from=\"1738400997305\" duration=\"12193000\" />\r\n      <workItem from=\"1738465288391\" duration=\"20532000\" />\r\n      <workItem from=\"1738552817007\" duration=\"35841000\" />\r\n      <workItem from=\"1738673646568\" duration=\"1424000\" />\r\n      <workItem from=\"1738676529600\" duration=\"3595000\" />\r\n      <workItem from=\"1738727679950\" duration=\"26743000\" />\r\n      <workItem from=\"1738813731373\" duration=\"56200000\" />\r\n      <workItem from=\"1738986011492\" duration=\"10678000\" />\r\n      <workItem from=\"1739072744751\" duration=\"10942000\" />\r\n      <workItem from=\"1739091128453\" duration=\"3202000\" />\r\n      <workItem from=\"1739094539357\" duration=\"5841000\" />\r\n      <workItem from=\"1739159373412\" duration=\"48678000\" />\r\n      <workItem from=\"1739416561583\" duration=\"32899000\" />\r\n      <workItem from=\"1739504997512\" duration=\"40825000\" />\r\n      <workItem from=\"1739612321784\" duration=\"10467000\" />\r\n      <workItem from=\"1739675233882\" duration=\"21142000\" />\r\n      <workItem from=\"1739700674876\" duration=\"1267000\" />\r\n      <workItem from=\"1739702523381\" duration=\"1598000\" />\r\n      <workItem from=\"1739849100860\" duration=\"9889000\" />\r\n      <workItem from=\"1739859293203\" duration=\"638000\" />\r\n      <workItem from=\"1739860319399\" duration=\"41931000\" />\r\n      <workItem from=\"1739964605433\" duration=\"3953000\" />\r\n      <workItem from=\"1740023765919\" duration=\"17061000\" />\r\n      <workItem from=\"1740044921396\" duration=\"1777000\" />\r\n      <workItem from=\"1740047813379\" duration=\"61878000\" />\r\n      <workItem from=\"1740280484644\" duration=\"25770000\" />\r\n      <workItem from=\"1740371892552\" duration=\"25999000\" />\r\n      <workItem from=\"1740462857266\" duration=\"14458000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00155\" summary=\"update invoice\">\r\n      <created>1739100350083</created>\r\n      <option name=\"number\" value=\"00155\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00155\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739100350083</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00156\" summary=\"update invoice\">\r\n      <created>1739100443856</created>\r\n      <option name=\"number\" value=\"00156\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00156\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739100443856</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00157\" summary=\"pass invoice details to main page\">\r\n      <created>1739162389832</created>\r\n      <option name=\"number\" value=\"00157\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00157\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739162389832</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00158\" summary=\"save or print invoice function\">\r\n      <created>1739162449190</created>\r\n      <option name=\"number\" value=\"00158\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00158\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739162449190</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00159\" summary=\"update accepting order checkbox\">\r\n      <created>1739169097150</created>\r\n      <option name=\"number\" value=\"00159\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00159\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739169097151</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00160\" summary=\"update frontend\">\r\n      <created>1739175656076</created>\r\n      <option name=\"number\" value=\"00160\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00160\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739175656076</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00161\" summary=\"update frontend running ports (Used Fixed ports)\">\r\n      <created>1739175993042</created>\r\n      <option name=\"number\" value=\"00161\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00161\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739175993042</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00162\" summary=\"update backend\">\r\n      <created>1739176084836</created>\r\n      <option name=\"number\" value=\"00162\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00162\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739176084836</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00163\" summary=\"update with booked unbooked\">\r\n      <created>1739179003371</created>\r\n      <option name=\"number\" value=\"00163\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00163\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739179003371</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00164\" summary=\"update pending order detail form\">\r\n      <created>1739184767446</created>\r\n      <option name=\"number\" value=\"00164\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00164\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739184767446</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00165\" summary=\"update accept order detail form\">\r\n      <created>1739186883390</created>\r\n      <option name=\"number\" value=\"00165\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00165\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739186883390</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00166\" summary=\"fixed update order issue\">\r\n      <created>1739263858784</created>\r\n      <option name=\"number\" value=\"00166\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00166\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739263858785</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00167\" summary=\"fixed delivery status error\">\r\n      <created>1739266755117</created>\r\n      <option name=\"number\" value=\"00167\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00167\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739266755117</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00168\" summary=\"fixed delivery status error\">\r\n      <created>1739274191387</created>\r\n      <option name=\"number\" value=\"00168\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00168\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739274191387</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00169\" summary=\"update with complete form\">\r\n      <created>1739421479223</created>\r\n      <option name=\"number\" value=\"00169\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00169\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739421479223</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00170\" summary=\"update with complete form\">\r\n      <created>1739430275750</created>\r\n      <option name=\"number\" value=\"00170\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00170\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739430275751</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00171\" summary=\"update with complete form\">\r\n      <created>1739431549266</created>\r\n      <option name=\"number\" value=\"00171\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00171\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739431549266</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00172\" summary=\"update with complete form\">\r\n      <created>1739432915525</created>\r\n      <option name=\"number\" value=\"00172\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00172\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739432915526</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00173\" summary=\"update saleteam details\">\r\n      <created>1739442917058</created>\r\n      <option name=\"number\" value=\"00173\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00173\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739442917059</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00174\" summary=\"update item save\">\r\n      <created>1739502971716</created>\r\n      <option name=\"number\" value=\"00174\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00174\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739502971716</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00175\" summary=\"finish item save api with view\">\r\n      <created>1739516598111</created>\r\n      <option name=\"number\" value=\"00175\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00175\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739516598112</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00176\" summary=\"update item save\">\r\n      <created>1739523210532</created>\r\n      <option name=\"number\" value=\"00176\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00176\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739523210533</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00177\" summary=\"update item save with supplier\">\r\n      <created>1739527149699</created>\r\n      <option name=\"number\" value=\"00177\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00177\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739527149699</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00178\" summary=\"update item detail with two pop up\">\r\n      <created>1739530878718</created>\r\n      <option name=\"number\" value=\"00178\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00178\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739530878718</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00179\" summary=\"update with adding new supplier to item\">\r\n      <created>1739535325041</created>\r\n      <option name=\"number\" value=\"00179\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00179\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739535325041</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00180\" summary=\"update with add stock api\">\r\n      <created>1739593997998</created>\r\n      <option name=\"number\" value=\"00180\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00180\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739593997998</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00181\" summary=\"update with add new supplier for item api\">\r\n      <created>1739611287192</created>\r\n      <option name=\"number\" value=\"00181\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00181\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739611287193</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00182\" summary=\"update item stock maintain\">\r\n      <created>1739618173782</created>\r\n      <option name=\"number\" value=\"00182\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00182\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739618173783</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00183\" summary=\"update other detail\">\r\n      <created>1739622837774</created>\r\n      <option name=\"number\" value=\"00183\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00183\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739622837774</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00184\" summary=\"update\">\r\n      <created>1739700314773</created>\r\n      <option name=\"number\" value=\"00184\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00184\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739700314774</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00185\" summary=\"update\">\r\n      <created>1739700359226</created>\r\n      <option name=\"number\" value=\"00185\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00185\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739700359226</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00186\" summary=\"update\">\r\n      <created>1739700507149</created>\r\n      <option name=\"number\" value=\"00186\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00186\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739700507149</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00187\" summary=\"update\">\r\n      <created>1739700877559</created>\r\n      <option name=\"number\" value=\"00187\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00187\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739700877560</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00188\" summary=\"update\">\r\n      <created>1739701380556</created>\r\n      <option name=\"number\" value=\"00188\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00188\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739701380556</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00189\" summary=\"update\">\r\n      <created>1739702879129</created>\r\n      <option name=\"number\" value=\"00189\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00189\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739702879129</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00190\" summary=\"update itemdetail (unfinished)\">\r\n      <created>1739859773533</created>\r\n      <option name=\"number\" value=\"00190\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00190\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739859773533</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00191\" summary=\"supplier view\">\r\n      <created>1739870138952</created>\r\n      <option name=\"number\" value=\"00191\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00191\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739870138953</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00192\" summary=\"update db\">\r\n      <created>1739937544577</created>\r\n      <option name=\"number\" value=\"00192\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00192\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739937544577</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00193\" summary=\"update view\">\r\n      <created>1739937728878</created>\r\n      <option name=\"number\" value=\"00193\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00193\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739937728878</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00194\" summary=\"update view\">\r\n      <created>1739937749891</created>\r\n      <option name=\"number\" value=\"00194\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00194\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739937749891</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00195\" summary=\"update\">\r\n      <created>1739937768944</created>\r\n      <option name=\"number\" value=\"00195\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00195\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739937768944</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00196\" summary=\"ad image\">\r\n      <created>1739937783067</created>\r\n      <option name=\"number\" value=\"00196\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00196\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739937783067</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00197\" summary=\"update\">\r\n      <created>1739941102202</created>\r\n      <option name=\"number\" value=\"00197\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00197\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739941102202</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00198\" summary=\"update view\">\r\n      <created>1739941404810</created>\r\n      <option name=\"number\" value=\"00198\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00198\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739941404810</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00199\" summary=\"update css\">\r\n      <created>1739948120477</created>\r\n      <option name=\"number\" value=\"00199\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00199\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739948120477</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00200\" summary=\"update view\">\r\n      <created>1739948142438</created>\r\n      <option name=\"number\" value=\"00200\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00200\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739948142438</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00201\" summary=\"update db\">\r\n      <created>1739948160588</created>\r\n      <option name=\"number\" value=\"00201\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00201\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739948160589</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00202\" summary=\"update db\">\r\n      <created>1739959266711</created>\r\n      <option name=\"number\" value=\"00202\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00202\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739959266711</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00203\" summary=\"update calculate\">\r\n      <created>1739959764374</created>\r\n      <option name=\"number\" value=\"00203\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00203\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1739959764374</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"236\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <option name=\"ADD_EXTERNAL_FILES_SILENTLY\" value=\"true\" />\r\n    <MESSAGE value=\"update other detail with api\" />\r\n    <MESSAGE value=\"update itemdetail (unfinished)\" />\r\n    <MESSAGE value=\"supplier view\" />\r\n    <MESSAGE value=\"update with api\" />\r\n    <MESSAGE value=\"ad image\" />\r\n    <MESSAGE value=\"update css\" />\r\n    <MESSAGE value=\"update view\" />\r\n    <MESSAGE value=\"update db\" />\r\n    <MESSAGE value=\"update api\" />\r\n    <MESSAGE value=\"modify errores\" />\r\n    <MESSAGE value=\"update calculate\" />\r\n    <MESSAGE value=\"update some bugs\" />\r\n    <MESSAGE value=\"add final invoice\" />\r\n    <MESSAGE value=\"add delivery note view\" />\r\n    <MESSAGE value=\"update final invoice\" />\r\n    <MESSAGE value=\"update item(add new colun)\" />\r\n    <MESSAGE value=\"remove unwanted console log\" />\r\n    <MESSAGE value=\"bug fixing\" />\r\n    <MESSAGE value=\"update with issued\" />\r\n    <MESSAGE value=\"update with item stock\" />\r\n    <MESSAGE value=\"update delivery side\" />\r\n    <MESSAGE value=\"update delivery side api\" />\r\n    <MESSAGE value=\"rename file name\" />\r\n    <MESSAGE value=\"change file place\" />\r\n    <MESSAGE value=\"update\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"update\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 4e1bae508fa6bbb569d9b20e45b4ab1e98edab8b)
++++ b/.idea/workspace.xml	(date 1740540675846)
+@@ -6,8 +6,8 @@
+   <component name="ChangeListManager">
+     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -82,7 +82,7 @@
+       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
+     </key>
+   </component>
+-  <component name="RunManager" selected="npm.start adminBackend">
++  <component name="RunManager" selected="npm.start admin">
+     <configuration name="start admin" type="js.build_tools.npm">
+       <package-json value="$PROJECT_DIR$/admin/package.json" />
+       <command value="run" />
+@@ -193,7 +193,7 @@
+       <workItem from="1740047813379" duration="61878000" />
+       <workItem from="1740280484644" duration="25770000" />
+       <workItem from="1740371892552" duration="25999000" />
+-      <workItem from="1740462857266" duration="14458000" />
++      <workItem from="1740462857266" duration="16158000" />
+     </task>
+     <task id="LOCAL-00155" summary="update invoice">
+       <created>1739100350083</created>
+@@ -538,7 +538,7 @@
+       <option name="project" value="LOCAL" />
+       <updated>1739959764374</updated>
+     </task>
+-    <option name="localTasksCounter" value="236" />
++    <option name="localTasksCounter" value="237" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">

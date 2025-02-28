@@ -5,6 +5,7 @@ import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import TableAllItem from "../components/tables/TableAllItem";
 import AddDeliveryShedule from "./AddDeliveryShedule";
+import TableAllDelivery from "../components/tables/TableAllDelivery";
 
 
 const AllDelivery = () => {
@@ -33,6 +34,14 @@ const AllDelivery = () => {
                                 className={activeTab === "2" ? "active" : ""}
                                 onClick={() => setActiveTab("2")}
                             >
+                                Delivery Notes
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={activeTab === "3" ? "active" : ""}
+                                onClick={() => setActiveTab("3")}
+                            >
                                 Add Scheduled Dates
                             </NavLink>
                         </NavItem>
@@ -43,10 +52,17 @@ const AllDelivery = () => {
                         {/* First Tab - Table */}
                         <TabPane tabId="1">
                             <Row>
-                                {/*<TableAllItem />*/}
+                                <TableAllDelivery />
                             </Row>
                         </TabPane>
                         <TabPane tabId="2">
+                            <Row>
+                                <Col>
+                                    <AddDeliveryShedule />
+                                </Col>
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="3">
                             <Row>
                                 <Col>
                                     <AddDeliveryShedule />
