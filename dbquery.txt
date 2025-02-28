@@ -256,4 +256,15 @@ CREATE TABLE m_s_r_detail(
     CONSTRAINT FOREIGN KEY (sr_ID) REFERENCES main_stock_received (sr_ID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE delivery_note(
+    delNoID INT AUTO_INCREMENT PRIMARY KEY,
+    driverName VARCHAR(25),
+    vehicalName VARCHAR(25),
+    date DATE,
+    hire DOUBLE
+);
+CREATE TABLE delivery_note_orders(
+    delNoID INT,
+    orID VARCHAR(25)
+);
 

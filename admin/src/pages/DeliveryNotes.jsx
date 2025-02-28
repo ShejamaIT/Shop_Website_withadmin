@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {Container, Row, Col, Form, FormGroup, Label, Input, Button, Table} from "reactstrap";
+import { Container, Row, Col, Form, FormGroup, Label, Input, Button, Table } from "reactstrap";
 import { toast } from "react-toastify";
 import "../style/deliverynotes.css";
-import FinalInvoice from "./FinalInvoice";
 import ReceiptView from "./ReceiptView";
 import MakeDeliveryNote from "./MakeDeliveryNote";
+import DeliveryNoteView from "./DeliveryNoteView";
 
 const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);
@@ -18,6 +18,56 @@ const DeliveryNotes = () => {
     const [showModal2, setShowModal2] = useState(false);
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
+
+    const handleSubmit2 = async (formData) => {
+        try {
+            const updatedReceiptData = {
+                orders: selectedOrders,
+                vehicleId: formData.vehicleId,
+                driverName: formData.driverName,
+                hire:formData.hire,
+                balanceToCollect: formData.balanceToCollect,
+                selectedDeliveryDate: selectedDeliveryDate,
+            };
+
+            // Prepare the data for API call (including necessary fields)
+            const deliveryNoteData = {
+                driverName: formData.driverName,
+                vehicleName: formData.vehicleId,  // Assuming vehicleId maps to vehicleName
+                hire:formData.hire,
+                date: selectedDeliveryDate,  // The selected delivery date
+                orderIds: selectedOrders.map(order => order.orId),  // Extracting order IDs
+            };
+
+            // Make the API call to create a delivery note and save the orders
+            const response = await fetch("http://localhost:5001/api/admin/main/create-delivery-note", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(deliveryNoteData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Optionally, set the receipt data
+                setReceiptData(updatedReceiptData);
+                setShowModal2(false);
+                setShowReceiptView(true);
+                // Show success message to the user
+                toast.success("Delivery note created successfully.");
+            } else {
+                // Handle errors from the API
+                console.error("Error creating delivery note:", data.message);
+                toast.error(data.message || "Error creating delivery note.");
+            }
+
+        } catch (error) {
+            console.error("Error submitting form data:", error);
+            toast.error("An unexpected error occurred while submitting the delivery note.");
+        }
+    };
 
     useEffect(() => {
         fetchRoutes();
@@ -37,7 +87,6 @@ const DeliveryNotes = () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/find-issued-orders?district=${routeId}`);
             const data = await response.json();
-            console.log(data);
             setOrders(data.orders || []);
         } catch (error) {
             toast.error("Error fetching orders.");
@@ -86,60 +135,9 @@ const DeliveryNotes = () => {
 
     const handleEditClick3 = (selectedOrders) => {
         if (!selectedOrders) return;
-        console.log(selectedOrders);
         setSelectedOrders(selectedOrders);
         setShowModal2(true);
     };
-    const handleSubmit2 = async (formData) => {
-        console.log(formData);
-        setShowModal2(false);
-
-        // const updatedData = {
-        //     orID: order.orderId,
-        //     delStatus: formData.deliveryStatus,
-        //     delPrice: formData.delivery,
-        //     discount: order.discount,
-        //     subtotal: formData.subtotal,
-        //     total: formData.billTotal,
-        //     advance: formData.totalAdvance,
-        //     payStatus: formData.paymentType,
-        //     stID: order.saleID,
-        //     paymentAmount: formData.addedAdvance,
-        //     selectedItems: formData.selectedItems,
-        //     balance: formData.billTotal - formData.totalAdvance, // assuming balance calculation
-        //     salesperson: order.salesTeam.employeeName,
-        //     items: order.items,
-        // };
-        //
-        // try {
-        //     // Make API request to the /isssued-order endpoint
-        //     const response = await fetch('http://localhost:5001/api/admin/main/isssued-order', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify(updatedData),
-        //     });
-        //
-        //     const result = await response.json();
-        //
-        //     if (response.ok) {
-        //         // Successfully updated
-        //         console.log("Order updated successfully:", result.message);
-        //         // Optionally, handle success, e.g., navigate or show a success message
-        //         setReceiptData(updatedData);  // Set data for receipt
-        //         setShowReceiptView(true);         // Show receipt view
-        //     } else {
-        //         // Handle error response
-        //         console.error("Error:", result.message);
-        //         // Optionally, show error message to the user
-        //     }
-        // } catch (error) {
-        //     console.error("Error making API request:", error.message);
-        //     // Handle network error, show error message to the user
-        // }
-    };
-
 
     return (
         <Container className="delivery-notes-container">
@@ -156,64 +154,62 @@ const DeliveryNotes = () => {
                                 ))}
                             </Input>
                         </FormGroup>
-                    {/* Delivery Date Dropdown */}
-                    {deliveryDates.length > 0 ? (
-                        <div>
-                            <FormGroup>
-                                <Label for="deliveryDateSelect">Select Delivery Date</Label>
-                                <Input
-                                    type="select"
-                                    id="deliveryDateSelect"
-                                    value={selectedDeliveryDate} // Add state to track selected date
-                                    onChange={(e) => setSelectedDeliveryDate(e.target.value)} // Update selected date on change
-                                >
-                                    <option value="">-- Select Date --</option>
-                                    {deliveryDates.map((date, index) => (
-                                        <option key={index} value={new Date(date).toLocaleDateString()}>
-                                            {new Date(date).toLocaleDateString()}
-                                        </option>
-                                    ))}
-                                </Input>
-                            </FormGroup>
-                            {orders.length > 0 && (
-                                <Table bordered responsive className="order-table">
-                                    <thead>
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Total</th>
-                                        <th>Advance</th>
-                                        <th>Balance</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {orders.map(order => (
-                                        <tr key={order.id}>
-                                            <td>
-                                                <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
-                                            </td>
-                                            <td>{order.orId}</td>
-                                            <td>{order.custName}</td>
-                                            <td>Rs.{order.total}</td>
-                                            <td>Rs.{order.advance}</td>
-                                            <td>Rs.{order.balance}</td>
+                        {/* Delivery Date Dropdown */}
+                        {deliveryDates.length > 0 ? (
+                            <div>
+                                <FormGroup>
+                                    <Label for="deliveryDateSelect">Select Delivery Date</Label>
+                                    <Input
+                                        type="select"
+                                        id="deliveryDateSelect"
+                                        value={selectedDeliveryDate} // Add state to track selected date
+                                        onChange={(e) => setSelectedDeliveryDate(e.target.value)} // Update selected date on change
+                                    >
+                                        <option value="">-- Select Date --</option>
+                                        {deliveryDates.map((date, index) => (
+                                            <option key={index} value={new Date(date).toLocaleDateString()}>
+                                                {new Date(date).toLocaleDateString()}
+                                            </option>
+                                        ))}
+                                    </Input>
+                                </FormGroup>
+                                {orders.length > 0 && (
+                                    <Table bordered responsive className="order-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Total</th>
+                                            <th>Advance</th>
+                                            <th>Balance</th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </Table>
-                            )}
-
-                        </div>
-                    ) : (
-                        <p className="mt-4 text-danger">{noScheduleMessage}</p>
-                    )}
+                                        </thead>
+                                        <tbody>
+                                        {orders.map(order => (
+                                            <tr key={order.id}>
+                                                <td>
+                                                    <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
+                                                </td>
+                                                <td>{order.orId}</td>
+                                                <td>{order.custName}</td>
+                                                <td>Rs.{order.total}</td>
+                                                <td>Rs.{order.advance}</td>
+                                                <td>Rs.{order.balance}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </Table>
+                                )}
+                            </div>
+                        ) : (
+                            <p className="mt-4 text-danger">{noScheduleMessage}</p>
+                        )}
                         <h5 className="text-end mt-3">Total Balance: Rs.{totalAmount}</h5>
                     </Form>
 
-
                     <div className="text-center mt-4">
-                        <Button color="primary" onClick={() => handleEditClick3(selectedOrders)} >Get Delivery Note</Button>
+                        <Button color="primary" onClick={() => handleEditClick3(selectedOrders)}>Get Delivery Note</Button>
                     </div>
                     {showModal2 && selectedOrders && (
                         <MakeDeliveryNote
@@ -223,7 +219,7 @@ const DeliveryNotes = () => {
                         />
                     )}
                     {showReceiptView && (
-                        <ReceiptView
+                        <DeliveryNoteView
                             receiptData={receiptData}
                             setShowReceiptView={setShowReceiptView}
                         />

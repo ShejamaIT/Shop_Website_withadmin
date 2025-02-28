@@ -55,6 +55,19 @@ p {
     margin: 0.5rem 0;
     color: #333;
 }
+.delivery-note-info {
+    display: flex;            /* Use flexbox to align items on one line */
+    flex-wrap: wrap;          /* Allow wrapping if there's not enough space */
+    justify-content: flex-start; /* Align items to the left */
+    gap: 15px;                /* Space between items */
+    margin-bottom: 15px;      /* Space below the info */
+}
+
+.delivery-note-info p {
+    margin: 0;                /* Remove margin for <p> elements to keep the layout tight */
+    display: inline;          /* Ensure <p> elements stay inline */
+}
+
 
 .modal-buttons {
     display: flex;

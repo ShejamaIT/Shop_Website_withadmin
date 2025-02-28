@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-// import "../style/finalInvoice.css";
 import "../style/deleiverynote.css";
-import { Button, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { toast } from "react-toastify";
 
 const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }) => {
     const [vehicleId, setVehicleId] = useState("");
     const [driverName, setDriverName] = useState("");
+    const [hire, setHire] = useState("");
     const [balanceToCollect, setBalanceToCollect] = useState(0);
     const [ordersWithBalance, setOrdersWithBalance] = useState([]);
 
@@ -23,13 +22,14 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
     }, [ordersWithBalance]);
 
     const handlePrintAndSubmit = () => {
-        if (balanceToCollect > 0 && (vehicleId === "" || driverName === "")) {
+        if (balanceToCollect > 0 && (vehicleId === "" || driverName === "" || hire === "")) {
             toast.error("Please provide vehicle ID and driver name before submitting the delivery note.");
         } else {
             handleDeliveryUpdate({
                 orders: selectedOrders,
                 vehicleId,
                 driverName,
+                hire,
                 balanceToCollect,
             });
         }
@@ -89,26 +89,39 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
 
                 {/* Vehicle and Driver Info */}
                 <div className="delivery-details">
-                    <div className="vehicle-info">
-                        <label><strong>Vehicle ID:</strong></label>
-                        <input
-                            type="text"
-                            value={vehicleId}
-                            onChange={(e) => setVehicleId(e.target.value)}
-                            placeholder="Enter vehicle ID"
-                        />
-                    </div>
+                    <div className="input-group">
+                        <div className="vehicle-info">
+                            <label><strong>Vehicle ID:</strong></label>
+                            <input
+                                type="text"
+                                value={vehicleId}
+                                onChange={(e) => setVehicleId(e.target.value)}
+                                placeholder="Enter vehicle ID"
+                            />
+                        </div>
 
-                    <div className="driver-info">
-                        <label><strong>Driver Name:</strong></label>
-                        <input
-                            type="text"
-                            value={driverName}
-                            onChange={(e) => setDriverName(e.target.value)}
-                            placeholder="Enter driver's name"
-                        />
+                        <div className="driver-info">
+                            <label><strong>Driver Name:</strong></label>
+                            <input
+                                type="text"
+                                value={driverName}
+                                onChange={(e) => setDriverName(e.target.value)}
+                                placeholder="Enter driver's name"
+                            />
+                        </div>
+
+                        <div className="hire-info">
+                            <label><strong>Hire:</strong></label>
+                            <input
+                                type="text"
+                                value={hire}
+                                onChange={(e) => setHire(e.target.value)}
+                                placeholder="Enter hire value"
+                            />
+                        </div>
                     </div>
                 </div>
+
 
                 {/* Action Buttons */}
                 <div className="modal-buttons">
