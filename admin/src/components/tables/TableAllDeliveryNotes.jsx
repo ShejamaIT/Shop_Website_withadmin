@@ -40,6 +40,9 @@ const TableAllDeliveryNotes= () => {
             .toString()
             .padStart(2, "0")}-${date.getFullYear()}`;
     };
+    const handleView = (delNoID) => {
+        navigate(`/deliveryNote-detail/${delNoID}`); // Navigate to OrderDetails page
+    };
     return (
         <div className="table-container">
             <h4 className="table-title">All Deliveries</h4>
@@ -52,6 +55,7 @@ const TableAllDeliveryNotes= () => {
                         <th>Delivery Date</th>
                         <th>Driver Name</th>
                         <th>District</th>
+                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -74,6 +78,14 @@ const TableAllDeliveryNotes= () => {
                                 <td>{formatDate(delivery.date)}</td>
                                 <td>{delivery.driverName}</td>
                                 <td>{delivery.district}</td>
+                                <td className="action-buttons">
+                                    <button
+                                        className="view-btn"
+                                         onClick={() => handleView(delivery.delNoID)}
+                                    >
+                                        👁️
+                                    </button>
+                                </td>
                             </tr>
                         ))
                     )}

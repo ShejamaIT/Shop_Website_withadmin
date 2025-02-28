@@ -39,6 +39,7 @@ const DeliveryNotes = () => {
                 date: selectedDeliveryDate,  // The selected delivery date
                 orderIds: selectedOrders.map(order => order.orId),  // Extracting order IDs
                 district: selectedRoute,
+                balanceToCollect: formData.balanceToCollect,
             };
             console.log(updatedReceiptData);
             console.log(deliveryNoteData);

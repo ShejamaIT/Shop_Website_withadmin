@@ -381,11 +381,8 @@ const OrderDetails = () => {
                                                     value={formData.orderStatus}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="Pending">Pending</option>
-                                                    <option value="Accepted">Accepted</option>
-                                                    <option value="Processing">Processing</option>
-                                                    <option value="Completed">Completed</option>
-                                                    <option value="Cancelled">Cancelled</option>
+                                                    <option value="Pending">Pending</option><option value="Accepted">Accepted</option>
+                                                    <option value="Processing">Processing</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
@@ -402,8 +399,7 @@ const OrderDetails = () => {
                                                     value={formData.deliveryStatus}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="Delivery">Delivery</option>
-                                                    <option value="Pick up">Pick up</option>
+                                                    <option value="Delivery">Delivery</option><option value="Pick up">Pick up</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
@@ -422,11 +418,8 @@ const OrderDetails = () => {
                                                     value={formData.payStatus}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="Pending">Pending</option>
-                                                    <option value="Advanced">Advanced</option>
-                                                    <option value="Settled">Settled</option>
-                                                    <option value="COD">COD</option>
-                                                    <option value="Credit">Credit</option>
+                                                    <option value="Pending">Pending</option><option value="Advanced">Advanced</option>
+                                                    <option value="Settled">Settled</option><option value="COD">COD</option><option value="Credit">Credit</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
@@ -471,10 +464,7 @@ const OrderDetails = () => {
                                                     <FormGroup>
                                                         <Label><strong>Address:</strong></Label>
                                                         <Input
-                                                            type="text"
-                                                            name="address"
-                                                            value={formData.deliveryInfo.address ?? order.deliveryInfo.address}
-                                                            onChange={handleChange}
+                                                            type="text" name="address" value={formData.deliveryInfo.address ?? order.deliveryInfo.address} onChange={handleChange}
                                                         />
                                                     </FormGroup>
                                                 )}
@@ -484,10 +474,7 @@ const OrderDetails = () => {
                                                     <FormGroup>
                                                         <Label><strong>District:</strong></Label>
                                                         <Input
-                                                            type="text"
-                                                            name="district"
-                                                            value={formData.deliveryInfo.district ?? order.deliveryInfo.district}
-                                                            onChange={handleChange}
+                                                            type="text" name="district" value={formData.deliveryInfo.district ?? order.deliveryInfo.district} onChange={handleChange}
                                                         />
                                                     </FormGroup>
                                                 )}
@@ -512,10 +499,7 @@ const OrderDetails = () => {
                                                     <FormGroup check>
                                                         <Label check>
                                                             <Input
-                                                                type="checkbox"
-                                                                name="booked"
-                                                                checked={formData.items[index]?.booked || false}
-                                                                onChange={(e) => handleChange(e, index)}
+                                                                type="checkbox" name="booked" checked={formData.items[index]?.booked || false} onChange={(e) => handleChange(e, index)}
                                                             />
                                                             Mark as Booked
                                                         </Label>
@@ -540,10 +524,7 @@ const OrderDetails = () => {
                                         <FormGroup>
                                             <Label><strong>Discount Price:</strong></Label>
                                             <Input
-                                                type="text"
-                                                name="discount"
-                                                value={formData.discount ?? order.discount}
-                                                onChange={handleChange}
+                                                type="text" name="discount" value={formData.discount ?? order.discount} onChange={handleChange}
                                             />
                                         </FormGroup>
                                     )}
@@ -557,10 +538,7 @@ const OrderDetails = () => {
                                             <FormGroup>
                                                 <Label><strong>Delivery Amount:</strong></Label>
                                                 <Input
-                                                    type="text"
-                                                    name="deliveryCharge"
-                                                    value={formData.deliveryCharge ?? order.deliveryCharge}
-                                                    onChange={handleChange}
+                                                    type="text" name="deliveryCharge" value={formData.deliveryCharge ?? order.deliveryCharge} onChange={handleChange}
                                                 />
                                             </FormGroup>
                                         )

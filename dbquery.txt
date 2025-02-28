@@ -263,7 +263,8 @@ CREATE TABLE delivery_note(
     date DATE,
     hire DOUBLE,
     district VARCHAR(35),
-    balanceToCollect DOUBLE
+    balanceToCollect DOUBLE,
+    status VARCHAR(15)
 );
 CREATE TABLE delivery_note_orders(
     delNoID INT,

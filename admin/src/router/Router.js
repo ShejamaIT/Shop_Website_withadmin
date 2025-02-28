@@ -19,6 +19,7 @@ import SaleteamDetail  from "../pages/SaleteamDetail";
 import AllSuppliers from "../pages/AllSuppliers";
 import AllDelivery from "../pages/AllDelivery";
 import IssuedOrderDetails from "../pages/IssuedOrder";
+import DeliveryNoteDetails from "../pages/DeliveryNoteDetails";
 const Router = () => {
     return(
         <Routes>
@@ -38,6 +39,7 @@ const Router = () => {
             <Route path="order-detail/:id" element={<OrderDetails />} />
             <Route path="accept-order-detail/:id" element={<AccepetOrderDetails />} />
             <Route path="issued-order-detail/:id" element={<IssuedOrderDetails />} />
+            <Route path="deliveryNote-detail/:id" element={<DeliveryNoteDetails />} />
             <Route path="complete-order-detail/:id" element={<CompleteOrderDetails />} />
             <Route path="item-detail/:id" element={<ItemDetails />} />
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />
