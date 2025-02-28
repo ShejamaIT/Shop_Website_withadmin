@@ -169,7 +169,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
                         const parsedUnitCost = parseFloat(unit_cost) || 0;
                         await db.query(
                             `INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
-                            VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)`,
+                             VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)`,
                             [I_Id, s_ID, parsedUnitCost]
                         );
                     }
@@ -385,6 +385,35 @@ router.get("/allitems", async (req, res) => {
     }
 });
 
+// Get all deliveries
+router.get("/alldeliveries", async (req, res) => {
+    try {
+        // Query the database to fetch all items
+        const [deliveries] = await db.query("SELECT * FROM delivery");
+
+        // If no items found, return a 404 status
+        if (deliveries.length === 0) {
+            return res.status(404).json({ message: "No deliveries found" });
+        }
+
+        // Format the items data
+        const formattedDeliveries = deliveries.map(delivery => ({
+            dv_id: delivery.dv_id,
+            orID: delivery.orID,
+            district: delivery.district,
+            status: delivery.status,
+            schedule_Date: delivery.schedule_Date,
+            delivery_Date: delivery.delivery_Date,
+        }));
+
+        // Send the formatted items as a JSON response
+        return res.status(200).json(formattedDeliveries);
+    } catch (error) {
+        console.error("Error fetching deliveries:", error.message);
+        return res.status(500).json({ message: "Error fetching deliveries" });
+    }
+});
+
 //add a new supplier and items
 router.post("/supplier", async (req, res) => {
     const { name, contact, contact2, address} = req.body;
@@ -580,8 +609,8 @@ router.get("/issued-order-details", async (req, res) => {
                 o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype, o.stID,
                 o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
-            LEFT JOIN sales_team s ON o.stID = s.stID
-            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+                     LEFT JOIN sales_team s ON o.stID = s.stID
+                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
             WHERE o.OrID = ?`;
 
         const [orderResult] = await db.query(orderQuery, [orID]);
@@ -596,7 +625,7 @@ router.get("/issued-order-details", async (req, res) => {
                 od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
                 i.bookedQty, i.availableQty
             FROM Order_Detail od
-            JOIN Item i ON od.I_Id = i.I_Id
+                     JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
@@ -606,7 +635,7 @@ router.get("/issued-order-details", async (req, res) => {
             SELECT
                 m.I_Id, i.I_name, m.stock_Id, m.sr_ID, m.barcode, m.status, m.datetime
             FROM m_s_r_detail m
-            JOIN Item i ON m.I_Id = i.I_Id
+                     JOIN Item i ON m.I_Id = i.I_Id
             WHERE m.orID = ?`;
 
         const [issuedItemsResult] = await db.query(issuedItemsQuery, [orID]);
@@ -701,7 +730,7 @@ router.get("/order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.orStatus, o.delStatus,
-                o.delPrice, o.discount, o.total, o.advance , o.balance, o.payStatus, o.expectedDate, 
+                o.delPrice, o.discount, o.total, o.advance , o.balance, o.payStatus, o.expectedDate,
                 o.specialNote, o.ordertype, s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN sales_team s ON o.stID = s.stID
@@ -983,13 +1012,13 @@ router.get("/orders-accepting", async (req, res) => {
     try {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
-            SELECT 
-                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice, 
+            SELECT
+                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
-                ao.itemReceived, 
+                ao.itemReceived,
                 ao.status AS acceptanceStatus
             FROM Orders o
-            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             WHERE o.orStatus = 'Accepted'
         `;
 
@@ -1057,11 +1086,11 @@ router.get("/orders-completed", async (req, res) => {
         const query = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
-                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate, 
-                ao.itemReceived, 
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived,
                 ao.status AS acceptanceStatus
             FROM Orders o
-            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             WHERE o.orStatus = 'Completed'
         `;
 
@@ -1129,11 +1158,11 @@ router.get("/orders-issued", async (req, res) => {
         const query = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
-                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate, 
-                ao.itemReceived, 
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived,
                 ao.status AS acceptanceStatus
             FROM Orders o
-            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             WHERE o.orStatus = 'Issued'
         `;
 
@@ -1389,7 +1418,7 @@ router.get("/item-detail", async (req, res) => {
 
         // Step 1: Fetch Item details
         const itemQuery = `
-            SELECT 
+            SELECT
                 I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty,I.bookedQty,I.availableQty,
                 I.warrantyPeriod, I.img
             FROM Item I
@@ -1457,9 +1486,9 @@ router.get("/getcategory", async (req, res) => {
 
     // SQL query to join Category and subCat_one based on category name
     const sql = `
-        SELECT sc.sb_c_id, sc.subcategory, sc.img, c.name AS category 
+        SELECT sc.sb_c_id, sc.subcategory, sc.img, c.name AS category
         FROM subCat_one sc
-        INNER JOIN Category c ON sc.Ca_Id = c.Ca_Id
+                 INNER JOIN Category c ON sc.Ca_Id = c.Ca_Id
         WHERE c.name = ?
     `;
 
@@ -1552,7 +1581,7 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
         let lastStockId = lastStockResult[0]?.lastStockId || 0;
 
         const insertDetailQuery = `
-            INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode,status,orID,datetime) 
+            INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode,status,orID,datetime)
             VALUES (?, ?, ?, ?,'Available','','')`;
         console.log(insertDetailQuery);
 
@@ -1718,11 +1747,11 @@ router.get("/orders-accept", async (req, res) => {
         const query = `
             SELECT
                 o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
-                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate, 
-                ao.itemReceived, 
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived,
                 ao.status AS acceptanceStatus
             FROM Orders o
-            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             WHERE o.orStatus = 'Accepted'
         `;
 
@@ -1987,22 +2016,22 @@ router.get("/salesteam", async (req, res) => {
     try {
         // Query the database to fetch all sales team members
         const [salesTeam] = await db.query(`
-            SELECT 
-                st.stID, 
-                st.orderTarget, 
-                st.issuedTarget, 
+            SELECT
+                st.stID,
+                st.orderTarget,
+                st.issuedTarget,
                 st.totalOrder,
                 st.totalIssued,
-                e.E_Id, 
-                e.name AS employeeName, 
-                e.address, 
-                e.nic, 
-                e.dob, 
-                e.contact, 
-                e.job, 
+                e.E_Id,
+                e.name AS employeeName,
+                e.address,
+                e.nic,
+                e.dob,
+                e.contact,
+                e.job,
                 e.basic
             FROM sales_team st
-            JOIN Employee e ON st.E_Id = e.E_Id;
+                     JOIN Employee e ON st.E_Id = e.E_Id;
         `);
 
         // If no sales team members found, return a 404 status
@@ -2046,8 +2075,8 @@ router.get("/orders/by-sales-team", async (req, res) => {
         console.log(stID);
 
         const [results] = await db.query(`
-            SELECT 
-                e.name AS employeeName, 
+            SELECT
+                e.name AS employeeName,
                 e.contact AS employeeContact,
                 e.nic AS employeeNic,
                 e.dob AS employeeDob,
@@ -2059,19 +2088,19 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 st.issuedTarget,
                 st.totalOrder,
                 st.totalIssued,
-                COUNT(o.OrID) AS totalCount, 
+                COUNT(o.OrID) AS totalCount,
                 SUM(CASE WHEN o.orStatus = 'issued' THEN 1 ELSE 0 END) AS issuedCount,
-                COALESCE(SUM(o.total), 0) AS totalOrderValue, 
+                COALESCE(SUM(o.total), 0) AS totalOrderValue,
                 COALESCE(SUM(CASE WHEN o.orStatus = 'issued' THEN o.total ELSE 0 END), 0) AS issuedOrderValue,
                 o.OrID AS orderId,
                 o.orDate AS orderDate,
                 o.total AS totalPrice,
                 o.orStatus AS orderStatus
             FROM sales_team st
-            JOIN Employee e ON e.E_Id = st.E_Id
-            LEFT JOIN Orders o ON o.stID = st.stID
+                     JOIN Employee e ON e.E_Id = st.E_Id
+                     LEFT JOIN Orders o ON o.stID = st.stID
             WHERE st.stID = ?
-            GROUP BY st.stID, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic, 
+            GROUP BY st.stID, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic,
                      st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued, o.OrID, o.orDate, o.total, o.orStatus;
         `, [stID]);
 
@@ -2155,7 +2184,7 @@ router.get("/types", async (req, res) => {
 
         // Fetch subCat_one and related subCat_two details for the given Ca_Id
         const [subCategories] = await db.query(`
-            SELECT 
+            SELECT
                 s1.sb_c_id AS subCatOneId,
                 s1.subcategory AS subCatOneName,
                 s1.img AS subCatOneImg,
@@ -2163,7 +2192,7 @@ router.get("/types", async (req, res) => {
                 s2.subcategory AS subCatTwoName,
                 s2.img AS subCatTwoImg
             FROM subCat_one s1
-            LEFT JOIN subCat_two s2 ON s1.sb_c_id = s2.sb_c_id
+                     LEFT JOIN subCat_two s2 ON s1.sb_c_id = s2.sb_c_id
             WHERE s1.Ca_Id = ?;
         `, [Ca_Id]);
 
@@ -2232,7 +2261,7 @@ router.get("/typesname", async (req, res) => {
 
         // Fetch subCat_one and related subCat_two details for the given Ca_Id
         const [subCategories] = await db.query(`
-            SELECT 
+            SELECT
                 s1.sb_c_id AS subCatOneId,
                 s1.subcategory AS subCatOneName,
                 s1.img AS subCatOneImg,
@@ -2240,7 +2269,7 @@ router.get("/typesname", async (req, res) => {
                 s2.subcategory AS subCatTwoName,
                 s2.img AS subCatTwoImg
             FROM subCat_one s1
-            LEFT JOIN subCat_two s2 ON s1.sb_c_id = s2.sb_c_id
+                     LEFT JOIN subCat_two s2 ON s1.sb_c_id = s2.sb_c_id
             WHERE s1.Ca_Id = ?;
         `, [Ca_Id]);
 
@@ -2462,18 +2491,18 @@ router.get("/find-issued-orders", async (req, res) => {
 
         // Query the database to fetch orders with matching district and status "issued"
         const [orders] = await db.query(`
-            SELECT 
+            SELECT
                 o.orId,
-                O.custName, 
-                O.contact1, 
-                O.contact2, 
-                D.address, 
-                O.total, 
-                O.advance, 
+                O.custName,
+                O.contact1,
+                O.contact2,
+                D.address,
+                O.total,
+                O.advance,
                 O.balance,
                 o.city
             FROM Orders O
-            JOIN delivery D ON O.OrID = D.orID
+                     JOIN delivery D ON O.OrID = D.orID
             WHERE D.district = ? AND O.orStatus = 'Issued';
         `, [district]);
 
@@ -2686,9 +2715,9 @@ router.post("/add-supplier-item", async (req, res) => {
 
         // Query to insert the supplier item
         const query = `
-            INSERT INTO item_supplier (I_Id, s_ID, unit_cost) 
+            INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
             VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)
+                ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)
         `;
 
         await db.query(query, [I_Id, s_ID, unit_cost]);
@@ -2704,14 +2733,14 @@ router.post("/add-supplier-item", async (req, res) => {
 router.get("/coupon-details", async (req, res) => {
     try {
         const query = `
-            SELECT 
+            SELECT
                 sc.cpID AS coupon_code,
                 sc.discount,
                 st.stID AS sales_team_id,
                 e.name AS employee_name
             FROM sales_coupon sc
-            JOIN sales_team st ON sc.stID = st.stID
-            JOIN Employee e ON st.E_Id = e.E_Id
+                     JOIN sales_team st ON sc.stID = st.stID
+                     JOIN Employee e ON st.E_Id = e.E_Id
         `;
 
         const [results] = await db.query(query);
@@ -2931,12 +2960,12 @@ router.post("/isssued-order", async (req, res) => {
     if (!orID || !stID || paymentAmount === undefined || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
-     const IssuedPrice = parseFloat(subtotal) - parseFloat(discount);
+    const IssuedPrice = parseFloat(subtotal) - parseFloat(discount);
 
     try {
         // 1. Update Orders table
         await db.query(
-            `UPDATE Orders 
+            `UPDATE Orders
              SET delStatus = ?, orStatus = 'Issued', delPrice = ?, discount = ?, total = ?, advance = ?, balance = ?, payStatus = ?, stID = ?
              WHERE OrID = ?`,
             [delStatus, delPrice, discount, total, advance, balance, payStatus, stID, orID]
@@ -2945,8 +2974,8 @@ router.post("/isssued-order", async (req, res) => {
         // 2. Update m_s_r_detail table (Mark selected items as issued)
         for (const item of selectedItems) {
             await db.query(
-                `UPDATE m_s_r_detail 
-                 SET status = 'Issued', orID = ?, datetime = NOW() 
+                `UPDATE m_s_r_detail
+                 SET status = 'Issued', orID = ?, datetime = NOW()
                  WHERE srd_Id = ?`,
                 [orID, item.srd_Id]
             );
@@ -2954,8 +2983,8 @@ router.post("/isssued-order", async (req, res) => {
 
         // 3. Update sales_team table
         await db.query(
-            `UPDATE sales_team 
-             SET totalIssued = totalIssued + ? 
+            `UPDATE sales_team
+             SET totalIssued = totalIssued + ?
              WHERE stID = ?`,
             [IssuedPrice, stID]
         );
@@ -2968,7 +2997,7 @@ router.post("/isssued-order", async (req, res) => {
 
         for (const item of orderItems) {
             await db.query(
-                `UPDATE Item 
+                `UPDATE Item
                  SET stockQty = stockQty - ?, bookedQty = bookedQty - ?
                  WHERE I_Id = ?`,
                 [item.qty, item.qty, item.I_Id]
@@ -2981,7 +3010,7 @@ router.post("/isssued-order", async (req, res) => {
 
         // 6. Insert into Payment table
         await db.query(
-            `INSERT INTO Payment (orID, amount, dateTime) 
+            `INSERT INTO Payment (orID, amount, dateTime)
              VALUES (?, ?, NOW())`,
             [orID, paymentAmount]
         );
@@ -3145,7 +3174,7 @@ router.post("/create-delivery-note", async (req, res) => {
 
         // Execute all the queries in parallel
         await Promise.all(orderQueries);
-        
+
         const deliveryQueries = orderIds.map((orID) => {
             return db.query(`
                 UPDATE delivery
