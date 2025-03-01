@@ -8,6 +8,7 @@ import "../style/placeorder.css";
 const PlaceOrder = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({
         customerName: "",
+        surname: "",
         email: "",
         phoneNumber: "",
         otherNumber: "",
@@ -142,26 +143,32 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!formData.customerName || !formData.email || !formData.phoneNumber || selectedItems.length === 0) {
             toast.error("Please fill all details and add at least one item.");
             return;
         }
+
         if (formData.dvStatus === "Delivery" && (!formData.address || !formData.district || !formData.expectedDate)) {
             toast.error("Please complete all delivery details.");
             return;
         }
 
+        // Combine customerName and surname into a single 'name' field
+        const fullName = `${formData.customerName} ${formData.surname}`.trim(); // Trim to remove extra spaces
+
         const orderData = {
             ...formData,
-            items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty ,price: item.price * item.qty })),
+            name: fullName, // Use 'name' instead of separate fields
+            items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
             deliveryPrice,
             discountAmount,
             totalItemPrice,
             totalBillPrice,
         };
+
         if (validateForm()) {
             try {
-                // Make a POST request to the server to add the supplier and items
                 const response = await fetch("http://localhost:5001/api/admin/main/orders", {
                     method: "POST",
                     headers: {
@@ -169,21 +176,22 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     },
                     body: JSON.stringify(orderData),
                 });
+
                 const result = await response.json();
+
                 if (response.ok) {
-                    // Show success message and clear the form
                     toast.success("Order placed successfully!");
                     handleClear();
                 } else {
-                    // Show error message if something goes wrong
                     toast.error(result.message || "Something went wrong. Please try again.");
                 }
             } catch (error) {
-                console.error("Error submitting supplier data:", error);
-                toast.error("Error submitting supplier data. Please try again.");
+                console.error("Error submitting order data:", error);
+                toast.error("Error submitting order data. Please try again.");
             }
         }
     };
+
     const validateForm = () => {
         const validationErrors = [];
         if (!formData.dvStatus) validationErrors.push("Please select a delivery method.");
@@ -218,6 +226,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const handleClear = () => {
         setFormData({
             customerName: "",
+            surname: "",
             email: "",
             phoneNumber: "",
             otherNumber: "",
@@ -257,15 +266,15 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         <Row>
                             <Col md={6}>
                                 <FormGroup>
-                                    <Label>Customer Name</Label>
+                                    <Label>First Name</Label>
                                     <Input type="text" name="customerName" value={formData.customerName} onChange={handleChange} required />
                                 </FormGroup>
                             </Col>
 
                             <Col md={6}>
                                 <FormGroup>
-                                    <Label>Email</Label>
-                                    <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
+                                    <Label>Last Name</Label>
+                                    <Input type="text" name="surname" value={formData.surname} onChange={handleChange} required />
                                 </FormGroup>
                             </Col>
                         </Row>
@@ -284,6 +293,10 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 </FormGroup>
                             </Col>
                         </Row>
+                        <FormGroup>
+                            <Label>Email</Label>
+                            <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
+                        </FormGroup>
                         <FormGroup>
                             <Label>Item Selection</Label>
                             <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />

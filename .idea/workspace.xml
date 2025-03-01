@@ -7,6 +7,7 @@
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Routes/adminRoutes.js" afterDir="false" />
     </list>
@@ -198,7 +199,7 @@
       <workItem from="1740628052973" duration="25674000" />
       <workItem from="1740664860893" duration="679000" />
       <workItem from="1740714333448" duration="28464000" />
-      <workItem from="1740805664312" duration="4900000" />
+      <workItem from="1740805664312" duration="7057000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -543,7 +544,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="259" />
+    <option name="localTasksCounter" value="260" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

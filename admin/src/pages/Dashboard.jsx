@@ -88,10 +88,43 @@ const Dashboard = () => {
         }
     };
 
-    const handlePromotionSubmit = (e) => {
+    const handlePromotionSubmit = async (e) => {
+        // e.preventDefault();
+        // alert(`Promotion ${date} added!`);
+        // setDate(""); setPromoImage(null);
+
         e.preventDefault();
-        alert(`Promotion ${date} added!`);
-        setDate(""); setPromoImage(null);
+        // Check if fields are filled
+        if (!date || !promoImage) {
+            alert("Please fill in all fields.");
+            return;
+        }
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/coupone", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    couponCode,
+                    saleteamCode,
+                    discount,
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                toast.success(`Coupon ${couponCode} added successfully!`);
+                // Clear form fields after successful submission
+                setCouponCode("");
+                setDiscount("");
+                setSaleteamCode("");
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        } catch (error) {
+            console.error("Error submitting coupon:", error);
+            alert("Failed to add coupon. Please try again.");
+        }
     };
     const handleImageUpload = (event) => {
         setPromoImage(URL.createObjectURL(event.target.files[0]));
