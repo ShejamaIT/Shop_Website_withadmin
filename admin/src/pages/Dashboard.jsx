@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Container, Row, Col, Table, Button, Form, FormGroup, Label, Input } from "reactstrap";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
 import Helmet from "../components/Helmet/Helmet";
@@ -6,6 +6,25 @@ import NavBar from "../components/header/navBar";
 import '../style/Dashboard.css';
 
 const Dashboard = () => {
+    const [salesteamMembers, setSalesteamMembers] = useState([]);
+
+    const fetchSalesTeamMembers = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
+            const data = await response.json();
+            console.log(data.data);
+            if (data.data && data.data.length > 0) {
+                setSalesteamMembers(data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching sales team members:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchSalesTeamMembers();
+    }, []);
+
     // Sample sales data
     const dailySales = [
         { id: 1, name: "Thushani", sales: 45000 },
@@ -113,7 +132,13 @@ const Dashboard = () => {
                                     </FormGroup>
                                     <FormGroup>
                                         <Label for="saleteamCode">Sale Team ID</Label>
-                                        <Input type="text" value={saleteamCode} onChange={(e) => setSaleteamCode(e.target.value)} placeholder="Enter sale team ID" required />
+
+                                        <Input type="select" name="saleteamCode" onChange={(e) => setSaleteamCode(e.target.value)} required >
+                                            <option value="">Sale team ID</option>
+                                            {salesteamMembers.map((member) => (
+                                                <option key={member.stID} value={member.stID}>{member.stID}-({member.employeeName})</option>
+                                            ))}
+                                        </Input>
                                     </FormGroup>
                                     <FormGroup>
                                         <Label for="discount">Discount Price</Label>
