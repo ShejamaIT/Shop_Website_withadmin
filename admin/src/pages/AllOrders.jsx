@@ -14,6 +14,9 @@ import TableIssued from "../components/tables/TableIssuedOrders";
 import TableInproduction from "../components/tables/TableInProduction";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
 import {useNavigate} from "react-router-dom";
+import DeliveryNotes from "./DeliveryNotes";
+import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
+import AddDeliveryShedule from "./AddDeliveryShedule";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("0");
@@ -35,7 +38,7 @@ const AllOrders = () => {
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}
                     <Nav tabs className="mb-3">
-                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Print GatePass" , "Issued Orders"].map((label, index) => (
+                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Delivery Notes" , "Issued Orders"].map((label, index) => (
                             <NavItem key={index}>
                                 <NavLink
                                     className={classnames({ active: activeTab === index.toString() })}
@@ -106,22 +109,64 @@ const AllOrders = () => {
                                 </Col>
                             </Row>
                         </TabPane>
-
                         <TabPane tabId="4" key={refreshKey}>
                             <Row>
                                 <TableInproduction />
                             </Row>
                         </TabPane>
-
                         <TabPane tabId="5" key={refreshKey}>
                             <Row>
                                 <TableCompleted />
                             </Row>
                         </TabPane>
                         <TabPane tabId="6" key={refreshKey}>
-                            <Row>
-                                {/*navigate("/create-delivery-note");*/}
-                            </Row>
+                            <Nav tabs className="mb-3">
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "1" })}
+                                        onClick={() => setNestedActiveTab("1")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        Create Delivery Note
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "2" })}
+                                        onClick={() => setNestedActiveTab("2")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        All delivery notes
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "3" })}
+                                        onClick={() => setNestedActiveTab("3")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        Add Scheduled Dates
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+
+                            <TabContent activeTab={nestedActiveTab}>
+                                <TabPane tabId="1" key={refreshKey}>
+                                    <Row>
+                                        <DeliveryNotes />
+                                    </Row>
+                                </TabPane>
+                                <TabPane tabId="2" key={refreshKey}>
+                                    <Row>
+                                        <TableAllDeliveryNotes />
+                                    </Row>
+                                </TabPane>
+                                <TabPane tabId="3" key={refreshKey}>
+                                    <Row>
+                                        <AddDeliveryShedule />
+                                    </Row>
+                                </TabPane>
+                            </TabContent>
                         </TabPane>
                         <TabPane tabId="7" key={refreshKey}>
                             <Row>
