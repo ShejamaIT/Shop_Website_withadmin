@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Responsive
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import '../style/Dashboard.css';
+import {toast} from "react-toastify";
 
 const Dashboard = () => {
     const [salesteamMembers, setSalesteamMembers] = useState([]);
@@ -52,11 +53,41 @@ const Dashboard = () => {
     const [date, setDate] = useState("");
     const [promoImage, setPromoImage] = useState(null);
 
-    const handleCouponSubmit = (e) => {
+    const handleCouponSubmit = async (e) => {
         e.preventDefault();
-        alert(`Coupon ${couponCode}, ${saleteamCode}, ${discount} added!`);
-        setCouponCode(""); setDiscount(""); setSaleteamCode("");
+        // Check if fields are filled
+        if (!couponCode || !saleteamCode || !discount) {
+            alert("Please fill in all fields.");
+            return;
+        }
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/coupone", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    couponCode,
+                    saleteamCode,
+                    discount,
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                toast.success(`Coupon ${couponCode} added successfully!`);
+                // Clear form fields after successful submission
+                setCouponCode("");
+                setDiscount("");
+                setSaleteamCode("");
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        } catch (error) {
+            console.error("Error submitting coupon:", error);
+            alert("Failed to add coupon. Please try again.");
+        }
     };
+
     const handlePromotionSubmit = (e) => {
         e.preventDefault();
         alert(`Promotion ${date} added!`);
