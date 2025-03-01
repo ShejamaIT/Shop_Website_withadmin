@@ -584,7 +584,7 @@ router.get("/accept-order-details", async (req, res) => {
         };
 
         // 6️⃣ Fetch Delivery Info If Order is for Delivery
-        if (orderData.dvStatus === "Delivery") {
+        if (orderData.delStatus === "Delivery") {
             const deliveryQuery = `
                 SELECT dv_id, address, district, contact, status, schedule_Date
                 FROM delivery
@@ -854,7 +854,7 @@ router.get("/order-details", async (req, res) => {
         }
 
         // If it's a delivery order, fetch delivery details
-        if (orderData.dvStatus === "Delivery") {
+        if (orderData.delStatus === "Delivery") {
             const deliveryQuery = `
                 SELECT dv_id, address, district, contact, status, schedule_Date
                 FROM delivery
@@ -2504,46 +2504,64 @@ router.get("/find-cost", async (req, res) => {
 });
 
 //find issuded order by district
-router.get("/find-issued-orders", async (req, res) => {
+router.get("/find-completed-orders", async (req, res) => {
     try {
-        const { district } = req.query;
+        const { district, date } = req.query;
+        console.log(district);
+        console.log(date);
 
-        // Ensure district is provided in the query params
+        // Ensure district and date are provided in the query params
         if (!district) {
             return res.status(400).json({ message: "District is required." });
         }
 
-        // Query the database to fetch orders with matching district and status "issued"
+        if (!date) {
+            return res.status(400).json({ message: "Date is required." });
+        }
+
+        // Parse the date in DD/MM/YYYY format and convert it to YYYY-MM-DD format
+        const parsedDate = parseDate(date);
+        console.log(parsedDate);
+
+        if (!parsedDate) {
+            return res.status(400).json({ message: "Invalid date format. Please use DD/MM/YYYY." });
+        }
+
+        // Query the database to fetch orders with matching district, status "Completed" and expected date
         const [orders] = await db.query(`
             SELECT
                 o.orId,
-                O.custName,
-                O.contact1,
-                O.contact2,
-                D.address,
-                O.total,
-                O.advance,
-                O.balance,
-                o.city
-            FROM Orders O
-                     JOIN delivery D ON O.OrID = D.orID
-            WHERE D.district = ? AND O.orStatus = 'Issued';
-        `, [district]);
+                o.custName,
+                o.contact1,
+                o.contact2,
+                d.address,
+                o.total,
+                o.advance,
+                o.balance,
+                o.city,
+                o.expectedDate
+            FROM Orders o
+                JOIN delivery d ON o.orID = d.orID
+            WHERE d.district = ? 
+                AND o.orStatus = 'Completed'
+                AND o.expectedDate = ?;
+        `, [district, parsedDate]);
 
         // If no orders are found, return a 404
         if (orders.length === 0) {
-            return res.status(404).json({ message: "No issued orders found for this district." });
+            return res.status(404).json({ message: "No completed orders found for this district and date." });
         }
+        console.log(orders);
 
         // Return the orders as a JSON response
         return res.status(200).json({
-            message: "Issued orders found.",
+            message: "Completed orders found.",
             orders: orders,  // Return all matching orders
         });
 
     } catch (error) {
-        console.error("Error fetching issued orders:", error.message);
-        return res.status(500).json({ message: "Error fetching issued orders." });
+        console.error("Error fetching completed orders:", error.message);
+        return res.status(500).json({ message: "Error fetching completed orders." });
     }
 });
 
@@ -3412,6 +3430,20 @@ const generateNewId = async (table, column, prefix) => {
     console.log(lastNum);
     console.log(`${prefix}_${String(lastNum).padStart(3, "0")}`);
     return `${prefix}_${String(lastNum).padStart(3, "0")}`;
+};
+
+// Helper function to parse date from DD/MM/YYYY format to YYYY-MM-DD format
+const parseDate = (dateStr) => {
+    const [day, month, year] = dateStr.split("/");
+
+    // Check if the date is valid
+    if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
+        return null;
+    }
+
+    // Ensure the day and month are two digits (e.g., "03" instead of "3")
+    const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return formattedDate;
 };
 
 export default router;
