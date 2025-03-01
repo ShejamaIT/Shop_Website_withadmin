@@ -208,6 +208,7 @@ router.post("/orders", async (req, res) => {
             expectedDate,
             specialNote,
         } = req.body;
+        console.log(expectedDate);
 
         // Calculate net total, balance
         const netTotal = parseFloat(totalBillPrice) ; // Ensure it's a valid number
@@ -2547,11 +2548,14 @@ router.get("/find-completed-orders", async (req, res) => {
                 AND o.expectedDate = ?;
         `, [district, parsedDate]);
 
+        console.log(orders);
+
+
         // If no orders are found, return a 404
         if (orders.length === 0) {
             return res.status(404).json({ message: "No completed orders found for this district and date." });
         }
-        console.log(orders);
+
 
         // Return the orders as a JSON response
         return res.status(200).json({
@@ -3307,53 +3311,6 @@ router.get("/delivery-note", async (req, res) => {
     }
 });
 
-// Save Delivery Notes
-router.post("/create-delivery-note", async (req, res) => {
-    try {
-        const { driverName, vehicleName, hire, date, orderIds } = req.body;
-
-        const delHire = parseFloat(hire);
-
-        // Check if the required fields are present in the request body
-        if (!driverName || !vehicleName || !date || !hire || !orderIds || orderIds.length === 0) {
-            return res.status(400).json({ message: "Driver name, vehicle name, hire, date, and order IDs are required." });
-        }
-
-        // Convert the date from DD/MM/YY format to YYYY-MM-DD
-        const [day, month, year] = date.split('/');
-        const formattedDate = `20${year.length === 2 ? year : year.slice(2)}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-
-        // Insert into the delivery_note table
-        const [result] = await db.query(`
-            INSERT INTO delivery_note (driverName, vehicalName, date, hire)
-            VALUES (?, ?, ?, ?)
-        `, [driverName, vehicleName, formattedDate, delHire]);
-
-        // Get the generated delNoID (Delivery Note ID)
-        const delNoID = result.insertId;
-
-        // Insert the orders into the delivery_note_orders table
-        const orderQueries = orderIds.map((orID) => {
-            return db.query(`
-                INSERT INTO delivery_note_orders (delNoID, orID)
-                VALUES (?, ?)
-            `, [delNoID, orID]);
-        });
-
-        // Execute all the queries in parallel
-        await Promise.all(orderQueries);
-
-        // Send a success response
-        return res.status(201).json({
-            message: "Delivery note and orders created successfully.",
-            delNoID,  // Return the generated Delivery Note ID
-        });
-
-    } catch (error) {
-        console.error("Error creating delivery note:", error.message);
-        return res.status(500).json({ message: "Error creating delivery note" });
-    }
-});
 
 // Save New Coupone
 router.post("/coupone", async (req, res) => {
@@ -3434,7 +3391,8 @@ const generateNewId = async (table, column, prefix) => {
 
 // Helper function to parse date from DD/MM/YYYY format to YYYY-MM-DD format
 const parseDate = (dateStr) => {
-    const [day, month, year] = dateStr.split("/");
+    const [month ,day, year] = dateStr.split("/");
+    console.log(day , month,year)
 
     // Check if the date is valid
     if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
@@ -3443,6 +3401,7 @@ const parseDate = (dateStr) => {
 
     // Ensure the day and month are two digits (e.g., "03" instead of "3")
     const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    console.log(formattedDate);
     return formattedDate;
 };
 
