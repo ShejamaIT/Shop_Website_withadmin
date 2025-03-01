@@ -18,7 +18,10 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_MM2D2DMA-2-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_MM2D2DMA-3-12.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -553,7 +556,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="262" />
+    <option name="localTasksCounter" value="263" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -2,20 +2,22 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button, Table } from "reactstrap";
 import { toast } from "react-toastify";
 import "../style/deliverynotes.css";
-import ReceiptView from "./ReceiptView";
 import MakeDeliveryNote from "./MakeDeliveryNote";
 import DeliveryNoteView from "./DeliveryNoteView";
+import FinalInvoice from "./FinalInvoice";
 
 const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);
     const [selectedRoute, setSelectedRoute] = useState("");
     const [orders, setOrders] = useState([]);
     const [selectedOrders, setSelectedOrders] = useState([]);
+    const [selectedOrder, setSelectedOrder] = useState(null);
     const [deliveryDates, setDeliveryDates] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
     const [noScheduleMessage, setNoScheduleMessage] = useState("");
     const [selectedDeliveryDate, setSelectedDeliveryDate] = useState(""); // Added state for selected date
     const [showModal2, setShowModal2] = useState(false);
+    const [showModal1, setShowModal1] = useState(false);
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
 
@@ -149,13 +151,73 @@ const DeliveryNotes = () => {
             ? selectedOrders.filter(o => o !== order)
             : [...selectedOrders, order];
         setSelectedOrders(updatedOrders);
+        setSelectedOrder(order);
+        console.log(order);
+        handleEditClick1(order);
         calculateTotal(updatedOrders);
+    };
+    const handleEditClick1 = (order) => {
+        if (!order) return;
+        console.log(order);
+        setSelectedOrder(order);
+        setShowModal1(true);
     };
 
     const calculateTotal = (orders) => {
         const total = orders.reduce((sum, order) => sum + order.balance, 0);
         setTotalAmount(total);
     };
+    const handleSubmit3 = async (formData) => {
+        console.log(selectedOrder);
+        console.log(formData);
+        setShowModal2(false);
+
+        const updatedData = {
+            orID: selectedOrder.orderId,
+            delStatus: formData.deliveryStatus,
+            delPrice: formData.delivery,
+            discount: selectedOrder.discount,
+            subtotal: formData.subtotal,
+            total: formData.billTotal,
+            advance: formData.totalAdvance,
+            payStatus: formData.paymentType,
+            stID: selectedOrder.saleID,
+            paymentAmount: formData.addedAdvance,
+            selectedItems: formData.selectedItems,
+            balance: formData.billTotal - formData.totalAdvance, // assuming balance calculation
+            salesperson: selectedOrder.salesTeam.employeeName,
+            items: selectedOrder.items,
+        };
+
+        // try {
+        //     // Make API request to the /isssued-order endpoint
+        //     const response = await fetch('http://localhost:5001/api/admin/main/isssued-order', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify(updatedData),
+        //     });
+        //
+        //     const result = await response.json();
+        //
+        //     if (response.ok) {
+        //         // Successfully updated
+        //         console.log("Order updated successfully:", result.message);
+        //         // Optionally, handle success, e.g., navigate or show a success message
+        //         setReceiptData(updatedData);  // Set data for receipt
+        //         setShowReceiptView(true);         // Show receipt view
+        //     } else {
+        //         // Handle error response
+        //         console.error("Error:", result.message);
+        //         // Optionally, show error message to the user
+        //     }
+        // } catch (error) {
+        //     console.error("Error making API request:", error.message);
+        //     // Handle network error, show error message to the user
+        // }
+    };
+
 
     const handleEditClick3 = (selectedOrders) => {
         if (!selectedOrders) return;
@@ -215,7 +277,7 @@ const DeliveryNotes = () => {
                                                 <td>
                                                     <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
                                                 </td>
-                                                <td>{order.orId}</td>
+                                                <td>{order.orderId}</td>
                                                 <td>{order.custName}</td>
                                                 <td>Rs.{order.total}</td>
                                                 <td>Rs.{order.advance}</td>
@@ -246,6 +308,13 @@ const DeliveryNotes = () => {
                         <DeliveryNoteView
                             receiptData={receiptData}
                             setShowReceiptView={setShowReceiptView}
+                        />
+                    )}
+                    {showModal1 && selectedOrder && (
+                        <FinalInvoice
+                            selectedOrder={selectedOrder}
+                            setShowModal2={setShowModal1}
+                            handlePaymentUpdate={handleSubmit3}
                         />
                     )}
                 </Col>

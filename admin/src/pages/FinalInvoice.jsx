@@ -138,12 +138,14 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
                             {/* Conditionally render options based on deliveryStatus */}
                             {deliveryStatus === "Pickup" && (
                                 <>
+                                    <option value="">-- Please Select Payment Type ---</option>
                                     <option value="Settled">Settled</option>
                                     <option value="Credit">Credit</option>
                                 </>
                             )}
                             {deliveryStatus === "Delivery" && (
                                 <>
+                                    <option value="">-- Please Select Payment Type ---</option>
                                     <option value="Settled">Settled</option>
                                     <option value="COD">COD</option>
                                     <option value="Credit">Credit</option>
