@@ -10,15 +10,17 @@ import TableAccepting from "../components/tables/TableAccepting";
 import TableCompleted from "../components/tables/TableCompleted";
 import PlaceOrder from "./Placeorder";
 import Tableforproduction from "../components/tables/Tableforproduction";
-import DeliveryNotes from "./DeliveryNotes";
 import TableIssued from "../components/tables/TableIssuedOrders";
 import TableInproduction from "../components/tables/TableInProduction";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
+import DeliveryNotes from "./DeliveryNotes";
+import {useNavigate} from "react-router-dom";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("0");
     const [nestedActiveTab, setNestedActiveTab] = useState("1");
     const [refreshKey, setRefreshKey] = useState(0); // Forcing re-render
+    const navigate = useNavigate()
 
     // Function to refresh the tab content after updates
     const handleDataUpdate = () => {
@@ -119,7 +121,7 @@ const AllOrders = () => {
                         </TabPane>
                         <TabPane tabId="6" key={refreshKey}>
                             <Row>
-                                <DeliveryNotes />
+                                navigate("/create-delivery-note");
                             </Row>
                         </TabPane>
 
