@@ -13,7 +13,6 @@ import Tableforproduction from "../components/tables/Tableforproduction";
 import TableIssued from "../components/tables/TableIssuedOrders";
 import TableInproduction from "../components/tables/TableInProduction";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
-import DeliveryNotes from "./DeliveryNotes";
 import {useNavigate} from "react-router-dom";
 
 const AllOrders = () => {
@@ -121,7 +120,7 @@ const AllOrders = () => {
                         </TabPane>
                         <TabPane tabId="6" key={refreshKey}>
                             <Row>
-                                navigate("/create-delivery-note");
+                                {/*navigate("/create-delivery-note");*/}
                             </Row>
                         </TabPane>
 
