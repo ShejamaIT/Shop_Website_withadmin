@@ -1,31 +1,82 @@
-.dashboard{
-    padding: 60px 0px;
-}
-.revenue__box , .orders__box , .products__box , .users__box{
+/* Dashboard.css */
+.dashboard {
     padding: 20px;
-    border-radius: 5px;
-}
-.revenue__box , .products__box{
-    background: var(--card-bg-03);
-}
-.orders__box , .users__box{
-    background: var(--card-bg-04);
-}
-.revenue__box h5 ,
-.orders__box h5,
-.products__box h5,
-.users__box h5{
-    font-weight: 500;
-    font-size: 1.1rem;
-    color: var(--primary-color);
-    margin-bottom: 20px;
 }
 
-.revenue__box span ,
-.orders__box span,
-.products__box span,
-.users__box span{
-    font-weight: 600;
-    font-size: 2rem;
-    color: var(--primary-color);
+h2 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+}
+
+h4 {
+    margin-top: 20px;
+    color: #555;
+    font-size: 20px;
+}
+
+h5 {
+    font-weight: bold;
+    color: #444;
+    margin-top: 10px;
+}
+
+.table {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.table th {
+    background: #007bff;
+    color: white;
+    text-align: center;
+}
+
+.table td {
+    text-align: center;
+}
+
+button {
+    margin-top: 10px;
+}
+
+input[type="file"] {
+    margin-top: 10px;
+}
+
+img {
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.general {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.general input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.general input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+}
+
+.promo-img {
+    width: 100px;
+    margin-top: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
