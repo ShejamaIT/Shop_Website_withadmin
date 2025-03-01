@@ -64,6 +64,7 @@ const CompleteOrderDetails = () => {
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
+            console.log(data);
 
             // Ensure `isBooked` updates correctly
             const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);

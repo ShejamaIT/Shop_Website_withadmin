@@ -34,7 +34,7 @@ const AllOrders = () => {
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}
                     <Nav tabs className="mb-3">
-                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Issued Orders", "Print GatePass"].map((label, index) => (
+                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Print GatePass" , "Issued Orders"].map((label, index) => (
                             <NavItem key={index}>
                                 <NavLink
                                     className={classnames({ active: activeTab === index.toString() })}
@@ -117,18 +117,19 @@ const AllOrders = () => {
                                 <TableCompleted />
                             </Row>
                         </TabPane>
-
                         <TabPane tabId="6" key={refreshKey}>
                             <Row>
-                                <TableIssued />
+                                <DeliveryNotes />
                             </Row>
                         </TabPane>
 
                         <TabPane tabId="7" key={refreshKey}>
                             <Row>
-                                <DeliveryNotes />
+                                <TableIssued />
                             </Row>
                         </TabPane>
+
+
                     </TabContent>
                 </Container>
             </section>

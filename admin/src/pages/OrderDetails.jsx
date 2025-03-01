@@ -57,6 +57,7 @@ const OrderDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/order-details?orID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
             const data = await response.json();
+            console.log(data);
             setOrder(data.order);
             setFormData({
                 ...data.order,

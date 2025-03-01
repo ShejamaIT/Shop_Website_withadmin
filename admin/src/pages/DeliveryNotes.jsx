@@ -87,12 +87,29 @@ const DeliveryNotes = () => {
             toast.error("Error fetching routes.");
         }
     };
+    const loadOders = (e) => {
+        const routedate = e.target.value;
+        setSelectedDeliveryDate(routedate); // Set the selected date
 
-    const fetchOrders = async (routeId) => {
+        // Use useEffect hook to call fetchOrders only after selectedDeliveryDate changes
+        fetchOrders(routedate);
+    };
+
+    const fetchOrders = async (date) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/find-issued-orders?district=${routeId}`);
+            if (!selectedRoute || !date) {
+                toast.error("Please select both route and delivery date.");
+                return;
+            }
+
+            const response = await fetch(`http://localhost:5001/api/admin/main/find-completed-orders?district=${selectedRoute}&date=${date}`);
             const data = await response.json();
-            setOrders(data.orders || []);
+
+            if (data.orders) {
+                setOrders(data.orders);
+            } else {
+                setOrders([]); // Clear orders if no data
+            }
         } catch (error) {
             toast.error("Error fetching orders.");
         }
@@ -119,11 +136,13 @@ const DeliveryNotes = () => {
     const handleRouteChange = (e) => {
         const routeId = e.target.value;
         setSelectedRoute(routeId);
-        fetchOrders(routeId);
+        //fetchOrders(routeId);
         fetchDeliveryDates(routeId); // Fetch the delivery schedule when the route changes
         setSelectedOrders([]);
         setTotalAmount(0);
     };
+
+
 
     const handleOrderSelection = (order) => {
         const updatedOrders = selectedOrders.includes(order)
@@ -168,7 +187,7 @@ const DeliveryNotes = () => {
                                         type="select"
                                         id="deliveryDateSelect"
                                         value={selectedDeliveryDate} // Add state to track selected date
-                                        onChange={(e) => setSelectedDeliveryDate(e.target.value)} // Update selected date on change
+                                        onChange={loadOders}// Update selected date on change
                                     >
                                         <option value="">-- Select Date --</option>
                                         {deliveryDates.map((date, index) => (
