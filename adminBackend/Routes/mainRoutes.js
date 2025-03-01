@@ -185,8 +185,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
             console.error("❌ Error updating item:", err.message);
             res.status(500).json({ success: false, message: "Error updating item", details: err.message });
         }
-    }
-);
+    });
 
 // Save a order
 router.post("/orders", async (req, res) => {
@@ -197,7 +196,7 @@ router.post("/orders", async (req, res) => {
             city,
             district,
             email,
-            customerName,
+            name,
             phoneNumber,
             otherNumber,
             items,
@@ -209,7 +208,6 @@ router.post("/orders", async (req, res) => {
             expectedDate,
             specialNote,
         } = req.body;
-        console.log(req.body);
 
         // Calculate net total, balance
         const netTotal = parseFloat(totalBillPrice) ; // Ensure it's a valid number
@@ -253,7 +251,7 @@ router.post("/orders", async (req, res) => {
         let orderQuery = `
             INSERT INTO Orders (OrID, orDate, custName, customerEmail, contact1, contact2, orStatus, delStatus, city, delPrice, discount, total, stID, expectedDate, specialNote, ordertype,advance,balance,payStatus)
             VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?,?, 'on-site',?,?,'Pending')`;
-        let orderParams = [orID, orderDate, customerName, email, phoneNumber, otherNumber, dvStatus, city, parseFloat(deliveryPrice), parseFloat(discountAmount), parseFloat(totalBillPrice), stID, expectedDate, specialNote,advance,balance];
+        let orderParams = [orID, orderDate, name, email, phoneNumber, otherNumber, dvStatus, city, parseFloat(deliveryPrice), parseFloat(discountAmount), parseFloat(totalBillPrice), stID, expectedDate, specialNote,advance,balance];
 
         await db.query(orderQuery, orderParams);
 
@@ -3339,7 +3337,6 @@ router.post("/create-delivery-note", async (req, res) => {
     }
 });
 
-
 // Save New Coupone
 router.post("/coupone", async (req, res) => {
     const sql = `INSERT INTO sales_coupon (cpID,stID,discount) VALUES (?, ?,?)`;
@@ -3374,6 +3371,36 @@ router.post("/coupone", async (req, res) => {
     }
 });
 
+// Save New Promotion
+router.post("/promotion", upload.single('img'), async (req, res) => {
+    const sql = `INSERT INTO Promotion (img, date ) VALUES (?, ?)`;
+
+    const values = [
+        req.file.buffer,  // The image file is in `req.file.buffer`
+        req.body.date,
+    ];
+    console.log(values);
+
+    // try {
+    //     const [result] = await db.query(sql, values);
+    //
+    //     return res.status(201).json({
+    //         success: true,
+    //         message: "Promotion added successfully",
+    //         data: {
+    //             img: req.body.img,
+    //             date: req.body.date,
+    //         },
+    //     });
+    // } catch (err) {
+    //     console.error("Error inserting item data:", err.message);
+    //     return res.status(500).json({
+    //         success: false,
+    //         message: "Error inserting data into database",
+    //         details: err.message,
+    //     });
+    // }
+});
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
