@@ -3339,6 +3339,42 @@ router.post("/create-delivery-note", async (req, res) => {
     }
 });
 
+
+// Save New Coupone
+router.post("/coupone", async (req, res) => {
+    const sql = `INSERT INTO sales_coupon (cpID,stID,discount) VALUES (?, ?,?)`;
+    const values = [
+        req.body.couponCode,
+        req.body.saleteamCode,
+        req.body.discount
+    ];
+    try {
+        // Execute the query and retrieve the result
+        const [result] = await db.query(sql, values);
+
+        // Return success response with inserted data details
+        return res.status(201).json({
+            success: true,
+            message: "Coupone added successfully",
+            data: {
+                couponCode : req.body.couponCode,
+                saleteamCode: req.body.saleteamCode,
+                discount: req.body.discount
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting coupone data:", err.message);
+
+        // Respond with error details
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
     const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
