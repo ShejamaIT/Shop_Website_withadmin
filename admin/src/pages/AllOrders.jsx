@@ -123,14 +123,11 @@ const AllOrders = () => {
                                 {/*navigate("/create-delivery-note");*/}
                             </Row>
                         </TabPane>
-
                         <TabPane tabId="7" key={refreshKey}>
                             <Row>
                                 <TableIssued />
                             </Row>
                         </TabPane>
-
-
                     </TabContent>
                 </Container>
             </section>
