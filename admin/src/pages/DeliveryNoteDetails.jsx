@@ -12,6 +12,9 @@ const DeliveryNoteDetails = () => {
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
+    // State for Return & Cancel Reasons
+    const [reasons, setReasons] = useState({});
+
     useEffect(() => {
         const fetchDeliveryNote = async () => {
             try {
@@ -24,10 +27,23 @@ const DeliveryNoteDetails = () => {
 
                 const data = await response.json();
                 setDeliveryNote(data.details);
-                setOrders(data.orders);
+                setOrders(
+                    data.orders.map(order => ({
+                        ...order,
+                        originalOrderStatus: order.orderStatus,
+                        originalDeliveryStatus: order.deliveryStatus,
+                        received: false, // Checkbox tracking
+                    }))
+                );
+
+                // Initialize reason state for each order
+                const initialReasons = {};
+                data.orders.forEach(order => {
+                    initialReasons[order.OrID] = { reason: "", type: "" };
+                });
+                setReasons(initialReasons);
 
             } catch (error) {
-                console.error("Error fetching delivery note details:", error);
                 setError("Failed to load delivery note details.");
             } finally {
                 setIsLoading(false);
@@ -38,43 +54,64 @@ const DeliveryNoteDetails = () => {
     }, [id]);
 
     const handleChange = (e, orderIndex) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
+        const orderId = orders[orderIndex].OrID;
 
-        setOrders(prevOrders => {
-            return prevOrders.map((order, i) =>
+        setOrders(prevOrders =>
+            prevOrders.map((order, i) =>
                 i === orderIndex
-                    ? { ...order, [name]: value }
+                    ? {
+                        ...order,
+                        [name]: type === "checkbox" ? checked : value,
+                        received: type === "checkbox" ? checked : order.received
+                    }
                     : order
-            );
-        });
+            )
+        );
+
+        // If the order is returned or canceled, show reason selection
+        if (name === "orderStatus") {
+            if (value === "Returned" || value === "Cancelled") {
+                setReasons(prev => ({
+                    ...prev,
+                    [orderId]: { reason: "", type: value }
+                }));
+            } else {
+                setReasons(prev => ({
+                    ...prev,
+                    [orderId]: { reason: "", type: "" }
+                }));
+            }
+        }
+    };
+
+    const handleReasonChange = (e, orderId) => {
+        const { value } = e.target;
+        setReasons(prev => ({
+            ...prev,
+            [orderId]: { ...prev[orderId], reason: value }
+        }));
     };
 
     const handleSave = async () => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/update-delivery-note`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    delNoID: deliveryNote.delNoID,
-                    orders: orders.map(order => ({
-                        OrID: order.OrID,
-                        orderStatus: order.orderStatus,
-                        deliveryStatus: order.deliveryStatus,
-                        issuedItems: order.issuedItems
-                    }))
-                }),
-            });
+        // Identify changed orders
+        const updatedOrders = orders
+            .filter(order =>
+                order.orderStatus !== order.originalOrderStatus ||
+                order.deliveryStatus !== order.originalDeliveryStatus ||
+                order.received // Ensure received orders are also included
+            )
+            .map(order => ({
+                OrID: order.OrID,
+                orderStatus: order.orderStatus,
+                deliveryStatus: order.deliveryStatus,
+                received: order.received, // Include received status
+                reason: reasons[order.OrID]?.reason || "N/A", // Attach reason if applicable
+                reasonType: reasons[order.OrID]?.type || "N/A" // Attach reason type (Returned/Cancelled)
+            }));
 
-            if (!response.ok) {
-                throw new Error("Failed to update delivery note.");
-            }
+        console.log("Updated Orders with Reasons and Received:", updatedOrders);
 
-            console.log("Delivery note updated successfully!");
-            setIsEditing(false);
-        } catch (error) {
-            console.error("Error updating delivery note:", error);
-            setError("Failed to update delivery note.");
-        }
     };
 
     if (isLoading) {
@@ -118,7 +155,7 @@ const DeliveryNoteDetails = () => {
 
                                     <h5 className="mt-4">Orders & Issued Items</h5>
                                     <div className="delivery-orders">
-                                        <ul className="order-items">
+                                        <ul className="order-items gap-2">
                                             <div className="order-general">
                                                 {orders.map((order, index) => (
                                                     <div key={order.OrID} className="order-box">
@@ -126,19 +163,56 @@ const DeliveryNoteDetails = () => {
                                                         {!isEditing ? (
                                                             <p><strong>Order Status:</strong> {order.orderStatus}</p>
                                                         ) : (
-                                                            <FormGroup>
-                                                                <Label><strong>Order Status:</strong></Label>
-                                                                <Input
-                                                                    type="select"
-                                                                    name="orderStatus"
-                                                                    value={order.orderStatus}
-                                                                    onChange={(e) => handleChange(e, index)}
-                                                                >
-                                                                    <option value="Issued">Issued</option>
-                                                                    <option value="Returned">Returned</option>
-                                                                    <option value="Completed">Completed</option>
-                                                                </Input>
-                                                            </FormGroup>
+                                                            <>
+                                                                <FormGroup>
+                                                                    <Label><strong>Order Status:</strong></Label>
+                                                                    <Input
+                                                                        type="select"
+                                                                        name="orderStatus"
+                                                                        value={order.orderStatus}
+                                                                        onChange={(e) => handleChange(e, index)}
+                                                                    >
+                                                                        <option value="Issued">Issued</option>
+                                                                        <option value="Returned">Returned</option>
+                                                                        <option value="Cancelled">Cancelled</option>
+                                                                    </Input>
+                                                                </FormGroup>
+                                                                {order.orderStatus === "Returned" && (
+                                                                    <FormGroup>
+                                                                        <Label>Return Reason</Label>
+                                                                        <Input
+                                                                            type="select"
+                                                                            value={reasons[order.OrID]?.reason}
+                                                                            onChange={(e) => handleReasonChange(e, order.OrID)}
+                                                                        >
+                                                                            <option value="">Select a Reason</option>
+                                                                            <option value="Customer Not Answer">Customer Not Answer</option>
+                                                                            <option value="Customer Rejected">Customer Rejected</option>
+                                                                            <option value="Customer Has No money">Customer Has No money</option>
+                                                                            <option value="Driver Issue">Driver Issue</option>
+                                                                            <option value="Vehical Issue">Vehical Issue</option>
+                                                                        </Input>
+                                                                    </FormGroup>
+                                                                )}
+
+                                                                {order.orderStatus === "Cancelled" && (
+                                                                    <FormGroup>
+                                                                        <Label>Cancel Reason</Label>
+                                                                        <Input
+                                                                            type="select"
+                                                                            value={reasons[order.OrID]?.reason}
+                                                                            onChange={(e) => handleReasonChange(e, order.OrID)}
+                                                                        >
+                                                                            <option value="">Select a Reason</option>
+                                                                            <option value="Customer Not Answer">Customer Not Answer</option>
+                                                                            <option value="Customer Rejected">Customer Rejected</option>
+                                                                            <option value="Customer Has No money">Customer Has No money</option>
+                                                                            <option value="Driver Issue">Driver Issue</option>
+                                                                            <option value="Vehical Issue">Vehical Issue</option>
+                                                                        </Input>
+                                                                    </FormGroup>
+                                                                )}
+                                                            </>
                                                         )}
 
                                                         {!isEditing ? (
@@ -158,6 +232,27 @@ const DeliveryNoteDetails = () => {
                                                                 </Input>
                                                             </FormGroup>
                                                         )}
+                                                        {order.balance > 0 ? (
+                                                            isEditing ? (
+                                                                <FormGroup>
+                                                                    <Label><strong>Balance:</strong> Rs.{order.balance}</Label>
+                                                                    <div className="d-flex align-items-center">
+                                                                        <Input
+                                                                            type="checkbox"
+                                                                            id={`received-${order.OrID}`}
+                                                                            checked={order.received}
+                                                                            onChange={(e) => handleChange(e, index)}
+                                                                        />
+                                                                        <Label for={`received-${order.OrID}`} className="ms-2">Received</Label>
+                                                                    </div>
+                                                                </FormGroup>
+                                                            ) : (
+                                                                <p><strong>Balance:</strong> Rs.{order.balance}</p>
+                                                            )
+                                                        ) : (
+                                                            <p><strong>Balance:</strong> Rs.{order.balance}</p>
+                                                        )}
+
                                                         {/* Display Issued Items for this Order */}
                                                         <div className="issued-items">
                                                             <h6 className="mt-3">Issued Items:</h6>
@@ -199,4 +294,5 @@ const DeliveryNoteDetails = () => {
         </Helmet>
     );
 };
+
 export default DeliveryNoteDetails;

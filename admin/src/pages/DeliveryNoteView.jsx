@@ -4,7 +4,6 @@ import "../style/receiptView.css";
 const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
     // Destructure necessary values from the receiptData
     const { orders, vehicleId, driverName, hire, balanceToCollect, selectedDeliveryDate } = receiptData;
-    console.log(receiptData);
 
     // Format the date
     const formatDate = (dateString) => {
