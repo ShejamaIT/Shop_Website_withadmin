@@ -450,8 +450,7 @@ router.post("/supplier", async (req, res) => {
     console.log(s_ID);
     const sqlInsertSupplier = `
         INSERT INTO Supplier (s_ID, name, address, contact, contact2)
-        VALUES (?, ?, ?, ?, ?)
-    `;
+        VALUES (?, ?, ?, ?, ?)`;
     const valuesSupplier = [
         s_ID,
         name,
@@ -545,7 +544,7 @@ router.get("/accept-order-details", async (req, res) => {
         // 5️⃣ Initialize Response Object
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate: orderData.orDate,
+            orderDate: new Date(orderData.orDate).toLocaleDateString('en-CA'),
             customerEmail: orderData.customerEmail,
             ordertype : orderData.ordertype,
             phoneNumber: orderData.contact1,
@@ -559,7 +558,7 @@ router.get("/accept-order-details", async (req, res) => {
             advance: orderData.advance,
             balance: orderData.balance,
             payStatus : orderData.payStatus,
-            expectedDeliveryDate: orderData.expectedDate,
+            expectedDeliveryDate: new Date(orderData.expectedDate).toLocaleDateString('en-CA'),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: itemsResult.map(item => ({
@@ -793,7 +792,7 @@ router.get("/order-details", async (req, res) => {
         // Prepare the order response
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate: orderData.orDate,
+            orderDate: new Date(orderData.orDate).toLocaleDateString('en-CA'), // Fix date issue
             customerEmail: orderData.customerEmail,
             ordertype: orderData.ordertype,
             phoneNumber: orderData.contact1,
@@ -806,7 +805,7 @@ router.get("/order-details", async (req, res) => {
             advance: orderData.advance,
             balance: orderData.balance,
             payStatus : orderData.payStatus,
-            expectedDeliveryDate: orderData.expectedDate,
+            expectedDeliveryDate: new Date(orderData.expectedDate).toLocaleDateString('en-CA'), // Fix date issue
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: [],
@@ -2510,6 +2509,7 @@ router.get("/find-cost", async (req, res) => {
 router.get("/find-completed-orders", async (req, res) => {
     try {
         const { district, date } = req.query;
+        console.log(district,date)
 
         if (!district) {
             return res.status(400).json({ success: false, message: "District is required." });
@@ -3477,7 +3477,7 @@ const parseDate = (dateStr) => {
     }
 
     // Ensure the day and month are two digits (e.g., "03" instead of "3")
-    const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const formattedDate = `${year}-${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}`;
     console.log(formattedDate);
     return formattedDate;
 };
