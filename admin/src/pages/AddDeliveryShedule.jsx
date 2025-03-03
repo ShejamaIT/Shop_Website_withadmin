@@ -9,12 +9,10 @@ const AddDeliverySchedule = () => {
     const [dbRates, setDbRates] = useState([]); // Store the fetched delivery rates
     const [dbDates, setDbDates] = useState([]); // Store the fetched delivery Dates
     const [selectedDistrict, setSelectedDistrict] = useState(""); // Store selected district
-
     // Fetch delivery rates from the DB on component mount
     useEffect(() => {
         fetchDeliveryRates();
     }, []);
-
     const fetchDeliveryRates = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates"); // Replace with your API endpoint
@@ -49,7 +47,6 @@ const AddDeliverySchedule = () => {
             setDbDates([]); // Handle error
         }
     };
-
     // Handle district selection from dropdown
     const handleDistrictSelect = (e) => {
         const selectedDistrict = e.target.value;
@@ -58,20 +55,16 @@ const AddDeliverySchedule = () => {
             fetchDeliveryDates(selectedDistrict); // Fetch dates for selected district
         }
     };
-
-
     // Handle Input Changes for delivery rates
     const handleRateChange = (e) => {
         const { name, value } = e.target;
         setDeliveryRates((prev) => ({ ...prev, [name]: value }));
     };
-
     // Handle Input Changes for district name
     const handleDistrictChange = (e) => {
         const { name, value } = e.target;
         setScheduledDates((prev) => ({ ...prev, [name]: value }));
     };
-
     // Handle Date Selection and Add to List
     const handleAddDate = () => {
         if (dateInput && !scheduledDates.dates.includes(dateInput)) {
@@ -82,7 +75,6 @@ const AddDeliverySchedule = () => {
             setDateInput(""); // Reset input field
         }
     };
-
     // Remove Selected Date from List
     const handleRemoveDate = (dateToRemove) => {
         setScheduledDates((prev) => ({
@@ -90,14 +82,12 @@ const AddDeliverySchedule = () => {
             dates: prev.dates.filter(date => date !== dateToRemove)
         }));
     };
-
     // Handle Form Submission for Delivery Rates
     const handleSubmitRate = async () => {
         if (!deliveryRates.District || !deliveryRates.rate) {
             alert("Please enter both District and Rate.");
             return;
         }
-
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates", {
                 method: "POST",
@@ -122,15 +112,12 @@ const AddDeliverySchedule = () => {
             toast.success("An error occurred while adding the delivery rate.")
         }
     };
-
-
     // Handle Form Submission for Scheduled Dates
     const handleSubmitDates = async () => {
         if (!scheduledDates.District || scheduledDates.dates.length === 0) {
             alert("Please enter a district and at least one date.");
             return;
         }
-
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/delivery-dates", {
                 method: "POST",
@@ -139,7 +126,6 @@ const AddDeliverySchedule = () => {
                 },
                 body: JSON.stringify(scheduledDates),
             });
-
             const data = await response.json();
             console.log("API Response:", data);
 
@@ -155,7 +141,6 @@ const AddDeliverySchedule = () => {
             toast.error("Error submitting delivery dates. Please try again.")
         }
     };
-
     return (
         <Container className="add-item-container">
             <Row className="justify-content-center">
@@ -167,17 +152,10 @@ const AddDeliverySchedule = () => {
                             type="text"
                             placeholder="Enter district name"
                             className="mb-2"
-                            name="District"
-                            value={deliveryRates.District}
-                            onChange={handleRateChange}
+                            name="District" value={deliveryRates.District} onChange={handleRateChange}
                         />
                         <Input
-                            type="number"
-                            placeholder="Enter district rate"
-                            className="mb-2"
-                            name="rate"
-                            value={deliveryRates.rate}
-                            onChange={handleRateChange}
+                            type="number" placeholder="Enter district rate" className="mb-2" name="rate" value={deliveryRates.rate} onChange={handleRateChange}
                         />
                         <Button color="primary" onClick={handleSubmitRate}>Add Rate</Button>
                     </div>
@@ -193,20 +171,29 @@ const AddDeliverySchedule = () => {
                             value={scheduledDates.District}
                             onChange={handleDistrictChange}
                         />
+                        {/*<Input*/}
+                        {/*    type="select"*/}
+                        {/*    className="mb-2"*/}
+                        {/*    value={selectedDistrict}*/}
+                        {/*    onChange={handleDistrictSelect}*/}
+                        {/*>*/}
+                        {/*    <option value="">Select District</option>*/}
+                        {/*    {dbRates.map((rate, index) => (*/}
+                        {/*        <option key={index} value={rate.District}>*/}
+                        {/*            {rate.district}*/}
+                        {/*        </option>*/}
+                        {/*    ))}*/}
+                        {/*</Input>*/}
                         <Row className="align-items-center">
                             <Col xs="8">
                                 <Input
-                                    type="date"
-                                    className="mb-2"
-                                    value={dateInput}
-                                    onChange={(e) => setDateInput(e.target.value)}
+                                    type="date" className="mb-2" value={dateInput} onChange={(e) => setDateInput(e.target.value)}
                                 />
                             </Col>
                             <Col xs="4">
                                 <Button color="info" onClick={handleAddDate}>Add Date</Button>
                             </Col>
                         </Row>
-
                         {/* Display Selected Dates in a Table */}
                         {scheduledDates.dates.length > 0 && (
                             <Table bordered size="sm" className="mt-3 ">
@@ -241,10 +228,7 @@ const AddDeliverySchedule = () => {
 
                         {/* Dropdown for Selecting District */}
                         <Input
-                            type="select"
-                            className="mb-2"
-                            value={selectedDistrict}
-                            onChange={handleDistrictSelect}
+                            type="select" className="mb-2" value={selectedDistrict} onChange={handleDistrictSelect}
                         >
                             <option value="">Select District</option>
                             {dbRates.map((rate, index) => (
