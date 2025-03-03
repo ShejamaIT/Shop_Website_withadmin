@@ -36,7 +36,7 @@ const ItemDetails = () => {
 
     useEffect(() => {
         if (formData.maincategory) {
-            fetch(`http://localhost:5001/api/admin/main/typesname?categoryName=${formData.maincategory}`)
+            fetch(`http://localhost:5001/api/admin/main/SubCatNames?categoryName=${formData.maincategory}`)
                 .then((res) => res.json())
                 .then((data) => {
                     setSubCatOne(data.data);

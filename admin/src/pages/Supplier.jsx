@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import Swal from "sweetalert2";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Card, CardBody, CardTitle, CardText, Form, FormGroup, Label, Input } from "reactstrap";
 import { useNavigate, useParams } from "react-router-dom";
@@ -34,6 +33,7 @@ const SupplierDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/item-suppliers?I_Id=${id}`);
             if (!response.ok) throw new Error("Failed to fetch supplier details.");
             const data = await response.json();
+            console.log(data);
             setSuppliers(data.suppliers);
         } catch (err) {
             console.error("Error fetching supplier details:", err);
@@ -48,6 +48,7 @@ const SupplierDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/item-detail?Id=${id}`);
             if (!response.ok) throw new Error("Failed to fetch item details.");
             const data = await response.json();
+            console.log(data);
             setItem(data.item);
         } catch (err) {
             console.error("Error fetching item details:", err);

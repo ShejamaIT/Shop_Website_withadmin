@@ -60,7 +60,7 @@ const AddItem = () => {
 
     const fetchSubcategories = async (Ca_Id) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/types?Ca_Id=${Ca_Id}`);
+            const response = await fetch(`http://localhost:5001/api/admin/main/subcategories?Ca_Id=${Ca_Id}`);
             const data = await response.json();
             setSubCatOne(data.data.length > 0 ? data.data : []); // Ensure empty array if no data
             setSubCatTwo([]); // Reset subcategory two
