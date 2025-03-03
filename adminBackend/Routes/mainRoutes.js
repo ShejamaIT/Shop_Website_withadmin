@@ -3083,10 +3083,13 @@ router.post("/get-stock-details", async (req, res) => {
 router.post("/isssued-order", async (req, res) => {
     const { orID, delStatus, delPrice, discount,subtotal, total, advance, balance, payStatus, stID, paymentAmount, selectedItems } = req.body;
 
+    console.log(req.body);
+
     if (!orID || !stID || paymentAmount === undefined || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
     const IssuedPrice = parseFloat(subtotal) - parseFloat(discount);
+
 
     try {
         // 1. Update Orders table
