@@ -1446,7 +1446,7 @@ router.get("/item-detail", async (req, res) => {
         // Step 1: Fetch Item details
         const itemQuery = `
             SELECT
-                I.I_Id, I.I_name, I.Ty_id, I.descrip, I.price, I.stockQty,I.bookedQty,I.availableQty,
+                I.I_Id, I.I_name, I.descrip, I.price, I.stockQty,I.bookedQty,I.availableQty,
                 I.warrantyPeriod, I.img
             FROM Item I
             WHERE I.I_Id = ?`;
