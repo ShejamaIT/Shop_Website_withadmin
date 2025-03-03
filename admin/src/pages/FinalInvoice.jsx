@@ -100,14 +100,39 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         setDropdownOpen(filtered.length > 0);
     };
     const handleSelectItem = (item) => {
-        // Check if the item is already selected
-        if (!selectedItems.some(selected => selected.stock_Id === item.stock_Id)) {
-            // If not, add it to the selectedItems array
-            setSelectedItems(prevItems => [...prevItems, item]);
+        // Find the requested quantity for the selected item
+        const orderedItem = selectedOrder.items.find(orderItem => orderItem.itemId === item.I_Id);
+
+        if (!orderedItem) {
+            toast.error("Selected stock does not belong to the order.");
+            return;
         }
+
+        const requestedQty = orderedItem.quantity;
+
+        // Count how many times this item (same I_Id) has been selected
+        const selectedCount = selectedItems.filter(selected => selected.I_Id === item.I_Id).length;
+
+        // Check if the stock item is already selected (prevent duplicate stock selection)
+        const isAlreadySelected = selectedItems.some(selected => selected.stock_Id === item.stock_Id);
+
+        if (isAlreadySelected) {
+            toast.error("This stock item has already been selected.");
+            return;
+        }
+
+        // Check if adding another stock item exceeds the requested quantity
+        if (selectedCount >= requestedQty) {
+            toast.error(`You cannot select more than ${requestedQty} stock items for this order.`);
+            return;
+        }
+
+        // If all checks pass, add the item to the selectedItems array
+        setSelectedItems(prevItems => [...prevItems, item]);
         setSearchTerm('');
         setDropdownOpen(false);
     };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
