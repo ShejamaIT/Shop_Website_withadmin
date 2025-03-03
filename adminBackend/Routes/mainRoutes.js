@@ -106,87 +106,87 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 
 // Update item
 router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 },]), async (req, res) => {
-        try {
-            const {I_Id, I_name, descrip, color, material, price, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, sub_one, sub_two, suppliers,} = req.body;
+    try {
+        const {I_Id, I_name, descrip, color, material, price, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, sub_one, sub_two, suppliers,} = req.body;
 
-            if (!I_Id) {
-                return res.status(400).json({ success: false, message: "Item ID is required." });
-            }
-
-            // ✅ Log received files and form data
-            const [itemCheckResult] = await db.query(`SELECT * FROM Item WHERE I_Id = ?`, [I_Id]);
-            if (itemCheckResult.length === 0) {
-                return res.status(404).json({ success: false, message: "Item not found." });
-            }
-
-            const parsedPrice = parseFloat(price) || 0;
-
-            // ✅ Properly extract image buffers
-            const imgBuffer = req.files["img"]?.[0]?.buffer || null;
-            const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
-            const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
-            const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
-
-            // ✅ Fetch subcategory names
-            let subCatOneName = null;
-            let subCatTwoName = sub_two !== "None" ? null : "None";
-
-            if (sub_one) {
-                const [subOneResult] = await db.query(`SELECT subcategory FROM subCat_one WHERE sb_c_id = ?`, [sub_one]);
-                subCatOneName = subOneResult[0]?.subcategory || null;
-            }
-
-            if (sub_two !== "None") {
-                const [subTwoResult] = await db.query(`SELECT subcategory FROM subCat_two WHERE sb_cc_id = ?`, [sub_two]);
-                subCatTwoName = subTwoResult[0]?.subcategory || null;
-            }
-
-            let updateFields = [];
-            let updateValues = [];
-
-            // ✅ Dynamic field updates
-            const fields = {
-                I_name, descrip, color, material, price: parsedPrice, warrantyPeriod, stockQty, bookedQty, availableQty, mn_Cat: maincategory, sb_catOne: subCatOneName, sb_catTwo: subCatTwoName, img: imgBuffer, img1: img1Buffer, img2: img2Buffer, img3: img3Buffer,
-            };
-
-            for (const key in fields) {
-                if (fields[key] !== undefined && fields[key] !== null) {
-                    updateFields.push(`${key} = ?`);
-                    updateValues.push(fields[key]);
-                }
-            }
-
-            if (updateFields.length > 0) {
-                const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
-                updateValues.push(I_Id);
-                await db.query(updateQuery, updateValues);
-            }
-
-            // ✅ Handle suppliers
-            if (suppliers) {
-                let supplierData = typeof suppliers === "string" ? JSON.parse(suppliers) : suppliers;
-                if (Array.isArray(supplierData)) {
-                    for (const { s_ID, unit_cost } of supplierData) {
-                        const parsedUnitCost = parseFloat(unit_cost) || 0;
-                        await db.query(
-                            `INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
-                             VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)`,
-                            [I_Id, s_ID, parsedUnitCost]
-                        );
-                    }
-                }
-            }
-
-            res.status(200).json({
-                success: true,
-                message: "Item updated successfully",
-                data: { I_Id, I_name },
-            });
-        } catch (err) {
-            console.error("❌ Error updating item:", err.message);
-            res.status(500).json({ success: false, message: "Error updating item", details: err.message });
+        if (!I_Id) {
+            return res.status(400).json({ success: false, message: "Item ID is required." });
         }
-    });
+
+        // ✅ Log received files and form data
+        const [itemCheckResult] = await db.query(`SELECT * FROM Item WHERE I_Id = ?`, [I_Id]);
+        if (itemCheckResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Item not found." });
+        }
+
+        const parsedPrice = parseFloat(price) || 0;
+
+        // ✅ Properly extract image buffers
+        const imgBuffer = req.files["img"]?.[0]?.buffer || null;
+        const img1Buffer = req.files["img1"]?.[0]?.buffer || null;
+        const img2Buffer = req.files["img2"]?.[0]?.buffer || null;
+        const img3Buffer = req.files["img3"]?.[0]?.buffer || null;
+
+        // ✅ Fetch subcategory names
+        let subCatOneName = null;
+        let subCatTwoName = sub_two !== "None" ? null : "None";
+
+        if (sub_one) {
+            const [subOneResult] = await db.query(`SELECT subcategory FROM subCat_one WHERE sb_c_id = ?`, [sub_one]);
+            subCatOneName = subOneResult[0]?.subcategory || null;
+        }
+
+        if (sub_two !== "None") {
+            const [subTwoResult] = await db.query(`SELECT subcategory FROM subCat_two WHERE sb_cc_id = ?`, [sub_two]);
+            subCatTwoName = subTwoResult[0]?.subcategory || null;
+        }
+
+        let updateFields = [];
+        let updateValues = [];
+
+        // ✅ Dynamic field updates
+        const fields = {
+            I_name, descrip, color, material, price: parsedPrice, warrantyPeriod, stockQty, bookedQty, availableQty, mn_Cat: maincategory, sb_catOne: subCatOneName, sb_catTwo: subCatTwoName, img: imgBuffer, img1: img1Buffer, img2: img2Buffer, img3: img3Buffer,
+        };
+
+        for (const key in fields) {
+            if (fields[key] !== undefined && fields[key] !== null) {
+                updateFields.push(`${key} = ?`);
+                updateValues.push(fields[key]);
+            }
+        }
+
+        if (updateFields.length > 0) {
+            const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
+            updateValues.push(I_Id);
+            await db.query(updateQuery, updateValues);
+        }
+
+        // ✅ Handle suppliers
+        if (suppliers) {
+            let supplierData = typeof suppliers === "string" ? JSON.parse(suppliers) : suppliers;
+            if (Array.isArray(supplierData)) {
+                for (const { s_ID, unit_cost } of supplierData) {
+                    const parsedUnitCost = parseFloat(unit_cost) || 0;
+                    await db.query(
+                        `INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+                         VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)`,
+                        [I_Id, s_ID, parsedUnitCost]
+                    );
+                }
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Item updated successfully",
+            data: { I_Id, I_name },
+        });
+    } catch (err) {
+        console.error("❌ Error updating item:", err.message);
+        res.status(500).json({ success: false, message: "Error updating item", details: err.message });
+    }
+});
 
 // Save a order
 router.post("/orders", async (req, res) => {
@@ -2527,14 +2527,14 @@ router.get("/find-completed-orders", async (req, res) => {
         // 1️⃣ Fetch Issued Orders with Sales Team & Customer Details
         const orderQuery = `
             SELECT
-                o.orId, o.orDate, o.customerEmail,o.custName, o.contact1, o.contact2, o.advance, o.balance, 
-                o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype, 
-                o.stID, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName, 
+                o.orId, o.orDate, o.customerEmail,o.custName, o.contact1, o.contact2, o.advance, o.balance,
+                o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype,
+                o.stID, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName,
                 d.address, d.district, d.contact, d.status AS deliveryStatus, d.schedule_Date
             FROM Orders o
-            JOIN delivery d ON o.orID = d.orID
-            LEFT JOIN sales_team s ON o.stID = s.stID
-            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+                     JOIN delivery d ON o.orID = d.orID
+                     LEFT JOIN sales_team s ON o.stID = s.stID
+                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
             WHERE d.district = ? AND o.orStatus = 'Completed' AND o.expectedDate = ?;
         `;
 
@@ -2548,10 +2548,10 @@ router.get("/find-completed-orders", async (req, res) => {
         const orderDetails = await Promise.all(orders.map(async (order) => {
             const itemsQuery = `
                 SELECT
-                    od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice, 
+                    od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
                     i.bookedQty, i.availableQty
                 FROM Order_Detail od
-                JOIN Item i ON od.I_Id = i.I_Id
+                         JOIN Item i ON od.I_Id = i.I_Id
                 WHERE od.orID = ?`;
 
             const [items] = await db.query(itemsQuery, [order.orId]);
@@ -2560,7 +2560,7 @@ router.get("/find-completed-orders", async (req, res) => {
             const bookedItemsQuery = `
                 SELECT bi.I_Id, i.I_name, bi.qty
                 FROM booked_item bi
-                JOIN Item i ON bi.I_Id = i.I_Id
+                         JOIN Item i ON bi.I_Id = i.I_Id
                 WHERE bi.orID = ?`;
 
             const [bookedItems] = await db.query(bookedItemsQuery, [order.orId]);
@@ -2569,7 +2569,7 @@ router.get("/find-completed-orders", async (req, res) => {
             const acceptedOrdersQuery = `
                 SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
                 FROM accept_orders ao
-                JOIN Item i ON ao.I_Id = i.I_Id
+                         JOIN Item i ON ao.I_Id = i.I_Id
                 WHERE ao.orID = ?`;
 
             const [acceptedOrders] = await db.query(acceptedOrdersQuery, [order.orId]);
@@ -3395,17 +3395,16 @@ router.get("/delivery-note", async (req, res) => {
             "SELECT * FROM delivery_note WHERE delNoID = ?",
             [delNoID]
         );
-
-
         if (deliveryNote.length === 0) {
             return res.status(404).json({ success: false, message: "Delivery note not found" });
         }
 
-        // Fetch associated orders (only required fields)
+        // Fetch associated orders (including payStatus and balance)
         const [orders] = await db.query(
-            `SELECT o.OrID, o.orStatus AS orderStatus, o.delStatus AS deliveryStatus
+            `SELECT o.OrID, o.orStatus AS orderStatus, o.delStatus AS deliveryStatus, 
+                    o.payStatus, o.balance 
              FROM Orders o
-                      INNER JOIN delivery_note_orders dno ON o.OrID = dno.orID
+             INNER JOIN delivery_note_orders dno ON o.OrID = dno.orID
              WHERE dno.delNoID = ?`,
             [delNoID]
         );
@@ -3428,9 +3427,9 @@ router.get("/delivery-note", async (req, res) => {
         // Organize issued items under their respective orders
         const ordersWithIssuedItems = orders.map(order => ({
             ...order,
-            issuedItems: issuedItems.filter(item => item.orID === order.OrID)
+            issuedItems: issuedItems.filter(item => item.orID === order.OrID),
+            balance: order.payStatus === "COD" ? order.balance : null // Include balance only if COD
         }));
-        console.log("ordersWithIssuedItems "+ordersWithIssuedItems);
 
         return res.status(200).json({
             success: true,
