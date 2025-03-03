@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 const router = express.Router();
 
+
 // Save  new item
 router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 }]), async (req, res) => {
     try {
@@ -620,6 +621,7 @@ router.get("/accept-order-details", async (req, res) => {
         });
     }
 });
+
 // Get Details of isssued order
 router.get("/issued-order-details", async (req, res) => {
     try {
@@ -2640,7 +2642,6 @@ router.get("/find-completed-orders", async (req, res) => {
     }
 });
 
-
 // Get subcat one detail by ca_id
 router.get("/getSubcategories", async (req, res) => {
     const { Ca_Id } = req.query;
@@ -2922,24 +2923,29 @@ router.get("/delivery-schedule", async (req, res) => {
             "SELECT ds_date FROM delivery_schedule WHERE district = ?",
             [district]
         );
-        console.log(result);
 
         if (result.length === 0) {
             return res.status(404).json({ message: "District not found" });
         }
-
-        // Get the current date (yyyy-mm-dd format)
-        const currentDate = new Date().toISOString().split("T")[0];
-
-        // Filter and sort dates
+        
+        // Format the dates correctly without timezone shifts
         const upcomingDates = result
             .map(row => {
-                // Convert ds_date to a string in yyyy-mm-dd format (ignoring time part)
-                const date = new Date(row.ds_date).toISOString().split("T")[0];
-                return date;
+                // Ensure the date remains in IST (India Standard Time)
+                const date = new Date(row.ds_date);
+                date.setHours(0, 0, 0, 0); // Remove any possible time shifts
+
+                // Use toLocaleDateString('en-CA') to keep format as YYYY-MM-DD
+                const formattedDate = date.toLocaleDateString('en-CA');
+
+                console.log("Formatted Date in IST:", formattedDate); // Debugging output
+                return formattedDate;
             })
-            .filter(date => date >= currentDate) // Keep only upcoming dates
-            .sort((a, b) => new Date(a) - new Date(b)); // Sort in ascending order
+            .filter(date => date >= new Date().toLocaleDateString('en-CA')) // Keep only upcoming dates
+            .sort((a, b) => new Date(a) - new Date(b)); // Sort dates
+
+        console.log("Fixed Upcoming Dates:", upcomingDates);
+
 
         if (upcomingDates.length === 0) {
             return res.status(404).json({ message: "No upcoming delivery dates available" });
@@ -3382,7 +3388,6 @@ router.get("/delivery-note", async (req, res) => {
         });
     }
 });
-
 
 // Save New Coupone
 router.post("/coupone", async (req, res) => {
