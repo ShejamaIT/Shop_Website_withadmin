@@ -158,23 +158,21 @@ const DeliveryNoteDetails = () => {
                                                                 </Input>
                                                             </FormGroup>
                                                         )}
-
                                                         {/* Display Issued Items for this Order */}
-                                                        {/*<div className="issued-items">*/}
-                                                        {/*    <h6 className="mt-3">Issued Items:</h6>*/}
-                                                        {/*    {order.issuedItems.length > 0 ? (*/}
-                                                        {/*        order.issuedItems.map((item, itemIndex) => (*/}
-                                                        {/*            <div key={itemIndex} className="item-box">*/}
-                                                        {/*                <p><strong>Item ID:</strong> {item.I_Id}</p>*/}
-                                                        {/*                <p><strong>Stock ID:</strong> {item.stock_Id}</p>*/}
-                                                        {/*                <p><strong>Barcode:</strong> {item.barcode}</p>*/}
-                                                        {/*                <p><strong>Date Issued:</strong> {new Date(item.datetime).toLocaleString()}</p>*/}
-                                                        {/*            </div>*/}
-                                                        {/*        ))*/}
-                                                        {/*    ) : (*/}
-                                                        {/*        <p className="text-muted">No issued items found for this order.</p>*/}
-                                                        {/*    )}*/}
-                                                        {/*</div>*/}
+                                                        <div className="issued-items">
+                                                            <h6 className="mt-3">Issued Items:</h6>
+                                                            {order.issuedItems.length > 0 ? (
+                                                                order.issuedItems.map((item, itemIndex) => (
+                                                                    <div key={itemIndex} className="item-box">
+                                                                        <p><strong>Item ID:</strong> {item.I_Id}</p>
+                                                                        <p><strong>Stock ID:</strong> {item.stock_Id}</p>
+                                                                        <p><strong>Date Issued:</strong> {new Date(item.datetime).toLocaleString()}</p>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <p className="text-muted">No issued items found for this order.</p>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -201,5 +199,4 @@ const DeliveryNoteDetails = () => {
         </Helmet>
     );
 };
-
 export default DeliveryNoteDetails;

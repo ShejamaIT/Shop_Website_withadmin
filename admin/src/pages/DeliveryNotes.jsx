@@ -4,9 +4,9 @@ import { toast } from "react-toastify";
 import "../style/deliverynotes.css";
 import MakeDeliveryNote from "./MakeDeliveryNote";
 import DeliveryNoteView from "./DeliveryNoteView";
-import FinalInvoice from "./FinalInvoice";
 import {logDOM} from "@testing-library/react";
 import ReceiptView from "./ReceiptView";
+import FinalInvoice2 from "./FinalInvoice2";
 
 const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);
@@ -23,7 +23,6 @@ const DeliveryNotes = () => {
     const [showDeliveryView, setShowDeliveryView] = useState(false);
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
-
     const handleSubmit2 = async (formData) => {
         try {
             const updatedReceiptData = {
@@ -42,7 +41,7 @@ const DeliveryNotes = () => {
                 vehicleName: formData.vehicleId,  // Assuming vehicleId maps to vehicleName
                 hire:formData.hire,
                 date: selectedDeliveryDate,  // The selected delivery date
-                orderIds: selectedOrders.map(order => order.orId),  // Extracting order IDs
+                orderIds: selectedOrders.map(order => order.orderId),  // Extracting order IDs
                 district: selectedRoute,
                 balanceToCollect: formData.balanceToCollect,
             };
@@ -61,24 +60,21 @@ const DeliveryNotes = () => {
             const data = await response.json();
 
             if (response.ok) {
-                // Optionally, set the receipt data
                 setReceiptData(updatedReceiptData);
                 setShowModal2(false);
                 setShowDeliveryView(true);
-                // Show success message to the user
                 toast.success("Delivery note created successfully.");
+                setTimeout(() => {
+                    window.location.reload(); // Auto-refresh the page
+                }, 1000);
             } else {
-                // Handle errors from the API
-                console.error("Error creating delivery note:", data.message);
                 toast.error(data.message || "Error creating delivery note.");
             }
 
         } catch (error) {
-            console.error("Error submitting form data:", error);
             toast.error("An unexpected error occurred while submitting the delivery note.");
         }
     };
-
     useEffect(() => {
         fetchRoutes();
     }, []);
@@ -95,8 +91,6 @@ const DeliveryNotes = () => {
     const loadOders = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
-
-        // Use useEffect hook to call fetchOrders only after selectedDeliveryDate changes
         fetchOrders(routedate);
     };
 
@@ -106,11 +100,8 @@ const DeliveryNotes = () => {
                 toast.error("Please select both route and delivery date.");
                 return;
             }
-
             const response = await fetch(`http://localhost:5001/api/admin/main/find-completed-orders?district=${selectedRoute}&date=${date}`);
             const data = await response.json();
-            console.log(data);
-
             if (data.orders) {
                 setOrders(data.orders);
             } else {
@@ -120,7 +111,6 @@ const DeliveryNotes = () => {
             toast.error("Error fetching orders.");
         }
     };
-
     const fetchDeliveryDates = async (district) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
@@ -138,40 +128,33 @@ const DeliveryNotes = () => {
             setNoScheduleMessage("No schedule available for this district.");
         }
     };
-
     const handleRouteChange = (e) => {
         const routeId = e.target.value;
         setSelectedRoute(routeId);
-        //fetchOrders(routeId);
         fetchDeliveryDates(routeId); // Fetch the delivery schedule when the route changes
         setSelectedOrders([]);
         setTotalAmount(0);
     };
-
-
-
     const handleOrderSelection = (order) => {
         const updatedOrders = selectedOrders.includes(order)
             ? selectedOrders.filter(o => o !== order)
             : [...selectedOrders, order];
         setSelectedOrders(updatedOrders);
         setSelectedOrder(order);
-        console.log(order);
         handleEditClick1(order);
         calculateTotal(updatedOrders);
     };
     const handleEditClick1 = (order) => {
         if (!order) return;
-        console.log(order);
         setSelectedOrder(order);
         setShowModal1(true);
     };
-
     const calculateTotal = (orders) => {
         const total = orders.reduce((sum, order) => sum + order.balance, 0);
         setTotalAmount(total);
     };
     const handleSubmit3 = async (formData) => {
+        console.log(formData);
         setShowModal2(false);
         const updatedData = {
             orID: selectedOrder.orderId,
@@ -189,39 +172,28 @@ const DeliveryNotes = () => {
             salesperson: selectedOrder.salesTeam.employeeName,
             items: selectedOrder.items,
         };
-
         try {
             // Make API request to the /isssued-order endpoint
-            const response = await fetch('http://localhost:5001/api/admin/main/isssued-order', {
+            const response = await fetch('http://localhost:5001/api/admin/main/isssued-items', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updatedData),
             });
-
             const result = await response.json();
-            console.log(result);
-
             if (response.ok) {
-                // Successfully updated
-                console.log("Order updated successfully:", result.message);
-                // Optionally, handle success, e.g., navigate or show a success message
+                toast.success("Update order Successfully");
                 setShowModal1(false);
                 setReceiptData(updatedData);  // Set data for receipt
                 setShowReceiptView(true);         // Show receipt view
             } else {
-                // Handle error response
                 console.error("Error:", result.message);
-                // Optionally, show error message to the user
             }
         } catch (error) {
             console.error("Error making API request:", error.message);
-            // Handle network error, show error message to the user
         }
     };
-
-
     const handleEditClick3 = (selectedOrders) => {
         if (!selectedOrders) return;
         setSelectedOrders(selectedOrders);
@@ -282,7 +254,7 @@ const DeliveryNotes = () => {
                                                 </td>
                                                 <td>{order.orderId}</td>
                                                 <td>{order.customerName}</td>
-                                                <td>Rs.{order.total}</td>
+                                                <td>Rs.{order.totalPrice}</td>
                                                 <td>Rs.{order.advance}</td>
                                                 <td>Rs.{order.balance}</td>
                                             </tr>
@@ -320,7 +292,7 @@ const DeliveryNotes = () => {
                         />
                     )}
                     {showModal1 && selectedOrder && (
-                        <FinalInvoice
+                        <FinalInvoice2
                             selectedOrder={selectedOrder}
                             setShowModal2={setShowModal1}
                             handlePaymentUpdate={handleSubmit3}
@@ -331,5 +303,4 @@ const DeliveryNotes = () => {
         </Container>
     );
 };
-
 export default DeliveryNotes;

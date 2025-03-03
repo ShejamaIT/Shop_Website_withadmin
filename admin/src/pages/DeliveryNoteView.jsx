@@ -46,7 +46,7 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                     {orders.map((order, index) => (
                         <tr key={index}>
                             <td>{order.orId}</td>
-                            <td>{order.custName}</td>
+                            <td>{order.customerName}</td>
                             <td>Rs. {order.total.toFixed(2)}</td>
                             <td>Rs. {order.advance.toFixed(2)}</td>
                             <td>Rs. {order.balance.toFixed(2)}</td>

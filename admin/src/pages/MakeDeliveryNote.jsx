@@ -3,6 +3,7 @@ import "../style/deleiverynote.css";
 import { toast } from "react-toastify";
 
 const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }) => {
+    console.log(selectedOrders);
     const [vehicleId, setVehicleId] = useState("");
     const [driverName, setDriverName] = useState("");
     const [hire, setHire] = useState("");
@@ -55,9 +56,9 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                         <tbody>
                         {selectedOrders.map((order, index) => (
                             <tr key={index}>
-                                <td>{order.orId}</td>
-                                <td>{order.custName}</td>
-                                <td>Rs.{order.total}</td>
+                                <td>{order.orderId}</td>
+                                <td>{order.customerName}</td>
+                                <td>Rs.{order.totalPrice}</td>
                                 <td>Rs.{order.advance}</td>
                                 <td>Rs.{order.balance.toFixed(2)}</td>
                             </tr>

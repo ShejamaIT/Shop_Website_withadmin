@@ -6,20 +6,7 @@ import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reac
 import "../style/placeorder.css";
 
 const PlaceOrder = ({ onPlaceOrder }) => {
-    const [formData, setFormData] = useState({
-        customerName: "",
-        surname: "",
-        email: "",
-        phoneNumber: "",
-        otherNumber: "",
-        address: "",
-        city: "",
-        district: "",
-        specialNote: "",
-        dvStatus: "",
-        expectedDate: "",
-        couponCode: "",
-    });
+    const [formData, setFormData] = useState({customerName: "", surname: "", email: "", phoneNumber: "", otherNumber: "", address: "", city: "", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",});
     const [items, setItems] = useState([]);
     const [selectedItems, setSelectedItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
@@ -54,15 +41,12 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 toast.error("Error fetching coupons.");
             }
         };
-
         fetchItems();
         fetchCoupons();
     }, []);
-
     useEffect(() => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -154,12 +138,11 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             return;
         }
 
-        // Combine customerName and surname into a single 'name' field
-        const fullName = `${formData.customerName} ${formData.surname}`.trim(); // Trim to remove extra spaces
+        const fullName = `${formData.customerName} ${formData.surname}`.trim();
 
         const orderData = {
             ...formData,
-            name: fullName, // Use 'name' instead of separate fields
+            name: fullName,
             items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
             deliveryPrice,
             discountAmount,
@@ -182,6 +165,9 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 if (response.ok) {
                     toast.success("Order placed successfully!");
                     handleClear();
+                    setTimeout(() => {
+                        window.location.reload(); // Auto-refresh the page
+                    }, 1000);
                 } else {
                     toast.error(result.message || "Something went wrong. Please try again.");
                 }
@@ -191,7 +177,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             }
         }
     };
-
     const validateForm = () => {
         const validationErrors = [];
         if (!formData.dvStatus) validationErrors.push("Please select a delivery method.");
@@ -224,20 +209,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         return true;
     };
     const handleClear = () => {
-        setFormData({
-            customerName: "",
-            surname: "",
-            email: "",
-            phoneNumber: "",
-            otherNumber: "",
-            address: "",
-            city: "",
-            district: "",
-            specialNote: "",
-            expectedDate: "",
-            couponCode: "",
-            dvStatus: "",
-        });
+        setFormData({customerName: "", surname: "", email: "", phoneNumber: "", otherNumber: "", address: "", city: "", district: "", specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",});
         setSelectedItems([]);
         setSearchTerm("");
         setDeliveryPrice(0);
