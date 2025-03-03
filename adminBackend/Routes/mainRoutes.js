@@ -2927,7 +2927,7 @@ router.get("/delivery-schedule", async (req, res) => {
         if (result.length === 0) {
             return res.status(404).json({ message: "District not found" });
         }
-        
+
         // Format the dates correctly without timezone shifts
         const upcomingDates = result
             .map(row => {
@@ -2941,11 +2941,13 @@ router.get("/delivery-schedule", async (req, res) => {
                 console.log("Formatted Date in IST:", formattedDate); // Debugging output
                 return formattedDate;
             })
-            .filter(date => date >= new Date().toLocaleDateString('en-CA')) // Keep only upcoming dates
+            .filter(date => {
+                const today = new Date().toLocaleDateString('en-CA');
+                return date >= today; // Keep today's date and all upcoming dates
+            })
             .sort((a, b) => new Date(a) - new Date(b)); // Sort dates
 
         console.log("Fixed Upcoming Dates:", upcomingDates);
-
 
         if (upcomingDates.length === 0) {
             return res.status(404).json({ message: "No upcoming delivery dates available" });
@@ -2961,6 +2963,8 @@ router.get("/delivery-schedule", async (req, res) => {
         return res.status(500).json({ message: "Error fetching delivery schedule" });
     }
 });
+
+
 
 // Update change qty
 router.put("/change-quantity", async (req, res) => {
