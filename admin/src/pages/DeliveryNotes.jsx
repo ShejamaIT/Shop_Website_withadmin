@@ -5,6 +5,8 @@ import "../style/deliverynotes.css";
 import MakeDeliveryNote from "./MakeDeliveryNote";
 import DeliveryNoteView from "./DeliveryNoteView";
 import FinalInvoice from "./FinalInvoice";
+import {logDOM} from "@testing-library/react";
+import ReceiptView from "./ReceiptView";
 
 const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);
@@ -18,6 +20,7 @@ const DeliveryNotes = () => {
     const [selectedDeliveryDate, setSelectedDeliveryDate] = useState(""); // Added state for selected date
     const [showModal2, setShowModal2] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
+    const [showDeliveryView, setShowDeliveryView] = useState(false);
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
 
@@ -61,7 +64,7 @@ const DeliveryNotes = () => {
                 // Optionally, set the receipt data
                 setReceiptData(updatedReceiptData);
                 setShowModal2(false);
-                setShowReceiptView(true);
+                setShowDeliveryView(true);
                 // Show success message to the user
                 toast.success("Delivery note created successfully.");
             } else {
@@ -169,10 +172,7 @@ const DeliveryNotes = () => {
         setTotalAmount(total);
     };
     const handleSubmit3 = async (formData) => {
-        console.log(selectedOrder);
-        console.log(formData);
         setShowModal2(false);
-
         const updatedData = {
             orID: selectedOrder.orderId,
             delStatus: formData.deliveryStatus,
@@ -190,33 +190,35 @@ const DeliveryNotes = () => {
             items: selectedOrder.items,
         };
 
-        // try {
-        //     // Make API request to the /isssued-order endpoint
-        //     const response = await fetch('http://localhost:5001/api/admin/main/isssued-order', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify(updatedData),
-        //     });
-        //
-        //     const result = await response.json();
-        //
-        //     if (response.ok) {
-        //         // Successfully updated
-        //         console.log("Order updated successfully:", result.message);
-        //         // Optionally, handle success, e.g., navigate or show a success message
-        //         setReceiptData(updatedData);  // Set data for receipt
-        //         setShowReceiptView(true);         // Show receipt view
-        //     } else {
-        //         // Handle error response
-        //         console.error("Error:", result.message);
-        //         // Optionally, show error message to the user
-        //     }
-        // } catch (error) {
-        //     console.error("Error making API request:", error.message);
-        //     // Handle network error, show error message to the user
-        // }
+        try {
+            // Make API request to the /isssued-order endpoint
+            const response = await fetch('http://localhost:5001/api/admin/main/isssued-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
+
+            const result = await response.json();
+            console.log(result);
+
+            if (response.ok) {
+                // Successfully updated
+                console.log("Order updated successfully:", result.message);
+                // Optionally, handle success, e.g., navigate or show a success message
+                setShowModal1(false);
+                setReceiptData(updatedData);  // Set data for receipt
+                setShowReceiptView(true);         // Show receipt view
+            } else {
+                // Handle error response
+                console.error("Error:", result.message);
+                // Optionally, show error message to the user
+            }
+        } catch (error) {
+            console.error("Error making API request:", error.message);
+            // Handle network error, show error message to the user
+        }
     };
 
 
@@ -305,8 +307,14 @@ const DeliveryNotes = () => {
                             handleDeliveryUpdate={handleSubmit2}
                         />
                     )}
-                    {showReceiptView && (
+                    {showDeliveryView && (
                         <DeliveryNoteView
+                            receiptData={receiptData}
+                            setShowDeliveryView={setShowDeliveryView}
+                        />
+                    )}
+                    {showReceiptView && (
+                        <ReceiptView
                             receiptData={receiptData}
                             setShowReceiptView={setShowReceiptView}
                         />

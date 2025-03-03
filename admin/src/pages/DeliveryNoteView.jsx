@@ -1,7 +1,7 @@
 import React from "react";
 import "../style/receiptView.css";
 
-const DeliveryNoteView = ({ receiptData, setShowReceiptView }) => {
+const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
     // Destructure necessary values from the receiptData
     const { orders, vehicleId, driverName, hire, balanceToCollect, selectedDeliveryDate } = receiptData;
     console.log(receiptData);
@@ -80,7 +80,7 @@ const DeliveryNoteView = ({ receiptData, setShowReceiptView }) => {
                 {/* Action Buttons */}
                 <div className="modal-buttons">
                     <button onClick={() => window.print()} className="print-btn">Print</button>
-                    <button onClick={() => setShowReceiptView(false)} className="close-btn">Close</button>
+                    <button onClick={() => setShowDeliveryView(false)} className="close-btn">Close</button>
                 </div>
             </div>
         </div>
