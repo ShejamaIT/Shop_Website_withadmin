@@ -3088,7 +3088,7 @@ router.post("/isssued-order", async (req, res) => {
     if (!orID || !stID || paymentAmount === undefined || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
-    const IssuedPrice = parseFloat(subtotal) - parseFloat(discount);
+    const IssuedPrice = parseFloat(paymentAmount);
 
 
     try {
@@ -3143,6 +3143,60 @@ router.post("/isssued-order", async (req, res) => {
              VALUES (?, ?, NOW())`,
             [orID, paymentAmount]
         );
+
+        return res.status(200).json({ success: true, message: "Order updated successfully" });
+
+    } catch (error) {
+        console.error("Error updating order:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+// Issued Orders items
+router.post("/isssued-items", async (req, res) => {
+    const { orID, payStatus, selectedItems } = req.body;
+
+    console.log(req.body);
+
+    if (!orID || !payStatus || !selectedItems || selectedItems.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    try {
+        // 1. Update Orders table
+        await db.query(
+            `UPDATE Orders SET  orStatus = 'Issued', payStatus = ? WHERE OrID = ?`,
+            [ payStatus, orID]
+        );
+
+        // 2. Update m_s_r_detail table (Mark selected items as issued)
+        for (const item of selectedItems) {
+            await db.query(
+                `UPDATE m_s_r_detail
+                 SET status = 'Issued', orID = ?, datetime = NOW()
+                 WHERE srd_Id = ?`,
+                [orID, item.srd_Id]
+            );
+        }
+
+        // 4. Update Item stock quantities using Order_Detail table
+        const [orderItems] = await db.query(
+            `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
+            [orID]
+        );
+
+        for (const item of orderItems) {
+            await db.query(
+                `UPDATE Item
+                 SET stockQty = stockQty - ?, bookedQty = bookedQty - ?
+                 WHERE I_Id = ?`,
+                [item.qty, item.qty, item.I_Id]
+            );
+        }
+
+        // 5. Delete from booked_item & accept_orders
+        await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
+        await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
 
         return res.status(200).json({ success: true, message: "Order updated successfully" });
 
@@ -3271,6 +3325,7 @@ router.post("/employees", async (req, res) => {
 router.post("/create-delivery-note", async (req, res) => {
     try {
         const { driverName, vehicleName, hire, date, district, orderIds ,balanceToCollect } = req.body;
+        console.log(orderIds);
 
         const delHire = parseFloat(hire);
 
@@ -3330,7 +3385,6 @@ router.post("/create-delivery-note", async (req, res) => {
 router.get("/delivery-note", async (req, res) => {
     try {
         const { delNoID } = req.query;
-        console.log("Requested Delivery Note ID:", delNoID);
 
         if (!delNoID) {
             return res.status(400).json({ success: false, message: "Delivery Note ID is required" });
@@ -3341,6 +3395,7 @@ router.get("/delivery-note", async (req, res) => {
             "SELECT * FROM delivery_note WHERE delNoID = ?",
             [delNoID]
         );
+
 
         if (deliveryNote.length === 0) {
             return res.status(404).json({ success: false, message: "Delivery note not found" });
@@ -3354,7 +3409,6 @@ router.get("/delivery-note", async (req, res) => {
              WHERE dno.delNoID = ?`,
             [delNoID]
         );
-
         if (orders.length === 0) {
             return res.status(404).json({ success: false, message: "No orders found for this delivery note" });
         }
@@ -3376,6 +3430,7 @@ router.get("/delivery-note", async (req, res) => {
             ...order,
             issuedItems: issuedItems.filter(item => item.orID === order.OrID)
         }));
+        console.log("ordersWithIssuedItems "+ordersWithIssuedItems);
 
         return res.status(200).json({
             success: true,
