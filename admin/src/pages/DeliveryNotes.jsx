@@ -106,6 +106,7 @@ const DeliveryNotes = () => {
 
             const response = await fetch(`http://localhost:5001/api/admin/main/find-completed-orders?district=${selectedRoute}&date=${date}`);
             const data = await response.json();
+            console.log(data);
 
             if (data.orders) {
                 setOrders(data.orders);
@@ -278,7 +279,7 @@ const DeliveryNotes = () => {
                                                     <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
                                                 </td>
                                                 <td>{order.orderId}</td>
-                                                <td>{order.custName}</td>
+                                                <td>{order.customerName}</td>
                                                 <td>Rs.{order.total}</td>
                                                 <td>Rs.{order.advance}</td>
                                                 <td>Rs.{order.balance}</td>

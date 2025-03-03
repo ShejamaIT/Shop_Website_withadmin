@@ -139,6 +139,7 @@ const OrderDetails = () => {
         const updatedTotal = calculateTotal();
         const updatedBalance = calculateBalance(updatedTotal,formData.advance);
         const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance };
+        console.log(updatedData);
         let updatedGeneralOrder = null;
         try {
             // Step 1: Update order general details only if changed
@@ -208,8 +209,7 @@ const OrderDetails = () => {
 
     // ✅ Improved change detection functions
     const hasGeneralDetailsChanged = (updatedData) => {
-        return updatedData.orderDate !== order.orderDate ||
-            updatedData.phoneNumber !== order.phoneNumber ||
+        return updatedData.phoneNumber !== order.phoneNumber ||
             updatedData.optionalNumber !== order.optionalNumber ||
             updatedData.orderStatus !== order.orderStatus ||
             updatedData.deliveryStatus !== order.deliveryStatus ||
@@ -217,7 +217,6 @@ const OrderDetails = () => {
             updatedData.discount !== order.discount ||
             updatedData.totalPrice !== order.totalPrice ||
             updatedData.payStatus !== order.payStatus ||
-            updatedData.expectedDeliveryDate !== order.expectedDeliveryDate ||
             updatedData.specialNote !== order.specialNote;
     };
 
@@ -344,6 +343,10 @@ const OrderDetails = () => {
             ],
         }));
     };
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
+    };
 
 
     if (loading) return <p>Loading...</p>;
@@ -364,7 +367,7 @@ const OrderDetails = () => {
                                 <div className="order-header">
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="order-general">
-                                        <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
+                                        <p><strong>Order Date:</strong> {order.orderDate}</p>
                                         <p><strong>Customer Email:</strong> {order.customerEmail}</p>
 
                                         {!isEditing ? (
@@ -424,7 +427,7 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
-                                        <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
+                                        <p><strong>Expected Delivery Date:</strong> {order.expectedDeliveryDate}</p>
                                         {!isEditing ? (
                                             <p><strong>Contact:</strong> {order.phoneNumber}</p>
                                         ) : (
