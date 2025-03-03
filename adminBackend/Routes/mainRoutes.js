@@ -1301,7 +1301,6 @@ router.get("/allitemslessone", async (req, res) => {
         const formattedItems = items.map(item => ({
             I_Id: item.I_Id,
             I_name: item.I_name,
-            Ty_id: item.Ty_id,
             descrip: item.descrip,
             price: item.price,
             availableQty: item.availableQty,
@@ -2200,7 +2199,7 @@ router.get("/categories", async (req, res) => {
 });
 
 //API to Get All Sub Categories (sub_one and sub_two) by Category ID (Ca_Id):
-router.get("/types", async (req, res) => {
+router.get("/subcategories", async (req, res) => {
     try {
         const { Ca_Id } = req.query;
 
@@ -2266,7 +2265,7 @@ router.get("/types", async (req, res) => {
 });
 
 // find subcat one and two data by category name
-router.get("/typesname", async (req, res) => {
+router.get("/SubCatNames", async (req, res) => {
     try {
         const { categoryName } = req.query;
 
@@ -2341,6 +2340,7 @@ router.get("/typesname", async (req, res) => {
         return res.status(500).json({ message: "Error fetching subcategories." });
     }
 });
+
 
 // API endpoint to save item-supplier association
 router.post('/add-item-supplier', async (req, res) => {
