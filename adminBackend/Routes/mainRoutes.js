@@ -2964,8 +2964,6 @@ router.get("/delivery-schedule", async (req, res) => {
     }
 });
 
-
-
 // Update change qty
 router.put("/change-quantity", async (req, res) => {
     const { orId, itemId, newQuantity, updatedPrice, booked } = req.body;
