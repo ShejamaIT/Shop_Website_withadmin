@@ -32,10 +32,6 @@ const AllSaleteam = () => {
         fetchSalesTeamMembers();
     }, []);
 
-    function handleNavigate(stid) {
-        navigate(`/saleteam-detail/${stid}`);
-    }
-
     const handleAddEmployee = (newEmployee) => {
         if (newEmployee.job === "Sales") {
             const newSalesMember = {

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Table, Button } from "reactstrap";
-import NavBar from "../components/header/navBar";
 import Helmet from "../components/Helmet/Helmet";
 import "../style/SaleteamDetail.css";
 
 const SaleteamDetail = ({ Saleteam }) => {
-    console.log(Saleteam);
     const [salesteamMember, setSalesteamMember] = useState(null);
     const [orders, setOrders] = useState([]);
+    const [coupones, setCoupones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -23,17 +21,15 @@ const SaleteamDetail = ({ Saleteam }) => {
     }, [Saleteam.stID]); // Run this effect when 'id' changes
 
     const fetchOrder = async (id) => {
-        console.log(id);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/orders/by-sales-team?stID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
-            console.log(data.data.orders);
-
             if (data.data) {
                 setSalesteamMember(data.data.memberDetails || null); // Ensure member details are set properly
                 setOrders(data.data.orders || []); // If no orders, set an empty array
+                setCoupones(data.data.coupons || []); // If no orders, set an empty array
             } else {
                 setError("No data available for this sales team.");
                 setOrders([]); // Ensure orders remain an empty array if there's no data
@@ -42,7 +38,6 @@ const SaleteamDetail = ({ Saleteam }) => {
 
             setLoading(false);
         } catch (err) {
-            console.error("Error fetching order details:", err);
             setError(err.message);
             setOrders([]); // Ensure orders remain empty on error
             setSalesteamMember(null); // Clear member details on error
@@ -75,8 +70,6 @@ const SaleteamDetail = ({ Saleteam }) => {
                 <Container>
                     <Row>
                         <Col lg="12">
-                            {/*<h4 className="salesteam-title">Sales Team Member: {salesteamMember?.employeeName}</h4>*/}
-
                             {/* Sales Team Member Details */}
                             <div className="salesteam-details">
                                 <Table bordered className="member-table">
@@ -104,6 +97,32 @@ const SaleteamDetail = ({ Saleteam }) => {
                                     </tbody>
                                 </Table>
                             </div>
+
+                            {/* Coupon Details */}
+                            <div className="coupon-detail">
+                                <h4 className="sub-title">Coupon Details</h4>
+                                {coupones &&coupones.length > 0 ? (
+                                    <Table bordered className="coupon-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Coupon ID</th>
+                                            <th>Discount (Rs.)</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {coupones.map((coupon, index) => (
+                                            <tr key={index}>
+                                                <td>{coupon.cpID}</td>
+                                                <td>Rs. {coupon.discount}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </Table>
+                                ) : (
+                                    <p className="no-coupon-text">No coupons available.</p>
+                                )}
+                            </div>
+
 
                             {/* Orders for this Sales Team Member */}
                             <div className="order-details">
@@ -161,5 +180,4 @@ const SaleteamDetail = ({ Saleteam }) => {
         </Helmet>
     );
 };
-
 export default SaleteamDetail;

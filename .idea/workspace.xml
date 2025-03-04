@@ -29,9 +29,10 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-4-5.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-5-5.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllSaleteam.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllSaleteam.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +107,7 @@
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start adminBackend">
+  <component name="RunManager" selected="npm.start admin">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -223,7 +224,7 @@
       <workItem from="1740714333448" duration="28464000" />
       <workItem from="1740805664312" duration="4900000" />
       <workItem from="1740975514280" duration="24675000" />
-      <workItem from="1741060307902" duration="2492000" />
+      <workItem from="1741060307902" duration="4701000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -568,7 +569,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="270" />
+    <option name="localTasksCounter" value="271" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -587,7 +588,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update api" />
     <MESSAGE value="modify errores" />
     <MESSAGE value="update calculate" />
     <MESSAGE value="update some bugs" />
@@ -610,8 +610,9 @@
     <MESSAGE value="update dashboard" />
     <MESSAGE value="update delivery note" />
     <MESSAGE value="update final invoice scan" />
-    <MESSAGE value="update delivery nte detail view" />
     <MESSAGE value="update auto refresh part" />
-    <option name="LAST_COMMIT_MESSAGE" value="update auto refresh part" />
+    <MESSAGE value="update delivery nte detail view" />
+    <MESSAGE value="update add refresh thing" />
+    <option name="LAST_COMMIT_MESSAGE" value="update add refresh thing" />
   </component>
 </project>

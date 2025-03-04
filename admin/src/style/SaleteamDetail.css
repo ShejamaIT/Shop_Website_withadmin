@@ -1,75 +1,137 @@
+/*.order-title {*/
+/*    text-align: center;*/
+/*    font-size: 24px;*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+/*.sub-title {*/
+/*    font-size: 20px;*/
+/*    font-weight: bold;*/
+/*    margin-top: 30px;*/
+/*}*/
+/*.order-details ,.coupone-detail {*/
+/*    margin-top: 20px;*/
+/*    padding: 20px;*/
+/*    background: #fff;*/
+/*    border-radius: 10px;*/
+/*    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);*/
+/*}*/
+/*.order-table, .items-table, .summary-table , .coupone-table{*/
+/*    width: 100%;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+/*.order-table td, .items-table td, .summary-table td {*/
+/*    padding: 10px;*/
+/*}*/
+
+/*.order-table tbody tr td:first-child,*/
+/*.summary-table tbody tr td:first-child {*/
+/*    background: #f8f9fa;*/
+/*    font-weight: bold;*/
+/*}*/
+/*.status {*/
+/*    padding: 5px 10px;*/
+/*    border-radius: 5px;*/
+/*    font-weight: bold;*/
+/*}*/
+/*.loading-text, .error-text {*/
+/*    text-align: center;*/
+/*    font-size: 18px;*/
+/*    font-weight: bold;*/
+/*    margin-top: 20px;*/
+/*}*/
+/*.text-center {*/
+/*    text-align: center;*/
+/*}*/
+
+
 .order-title {
     text-align: center;
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
+
 }
 
 .sub-title {
     font-size: 20px;
     font-weight: bold;
     margin-top: 30px;
+
 }
 
-.order-details {
+/* Styling for tables */
+.order-details, .coupon-detail {
     margin-top: 20px;
     padding: 20px;
-    background: #fff;
+    background: #fff; /* Black background */
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
-.order-table, .items-table, .summary-table {
+/* Table styles */
+.order-table, .items-table, .summary-table, .coupon-table {
     width: 100%;
     margin-bottom: 20px;
+    border-collapse: collapse;
 }
 
-.order-table td, .items-table td, .summary-table td {
+/* Table headers */
+.order-table thead tr th,
+.items-table thead tr th,
+.summary-table thead tr th,
+.coupon-table thead tr th {
+    background: black !important; /* Black background */
+    color: gold !important; /* Gold text */
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid gold;
+}
+
+/* Table cells */
+.order-table td,
+.items-table td,
+.summary-table td,
+.coupon-table td {
     padding: 10px;
+    text-align: center;
+    border: 1px solid gold;
+    color: #000;
 }
 
+/* Alternating row colors */
+.order-table tbody tr:nth-child(even),
+.items-table tbody tr:nth-child(even),
+.summary-table tbody tr:nth-child(even),
+.coupon-table tbody tr:nth-child(even) {
+    background: rgba(255, 215, 0, 0.1); /* Light gold tint */
+}
+
+/* First column styles */
 .order-table tbody tr td:first-child,
 .summary-table tbody tr td:first-child {
-    background: #f8f9fa;
+    background: black; /* Black background */
     font-weight: bold;
+    color: gold; /* Gold text */
 }
 
+/* Status styles */
 .status {
     padding: 5px 10px;
     border-radius: 5px;
     font-weight: bold;
+    background: gold;
+    color: black;
 }
 
-.status.pending {
-    background: #ffeb3b;
-    color: #000;
-}
-
-.status.accepted {
-    background: #4caf50;
-    color: white;
-}
-
-.status.processing {
-    background: #2196f3;
-    color: white;
-}
-
-.status.completed {
-    background: #8bc34a;
-    color: white;
-}
-
-.status.cancelled {
-    background: #f44336;
-    color: white;
-}
-
+/* Loading and Error messages */
 .loading-text, .error-text {
     text-align: center;
     font-size: 18px;
     font-weight: bold;
     margin-top: 20px;
+    color: gold;
 }
 
 .text-center {
