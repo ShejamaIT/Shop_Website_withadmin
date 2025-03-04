@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button } from "reactstrap";
+import {
+    Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button
+} from "reactstrap";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
@@ -8,29 +10,27 @@ import AddEmployee from "./AddEmployee";
 import SaleteamDetail from "./SaleteamDetail";
 
 const AllSaleteam = () => {
-    const [activeTab, setActiveTab] = useState("");
+    const [mainTab, setMainTab] = useState("salesTeam"); // Tracks main tab selection
+    const [activeSubTab, setActiveSubTab] = useState(""); // Tracks sub-tab for Sales Team
     const [salesteamMembers, setSalesteamMembers] = useState([]);
-    const navigate = useNavigate();
+
+    useEffect(() => {
+        fetchSalesTeamMembers();
+    }, []);
 
     const fetchSalesTeamMembers = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
             const data = await response.json();
-            console.log(data.data);
+
             if (data.data && data.data.length > 0) {
                 setSalesteamMembers(data.data);
-                setActiveTab(data.data[0].stID);
-            } else {
-                setActiveTab("addEmployee");
+                setActiveSubTab(data.data[0].stID); // Set first member as default sub-tab
             }
         } catch (error) {
             console.error("Error fetching sales team members:", error);
         }
     };
-
-    useEffect(() => {
-        fetchSalesTeamMembers();
-    }, []);
 
     const handleAddEmployee = (newEmployee) => {
         if (newEmployee.job === "Sales") {
@@ -45,47 +45,84 @@ const AllSaleteam = () => {
             };
 
             setSalesteamMembers((prevMembers) => [...prevMembers, newSalesMember]);
-            setActiveTab(newSalesMember.stID);
+            setMainTab("salesTeam"); // Switch to Sales Team tab if an employee is added
+            setActiveSubTab(newSalesMember.stID);
         }
     };
 
     return (
-        <Helmet title={'All-Saleteam'}>
+        <Helmet title="All-Saleteam">
             <section>
                 <Row>
                     <NavBar />
                 </Row>
 
                 <Container className="all-products">
+                    {/* === MAIN NAVIGATION TABS === */}
                     <Nav tabs>
-                        {salesteamMembers.map((member) => (
-                            <NavItem key={member.stID}>
-                                <NavLink
-                                    className={activeTab === member.stID ? "active" : ""}
-                                    onClick={() => setActiveTab(member.stID)}
-                                >
-                                    {member.employeeName}
-                                </NavLink>
-                            </NavItem>
-                        ))}
-
                         <NavItem>
                             <NavLink
-                                className={activeTab === "addEmployee" ? "active" : ""}
-                                onClick={() => setActiveTab("addEmployee")}
+                                className={mainTab === "salesTeam" ? "active" : ""}
+                                onClick={() => setMainTab("salesTeam")}
+                            >
+                                Sales Team
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={mainTab === "drivers" ? "active" : ""}
+                                onClick={() => setMainTab("drivers")}
+                            >
+                                Drivers
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={mainTab === "addEmployee" ? "active" : ""}
+                                onClick={() => setMainTab("addEmployee")}
                             >
                                 Add Employee
                             </NavLink>
                         </NavItem>
                     </Nav>
 
-                    <TabContent activeTab={activeTab}>
-                        {salesteamMembers.map((member) => (
-                            <TabPane tabId={member.stID} key={member.stID}>
-                                <SaleteamDetail Saleteam={member} />
-                            </TabPane>
-                        ))}
+                    <TabContent activeTab={mainTab}>
+                        {/* === SALES TEAM TAB === */}
+                        <TabPane tabId="salesTeam">
+                            {salesteamMembers.length > 0 ? (
+                                <>
+                                    <Nav tabs className="mt-3">
+                                        {salesteamMembers.map((member) => (
+                                            <NavItem key={member.stID}>
+                                                <NavLink
+                                                    className={activeSubTab === member.stID ? "active" : ""}
+                                                    onClick={() => setActiveSubTab(member.stID)}
+                                                >
+                                                    {member.employeeName}
+                                                </NavLink>
+                                            </NavItem>
+                                        ))}
+                                    </Nav>
 
+                                    <TabContent activeTab={activeSubTab} className="mt-3">
+                                        {salesteamMembers.map((member) => (
+                                            <TabPane tabId={member.stID} key={member.stID}>
+                                                <SaleteamDetail Saleteam={member} />
+                                            </TabPane>
+                                        ))}
+                                    </TabContent>
+                                </>
+                            ) : (
+                                <p className="text-muted mt-3">No Sales Team members found.</p>
+                            )}
+                        </TabPane>
+
+                        {/* === DRIVERS TAB === */}
+                        <TabPane tabId="drivers">
+                            <p className="mt-3">Drivers management will be implemented here.</p>
+                        </TabPane>
+
+                        {/* === ADD EMPLOYEE TAB === */}
                         <TabPane tabId="addEmployee">
                             <Row>
                                 <Col>
