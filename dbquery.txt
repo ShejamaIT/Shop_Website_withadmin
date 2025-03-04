@@ -183,21 +183,24 @@ CREATE TABLE booked_item (
                         			ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE rejected_orders(
-    rid VARCHAR(25) PRIMARY KEY,
+CREATE TABLE return_orders(
+    rid INT AUTO_INCREMENT PRIMARY KEY,
     OrID VARCHAR(25),
     detail TEXT,
+    reserved VARCHAR(15),
+    rescheduled VARCHAR(15),
+    newDate DATE,
        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                            ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-CREATE TABLE canceled_delivery(
-    d_id VARCHAR(25) PRIMARY KEY,
-    dv_id VARCHAR(25),
-    detail VARCHAR(15),
-        CONSTRAINT FOREIGN KEY (dv_id) REFERENCES delivery (dv_id)
-                                   ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE canceled_orders(
+    cid INT AUTO_INCREMENT PRIMARY KEY,
+    OrID VARCHAR(25),
+    detail TEXT,
+    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                               ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 CREATE TABLE order_coupon(
     ocID VARCHAR(25) PRIMARY KEY,
     orID VARCHAR(25),

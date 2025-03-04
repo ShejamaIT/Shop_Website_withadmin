@@ -3,6 +3,8 @@ import { Container, Row, Col, Button, FormGroup, Label, Input, Spinner } from "r
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import { useParams } from "react-router-dom";
+import '../style/DeliveryNoteDetails.css';
+import {toast} from "react-toastify";
 
 const DeliveryNoteDetails = () => {
     const { id } = useParams();
@@ -11,6 +13,8 @@ const DeliveryNoteDetails = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [deliveryDates, setDeliveryDates] = useState([]);
+    const [selectedDeliveryDate, setSelectedDeliveryDate] = useState(""); // Added state for selected date
 
     // State for Return & Cancel Reasons
     const [reasons, setReasons] = useState({});
@@ -27,15 +31,13 @@ const DeliveryNoteDetails = () => {
 
                 const data = await response.json();
                 setDeliveryNote(data.details);
+                fetchDeliveryDates(data.details.district);
                 setOrders(
                     data.orders.map(order => ({
                         ...order,
-                        originalOrderStatus: order.orderStatus,
-                        originalDeliveryStatus: order.deliveryStatus,
-                        received: false, // Checkbox tracking
+                        originalOrderStatus: order.orderStatus, originalDeliveryStatus: order.deliveryStatus, received: false,
                     }))
                 );
-
                 // Initialize reason state for each order
                 const initialReasons = {};
                 data.orders.forEach(order => {
@@ -52,7 +54,21 @@ const DeliveryNoteDetails = () => {
 
         fetchDeliveryNote();
     }, [id]);
-
+    const fetchDeliveryDates = async (district) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
+            const data = await response.json();
+            console.log(data);
+            if (data.upcomingDates && data.upcomingDates.length > 0) {
+                setDeliveryDates(data.upcomingDates);
+            } else {
+                setDeliveryDates([]);
+            }
+        } catch (error) {
+            toast.error("Error fetching delivery dates.");
+            setDeliveryDates([]);
+        }
+    };
     const handleChange = (e, orderIndex) => {
         const { name, value, type, checked } = e.target;
         const orderId = orders[orderIndex].OrID;
@@ -86,32 +102,39 @@ const DeliveryNoteDetails = () => {
     };
 
     const handleReasonChange = (e, orderId) => {
-        const { value } = e.target;
+        const { name, value } = e.target;
         setReasons(prev => ({
             ...prev,
-            [orderId]: { ...prev[orderId], reason: value }
+            [orderId]: { ...prev[orderId], [name]: value }
         }));
+    };
+    const setDate = (e) => {
+        const routedate = e.target.value;
+        setSelectedDeliveryDate(routedate); // Set the selected date
     };
 
     const handleSave = async () => {
-        // Identify changed orders
+        const rescheduledDate = selectedDeliveryDate || "";
+
         const updatedOrders = orders
             .filter(order =>
                 order.orderStatus !== order.originalOrderStatus ||
                 order.deliveryStatus !== order.originalDeliveryStatus ||
-                order.received // Ensure received orders are also included
+                order.received
             )
             .map(order => ({
                 OrID: order.OrID,
                 orderStatus: order.orderStatus,
                 deliveryStatus: order.deliveryStatus,
-                received: order.received, // Include received status
-                reason: reasons[order.OrID]?.reason || "N/A", // Attach reason if applicable
-                reasonType: reasons[order.OrID]?.type || "N/A" // Attach reason type (Returned/Cancelled)
+                received: order.received,
+                reason: reasons[order.OrID]?.reason === "Other"
+                    ? reasons[order.OrID]?.customReason || "N/A"
+                    : reasons[order.OrID]?.reason || "N/A",
+                reasonType: reasons[order.OrID]?.type || "N/A",
+                rescheduledDate: rescheduledDate,
             }));
 
         console.log("Updated Orders with Reasons and Received:", updatedOrders);
-
     };
 
     if (isLoading) {
@@ -177,39 +200,60 @@ const DeliveryNoteDetails = () => {
                                                                         <option value="Cancelled">Cancelled</option>
                                                                     </Input>
                                                                 </FormGroup>
-                                                                {order.orderStatus === "Returned" && (
+                                                                {(order.orderStatus === "Returned" || order.orderStatus === "Cancelled") && (
                                                                     <FormGroup>
-                                                                        <Label>Return Reason</Label>
+                                                                        <Label><strong>{order.orderStatus} Reason</strong></Label>
                                                                         <Input
                                                                             type="select"
+                                                                            name="reason"
                                                                             value={reasons[order.OrID]?.reason}
                                                                             onChange={(e) => handleReasonChange(e, order.OrID)}
                                                                         >
                                                                             <option value="">Select a Reason</option>
                                                                             <option value="Customer Not Answer">Customer Not Answer</option>
                                                                             <option value="Customer Rejected">Customer Rejected</option>
-                                                                            <option value="Customer Has No money">Customer Has No money</option>
+                                                                            <option value="Customer Has No Money">Customer Has No Money</option>
                                                                             <option value="Driver Issue">Driver Issue</option>
-                                                                            <option value="Vehical Issue">Vehical Issue</option>
+                                                                            <option value="Vehicle Issue">Vehicle Issue</option>
+                                                                            <option value="Other">Other</option>
                                                                         </Input>
+                                                                        {reasons[order.OrID]?.reason === "Other" && (
+                                                                            <Input
+                                                                                type="text"
+                                                                                name="customReason"
+                                                                                placeholder="Enter custom reason"
+                                                                                value={reasons[order.OrID]?.customReason || ""}
+                                                                                onChange={(e) => handleReasonChange(e, order.OrID)}
+                                                                                className="mt-2"
+                                                                            />
+                                                                        )}
                                                                     </FormGroup>
                                                                 )}
-
-                                                                {order.orderStatus === "Cancelled" && (
+                                                                {order.orderStatus === "Returned" && (
                                                                     <FormGroup>
-                                                                        <Label>Cancel Reason</Label>
-                                                                        <Input
-                                                                            type="select"
-                                                                            value={reasons[order.OrID]?.reason}
-                                                                            onChange={(e) => handleReasonChange(e, order.OrID)}
-                                                                        >
-                                                                            <option value="">Select a Reason</option>
-                                                                            <option value="Customer Not Answer">Customer Not Answer</option>
-                                                                            <option value="Customer Rejected">Customer Rejected</option>
-                                                                            <option value="Customer Has No money">Customer Has No money</option>
-                                                                            <option value="Driver Issue">Driver Issue</option>
-                                                                            <option value="Vehical Issue">Vehical Issue</option>
-                                                                        </Input>
+                                                                        <Label><strong>Reschedule Date</strong></Label>
+                                                                        {deliveryDates.length > 0 ? (
+                                                                            <Input
+                                                                                type="select"
+                                                                                id="deliveryDateSelect"
+                                                                                value={selectedDeliveryDate}
+                                                                                onChange={setDate}
+                                                                            >
+                                                                                <option value="">-- Select Date --</option>
+                                                                                {deliveryDates.map((date, index) => (
+                                                                                    <option key={index} value={new Date(date).toISOString().split("T")[0]}>
+                                                                                        {new Date(date).toLocaleDateString()}
+                                                                                    </option>
+                                                                                ))}
+                                                                            </Input>
+                                                                        ) : (
+                                                                            <Input
+                                                                                type="date"
+                                                                                id="customDeliveryDate"
+                                                                                value={selectedDeliveryDate}
+                                                                                onChange={(e) => setSelectedDeliveryDate(e.target.value)}
+                                                                            />
+                                                                        )}
                                                                     </FormGroup>
                                                                 )}
                                                             </>
@@ -226,7 +270,6 @@ const DeliveryNoteDetails = () => {
                                                                     value={order.deliveryStatus}
                                                                     onChange={(e) => handleChange(e, index)}
                                                                 >
-                                                                    <option value="Issued">Issued</option>
                                                                     <option value="Delivered">Delivered</option>
                                                                     <option value="Returned">Returned</option>
                                                                 </Input>

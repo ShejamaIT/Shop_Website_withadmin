@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update delivery nte detail view">
+      <change afterPath="$PROJECT_DIR$/admin/src/style/DeliveryNoteDetails.css" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-1-6.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-2-6.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-3-6.png" afterDir="false" />
@@ -28,7 +29,9 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-3-5.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-4-5.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-5-5.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +106,7 @@
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start admin">
+  <component name="RunManager" selected="npm.start adminBackend">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -222,6 +225,7 @@
       <workItem from="1740975514280" duration="24675000" />
       <workItem from="1741060307902" duration="4701000" />
       <workItem from="1741065451349" duration="568000" />
+      <workItem from="1741070352026" duration="6164000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
