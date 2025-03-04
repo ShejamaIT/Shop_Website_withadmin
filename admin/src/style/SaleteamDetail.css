@@ -69,24 +69,6 @@
     color: #000; /* Gold text */
 }
 
-/* Status styles */
-.status {
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    background: gold;
-    color: black;
-}
-
-/* Loading and Error messages */
-.loading-text, .error-text {
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 20px;
-    color: gold;
-}
-
 .text-center {
     text-align: center;
 }
