@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import upload from "./middlewares/upload.js";
 import mainRoutes from "./Routes/mainRoutes.js";
 import auth from "./Routes/auth.js";
 import * as path from "path";

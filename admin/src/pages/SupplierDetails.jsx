@@ -20,6 +20,7 @@ const SupplierDetails = ({ supplier }) => {
             try {
                 const response = await fetch("http://localhost:5001/api/admin/main/allitems");  // API to fetch all items
                 const data = await response.json();
+                console.log(data);
 
                 if (response.ok) {
                     setItemData(data); // Store all items for search
@@ -161,9 +162,10 @@ const SupplierDetails = ({ supplier }) => {
             <Col>
                 <Row>
                     <h5 >Details for {supplier.name}</h5><hr/>
-                    <Col md={4}><Label><strong>Id:</strong> {supplier.s_ID}</Label></Col>
-                    <Col md={4}><Label><strong>Contact:</strong> {supplier.contact}</Label></Col>
-                    <Col md={4}><Label><strong>Address:</strong> {supplier.address}</Label></Col>
+                    <Col md={3}><Label><strong>Id:</strong> {supplier.s_ID}</Label></Col>
+                    <Col md={3}><Label><strong>Contact:</strong> {supplier.contact}</Label></Col>
+                    <Col md={3}><Label><strong>Contact :</strong> {supplier.contact2}</Label></Col>
+                    <Col md={3}><Label><strong>Address:</strong> {supplier.address}</Label></Col>
                 </Row>
 
                 {/* Search box */}

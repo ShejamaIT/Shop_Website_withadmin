@@ -52,6 +52,10 @@ const AddSupplier = ({ onAddSupplier }) => {
                 toast.success(result.message);
                 onAddSupplier(supplierData); // Pass the new supplier to the parent component
                 handleClear(); // Clear form after successful submission
+                setTimeout(() => {
+                    window.location.reload(); // Auto-refresh the page
+                }, 1000);
+
             } else {
                 toast.error(result.message || "Something went wrong. Please try again.");
             }
