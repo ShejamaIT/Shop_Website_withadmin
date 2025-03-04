@@ -93,18 +93,16 @@ const AddItem = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Submitting Form:", formData);
-        // Add API request to submit form data here
+
         try {
-            // ✅ Handle "Other" material selection
             const materialToSend = formData.material === "Other" ? formData.otherMaterial : formData.material;
 
-            // ✅ Prepare FormData for submission
             const formDataToSend = new FormData();
             formDataToSend.append("I_Id", formData.I_Id);
             formDataToSend.append("I_name", formData.I_name);
             formDataToSend.append("Ca_Id", formData.Ca_Id);
             formDataToSend.append("sub_one", formData.sub_one);
-            formDataToSend.append("sub_two", formData.sub_two || "None"); // Set "None" if not selected
+            formDataToSend.append("sub_two", formData.sub_two || "None");
             formDataToSend.append("descrip", formData.descrip);
             formDataToSend.append("color", formData.color);
             formDataToSend.append("material", materialToSend);
@@ -114,7 +112,6 @@ const AddItem = () => {
             formDataToSend.append("s_Id", formData.s_Id);
             formDataToSend.append("minQty", formData.minQty);
 
-            // ✅ Append Required Main Image
             if (formData.img) {
                 formDataToSend.append("img", formData.img);
             } else {
@@ -122,23 +119,32 @@ const AddItem = () => {
                 return;
             }
 
-            // ✅ Append Optional Images
             if (formData.img1) formDataToSend.append("img1", formData.img1);
             if (formData.img2) formDataToSend.append("img2", formData.img2);
             if (formData.img3) formDataToSend.append("img3", formData.img3);
 
-            // ✅ Submit the form data
             const submitResponse = await fetch("http://localhost:5001/api/admin/main/add-item", {
                 method: "POST",
                 body: formDataToSend,
             });
+
             const submitData = await submitResponse.json();
 
             if (submitResponse.ok) {
                 toast.success("✅ Item added successfully!");
-                setFormData({
-                    I_Id: "",I_name: "",Ca_Id: "",sub_one: "",sub_two: "",descrip: "",color: "",material: "",otherMaterial: "",price: "",warrantyPeriod: "",cost: "",img: null,img1: null,img2: null,img3: null,s_Id: "",minQty: ""
-                });
+
+                // Reset form fields but keep image
+                setFormData((prevData) => ({
+                    ...prevData,
+                    I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "",
+                    color: "", material: "", otherMaterial: "", price: "", warrantyPeriod: "",
+                    cost: "", s_Id: "", minQty: ""
+                }));
+
+                // Auto-refresh the page
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             } else {
                 toast.error(submitData.message || "❌ Failed to add item.");
             }
@@ -147,6 +153,7 @@ const AddItem = () => {
             toast.error("❌ An error occurred while adding the item.");
         }
     };
+
 
     const handleClear = () => {
         setFormData({

@@ -144,10 +144,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             ...formData,
             name: fullName,
             items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
-            deliveryPrice,
-            discountAmount,
-            totalItemPrice,
-            totalBillPrice,
+            deliveryPrice, discountAmount, totalItemPrice, totalBillPrice,
         };
 
         if (validateForm()) {
