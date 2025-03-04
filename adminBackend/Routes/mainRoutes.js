@@ -2098,8 +2098,10 @@ router.get("/orders/by-sales-team", async (req, res) => {
         const { stID } = req.query;
         console.log(stID);
 
+        // Fetch sales team details, orders, and coupon details
         const [results] = await db.query(`
             SELECT
+                e.E_Id AS employeeId,
                 e.name AS employeeName,
                 e.contact AS employeeContact,
                 e.nic AS employeeNic,
@@ -2119,13 +2121,18 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 o.OrID AS orderId,
                 o.orDate AS orderDate,
                 o.total AS totalPrice,
-                o.orStatus AS orderStatus
+                o.orStatus AS orderStatus,
+                sc.cpID AS couponId,
+                sc.discount AS couponDiscount
             FROM sales_team st
                      JOIN Employee e ON e.E_Id = st.E_Id
                      LEFT JOIN Orders o ON o.stID = st.stID
+                     LEFT JOIN sales_coupon sc ON sc.stID = st.stID  
             WHERE st.stID = ?
-            GROUP BY st.stID, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic,
-                     st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued, o.OrID, o.orDate, o.total, o.orStatus;
+            GROUP BY
+                st.stID, e.E_Id, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic,
+                st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued,
+                o.OrID, o.orDate, o.total, o.orStatus, sc.cpID, sc.discount;
         `, [stID]);
 
         if (results.length === 0) {
@@ -2134,6 +2141,7 @@ router.get("/orders/by-sales-team", async (req, res) => {
 
         // Extract member details from the first row
         const memberDetails = {
+            employeeId: results[0].employeeId,
             employeeName: results[0].employeeName,
             employeeContact: results[0].employeeContact,
             employeeNic: results[0].employeeNic,
@@ -2144,33 +2152,45 @@ router.get("/orders/by-sales-team", async (req, res) => {
             stID: results[0].stID,
             orderTarget: results[0].orderTarget,
             issuedTarget: results[0].issuedTarget,
-            totalOrder: results[0].totalOrder,  // Total sales value of all orders
-            totalIssued: results[0].totalIssued,  // Total sales value of issued orders
-            totalCount: results[0].totalCount,  // Total number of orders
-            issuedCount: results[0].issuedCount  // Number of issued orders
+            totalOrder: results[0].totalOrder,
+            totalIssued: results[0].totalIssued,
+            totalCount: results[0].totalCount,
+            issuedCount: results[0].issuedCount
         };
 
-        // Filter out null orders and return an empty array if none exist
-        const orders = results.filter(order => order.orderId !== null).map(order => ({
-            orderId: order.orderId,
-            orderDate: order.orderDate,
-            totalPrice: order.totalPrice,
-            orderStatus: order.orderStatus
-        }));
+        // Extract orders
+        const orders = results
+            .filter(order => order.orderId !== null)
+            .map(order => ({
+                orderId: order.orderId,
+                orderDate: order.orderDate,
+                totalPrice: order.totalPrice,
+                orderStatus: order.orderStatus
+            }));
+
+        // Extract coupon details (avoiding duplicates)
+        const coupons = results
+            .filter(coupon => coupon.couponId !== null)
+            .map(coupon => ({
+                cpID: coupon.couponId,
+                discount: coupon.couponDiscount
+            }));
 
         return res.status(200).json({
-            message: "Sales team details and orders fetched successfully.",
+            message: "Sales team details, orders, and coupons fetched successfully.",
             data: {
                 memberDetails,
-                orders: orders.length > 0 ? orders : [] // Ensure orders array is empty if there are no valid orders
+                orders: orders.length > 0 ? orders : [],
+                coupons: coupons.length > 0 ? coupons : [] // ✅ Ensure coupons array is empty if none exist
             }
         });
 
     } catch (error) {
-        console.error("Error fetching orders and member details:", error.message);
-        return res.status(500).json({ message: "Error fetching orders and member details." });
+        console.error("Error fetching orders, member details, and coupons:", error.message);
+        return res.status(500).json({ message: "Error fetching orders, member details, and coupons." });
     }
 });
+
 
 // Get all categories
 router.get("/categories", async (req, res) => {
