@@ -3342,14 +3342,14 @@ router.post("/employees", async (req, res) => {
 // Save Delivery Notes
 router.post("/create-delivery-note", async (req, res) => {
     try {
-        const { driverName, vehicleName, hire, date, district, orderIds ,balanceToCollect } = req.body;
-        console.log(orderIds);
+        const { driverName, vehicleName, hire, date, district, orders, balanceToCollect } = req.body;
+        console.log(orders);
 
         const delHire = parseFloat(hire);
 
-        // Check if the required fields are present in the request body
-        if (!driverName || !vehicleName || !date || !hire || !orderIds || orderIds.length === 0) {
-            return res.status(400).json({ message: "Driver name, vehicle name, hire, date, and order IDs are required." });
+        // Validate required fields
+        if (!driverName || !vehicleName || !date || !hire || !orders || orders.length === 0) {
+            return res.status(400).json({ message: "Driver name, vehicle name, hire, date, and orders are required." });
         }
 
         // Convert the date from DD/MM/YY format to YYYY-MM-DD
@@ -3358,44 +3358,45 @@ router.post("/create-delivery-note", async (req, res) => {
 
         // Insert into the delivery_note table
         const [result] = await db.query(`
-            INSERT INTO delivery_note (driverName, vehicalName, date, hire, district , balanceToCollect , status)
-            VALUES (?, ?, ?, ?,? , ?,'Incomplete')
-        `, [driverName, vehicleName, formattedDate, delHire,district, balanceToCollect]);
+            INSERT INTO delivery_note (driverName, vehicalName, date, hire, district, balanceToCollect, status)
+            VALUES (?, ?, ?, ?, ?, ?, 'Incomplete')
+        `, [driverName, vehicleName, formattedDate, delHire, district, balanceToCollect]);
 
         // Get the generated delNoID (Delivery Note ID)
         const delNoID = result.insertId;
 
         // Insert the orders into the delivery_note_orders table
-        const orderQueries = orderIds.map((orID) => {
+        const orderQueries = orders.map(({ orderId, balance }) => {
             return db.query(`
-                INSERT INTO delivery_note_orders (delNoID, orID)
-                VALUES (?, ?)
-            `, [delNoID, orID]);
+                INSERT INTO delivery_note_orders (delNoID, orID, balance)
+                VALUES (?, ?, ?)
+            `, [delNoID, orderId, balance]); // Now including balance
         });
 
-        // Execute all the queries in parallel
+        // Execute all insert queries in parallel
         await Promise.all(orderQueries);
 
-        const deliveryQueries = orderIds.map((orID) => {
+        // Update delivery status for each order
+        const deliveryQueries = orders.map(({ orderId }) => {
             return db.query(`
                 UPDATE delivery
                 SET status = 'Delivered', delivery_Date = ?
                 WHERE orID = ?
-            `, [formattedDate, orID]);
+            `, [formattedDate, orderId]);
         });
 
         // Execute all delivery updates in parallel
         await Promise.all(deliveryQueries);
 
-        // Send a success response
+        // Send success response
         return res.status(201).json({
             message: "Delivery note and orders created successfully, and delivery status updated.",
-            delNoID,  // Return the generated Delivery Note ID
+            delNoID, // Return the generated Delivery Note ID
         });
 
     } catch (error) {
         console.error("Error creating delivery note:", error.message);
-        return res.status(500).json({ message: "Error creating delivery note" });
+        return res.status(500).json({ message: "Error creating delivery note", details: error.message });
     }
 });
 
@@ -3405,7 +3406,7 @@ router.get("/delivery-note", async (req, res) => {
         const { delNoID } = req.query;
 
         if (!delNoID) {
-            return res.status(400).json({ success: false, message: "Delivery Note ID is required" });
+            return res.status(400).json({ success: false, message: "Delivery Note ID is required." });
         }
 
         // Fetch delivery note details
@@ -3413,19 +3414,21 @@ router.get("/delivery-note", async (req, res) => {
             "SELECT * FROM delivery_note WHERE delNoID = ?",
             [delNoID]
         );
+
         if (deliveryNote.length === 0) {
             return res.status(404).json({ success: false, message: "Delivery note not found" });
         }
 
-        // Fetch associated orders (including payStatus and balance)
+        // Fetch associated orders and balance from delivery_note_orders
         const [orders] = await db.query(
             `SELECT o.OrID, o.orStatus AS orderStatus, o.delStatus AS deliveryStatus, 
-                    o.payStatus, o.balance 
-             FROM Orders o
-             INNER JOIN delivery_note_orders dno ON o.OrID = dno.orID
+                    o.payStatus, dno.balance AS balanceAmount
+             FROM delivery_note_orders dno
+             INNER JOIN Orders o ON o.OrID = dno.orID
              WHERE dno.delNoID = ?`,
             [delNoID]
         );
+
         if (orders.length === 0) {
             return res.status(404).json({ success: false, message: "No orders found for this delivery note" });
         }
@@ -3433,6 +3436,7 @@ router.get("/delivery-note", async (req, res) => {
         // Fetch issued items grouped by order ID
         const orderIds = orders.map(order => order.OrID);
         let issuedItems = [];
+
         if (orderIds.length > 0) {
             [issuedItems] = await db.query(
                 `SELECT m.orID, m.srd_Id, m.I_Id, m.stock_Id, m.barcode, m.datetime
@@ -3446,7 +3450,7 @@ router.get("/delivery-note", async (req, res) => {
         const ordersWithIssuedItems = orders.map(order => ({
             ...order,
             issuedItems: issuedItems.filter(item => item.orID === order.OrID),
-            balance: order.payStatus === "COD" ? order.balance : null // Include balance only if COD
+            balance: order.payStatus === "COD" ? order.balanceAmount : null // Include balance only if COD
         }));
 
         return res.status(200).json({
@@ -3530,6 +3534,65 @@ router.post("/promotion", upload.single('img'), async (req, res) => {
     //     });
     // }
 });
+
+// Update delivery note when order status issued (done)
+router.post("/delivery-done", async (req, res) => {
+    const { updatedOrders, deliveryNoteId } = req.body; // Extract orders array and delivery note ID
+
+    if (!updatedOrders || !Array.isArray(updatedOrders) || updatedOrders.length === 0) {
+        return res.status(400).json({ success: false, message: "No valid orders provided." });
+    }
+
+    try {
+        for (const order of updatedOrders) {
+            console.log(order);
+            const { OrID, orderStatus, deliveryStatus, received, reason, reasonType, rescheduledDate } = order;
+            console.log(OrID);
+
+            // Ensure the order exists before updating
+            const [rows] = await db.query(
+                "SELECT orID, custName, balance, payStatus, expectedDate, stID FROM Orders WHERE orID = ?",
+                [OrID]
+            );
+
+            if (!rows || rows.length === 0) {
+                throw new Error(`Order ${OrID} not found.`);
+            }
+
+            const existingOrder = rows[0]; // Fix: Get the first row properly
+
+            const { orID, custName, balance, payStatus, expectedDate, stID } = existingOrder;
+            console.log(orID, custName, balance, payStatus, expectedDate, stID);
+
+            // Ensure balance is valid
+            const updatedBalance = parseFloat(balance) || 0;
+            console.log(updatedBalance);
+
+            // Uncomment this when testing is done
+            await db.query(`UPDATE Orders SET advance = ?, balance = ?, payStatus = ? WHERE OrID = ?`, [updatedBalance, 0, 'Settled', OrID]);
+            await db.query(`UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?`, [updatedBalance, stID]);
+            await db.query(`INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())`, [OrID, updatedBalance]);
+            await db.query(`UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?`, ["Delivered", expectedDate, OrID]);
+            await db.query(`UPDATE delivery_note SET status = ? WHERE delNoID = ?`, ["Complete", deliveryNoteId]);
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Orders updated successfully.",
+        });
+
+    } catch (err) {
+        console.error("Error updating orders:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error updating orders",
+            details: err.message,
+        });
+    }
+});
+
+
+
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
