@@ -188,8 +188,6 @@ CREATE TABLE return_orders(
     OrID VARCHAR(25),
     detail TEXT,
     reserved VARCHAR(15),
-    rescheduled VARCHAR(15),
-    newDate DATE,
        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                            ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -271,6 +269,12 @@ CREATE TABLE delivery_note(
 );
 CREATE TABLE delivery_note_orders(
     delNoID INT,
-    orID VARCHAR(25)
+    orID VARCHAR(25),
+    balance DOUBLE,
+    PRIMARY KEY (delNoID, orID),
+    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                             ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (delNoID) REFERENCES delivery_note (delNoID)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
 );
 

@@ -20,40 +20,42 @@ const DeliveryNoteDetails = () => {
     const [reasons, setReasons] = useState({});
 
     useEffect(() => {
-        const fetchDeliveryNote = async () => {
-            try {
-                setIsLoading(true);
-                const response = await fetch(`http://localhost:5001/api/admin/main/delivery-note?delNoID=${id}`);
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch delivery note details.");
-                }
-
-                const data = await response.json();
-                setDeliveryNote(data.details);
-                fetchDeliveryDates(data.details.district);
-                setOrders(
-                    data.orders.map(order => ({
-                        ...order,
-                        originalOrderStatus: order.orderStatus, originalDeliveryStatus: order.deliveryStatus, received: false,
-                    }))
-                );
-                // Initialize reason state for each order
-                const initialReasons = {};
-                data.orders.forEach(order => {
-                    initialReasons[order.OrID] = { reason: "", type: "" };
-                });
-                setReasons(initialReasons);
-
-            } catch (error) {
-                setError("Failed to load delivery note details.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchDeliveryNote();
     }, [id]);
+
+    const fetchDeliveryNote = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch(`http://localhost:5001/api/admin/main/delivery-note?delNoID=${id}`);
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch delivery note details.");
+            }
+
+            const data = await response.json();
+            console.log(data.orders);
+            setDeliveryNote(data.details);
+            fetchDeliveryDates(data.details.district);
+            setOrders(
+                data.orders.map(order => ({
+                    ...order,
+                    originalOrderStatus: order.orderStatus, originalDeliveryStatus: order.deliveryStatus, received: false,
+                }))
+            );
+            // Initialize reason state for each order
+            const initialReasons = {};
+            data.orders.forEach(order => {
+                initialReasons[order.OrID] = { reason: "", type: "" };
+            });
+            setReasons(initialReasons);
+
+        } catch (error) {
+            setError("Failed to load delivery note details.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const fetchDeliveryDates = async (district) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
@@ -135,6 +137,33 @@ const DeliveryNoteDetails = () => {
             }));
 
         console.log("Updated Orders with Reasons and Received:", updatedOrders);
+
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/delivery-done", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    deliveryNoteId: id, // Pass delivery note ID separately
+                    updatedOrders, // Pass updated orders array
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                toast.success("Delivery note created successfully.");
+                fetchDeliveryNote();
+                setIsEditing(false);  // Exit edit mode
+            } else {
+                console.error("Update failed:", result.message);
+                alert("Failed to update delivery note.");
+            }
+        } catch (error) {
+            console.error("Error updating delivery note:", error);
+            alert("An error occurred while updating the delivery note.");
+        }
     };
 
     if (isLoading) {
@@ -174,6 +203,7 @@ const DeliveryNoteDetails = () => {
                                         <p><strong>Balance to Collect:</strong> Rs. {deliveryNote.balanceToCollect}</p>
                                         <p><strong>Delivery Date:</strong> {new Date(deliveryNote.date).toLocaleDateString()}</p>
                                         <p><strong>District:</strong> {deliveryNote.district}</p>
+                                        <p><strong>Status:</strong> {deliveryNote.status}</p>
                                     </div>
 
                                     <h5 className="mt-4">Orders & Issued Items</h5>
@@ -275,10 +305,10 @@ const DeliveryNoteDetails = () => {
                                                                 </Input>
                                                             </FormGroup>
                                                         )}
-                                                        {order.balance > 0 ? (
+                                                        {order.balanceAmount > 0 ? (
                                                             isEditing ? (
                                                                 <FormGroup>
-                                                                    <Label><strong>Balance:</strong> Rs.{order.balance}</Label>
+                                                                    <Label><strong>Balance:</strong> Rs.{order.balanceAmount}</Label>
                                                                     <div className="d-flex align-items-center">
                                                                         <Input
                                                                             type="checkbox"
@@ -290,10 +320,10 @@ const DeliveryNoteDetails = () => {
                                                                     </div>
                                                                 </FormGroup>
                                                             ) : (
-                                                                <p><strong>Balance:</strong> Rs.{order.balance}</p>
+                                                                <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
                                                             )
                                                         ) : (
-                                                            <p><strong>Balance:</strong> Rs.{order.balance}</p>
+                                                            <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
                                                         )}
 
                                                         {/* Display Issued Items for this Order */}

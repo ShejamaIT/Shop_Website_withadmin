@@ -39,12 +39,16 @@ const DeliveryNotes = () => {
             const deliveryNoteData = {
                 driverName: formData.driverName,
                 vehicleName: formData.vehicleId,  // Assuming vehicleId maps to vehicleName
-                hire:formData.hire,
+                hire: formData.hire,
                 date: selectedDeliveryDate,  // The selected delivery date
-                orderIds: selectedOrders.map(order => order.orderId),  // Extracting order IDs
+                orders: selectedOrders.map(order => ({
+                    orderId: order.orderId,
+                    balance: order.balance
+                })),  // Extracting order IDs and balances correctly
                 district: selectedRoute,
                 balanceToCollect: formData.balanceToCollect,
             };
+
             console.log(updatedReceiptData);
             console.log(deliveryNoteData);
 
@@ -60,10 +64,10 @@ const DeliveryNotes = () => {
             const data = await response.json();
 
             if (response.ok) {
+                toast.success("Delivery note created successfully.");
                 setReceiptData(updatedReceiptData);
                 setShowModal2(false);
                 setShowDeliveryView(true);
-                toast.success("Delivery note created successfully.");
                 setTimeout(() => {
                     window.location.reload(); // Auto-refresh the page
                 }, 1000);
