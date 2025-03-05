@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, FormGroup, Label, Input, Spinner } from "reactstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Button,
+    FormGroup,
+    Label,
+    Input,
+    Spinner,
+    ModalHeader,
+    ModalBody,
+    ModalFooter, Modal
+} from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import { useParams } from "react-router-dom";
@@ -15,14 +27,23 @@ const DeliveryNoteDetails = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [deliveryDates, setDeliveryDates] = useState([]);
     const [selectedDeliveryDate, setSelectedDeliveryDate] = useState(""); // Added state for selected date
+    const [selectedItems, setSelectedItems] = useState({});
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [selectedAction, setSelectedAction] = useState("Available"); // Default value is "Available"
+    const [selectedItemStatus, setSelectedItemStatus] = useState({});
+
+
+    const passReservedItem = (selectedItems, selectedAction) => {
+        console.log("Selected Items:", selectedItems);
+        console.log("Selected Action:", selectedAction);
+        setShowStockModal(false);
+    };
 
     // State for Return & Cancel Reasons
     const [reasons, setReasons] = useState({});
-
     useEffect(() => {
         fetchDeliveryNote();
     }, [id]);
-
     const fetchDeliveryNote = async () => {
         try {
             setIsLoading(true);
@@ -31,9 +52,7 @@ const DeliveryNoteDetails = () => {
             if (!response.ok) {
                 throw new Error("Failed to fetch delivery note details.");
             }
-
             const data = await response.json();
-            console.log(data.orders);
             setDeliveryNote(data.details);
             fetchDeliveryDates(data.details.district);
             setOrders(
@@ -55,7 +74,6 @@ const DeliveryNoteDetails = () => {
             setIsLoading(false);
         }
     };
-
     const fetchDeliveryDates = async (district) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
@@ -77,6 +95,11 @@ const DeliveryNoteDetails = () => {
 
         setOrders(prevOrders =>
             prevOrders.map((order, i) =>
+                i === orderIndex ? { ...order, [name]: value } : order
+            )
+        );
+        setOrders(prevOrders =>
+            prevOrders.map((order, i) =>
                 i === orderIndex
                     ? {
                         ...order,
@@ -86,21 +109,21 @@ const DeliveryNoteDetails = () => {
                     : order
             )
         );
-
-        // If the order is returned or canceled, show reason selection
-        if (name === "orderStatus") {
-            if (value === "Returned" || value === "Cancelled") {
-                setReasons(prev => ({
-                    ...prev,
-                    [orderId]: { reason: "", type: value }
-                }));
-            } else {
-                setReasons(prev => ({
-                    ...prev,
-                    [orderId]: { reason: "", type: "" }
-                }));
-            }
+        if (name === "orderStatus" && (value === "Returned" || value === "Cancelled")) {
+            setSelectedItems(prev => ({ ...prev, [orderId]: [] })); // Reset selection
         }
+    };
+    const handleItemSelection = (orderId, itemId, stockId) => {
+        // Create a unique identifier for each issued item based on both itemId and stockId
+        const itemKey = `${itemId}-${stockId}`;
+
+        setSelectedItems(prev => ({
+            ...prev,
+            [orderId]: prev[orderId]?.includes(itemKey)
+                ? prev[orderId].filter(id => id !== itemKey) // Remove if already selected
+                : [...(prev[orderId] || []), itemKey] // Add if not selected
+        }));
+        setShowStockModal(true)
     };
 
     const handleReasonChange = (e, orderId) => {
@@ -110,14 +133,20 @@ const DeliveryNoteDetails = () => {
             [orderId]: { ...prev[orderId], [name]: value }
         }));
     };
+    const handleItemStatusChange = (itemKey, newStatus) => {
+        setSelectedItemStatus(prev => ({
+            ...prev,
+            [itemKey]: newStatus,  // Update status for this specific item
+        }));
+    };
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
     };
-
     const handleSave = async () => {
         const rescheduledDate = selectedDeliveryDate || "";
 
+        // Filter and map orders to include selected items and their status
         const updatedOrders = orders
             .filter(order =>
                 order.orderStatus !== order.originalOrderStatus ||
@@ -129,41 +158,22 @@ const DeliveryNoteDetails = () => {
                 orderStatus: order.orderStatus,
                 deliveryStatus: order.deliveryStatus,
                 received: order.received,
-                reason: reasons[order.OrID]?.reason === "Other"
-                    ? reasons[order.OrID]?.customReason || "N/A"
-                    : reasons[order.OrID]?.reason || "N/A",
+                reason: reasons[order.OrID]?.reason || "N/A",
                 reasonType: reasons[order.OrID]?.type || "N/A",
-                rescheduledDate: rescheduledDate,
+                rescheduledDate: selectedDeliveryDate || "",
+                returnedItems: selectedItems[order.OrID]?.map(itemKey => {
+                    const [itemId, stockId] = itemKey.split("-");  // Split the key back into itemId and stockId
+
+                    // Get the selected status for the item (assuming selectedStatus is a state holding statuses)
+                    const itemStatus = selectedItemStatus[order.OrID]?.[itemKey] || "Available";  // Default to "Available"
+
+                    return { itemId, stockId, status: itemStatus };
+                }) || [],  // Include selected items, now with both itemId, stockId, and status
             }));
 
-        console.log("Updated Orders with Reasons and Received:", updatedOrders);
+        console.log(updatedOrders);
 
-        try {
-            const response = await fetch("http://localhost:5001/api/admin/main/delivery-done", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    deliveryNoteId: id, // Pass delivery note ID separately
-                    updatedOrders, // Pass updated orders array
-                }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                toast.success("Delivery note created successfully.");
-                fetchDeliveryNote();
-                setIsEditing(false);  // Exit edit mode
-            } else {
-                console.error("Update failed:", result.message);
-                alert("Failed to update delivery note.");
-            }
-        } catch (error) {
-            console.error("Error updating delivery note:", error);
-            alert("An error occurred while updating the delivery note.");
-        }
+        // Now you can send updatedOrders to your backend for saving the changes
     };
 
     if (isLoading) {
@@ -174,15 +184,12 @@ const DeliveryNoteDetails = () => {
             </div>
         );
     }
-
     if (error) {
         return <div className="text-center text-danger mt-5">{error}</div>;
     }
-
     if (!deliveryNote) {
         return <div className="text-center mt-5 text-warning">No delivery note data found.</div>;
     }
-
     return (
         <Helmet title={`Delivery Note - ${deliveryNote.delNoID}`}>
             <section>
@@ -197,15 +204,11 @@ const DeliveryNoteDetails = () => {
                                 <div className="delivery-header">
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="order-general">
-                                        <p><strong>Driver Name:</strong> {deliveryNote.driverName}</p>
-                                        <p><strong>Vehicle:</strong> {deliveryNote.vehicalName}</p>
-                                        <p><strong>Hire Charge:</strong> Rs. {deliveryNote.hire}</p>
-                                        <p><strong>Balance to Collect:</strong> Rs. {deliveryNote.balanceToCollect}</p>
+                                        <p><strong>Driver Name:</strong> {deliveryNote.driverName}</p><p><strong>Vehicle:</strong> {deliveryNote.vehicalName}</p>
+                                        <p><strong>Hire Charge:</strong> Rs. {deliveryNote.hire}</p><p><strong>Balance to Collect:</strong> Rs. {deliveryNote.balanceToCollect}</p>
                                         <p><strong>Delivery Date:</strong> {new Date(deliveryNote.date).toLocaleDateString()}</p>
-                                        <p><strong>District:</strong> {deliveryNote.district}</p>
-                                        <p><strong>Status:</strong> {deliveryNote.status}</p>
+                                        <p><strong>District:</strong> {deliveryNote.district}</p><p><strong>Status:</strong> {deliveryNote.status}</p>
                                     </div>
-
                                     <h5 className="mt-4">Orders & Issued Items</h5>
                                     <div className="delivery-orders">
                                         <ul className="order-items gap-2">
@@ -288,7 +291,6 @@ const DeliveryNoteDetails = () => {
                                                                 )}
                                                             </>
                                                         )}
-
                                                         {!isEditing ? (
                                                             <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
                                                         ) : (
@@ -325,18 +327,35 @@ const DeliveryNoteDetails = () => {
                                                         ) : (
                                                             <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
                                                         )}
-
                                                         {/* Display Issued Items for this Order */}
                                                         <div className="issued-items">
                                                             <h6 className="mt-3">Issued Items:</h6>
                                                             {order.issuedItems.length > 0 ? (
-                                                                order.issuedItems.map((item, itemIndex) => (
-                                                                    <div key={itemIndex} className="item-box">
-                                                                        <p><strong>Item ID:</strong> {item.I_Id}</p>
-                                                                        <p><strong>Stock ID:</strong> {item.stock_Id}</p>
-                                                                        <p><strong>Date Issued:</strong> {new Date(item.datetime).toLocaleString()}</p>
-                                                                    </div>
-                                                                ))
+                                                                order.issuedItems.map((item, itemIndex) => {
+                                                                    const itemKey = `${item.I_Id}-${item.stock_Id}`;  // Use both itemId and stockId as the key
+                                                                    return (
+                                                                        <div key={itemIndex} className="item-box">
+                                                                            <p><strong>Item ID:</strong> {item.I_Id}</p>
+                                                                            <p><strong>Stock ID:</strong> {item.stock_Id}</p>
+                                                                            <p><strong>Date Issued:</strong> {new Date(item.datetime).toLocaleString()}</p>
+
+                                                                            {(order.orderStatus === "Returned" || order.orderStatus === "Cancelled") && (
+                                                                                <div className="form-check">
+                                                                                    <input
+                                                                                        type="checkbox"
+                                                                                        className="form-check-input"
+                                                                                        id={`select-item-${order.OrID}-${itemKey}`}
+                                                                                        checked={selectedItems[order.OrID]?.includes(itemKey) || false}
+                                                                                        onChange={() => handleItemSelection(order.OrID, item.I_Id, item.stock_Id)}  // Pass both itemId and stockId
+                                                                                    />
+                                                                                    <label className="form-check-label" htmlFor={`select-item-${order.OrID}-${itemKey}`}>
+                                                                                        Select Item
+                                                                                    </label>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                })
                                                             ) : (
                                                                 <p className="text-muted">No issued items found for this order.</p>
                                                             )}
@@ -345,10 +364,8 @@ const DeliveryNoteDetails = () => {
                                                 ))}
                                             </div>
                                         </ul>
-
                                     </div>
                                 </div>
-
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
                                         <Button color="primary" onClick={() => setIsEditing(true)}>Edit Delivery Note</Button>
@@ -360,6 +377,39 @@ const DeliveryNoteDetails = () => {
                                     )}
                                 </div>
                             </div>
+                            <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
+                                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
+                                <ModalBody>
+                                    <FormGroup style={{ position: "relative" }}>
+                                        <Label>What to do to this item?</Label>
+                                        <Input
+                                            type="select"
+                                            value={selectedAction} // This will hold the selected action ("Available", "Reserved", "Damage")
+                                            onChange={(e) => setSelectedAction(e.target.value)} // Update selectedAction when an option is chosen
+                                        >
+                                            <option value="Available">Set as Available</option>
+                                            <option value="Reserved">Set as Reserved</option>
+                                            <option value="Damage">Set as Damage</option>
+                                        </Input>
+                                    </FormGroup>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button
+                                        color="primary"
+                                        onClick={() => {
+                                            // Iterate over selectedItems and update each item with the new status
+                                            selectedItems.forEach(itemKey => {
+                                                handleItemStatusChange(itemKey, selectedAction);
+                                            });
+                                            passReservedItem(selectedItems, selectedAction); // You may update passReservedItem logic as per the status
+                                            setShowStockModal(false); // Close the modal after action
+                                        }}
+                                    >
+                                        Pass
+                                    </Button>
+                                    <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
                         </Col>
                     </Row>
                 </Container>
@@ -367,5 +417,4 @@ const DeliveryNoteDetails = () => {
         </Helmet>
     );
 };
-
 export default DeliveryNoteDetails;

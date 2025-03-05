@@ -28,14 +28,8 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-3-5.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-4-5.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-5-5.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_26_02_2025_09_02_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_26_02_2025_09_02__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" afterPath="$PROJECT_DIR$/testdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -231,7 +225,7 @@
       <workItem from="1741065451349" duration="568000" />
       <workItem from="1741070352026" duration="6164000" />
       <workItem from="1741090285206" duration="684000" />
-      <workItem from="1741146807331" duration="13432000" />
+      <workItem from="1741146807331" duration="18543000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -576,7 +570,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="272" />
+    <option name="localTasksCounter" value="273" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -595,7 +589,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update calculate" />
     <MESSAGE value="update some bugs" />
     <MESSAGE value="add final invoice" />
     <MESSAGE value="add delivery note view" />
@@ -618,8 +611,9 @@
     <MESSAGE value="update final invoice scan" />
     <MESSAGE value="update auto refresh part" />
     <MESSAGE value="update add refresh thing" />
-    <MESSAGE value="update delivery nte detail view" />
     <MESSAGE value="update salt team coupone part" />
-    <option name="LAST_COMMIT_MESSAGE" value="update salt team coupone part" />
+    <MESSAGE value="update delivery nte detail view" />
+    <MESSAGE value="update DeliveryNoteDetails update-done status" />
+    <option name="LAST_COMMIT_MESSAGE" value="update DeliveryNoteDetails update-done status" />
   </component>
 </project>
