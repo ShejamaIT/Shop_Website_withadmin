@@ -29,10 +29,10 @@ const DeliveryNoteDetails = () => {
     const [selectedDeliveryDate, setSelectedDeliveryDate] = useState(""); // Added state for selected date
     const [selectedItems, setSelectedItems] = useState({});
     const [showStockModal, setShowStockModal] = useState(false);
-    const [selectedAction, setSelectedAction] = useState("Available"); // Default value is "Available"
+    const [showStockModal1, setShowStockModal1] = useState(false);
+    const [selectedAction, setSelectedAction] = useState("Available");
+    const [payment, setPayment] = useState("");
     const [selectedItemStatus, setSelectedItemStatus] = useState({});
-
-
     const passReservedItem = (selectedItems, selectedAction) => {
         console.log("Selected Items:", selectedItems);
         console.log("Selected Action:", selectedAction);
@@ -134,11 +134,41 @@ const DeliveryNoteDetails = () => {
         }));
     };
     const handleItemStatusChange = (itemKey, newStatus) => {
+        console.log("Updating status for:", itemKey);
+        console.log("New status:", newStatus);
+
         setSelectedItemStatus(prev => ({
             ...prev,
             [itemKey]: newStatus,  // Update status for this specific item
         }));
     };
+    const handleConfirmSelection = () => {
+        if (!selectedItems || Object.keys(selectedItems).length === 0) {
+            console.warn("No items selected for status update.");
+            return;
+        }
+
+        // Iterate over the selected items and update their status
+        Object.values(selectedItems).forEach(itemArray => {
+            itemArray.forEach(itemKey => {
+                handleItemStatusChange(itemKey, selectedAction);
+            });
+        });
+
+        passReservedItem(selectedItems, selectedAction); // Ensure this function handles updates correctly
+        setShowStockModal(false); // Close modal
+    };
+    const handlePayment = () => {
+        if (!payment || isNaN(payment) || Number(payment) <= 0) {
+            alert("Please enter a valid payment amount.");
+            return;
+        }
+
+        console.log("Payment received:", payment);
+        setShowStockModal1(false);
+    };
+
+
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
@@ -160,21 +190,66 @@ const DeliveryNoteDetails = () => {
                 received: order.received,
                 reason: reasons[order.OrID]?.reason || "N/A",
                 reasonType: reasons[order.OrID]?.type || "N/A",
-                rescheduledDate: selectedDeliveryDate || "",
+                rescheduledDate,
                 returnedItems: selectedItems[order.OrID]?.map(itemKey => {
-                    const [itemId, stockId] = itemKey.split("-");  // Split the key back into itemId and stockId
-
-                    // Get the selected status for the item (assuming selectedStatus is a state holding statuses)
-                    const itemStatus = selectedItemStatus[order.OrID]?.[itemKey] || "Available";  // Default to "Available"
-
+                    const [itemId, stockId] = itemKey.split("-");
+                    const itemStatus = selectedItemStatus[itemKey] || "Available";
                     return { itemId, stockId, status: itemStatus };
-                }) || [],  // Include selected items, now with both itemId, stockId, and status
+                }) || [],
+                payment: order.orderStatus === "Returned" || "Canceled" ? payment : 0,
             }));
 
         console.log(updatedOrders);
 
-        // Now you can send updatedOrders to your backend for saving the changes
+        try {
+            const hasReturnedOrder = updatedOrders.some(order => order.orderStatus === "Returned");
+            const allIssued = updatedOrders.length > 0 && updatedOrders.every(order => order.orderStatus === "Issued");
+
+            if (hasReturnedOrder) {
+                // Call delivery-return API if any order is returned
+                const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        deliveryNoteId: id,
+                        updatedOrders,
+                    }),
+                });
+
+                const returnResult = await returnResponse.json();
+                if (returnResult.success) {
+                    toast.success("Returned orders processed successfully.");
+                } else {
+                    alert("Failed to process returned orders.");
+                }
+            }
+
+            if (allIssued) {
+                // Call delivery-done API only when all orders are issued
+                const doneResponse = await fetch("http://localhost:5001/api/admin/main/delivery-done", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        deliveryNoteId: id,
+                        updatedOrders,
+                    }),
+                });
+
+                const doneResult = await doneResponse.json();
+                if (doneResult.success) {
+                    toast.success("Delivery note marked as done successfully.");
+                } else {
+                    alert("Failed to mark delivery note as done.");
+                }
+            }
+
+            fetchDeliveryNote();
+            setIsEditing(false); // Exit edit mode
+        } catch (error) {
+            alert("An error occurred while updating the delivery note.");
+        }
     };
+
 
     if (isLoading) {
         return (
@@ -319,8 +394,10 @@ const DeliveryNoteDetails = () => {
                                                                             onChange={(e) => handleChange(e, index)}
                                                                         />
                                                                         <Label for={`received-${order.OrID}`} className="ms-2">Received</Label>
+                                                                        <Button className='ms-4' onClick={() => setShowStockModal1(true)}>Payment</Button>
                                                                     </div>
                                                                 </FormGroup>
+
                                                             ) : (
                                                                 <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
                                                             )
@@ -378,14 +455,14 @@ const DeliveryNoteDetails = () => {
                                 </div>
                             </div>
                             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
-                                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
+                                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Issued Stock</ModalHeader>
                                 <ModalBody>
                                     <FormGroup style={{ position: "relative" }}>
                                         <Label>What to do to this item?</Label>
                                         <Input
                                             type="select"
-                                            value={selectedAction} // This will hold the selected action ("Available", "Reserved", "Damage")
-                                            onChange={(e) => setSelectedAction(e.target.value)} // Update selectedAction when an option is chosen
+                                            value={selectedAction}
+                                            onChange={(e) => setSelectedAction(e.target.value)}
                                         >
                                             <option value="Available">Set as Available</option>
                                             <option value="Reserved">Set as Reserved</option>
@@ -394,22 +471,30 @@ const DeliveryNoteDetails = () => {
                                     </FormGroup>
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button
-                                        color="primary"
-                                        onClick={() => {
-                                            // Iterate over selectedItems and update each item with the new status
-                                            selectedItems.forEach(itemKey => {
-                                                handleItemStatusChange(itemKey, selectedAction);
-                                            });
-                                            passReservedItem(selectedItems, selectedAction); // You may update passReservedItem logic as per the status
-                                            setShowStockModal(false); // Close the modal after action
-                                        }}
-                                    >
-                                        Pass
-                                    </Button>
+                                    <Button color="primary" onClick={handleConfirmSelection}>Pass</Button>
                                     <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
                                 </ModalFooter>
                             </Modal>
+
+                            <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>
+                                <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Payment</ModalHeader>
+                                <ModalBody>
+                                    <FormGroup style={{ position: "relative" }}>
+                                        <Label>Received Payment</Label>
+                                        <Input
+                                            type="text"
+                                            value={payment}
+                                            onChange={(e) => setPayment(e.target.value)}
+                                        >
+                                        </Input>
+                                    </FormGroup>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" onClick={handlePayment}>Pass</Button>
+                                    <Button color="secondary" onClick={() => setShowStockModal1(false)}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
+
                         </Col>
                     </Row>
                 </Container>
