@@ -2956,7 +2956,6 @@ router.get("/delivery-schedule", async (req, res) => {
                 // Use toLocaleDateString('en-CA') to keep format as YYYY-MM-DD
                 const formattedDate = date.toLocaleDateString('en-CA');
 
-                console.log("Formatted Date in IST:", formattedDate); // Debugging output
                 return formattedDate;
             })
             .filter(date => {
@@ -2964,8 +2963,6 @@ router.get("/delivery-schedule", async (req, res) => {
                 return date >= today; // Keep today's date and all upcoming dates
             })
             .sort((a, b) => new Date(a) - new Date(b)); // Sort dates
-
-        console.log("Fixed Upcoming Dates:", upcomingDates);
 
         if (upcomingDates.length === 0) {
             return res.status(404).json({ message: "No upcoming delivery dates available" });
@@ -3591,6 +3588,75 @@ router.post("/delivery-done", async (req, res) => {
     }
 });
 
+// Update delivery note when order status issued (done)
+router.post("/delivery-return", async (req, res) => {
+    const { updatedOrders, deliveryNoteId } = req.body; // Extract orders array and delivery note ID
+    // console.log(req.body);
+
+    if (!updatedOrders || !Array.isArray(updatedOrders) || updatedOrders.length === 0) {
+        return res.status(400).json({ success: false, message: "No valid orders provided." });
+    }
+
+    try {
+        for (const order of updatedOrders) {
+            const { OrID, orderStatus, deliveryStatus, received, reason, reasonType, rescheduledDate ,returnedItems , payment} = order;
+
+            const nowPayment = parseFloat(payment);
+
+            // Ensure the order exists before updating
+            const [rows] = await db.query(
+                "SELECT orID, custName, balance, payStatus, expectedDate, stID, advance FROM Orders WHERE orID = ?",
+                [OrID]
+            );
+
+            if (!rows || rows.length === 0) {
+                throw new Error(`Order ${OrID} not found.`);
+            }
+
+            const existingOrder = rows[0]; // Fix: Get the first row properly
+
+            const { orID, custName, balance, payStatus, expectedDate, stID ,advance } = existingOrder;
+
+            // Ensure balance is valid
+            const updatedBalance = parseFloat(balance) || 0;
+            const updatedAdvance = parseFloat(nowPayment) + parseFloat(advance);
+            const newBalance = parseFloat(updatedBalance) - parseFloat(nowPayment);
+
+            // Uncomment this when testing is done
+            if (orderStatus === "Issued"){
+                console.log("Issued order");
+                await db.query(`UPDATE Orders SET advance = ?, balance = ?, payStatus = ? WHERE OrID = ?`, [updatedBalance, 0, 'Settled', OrID]);
+                await db.query(`UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?`, [updatedBalance, stID]);
+                await db.query(`INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())`, [OrID, updatedBalance]);
+                await db.query(`UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?`, ["Delivered", expectedDate, OrID]);
+
+            }else if (orderStatus === "Returned"){
+                console.log("Returned order");
+                await db.query(`UPDATE Orders SET advance = ?, balance = ?, payStatus = ? , orStatus =?, expectedDate=? WHERE OrID = ?`,
+                    [updatedAdvance,newBalance, 'Credit','Returned', rescheduledDate,OrID]);
+                await db.query(`UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?`, [nowPayment, stID]);
+                await db.query(`INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())`, [OrID, nowPayment]);
+                await db.query(`UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?`, ["Returned", expectedDate, OrID]);
+            }else {
+                console.log("pass");
+            }
+            //await db.query(`UPDATE delivery_note SET status = ? WHERE delNoID = ?`, ["Complete", deliveryNoteId]);
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Orders updated successfully.",
+        });
+
+    } catch (err) {
+        console.error("Error updating orders:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error updating orders",
+            details: err.message,
+        });
+    }
+});
 
 
 
