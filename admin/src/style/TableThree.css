@@ -95,7 +95,10 @@
     background-color: rgba(155, 89, 182, 0.2);
     color: #9b59b6;
 }
-
+.status.returned {
+    background-color: rgba(89, 146, 182, 0.2);
+    color: #59a0b6;
+}
 /* No data message */
 .no-data {
     text-align: center;
