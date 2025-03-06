@@ -31,14 +31,11 @@ const DeliveryNoteDetails = () => {
     const [showStockModal, setShowStockModal] = useState(false);
     const [showStockModal1, setShowStockModal1] = useState(false);
     const [selectedAction, setSelectedAction] = useState("Available");
-    const [payment, setPayment] = useState("");
+    const [payments, setPayments] = useState({});
     const [selectedItemStatus, setSelectedItemStatus] = useState({});
     const passReservedItem = (selectedItems, selectedAction) => {
-        console.log("Selected Items:", selectedItems);
-        console.log("Selected Action:", selectedAction);
         setShowStockModal(false);
     };
-
     // State for Return & Cancel Reasons
     const [reasons, setReasons] = useState({});
     useEffect(() => {
@@ -78,7 +75,6 @@ const DeliveryNoteDetails = () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
             const data = await response.json();
-            console.log(data);
             if (data.upcomingDates && data.upcomingDates.length > 0) {
                 setDeliveryDates(data.upcomingDates);
             } else {
@@ -92,21 +88,9 @@ const DeliveryNoteDetails = () => {
     const handleChange = (e, orderIndex) => {
         const { name, value, type, checked } = e.target;
         const orderId = orders[orderIndex].OrID;
-
         setOrders(prevOrders =>
             prevOrders.map((order, i) =>
                 i === orderIndex ? { ...order, [name]: value } : order
-            )
-        );
-        setOrders(prevOrders =>
-            prevOrders.map((order, i) =>
-                i === orderIndex
-                    ? {
-                        ...order,
-                        [name]: type === "checkbox" ? checked : value,
-                        received: type === "checkbox" ? checked : order.received
-                    }
-                    : order
             )
         );
         if (name === "orderStatus" && (value === "Returned" || value === "Cancelled")) {
@@ -125,7 +109,6 @@ const DeliveryNoteDetails = () => {
         }));
         setShowStockModal(true)
     };
-
     const handleReasonChange = (e, orderId) => {
         const { name, value } = e.target;
         setReasons(prev => ({
@@ -147,35 +130,33 @@ const DeliveryNoteDetails = () => {
             console.warn("No items selected for status update.");
             return;
         }
-
         // Iterate over the selected items and update their status
         Object.values(selectedItems).forEach(itemArray => {
             itemArray.forEach(itemKey => {
                 handleItemStatusChange(itemKey, selectedAction);
             });
         });
-
         passReservedItem(selectedItems, selectedAction); // Ensure this function handles updates correctly
         setShowStockModal(false); // Close modal
     };
     const handlePayment = () => {
-        if (!payment || isNaN(payment) || Number(payment) <= 0) {
-            alert("Please enter a valid payment amount.");
+        const hasInvalidPayment = Object.values(payments).some(
+            (value) => value === "" || isNaN(value) || Number(value) < 0 // Allow 0 but prevent negatives
+        );
+
+        if (hasInvalidPayment) {
+            alert("Please enter valid payment amounts (0 or more) for all orders.");
             return;
         }
 
-        console.log("Payment received:", payment);
         setShowStockModal1(false);
     };
-
-
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
     };
     const handleSave = async () => {
         const rescheduledDate = selectedDeliveryDate || "";
-
         // Filter and map orders to include selected items and their status
         const updatedOrders = orders
             .filter(order =>
@@ -187,7 +168,6 @@ const DeliveryNoteDetails = () => {
                 OrID: order.OrID,
                 orderStatus: order.orderStatus,
                 deliveryStatus: order.deliveryStatus,
-                received: order.received,
                 reason: reasons[order.OrID]?.reason || "N/A",
                 reasonType: reasons[order.OrID]?.type || "N/A",
                 rescheduledDate,
@@ -196,51 +176,23 @@ const DeliveryNoteDetails = () => {
                     const itemStatus = selectedItemStatus[itemKey] || "Available";
                     return { itemId, stockId, status: itemStatus };
                 }) || [],
-                payment: order.orderStatus === "Returned" || "Canceled" ? payment : 0,
+                payment: payments[order.OrID] || 0, // ✅ Assign correct payment per order
             }));
-
-        console.log(updatedOrders);
-
         try {
-            const hasReturnedOrder = updatedOrders.some(order => order.orderStatus === "Returned");
-            const allIssued = updatedOrders.length > 0 && updatedOrders.every(order => order.orderStatus === "Issued");
-
-            if (hasReturnedOrder) {
-                // Call delivery-return API if any order is returned
-                const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        deliveryNoteId: id,
-                        updatedOrders,
-                    }),
-                });
-
-                const returnResult = await returnResponse.json();
-                if (returnResult.success) {
-                    toast.success("Returned orders processed successfully.");
-                } else {
-                    alert("Failed to process returned orders.");
-                }
-            }
-
-            if (allIssued) {
-                // Call delivery-done API only when all orders are issued
-                const doneResponse = await fetch("http://localhost:5001/api/admin/main/delivery-done", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        deliveryNoteId: id,
-                        updatedOrders,
-                    }),
-                });
-
-                const doneResult = await doneResponse.json();
-                if (doneResult.success) {
-                    toast.success("Delivery note marked as done successfully.");
-                } else {
-                    alert("Failed to mark delivery note as done.");
-                }
+            // Call delivery-return API if any order is returned
+            const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    deliveryNoteId: id,
+                    updatedOrders,
+                }),
+            });
+            const returnResult = await returnResponse.json();
+            if (returnResult.success) {
+                toast.success("Returned orders processed successfully.");
+            } else {
+                alert("Failed to process returned orders.");
             }
 
             fetchDeliveryNote();
@@ -249,8 +201,6 @@ const DeliveryNoteDetails = () => {
             alert("An error occurred while updating the delivery note.");
         }
     };
-
-
     if (isLoading) {
         return (
             <div className="text-center mt-5">
@@ -387,13 +337,6 @@ const DeliveryNoteDetails = () => {
                                                                 <FormGroup>
                                                                     <Label><strong>Balance:</strong> Rs.{order.balanceAmount}</Label>
                                                                     <div className="d-flex align-items-center">
-                                                                        <Input
-                                                                            type="checkbox"
-                                                                            id={`received-${order.OrID}`}
-                                                                            checked={order.received}
-                                                                            onChange={(e) => handleChange(e, index)}
-                                                                        />
-                                                                        <Label for={`received-${order.OrID}`} className="ms-2">Received</Label>
                                                                         <Button className='ms-4' onClick={() => setShowStockModal1(true)}>Payment</Button>
                                                                     </div>
                                                                 </FormGroup>
@@ -476,24 +419,30 @@ const DeliveryNoteDetails = () => {
                                 </ModalFooter>
                             </Modal>
 
-                            <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>
-                                <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Payment</ModalHeader>
+                            <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(false)}>
+                                <ModalHeader toggle={() => setShowStockModal1(false)}>Payment</ModalHeader>
                                 <ModalBody>
-                                    <FormGroup style={{ position: "relative" }}>
-                                        <Label>Received Payment</Label>
-                                        <Input
-                                            type="text"
-                                            value={payment}
-                                            onChange={(e) => setPayment(e.target.value)}
-                                        >
-                                        </Input>
-                                    </FormGroup>
+                                    {orders.map((order) => (
+                                        <FormGroup key={order.OrID} style={{ position: "relative" }}>
+                                            <Label>Payment for Order {order.OrID}</Label>
+                                            <Input
+                                                type="number"
+                                                value={payments[order.OrID] || ""}
+                                                onChange={(e) => setPayments(prev => ({
+                                                    ...prev,
+                                                    [order.OrID]: e.target.value
+                                                }))}
+                                                placeholder="Enter payment amount"
+                                            />
+                                        </FormGroup>
+                                    ))}
                                 </ModalBody>
                                 <ModalFooter>
                                     <Button color="primary" onClick={handlePayment}>Pass</Button>
                                     <Button color="secondary" onClick={() => setShowStockModal1(false)}>Cancel</Button>
                                 </ModalFooter>
                             </Modal>
+
 
                         </Col>
                     </Row>
