@@ -463,7 +463,8 @@ const CompleteOrderDetails = () => {
                 <Container>
                     <Row>
                         <Col lg="12">
-                            <h4 className="mb-3 text-center topic">Order #{order.orderId} Details</h4>
+                            <h4 className="mb-3 text-center topic">Completed Order Details</h4>
+                            <h4 className="mb-3 text-center topic">#{order.orderId}</h4>
                             <div className="order-details">
                                 <div className="order-header">
                                     <h5 className="mt-4">General Details</h5>

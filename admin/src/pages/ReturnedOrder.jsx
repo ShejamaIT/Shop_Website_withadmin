@@ -9,7 +9,7 @@ import "../style/orderDetails.css";
 
 
 
-const IssuedOrderDetails = () => {
+const ReturnedOrderDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [order, setOrder] = useState(null);
@@ -96,7 +96,7 @@ const IssuedOrderDetails = () => {
                 <Container>
                     <Row>
                         <Col lg="12">
-                            <h4 className="mb-3 text-center topic">Issued Order Details</h4>
+                            <h4 className="mb-3 text-center topic">Returned Order Details</h4>
                             <h4 className="mb-3 text-center topic">#{order.orderId}</h4>
                             <div className="order-details">
                                 <div className="order-header">
@@ -167,7 +167,6 @@ const IssuedOrderDetails = () => {
                                                         <p><strong>Color:</strong> {item.color}</p>
                                                         <p><strong>Requested Quantity:</strong> {item.quantity}</p>
                                                         <p><strong>Amount:</strong> Rs. {item.price}</p>
-                                                        <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                         <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
                                                     </li>
                                                 ))}
@@ -195,22 +194,22 @@ const IssuedOrderDetails = () => {
                                     </div>
 
                                     {/* Buttons */}
-                                    {/*<div className="text-center mt-4">*/}
-                                    {/*    {!isEditing ? (*/}
-                                    {/*        <Button color="primary" onClick={() => setIsEditing(true)} disabled={loading}>*/}
-                                    {/*            {loading ? "Loading..." : "Edit Order"}*/}
-                                    {/*        </Button>*/}
-                                    {/*    ) : (*/}
-                                    {/*        <>*/}
-                                    {/*            <Button color="success" onClick={handleSave} disabled={loading}>*/}
-                                    {/*                {loading ? "Saving..." : "Save Changes"}*/}
-                                    {/*            </Button>*/}
-                                    {/*            <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)} disabled={loading}>*/}
-                                    {/*                Cancel*/}
-                                    {/*            </Button>*/}
-                                    {/*        </>*/}
-                                    {/*    )}*/}
-                                    {/*</div>*/}
+                                    <div className="text-center mt-4">
+                                        {!isEditing ? (
+                                            <Button color="primary" onClick={() => setIsEditing(true)} disabled={loading}>
+                                                {loading ? "Loading..." : "Edit Order"}
+                                            </Button>
+                                        ) : (
+                                            <>
+                                                <Button color="success" onClick={handleSave} disabled={loading}>
+                                                    {loading ? "Saving..." : "Save Changes"}
+                                                </Button>
+                                                <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)} disabled={loading}>
+                                                    Cancel
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </Col>
@@ -221,6 +220,6 @@ const IssuedOrderDetails = () => {
     );
 };
 
-export default IssuedOrderDetails;
+export default ReturnedOrderDetails;
 
 

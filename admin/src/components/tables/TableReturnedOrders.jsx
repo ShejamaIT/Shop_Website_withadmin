@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "../../style/TableThree.css"; // Importing the stylesheet
 
-const TableIssued = ({ refreshKey }) => {
+const TableReturned = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,7 +14,7 @@ const TableIssued = ({ refreshKey }) => {
 
     const fetchOrders = async () => {
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-issued"); // Adjust API URL if needed
+            const response = await fetch("http://localhost:5001/api/admin/main/orders-returned"); // Adjust API URL if needed
             const data = await response.json();
 
             if (!response.ok) {
@@ -38,7 +38,7 @@ const TableIssued = ({ refreshKey }) => {
 
     // Function to navigate to order details page
     const handleViewOrder = (orderId) => {
-        navigate(`/issued-order-detail/${orderId}`); // Navigate to OrderDetails page
+        navigate(`/retruned-order-detail/${orderId}`); // Navigate to OrderDetails page
     };
 
     return (
@@ -66,11 +66,11 @@ const TableIssued = ({ refreshKey }) => {
                         </tr>
                     ) : error ? (
                         <tr>
-                            <td colSpan="10" className="error-text text-center">No Issued orders</td>
+                            <td colSpan="10" className="error-text text-center">No Returned orders</td>
                         </tr>
                     ) : orders.length === 0 ? (
                         <tr>
-                            <td colSpan="10" className="no-data text-center">No Issued orders found</td>
+                            <td colSpan="10" className="no-data text-center">No Returned orders found</td>
                         </tr>
                     ) : (
                         orders.map((order) => (
@@ -106,4 +106,4 @@ const TableIssued = ({ refreshKey }) => {
     );
 };
 
-export default TableIssued;
+export default TableReturned;

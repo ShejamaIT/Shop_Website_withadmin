@@ -93,10 +93,13 @@ CREATE TABLE Customer_log(
        password TEXT
 );
 CREATE TABLE Customer(
-        c_ID VARCHAR(25) PRIMARY KEY,
-        email TEXT,
+        c_ID INT AUTO_INCREMENT PRIMARY KEY,
+        Name TEXT,
+        email TEXT NULL,
         address TEXT,
-        contact VARCHAR(10)
+        contact1 VARCHAR(10),
+        contact2 VARCHAR(10),
+        excessAmount DOUBLE
 );
 CREATE TABLE sessionlogs (
   SessionID int(11) NOT NULL,

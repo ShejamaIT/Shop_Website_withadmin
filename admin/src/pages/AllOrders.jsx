@@ -17,6 +17,7 @@ import {useNavigate} from "react-router-dom";
 import DeliveryNotes from "./DeliveryNotes";
 import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
 import AddDeliveryShedule from "./AddDeliveryShedule";
+import TableReturned from "../components/tables/TableReturnedOrders";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("0");
@@ -38,7 +39,7 @@ const AllOrders = () => {
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}
                     <Nav tabs className="mb-3">
-                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Delivery Notes" , "Issued Orders"].map((label, index) => (
+                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Delivery Notes" , "Issued Orders", "Returned Orders"].map((label, index) => (
                             <NavItem key={index}>
                                 <NavLink
                                     className={classnames({ active: activeTab === index.toString() })}
@@ -171,6 +172,11 @@ const AllOrders = () => {
                         <TabPane tabId="7" key={refreshKey}>
                             <Row>
                                 <TableIssued />
+                            </Row>
+                        </TabPane>
+                        <TabPane tabId="8" key={refreshKey}>
+                            <Row>
+                                <TableReturned />
                             </Row>
                         </TabPane>
                     </TabContent>
