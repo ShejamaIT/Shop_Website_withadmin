@@ -190,7 +190,6 @@ CREATE TABLE return_orders(
     rid INT AUTO_INCREMENT PRIMARY KEY,
     OrID VARCHAR(25),
     detail TEXT,
-    reserved VARCHAR(15),
        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                            ON DELETE CASCADE ON UPDATE CASCADE
 );

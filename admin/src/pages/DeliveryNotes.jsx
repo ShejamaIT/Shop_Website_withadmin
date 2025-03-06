@@ -23,6 +23,7 @@ const DeliveryNotes = () => {
     const [showDeliveryView, setShowDeliveryView] = useState(false);
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
+    const [receiptDataD, setReceiptDataD] = useState(null);
     const handleSubmit2 = async (formData) => {
         try {
             const updatedReceiptData = {
@@ -65,7 +66,7 @@ const DeliveryNotes = () => {
 
             if (response.ok) {
                 toast.success("Delivery note created successfully.");
-                setReceiptData(updatedReceiptData);
+                setReceiptDataD(updatedReceiptData);
                 setShowModal2(false);
                 setShowDeliveryView(true);
                 setTimeout(() => {
@@ -285,7 +286,7 @@ const DeliveryNotes = () => {
                     )}
                     {showDeliveryView && (
                         <DeliveryNoteView
-                            receiptData={receiptData}
+                            receiptData={receiptDataD}
                             setShowDeliveryView={setShowDeliveryView}
                         />
                     )}

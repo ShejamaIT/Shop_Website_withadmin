@@ -24,7 +24,7 @@ const ReturnedOrderDetails = () => {
 
     const fetchOrder = async () => {
         try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/issued-order-details?orID=${id}`);
+            const response = await fetch(`http://localhost:5001/api/admin/main/returned-order-details?orID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
@@ -154,6 +154,7 @@ const ReturnedOrderDetails = () => {
                                         <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
+                                        <p><strong>Reason to Return:</strong> {order.returnReason}</p>
                                     </div>
 
                                     {/* Ordered Items */}
