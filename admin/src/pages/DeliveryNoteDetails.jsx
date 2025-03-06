@@ -332,21 +332,7 @@ const DeliveryNoteDetails = () => {
                                                                 </Input>
                                                             </FormGroup>
                                                         )}
-                                                        {order.balanceAmount > 0 ? (
-                                                            isEditing ? (
-                                                                <FormGroup>
-                                                                    <Label><strong>Balance:</strong> Rs.{order.balanceAmount}</Label>
-                                                                    <div className="d-flex align-items-center">
-                                                                        <Button className='ms-4' onClick={() => setShowStockModal1(true)}>Payment</Button>
-                                                                    </div>
-                                                                </FormGroup>
-
-                                                            ) : (
-                                                                <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
-                                                            )
-                                                        ) : (
-                                                            <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
-                                                        )}
+                                                        <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
                                                         {/* Display Issued Items for this Order */}
                                                         <div className="issued-items">
                                                             <h6 className="mt-3">Issued Items:</h6>
@@ -391,8 +377,10 @@ const DeliveryNoteDetails = () => {
                                         <Button color="primary" onClick={() => setIsEditing(true)}>Edit Delivery Note</Button>
                                     ) : (
                                         <>
-                                            <Button color="success" onClick={handleSave}>Save Changes</Button>
+                                            <Button color='primary' className="ms-3" onClick={() => setShowStockModal1(true)}>Payment</Button>
+                                            <Button color="success" className="ms-3" onClick={handleSave}>Save Changes</Button>
                                             <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)}>Cancel</Button>
+
                                         </>
                                     )}
                                 </div>
