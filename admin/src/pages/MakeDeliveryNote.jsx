@@ -69,22 +69,6 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
 
                 {/* Balance to Collect Row */}
                 <div className="balance-to-collect">
-                    {/*<table className="receipt-table">*/}
-                    {/*    <thead>*/}
-                    {/*    <tr>*/}
-                    {/*        <th>Balance to Collect</th>*/}
-                    {/*        <th>Total</th>*/}
-                    {/*    </tr>*/}
-                    {/*    </thead>*/}
-                    {/*    <tbody>*/}
-                    {/*    {ordersWithBalance.map((order, index) => (*/}
-                    {/*        <tr key={index}>*/}
-                    {/*            <td>Order ID {order.orId}</td>*/}
-                    {/*            <td>Rs. {order.balance.toFixed(2)}</td>*/}
-                    {/*        </tr>*/}
-                    {/*    ))}*/}
-                    {/*    </tbody>*/}
-                    {/*</table>*/}
                     <p><strong>Total Balance to Collect: </strong>Rs. {balanceToCollect.toFixed(2)}</p>
                 </div>
 

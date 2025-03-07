@@ -32,10 +32,10 @@ const AddEmployee = ({ onAddEmployee }) => {
             return;
         }
 
-        if (formData.job === "Sales" && !formData.orderTarget && !formData.issuedTarget) {
-            toast.error("Please enter sales team details.");
-            return;
-        }
+        // if (formData.job === "Sales" && !formData.orderTarget && !formData.issuedTarget) {
+        //     toast.error("Please enter sales team details.");
+        //     return;
+        // }
 
         try {
             const employeeData = {
@@ -126,7 +126,7 @@ const AddEmployee = ({ onAddEmployee }) => {
                                 <option value="Admin">Admin</option>
                                 <option value="Sales">Sales</option>
                                 <option value="HR">HR</option>
-                                <option value="Finance">Finance</option>
+                                <option value="Driver">Driver</option>
                             </Input>
                         </FormGroup>
                         <FormGroup>
