@@ -2388,6 +2388,57 @@ router.get("/salesteam", async (req, res) => {
     }
 });
 
+//Get All driver members
+router.get("/drivers", async (req, res) => {
+    try {
+        // Query the database to fetch all drivers and their related employee details
+        const [drivers] = await db.query(`
+            SELECT
+                d.devID,
+                d.balance,
+                e.E_Id,
+                e.name AS employeeName,
+                e.address,
+                e.nic,
+                e.dob,
+                e.contact,
+                e.job,
+                e.basic
+            FROM driver d
+            JOIN Employee e ON d.E_ID = e.E_Id;
+        `);
+
+        // If no drivers are found, return a 404 status
+        if (drivers.length === 0) {
+            return res.status(404).json({ message: "No drivers found" });
+        }
+
+        // Format the response data
+        const formattedDrivers = drivers.map(driver => ({
+            devID: driver.devID,
+            E_Id: driver.E_Id,
+            employeeName: driver.employeeName,
+            address: driver.address,
+            nic: driver.nic,
+            dob: driver.dob,
+            contact: driver.contact,
+            job: driver.job,
+            basic: driver.basic,
+            balance: driver.balance
+        }));
+
+        // Send the formatted data as a JSON response
+        return res.status(200).json({
+            message: "Drivers found.",
+            data: formattedDrivers
+        });
+
+    } catch (error) {
+        console.error("Error fetching drivers:", error.message);
+        return res.status(500).json({ message: "Error fetching drivers" });
+    }
+});
+
 // Get orders for a specific sales team member (stID)
 router.get("/orders/by-sales-team", async (req, res) => {
     try {
@@ -3593,7 +3644,7 @@ router.post("/employees", async (req, res) => {
         const { name, address, nic, dob, contact, job, basic, orderTarget , issuedTarget } = req.body;
         console.log(req.body);
 
-        if (!name || !address || !nic || !dob || !contact || !job || !basic || !orderTarget || !issuedTarget) {
+        if (!name || !address || !nic || !dob || !contact || !job || !basic ) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required except target and currentRate (only for Sales)."
@@ -3606,19 +3657,26 @@ router.post("/employees", async (req, res) => {
         await db.query(sql, [E_Id, name, address, nic, dob, contact, job, basic]);
 
         // If job is Sales, insert into sales_team table
-        let salesData = null;
+        let Data = null;
         if (job === "Sales" && orderTarget && issuedTarget) {
             const stID = await generateNewId("sales_team", "stID", "ST");
             const sqlSales = `INSERT INTO sales_team (stID, E_Id, orderTarget,issuedTarget, totalOrder, totalIssued) VALUES (?, ?, ?,?,'0', '0')`;
             await db.query(sqlSales,[stID, E_Id, orderTarget , issuedTarget]);
 
-            salesData = { stID, orderTarget , issuedTarget };
+            Data = { stID, orderTarget , issuedTarget };
         }
+        if ( job === "Driver"){
+            const devID = await generateNewId("driver","devID","DI");
+            const sqlDriver = `INSERT INTO driver (devID,E_ID,balance) VALUES (?,?,'0')`;
+            await db.query(sqlDriver,[devID,E_Id]);
 
+            Data = {devID,E_Id};
+
+        }
         return res.status(201).json({
             success: true,
             message: "Employee added successfully",
-            data:  {E_Id,salesData},
+            data:  {E_Id,Data},
         });
 
     } catch (err) {
