@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import '../style/DeliveryNoteDetails.css';
 import {toast} from "react-toastify";
 import Swal from 'sweetalert2';
+import { FaArrowRight } from "react-icons/fa";
 
 const DeliveryNoteDetails = () => {
     const { id } = useParams();
@@ -503,11 +504,11 @@ const DeliveryNoteDetails = () => {
                                         <Label><strong>Order ID:</strong> {selectedOrderId}</Label>
                                         <Label><strong>Due Amount:</strong> Rs.{selectedBalance}</Label>
 
-                                        <Label>Customer ➡ Driver</Label>
+                                        <Label>Customer <FaArrowRight /> Driver </Label>
                                         <Input type="number" onChange={handleCustomerBalance} />
                                         <Label><strong>Customer Balance:</strong> Rs.{CustomerBalance.toFixed(2)}</Label>
 
-                                        <Label>Driver ➡ Shop</Label>
+                                        <Label>Driver <FaArrowRight /> Shop</Label>
                                         <Input type="number" value={AmountRecevice} onChange={handleDriverBalance} />
                                         <Label><strong>Driver Balance:</strong> Rs.{DriverBalance.toFixed(2)}</Label>
                                     </FormGroup>
