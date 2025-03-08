@@ -4145,6 +4145,52 @@ router.post("/delivery-payment", async (req, res) => {
     
 });
 
+router.post("/delivery-payment", async (req, res) => {
+    const { orderid, payment ,driver , RPayment , driverbalance, customerbalance } = req.body;
+    const receviedPayment = parseFloat(RPayment) || 0;
+    const DrivBalance = parseFloat(driverbalance) || 0;
+    const CustBalance = parseFloat(customerbalance) || 0;
+    // Fetch advance by order id
+    const [Orderpayment] = await db.query(
+        "SELECT custName, contact1 , contact2 ,advance , balance FROM Orders WHERE OrID = ?",
+        [orderid]
+    );
+
+    if (!Orderpayment || Orderpayment.length === 0) {
+        console.error("No order found for this order ID.");
+        return res.status(404).json({ error: "Order not found." });
+    }
+
+    const contact1 = Orderpayment[0]?.contact1?.trim();
+    const contact2 = Orderpayment[0]?.contact2?.trim();
+
+// Fetch customer
+    const [cusId] = await db.query(
+        "SELECT c_ID FROM Customer WHERE contact1 = ? OR contact2 = ? OR (contact1 = ? AND contact2 = ?)",
+        [contact1, contact1, contact2, contact2]
+    );
+
+    if (!cusId || cusId.length === 0) {
+        console.error("No customer found with these contact details.");
+        return res.status(404).json({ error: "Customer not found." });
+    }
+
+    // Fetch Employee
+    const [EMPID] = await  db.query(
+        "SELECT E_Id FROM Employee WHERE name=?", [driver]
+    );
+    console.log(EMPID);
+    // Fetch Driver
+    const [driverdetail] = await db.query(
+        "SELECT devID, balance FROM driver WHERE E_ID=?",[EMPID.E_Id]
+    );
+
+    const advance = parseFloat(Orderpayment.advance) + parseFloat(receviedPayment);
+    const balance = parseFloat(Orderpayment.balance) - parseFloat(receviedPayment);
+
+
+});
+
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
     const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
