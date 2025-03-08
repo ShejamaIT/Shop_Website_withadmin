@@ -1,39 +1,85 @@
 import React, { useState, useEffect } from "react";
 import "../style/deleiverynote.css";
 import { toast } from "react-toastify";
+import { Input } from "reactstrap";
 
 const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }) => {
-    console.log(selectedOrders);
+    console.log("Selected Orders: ", selectedOrders);
+
     const [vehicleId, setVehicleId] = useState("");
-    const [driverName, setDriverName] = useState("");
+    const [driverName, setDriverName] = useState("");  // Updated: Stores the selected driver name
+    const [drivers, setDrivers] = useState([]);
     const [hire, setHire] = useState("");
     const [balanceToCollect, setBalanceToCollect] = useState(0);
     const [ordersWithBalance, setOrdersWithBalance] = useState([]);
+    const [selectedDriver, setSelectedDriver] = useState(null);
+    const [filteredDriver, setFilteredDriver] = useState([]);
+    const [searchTerm, setSearchTerm] = useState(""); // Keeps the search text separate
 
-    // Group orders into those with balance and without balance
+    // Filter orders with balance
     useEffect(() => {
         const ordersWithBalance = selectedOrders.filter(order => order.balance > 0);
         setOrdersWithBalance(ordersWithBalance);
     }, [selectedOrders]);
 
-    // Calculate the total balance to collect
+    // Calculate total balance to collect
     useEffect(() => {
         const totalBalance = ordersWithBalance.reduce((sum, order) => sum + order.balance, 0);
         setBalanceToCollect(totalBalance);
     }, [ordersWithBalance]);
 
+    // Fetch drivers
+    useEffect(() => {
+        const fetchDrivers = async () => {
+            try {
+                const response = await fetch("http://localhost:5001/api/admin/main/drivers");
+                const data = await response.json();
+                console.log("Fetched Drivers: ", data.data);
+                setDrivers(data.data || []);
+            } catch (error) {
+                toast.error("Error fetching drivers.");
+            }
+        };
+        fetchDrivers();
+    }, []);
+
+    // Handle submission & printing
     const handlePrintAndSubmit = () => {
-        if (balanceToCollect > 0 && (vehicleId === "" || driverName === "" || hire === "")) {
-            toast.error("Please provide vehicle ID and driver name before submitting the delivery note.");
-        } else {
-            handleDeliveryUpdate({
-                orders: selectedOrders,
-                vehicleId,
-                driverName,
-                hire,
-                balanceToCollect,
-            });
+        if (balanceToCollect > 0 && (vehicleId === "" || hire === "" || !selectedDriver)) {
+            toast.error("Please provide vehicle ID, hire value, and select a driver before submitting.");
+            return;
         }
+        handleDeliveryUpdate({
+            orders: selectedOrders,
+            vehicleId,
+            driverName,  // Updated: Send selected driver name
+            hire,
+            balanceToCollect,
+        });
+    };
+
+    // Handle driver search
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setDriverName(value); // Set search term in input field
+
+        if (!value.trim()) {
+            setFilteredDriver([]);
+        } else {
+            const filtered = drivers.filter((driver) =>
+                driver.E_Id.toString().includes(value) || driver.employeeName.toLowerCase().includes(value.toLowerCase())
+            );
+            setFilteredDriver(filtered);
+        }
+    };
+
+    // Select driver from dropdown
+    const handleSelectDriver = (driver) => {
+        setSelectedDriver(driver);
+        setDriverName(driver.employeeName); // Updated: Set the selected driver's name in the input field
+        setSearchTerm(""); // Clear search term
+        setFilteredDriver([]); // Hide dropdown
+        console.log("Selected Driver: ", driver);
     };
 
     return (
@@ -75,6 +121,7 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                 {/* Vehicle and Driver Info */}
                 <div className="delivery-details">
                     <div className="input-group">
+                        {/* Vehicle ID */}
                         <div className="vehicle-info">
                             <label><strong>Vehicle ID:</strong></label>
                             <input
@@ -85,16 +132,31 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                             />
                         </div>
 
+                        {/* Driver Selection */}
                         <div className="driver-info">
                             <label><strong>Driver Name:</strong></label>
-                            <input
+                            <Input
                                 type="text"
-                                value={driverName}
-                                onChange={(e) => setDriverName(e.target.value)}
-                                placeholder="Enter driver's name"
+                                placeholder="Search driver"
+                                value={driverName} // Updated: Shows selected driver in input field
+                                onChange={handleSearchChange}
                             />
+                            {driverName && filteredDriver.length > 0 && (
+                                <div className="dropdown">
+                                    {filteredDriver.map((driver) => (
+                                        <div
+                                            key={driver.devID}
+                                            onClick={() => handleSelectDriver(driver)}
+                                            className="dropdown-item"
+                                        >
+                                            {driver.employeeName} ({driver.devID})
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
+                        {/* Hire Fee */}
                         <div className="hire-info">
                             <label><strong>Hire:</strong></label>
                             <input
@@ -106,7 +168,6 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                         </div>
                     </div>
                 </div>
-
 
                 {/* Action Buttons */}
                 <div className="modal-buttons">

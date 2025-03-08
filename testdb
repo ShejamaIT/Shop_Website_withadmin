@@ -1,225 +1,13 @@
-CREATE TABLE Supplier(
-    s_ID VARCHAR(25) PRIMARY KEY,
-    name VARCHAR(45),
-    address TEXT,
-    contact VARCHAR(10),
-    contact2 VARCHAR(10)
-);
-CREATE TABLE Category (
-    Ca_Id VARCHAR(15) PRIMARY KEY,
-    name VARCHAR(40)
-);
-CREATE TABLE subCat_one(
-      sb_c_id VARCHAR(15) PRIMARY KEY,
-      subcategory TEXT,
-      Ca_Id VARCHAR(15),
-      img LONGBLOB NOT NULL,
-        CONSTRAINT FOREIGN KEY (Ca_Id) REFERENCES Category (Ca_Id)
-        			ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE subCat_two(
-      sb_cc_id VARCHAR(15) PRIMARY KEY,
-      subcategory TEXT,
-      sb_c_id VARCHAR(15),
-      img LONGBLOB NOT NULL,
-        CONSTRAINT FOREIGN KEY (sb_c_id) REFERENCES subCat_one (sb_c_id)
-        			ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE Item(
-      I_Id VARCHAR(25) PRIMARY KEY,
-      I_name TEXT ,
-      descrip TEXT,
-      color VARCHAR(20),
-      material VARCHAR(20),
-      price DOUBLE,
-      warrantyPeriod VARCHAR(25),
-      stockQty INT,
-      bookedQty INT,
-      availableQty INT,
-      minQTY INT,
-      img LONGBLOB NOT NULL,
-      img1 LONGBLOB NOT NULL,
-      img2 LONGBLOB NOT NULL,
-      img3 LONGBLOB NOT NULL,
-      mn_Cat VARCHAR(35),
-      sb_catOne VARCHAR(35),
-      sb_catTwo VARCHAR(35)
-);
-CREATE TABLE item_supplier (
-  I_Id varchar(25) NOT NULL,
-  s_ID varchar(25) NOT NULL,
-  unit_cost DOUBLE,
-  PRIMARY KEY (I_Id,s_ID),
-  CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-              ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
-                ON DELETE CASCADE ON UPDATE CASCADE
-
-);
-CREATE TABLE Employee(
-      E_Id VARCHAR(15) PRIMARY KEY,
-      name TEXT ,
-      address TEXT,
-      nic VARCHAR(12),
-      dob DATE,
-      contact VARCHAR(15),
-      job VARCHAR(15),
-      basic DOUBLE
-);
-CREATE TABLE sales_team(
-    stID VARCHAR(25) PRIMARY KEY,
-    E_Id VARCHAR(15),
-    orderTarget DOUBLE,
-    issuedTarget DOUBLE,
-    totalOrder DOUBLE,
-    totalIssued DOUBLE,
-        CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
-                                   ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE sales_coupon(
-    cpID VARCHAR(25) PRIMARY KEY,
-    stID VARCHAR(25),
-    discount DOUBLE,
-        CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
-                                   ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE Promotion(
-       img LONGBLOB NOT NULL,
-       date DATE
-);
-CREATE TABLE Customer_log(
-       name TEXT,
-       email TEXT,
-       password TEXT
-);
-CREATE TABLE Customer(
-        c_ID VARCHAR(25) PRIMARY KEY,
-        email TEXT,
-        address TEXT,
-        contact VARCHAR(10)
-);
-CREATE TABLE sessionlogs (
-  SessionID int(11) NOT NULL,
-  email TEXT NOT NULL,
-  LoginTime datetime DEFAULT current_timestamp(),
-  LogoutTime datetime DEFAULT NULL,
-  Token varchar(255) DEFAULT NULL
-);
-CREATE TABLE deli_Rates(
-    district VARCHAR(25) PRIMARY KEY,
-    amount DOUBLE
-);
-CREATE TABLE delivery_schedule(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ds_date DATE,
-    district VARCHAR(25)
-);
 CREATE TABLE Orders (
     OrID VARCHAR(25) PRIMARY KEY,
-    orDate DATE,
-    custName VARCHAR(30),
-    customerEmail TEXT,
-    contact1 VARCHAR(14) NOT NULL,
-    contact2 VARCHAR(14),
-    orStatus VARCHAR(15),
-    city VARCHAR(25),
-    delStatus VARCHAR(10),
     delPrice DOUBLE,
     discount DOUBLE,
     total DOUBLE,
     advance DOUBLE,
     balance DOUBLE,
     payStatus VARCHAR(20),
-    stID VARCHAR(25),
-    expectedDate DATE,
-    specialNote TEXT,
-    ordertype VARCHAR(10),
     CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
                         ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE Order_Detail (
-    orID VARCHAR(25),
-    I_Id VARCHAR(25),
-    qty INT,
-    tprice DOUBLE,
-    PRIMARY KEY (orID, I_Id),
-    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE delivery(
-    dv_id VARCHAR(25) PRIMARY KEY,
-    orID VARCHAR(25),
-    address TEXT,
-    district VARCHAR(25) NOT NULL,
-    contact VARCHAR(15) NOT NULL,
-    status VARCHAR(15),
-    schedule_Date DATE,
-    delivery_Date DATE,
-        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                   ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE accept_orders (
-    ao_ID INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    I_Id VARCHAR(25),
-    itemReceived VARCHAR(25),
-    status VARCHAR(25),
-    CONSTRAINT FK_accept_orders_orID FOREIGN KEY (orID) REFERENCES Orders (orID)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                     ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE booked_item (
-    bi_ID INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    I_Id VARCHAR(25),
-    qty INT,
-        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                           ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                        			ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE return_orders(
-    rid INT AUTO_INCREMENT PRIMARY KEY,
-    OrID VARCHAR(25),
-    detail TEXT,
-    reserved VARCHAR(15),
-       CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                           ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE canceled_orders(
-    cid INT AUTO_INCREMENT PRIMARY KEY,
-    OrID VARCHAR(25),
-    detail TEXT,
-    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                               ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE order_coupon(
-    ocID VARCHAR(25) PRIMARY KEY,
-    orID VARCHAR(25),
-    cpID VARCHAR(25),
-        CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                   ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT FOREIGN KEY (cpID) REFERENCES sales_coupon (cpID)
-                                   ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE production(
-    p_ID VARCHAR(25) PRIMARY KEY,
-    I_Id VARCHAR(25),
-    qty INT,
-    s_ID VARCHAR(25),
-    expectedDate DATE,
-    specialNote TEXT,
-    status VARCHAR(12),
-        CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                			ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
-                    			    ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE Payment(
     op_ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -229,46 +17,18 @@ CREATE TABLE Payment(
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                          ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-CREATE TABLE main_stock_received (
-    sr_ID INT AUTO_INCREMENT PRIMARY KEY,
-    s_ID VARCHAR(25) NOT NULL,
-    I_Id varchar(25) NOT NULL,
-    rDate DATE NOT NULL,
-    rec_count INT,
-    unitPrice DOUBLE,
-    detail TEXT,
-    CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
-                    ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                  ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE driver(
+    devID VARCHAR(25) PRIMARY KEY,
+    E_ID VARCHAR(15),
+    balance DOUBLE
 );
-CREATE TABLE m_s_r_detail(
-    srd_Id INT AUTO_INCREMENT PRIMARY KEY,
-    I_Id varchar(25) NOT NULL,
-    stock_Id varchar(25) NOT NULL,
-    sr_ID INT NOT NULL,
-    barcode LONGBLOB NOT NULL,
-    status VARCHAR(15),
-    orID VARCHAR(25),
-    datetime DATETIME,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                      ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (sr_ID) REFERENCES main_stock_received (sr_ID)
-                        ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE Customer(
+        c_ID INT AUTO_INCREMENT PRIMARY KEY,
+        Name TEXT,
+        email TEXT NULL,
+        address TEXT,
+        contact1 VARCHAR(10),
+        contact2 VARCHAR(10),
+        excessAmount DOUBLE,
+        credit DOUBLE
 );
-CREATE TABLE delivery_note(
-    delNoID INT AUTO_INCREMENT PRIMARY KEY,
-    driverName VARCHAR(25),
-    vehicalName VARCHAR(25),
-    date DATE,
-    hire DOUBLE,
-    district VARCHAR(35),
-    balanceToCollect DOUBLE,
-    status VARCHAR(15)
-);
-CREATE TABLE delivery_note_orders(
-    delNoID INT,
-    orID VARCHAR(25)
-);
-

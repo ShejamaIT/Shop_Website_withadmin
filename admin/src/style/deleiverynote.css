@@ -17,10 +17,10 @@
     background-color: #fff;
     padding: 1.5rem;
     border-radius: 12px;
-    width: 90%; /* Adjusted to fit better on smaller screens */
-    max-width: 900px; /* Adjust the max-width for larger screens */
+    width: 90%;
+    max-width: 900px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    overflow-x: auto; /* Allow horizontal scrolling on small screens */
+    overflow-x: auto;
 }
 
 /* Title */
@@ -43,7 +43,7 @@ p {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 1.5rem;
-    table-layout: auto; /* Allow columns to adjust based on content */
+    table-layout: auto;
 }
 
 .receipt-table th,
@@ -51,7 +51,7 @@ p {
     border: 1px solid #ddd;
     padding: 0.75rem;
     text-align: center;
-    word-wrap: break-word; /* Ensures content breaks if too long */
+    word-wrap: break-word;
 }
 
 .receipt-table th {
@@ -84,31 +84,61 @@ p {
 }
 
 .input-group {
-    display: flex;              /* Use Flexbox to align items */
-    justify-content: space-between; /* Space between the inputs */
-    gap: 10px;                  /* Optional: space between inputs */
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .vehicle-info,
 .driver-info,
 .hire-info {
-    flex: 1;                    /* Allow inputs to grow equally */
-    margin-right: 10px;         /* Optional: space between inputs */
+    flex: 1;
+    margin-right: 10px;
 }
 
 .vehicle-info label,
 .driver-info label,
 .hire-info label {
-    display: block;             /* Ensures labels appear above the inputs */
+    display: block;
     margin-bottom: 5px;
 }
 
 input {
-    width: 100%;                /* Make inputs take full width of the container */
+    width: 100%;
     padding: 8px;
     font-size: 14px;
     border-radius: 4px;
     border: 1px solid #ccc;
+}
+
+/* Dropdown Styles */
+.dropdown {
+    position: absolute;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    margin-top: 2px;
+}
+
+.dropdown-item {
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background-color: #f1f1f1;
 }
 
 /* Action Buttons */
@@ -150,7 +180,7 @@ input {
 /* Responsive Styles */
 @media (max-width: 768px) {
     .make-delivery-note {
-        width: 95%; /* Make the modal slightly narrower on smaller screens */
+        width: 95%;
         padding: 1rem;
     }
 
@@ -158,7 +188,7 @@ input {
     .receipt-table td,
     .balance-to-collect th,
     .balance-to-collect td {
-        padding: 0.5rem; /* Reduce padding for smaller screens */
+        padding: 0.5rem;
         font-size: 0.9rem;
     }
 
@@ -169,14 +199,14 @@ input {
 
     .print-btn,
     .close-btn {
-        width: 100%; /* Make buttons full width on small screens */
+        width: 100%;
         padding: 1rem;
         font-size: 1.2rem;
     }
 
     .vehicle-info input,
     .driver-info input {
-        font-size: 0.9rem; /* Adjust input field font size */
+        font-size: 0.9rem;
     }
 }
 

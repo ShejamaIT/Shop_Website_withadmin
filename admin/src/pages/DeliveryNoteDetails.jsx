@@ -5,6 +5,7 @@ import NavBar from "../components/header/navBar";
 import { useParams } from "react-router-dom";
 import '../style/DeliveryNoteDetails.css';
 import {toast} from "react-toastify";
+import Swal from 'sweetalert2';
 
 const DeliveryNoteDetails = () => {
     const { id } = useParams();
@@ -21,10 +22,10 @@ const DeliveryNoteDetails = () => {
     const [selectedOrderId, setSelectedOrderId] = useState(null);
     const [selectedBalance, setSelectedBalance] = useState(0);
     const [selectedAction, setSelectedAction] = useState("Available");
-    const [payment, setPayment] = useState("");
-    const [Rpayment, setRPayment] = useState("");
+    const [payment, setPayment] = useState(0);
+    const [Rpayment, setRPayment] = useState(0);
     const [CustomerBalance, setCustomerBalance] = useState(0);
-    const [AmountRecevice, setAmountRecevice] = useState("");
+    const [AmountRecevice, setAmountRecevice] = useState(0);
     const [DriverBalance, setDriverBalance] = useState(0);
     const [selectedItemStatus, setSelectedItemStatus] = useState({});
 
@@ -146,15 +147,73 @@ const DeliveryNoteDetails = () => {
         // passReservedItem(selectedItems, selectedAction); // Ensure this function handles updates correctly
         setShowStockModal(false); // Close modal
     };
-    const handlePayment = () => {
-        if (!payment || isNaN(payment) || Number(payment) <= 0) {
-            alert("Please enter a valid payment amount.");
-            return;
-        }
+    const handlePayment = async () => {
+        const CustBalance = parseFloat(CustomerBalance);
+        const DrivBalance = parseFloat(DriverBalance);
+        console.log(selectedOrderId);
 
-        console.log("Payment received:", payment);
-        setShowStockModal1(false);
+        // Handle Customer Balance Alert
+        const customerPromise = CustBalance !== 0
+            ? Swal.fire({
+                title: "<strong>Customer <u>Balance</u></strong>",
+                icon: "info",
+                html: `There is <b>Rs.${CustBalance}</b> balance by customer.`,
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText: "👍 Pass!",
+                cancelButtonText: "👎",
+            })
+            : Promise.resolve();
+
+        // Handle Driver Balance Alert (Chained After Customer Alert)
+        customerPromise.then(() => {
+            const driverPromise = DrivBalance !== 0
+                ? Swal.fire({
+                    title: "<strong>Driver <u>Balance</u></strong>",
+                    icon: "info",
+                    html: `There is <b>Rs.${DrivBalance}</b> balance by driver.`,
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    focusConfirm: false,
+                    confirmButtonText: "👍 Pass!",
+                    cancelButtonText: "👎",
+                })
+                : Promise.resolve();
+
+            // Once all alerts are resolved, call the API
+            driverPromise.then(async () => {
+                try {
+                    const response = await fetch("http://localhost:5001/api/admin/main/delivery-payment", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            orderid: selectedOrderId,
+                            driver: deliveryNote.driverName,
+                            payment : selectedBalance,
+                            RPayment: Rpayment,
+                            driverbalance: DrivBalance,
+                            customerbalance: CustBalance,
+                        }),
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        toast.success("Delivery note marked as done successfully.");
+                    } else {
+                        alert("Failed to mark delivery note as done.");
+                    }
+                } catch (error) {
+                    console.error("API Error:", error);
+                    alert("Error processing payment.");
+                }
+
+                setShowStockModal1(false); // Close modal after API call
+            });
+        });
     };
+
+
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
@@ -244,7 +303,7 @@ const DeliveryNoteDetails = () => {
     const handleCustomerBalance = (e) => {
         const receivedPayment = e.target.value;
         setRPayment(receivedPayment);
-        const dueAmount = parseFloat(payment) || 0;
+        const dueAmount = parseFloat(selectedBalance) || 0;
         const received = parseFloat(receivedPayment) || 0;
         setCustomerBalance(dueAmount - received);
     };
