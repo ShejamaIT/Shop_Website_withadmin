@@ -4098,12 +4098,12 @@ router.post("/delivery-return", async (req, res) => {
         return res.status(500).json({ success: false, message: "Error updating orders", details: err.message });
     }
 });
-
 router.post("/delivery-payment", async (req, res) => {
-    const { orderid, payment ,driver , RPayment , driverbalance, customerbalance } = req.body;
+    const { orderid, payment , driver , RPayment , driverbalance, customerbalance } = req.body;
     const receviedPayment = parseFloat(RPayment) || 0;
     const DrivBalance = parseFloat(driverbalance) || 0;
     const CustBalance = parseFloat(customerbalance) || 0;
+
     // Fetch advance by order id
     const [Orderpayment] = await db.query(
         "SELECT custName, contact1 , contact2 ,advance , balance FROM Orders WHERE OrID = ?",
@@ -4118,78 +4118,56 @@ router.post("/delivery-payment", async (req, res) => {
     const contact1 = Orderpayment[0]?.contact1?.trim();
     const contact2 = Orderpayment[0]?.contact2?.trim();
 
-// Fetch customer
-    const [cusId] = await db.query(
-        "SELECT c_ID FROM Customer WHERE contact1 = ? OR contact2 = ? OR (contact1 = ? AND contact2 = ?)",
+    // Fetch customer
+    const [customer] = await db.query(
+        "SELECT c_ID, credit FROM Customer WHERE contact1 = ? OR contact2 = ? OR (contact1 = ? AND contact2 = ?)",
         [contact1, contact1, contact2, contact2]
     );
 
-    if (!cusId || cusId.length === 0) {
+    if (!customer || customer.length === 0) {
         console.error("No customer found with these contact details.");
         return res.status(404).json({ error: "Customer not found." });
     }
 
-    // Fetch Employee
-    const [EMPID] = await  db.query(
-        "SELECT E_Id FROM Employee WHERE name=?", [driver]
-    );
-    console.log(EMPID);
-    // Fetch Driver
-    const [driverdetail] = await db.query(
-        "SELECT devID, balance FROM driver WHERE E_ID=?",[EMPID.E_Id]
-    );
+    // Initialize driverdetail as an empty array
+    let driverdetail = [];
 
-    const advance = parseFloat(Orderpayment.advance) + parseFloat(receviedPayment);
-    const balance = parseFloat(Orderpayment.balance) - parseFloat(receviedPayment);
-    
-    
+    try {
+        // Fetch Employee
+        const [EMPID] = await db.query(
+            "SELECT E_Id FROM Employee WHERE name=?", [driver]
+        );
+
+        if (EMPID && EMPID.length > 0) {
+            const employeeId = EMPID[0].E_Id;
+
+            // Fetch Driver
+            const [driverData] = await db.query(
+                "SELECT devID, balance FROM driver WHERE E_ID=?", [employeeId]
+            );
+            driverdetail = driverData; // Store driver details
+
+            console.log("Driver Query Result: ", driverdetail);
+        } else {
+            console.log("No employee found with the name:", driver);
+        }
+
+        // Ensure valid numeric values before performing arithmetic
+        const advance = !isNaN(parseFloat(Orderpayment[0]?.advance)) ? parseFloat(Orderpayment[0].advance) + receviedPayment : 0;
+        const balance = !isNaN(parseFloat(Orderpayment[0]?.balance)) ? parseFloat(Orderpayment[0].balance) - receviedPayment : 0;
+        const creditbalance = !isNaN(parseFloat(customer[0]?.credit)) ? parseFloat(customer[0].credit) + CustBalance : 0;
+        const driverBalance = !isNaN(parseFloat(driverdetail[0]?.balance)) ? parseFloat(driverdetail[0].balance) + DrivBalance : 0;
+
+        console.log("Order new Advance: " + advance );
+        console.log("Order new Balance: " + balance);
+        console.log("Customer new credit balance: " + creditbalance);
+        console.log("Driver new credit balance: " + driverBalance);
+
+    } catch (error) {
+        console.error("Error fetching data: ", error);
+    }
 });
 
-router.post("/delivery-payment", async (req, res) => {
-    const { orderid, payment ,driver , RPayment , driverbalance, customerbalance } = req.body;
-    const receviedPayment = parseFloat(RPayment) || 0;
-    const DrivBalance = parseFloat(driverbalance) || 0;
-    const CustBalance = parseFloat(customerbalance) || 0;
-    // Fetch advance by order id
-    const [Orderpayment] = await db.query(
-        "SELECT custName, contact1 , contact2 ,advance , balance FROM Orders WHERE OrID = ?",
-        [orderid]
-    );
-
-    if (!Orderpayment || Orderpayment.length === 0) {
-        console.error("No order found for this order ID.");
-        return res.status(404).json({ error: "Order not found." });
-    }
-
-    const contact1 = Orderpayment[0]?.contact1?.trim();
-    const contact2 = Orderpayment[0]?.contact2?.trim();
-
-// Fetch customer
-    const [cusId] = await db.query(
-        "SELECT c_ID FROM Customer WHERE contact1 = ? OR contact2 = ? OR (contact1 = ? AND contact2 = ?)",
-        [contact1, contact1, contact2, contact2]
-    );
-
-    if (!cusId || cusId.length === 0) {
-        console.error("No customer found with these contact details.");
-        return res.status(404).json({ error: "Customer not found." });
-    }
-
-    // Fetch Employee
-    const [EMPID] = await  db.query(
-        "SELECT E_Id FROM Employee WHERE name=?", [driver]
-    );
-    console.log(EMPID);
-    // Fetch Driver
-    const [driverdetail] = await db.query(
-        "SELECT devID, balance FROM driver WHERE E_ID=?",[EMPID.E_Id]
-    );
-
-    const advance = parseFloat(Orderpayment.advance) + parseFloat(receviedPayment);
-    const balance = parseFloat(Orderpayment.balance) - parseFloat(receviedPayment);
-
-
-});
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
