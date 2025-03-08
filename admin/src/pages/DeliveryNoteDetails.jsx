@@ -44,6 +44,7 @@ const DeliveryNoteDetails = () => {
                 throw new Error("Failed to fetch delivery note details.");
             }
             const data = await response.json();
+            console.log(data);
             setDeliveryNote(data.details);
             fetchDeliveryDates(data.details.district);
             setOrders(
@@ -200,6 +201,7 @@ const DeliveryNoteDetails = () => {
 
                     const result = await response.json();
                     if (result.success) {
+                        fetchDeliveryNote();
                         toast.success("Delivery note marked as done successfully.");
                     } else {
                         alert("Failed to mark delivery note as done.");
@@ -222,79 +224,56 @@ const DeliveryNoteDetails = () => {
     const handleSave = async () => {
         const rescheduledDate = selectedDeliveryDate || "";
 
-        // Filter and map orders to include selected items and their status
         const updatedOrders = orders
             .filter(order =>
                 order.orderStatus !== order.originalOrderStatus ||
-                order.deliveryStatus !== order.originalDeliveryStatus ||
-                order.received
+                order.deliveryStatus !== order.originalDeliveryStatus
             )
             .map(order => ({
                 OrID: order.OrID,
                 orderStatus: order.orderStatus,
                 deliveryStatus: order.deliveryStatus,
-                received: order.received,
                 reason: reasons[order.OrID]?.reason || "N/A",
                 reasonType: reasons[order.OrID]?.type || "N/A",
                 rescheduledDate,
-                returnedItems: selectedItems[order.OrID]?.map(itemKey => {
-                    const [itemId, stockId] = itemKey.split("-");
-                    const itemStatus = selectedItemStatus[itemKey] || "Available";
-                    return { itemId, stockId, status: itemStatus };
-                }) || [],
-                payment: order.orderStatus === "Returned" || "Canceled" ? payment : 0,
+                returnedItems: (order.orderStatus === "Returned" || order.orderStatus === "Cancelled")
+                    ? (selectedItems[order.OrID]?.map(itemKey => {
+                        const [itemId, stockId] = itemKey.split("-");
+                        const itemStatus = selectedItemStatus[itemKey] || "Available";
+                        return { itemId, stockId, status: itemStatus };
+                    }) || [])
+                    : [],
             }));
 
-        console.log(updatedOrders);
+        console.log("Updated Orders:", updatedOrders);
 
         try {
-            const hasReturnedOrder = updatedOrders.some(order => order.orderStatus === "Returned");
-            const allIssued = updatedOrders.length > 0 && updatedOrders.every(order => order.orderStatus === "Issued");
+            const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ deliveryNoteId: id, updatedOrders }),
+            });
 
-            if (hasReturnedOrder) {
-                // Call delivery-return API if any order is returned
-                const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        deliveryNoteId: id,
-                        updatedOrders,
-                    }),
-                });
-
-                const returnResult = await returnResponse.json();
-                if (returnResult.success) {
-                    toast.success("Returned orders processed successfully.");
-                } else {
-                    alert("Failed to process returned orders.");
-                }
+            if (!returnResponse.ok) {
+                throw new Error(`Server Error: ${returnResponse.status}`);
             }
 
-            if (allIssued) {
-                // Call delivery-done API only when all orders are issued
-                const doneResponse = await fetch("http://localhost:5001/api/admin/main/delivery-done", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        deliveryNoteId: id,
-                        updatedOrders,
-                    }),
-                });
-
-                const doneResult = await doneResponse.json();
-                if (doneResult.success) {
-                    toast.success("Delivery note marked as done successfully.");
-                } else {
-                    alert("Failed to mark delivery note as done.");
-                }
+            const returnResult = await returnResponse.json();
+            if (!returnResult.success) {
+                toast.error(`Failed: ${returnResult.details || "Unknown error"}`);
+                return;
             }
 
+            toast.success("Orders updated successfully.");
             fetchDeliveryNote();
-            setIsEditing(false); // Exit edit mode
+            setIsEditing(false);
         } catch (error) {
-            alert("An error occurred while updating the delivery note.");
+            console.error("Error updating delivery note:", error);
+            alert(`An error occurred: ${error.message}`);
         }
     };
+
+
     // Function to open modal and set selected order details
     const handleOpenModal = (OrID, balance) => {
         setSelectedOrderId(OrID);

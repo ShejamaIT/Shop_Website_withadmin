@@ -22,30 +22,37 @@ const SaleteamDetail = ({ Saleteam }) => {
 
     const fetchOrder = async (id) => {
         try {
+            setLoading(true);
+            setError(null);
+
             const response = await fetch(`http://localhost:5001/api/admin/main/orders/by-sales-team?stID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
+            console.log(data);
+
+            // Reset previous state to prevent duplicates
+            setSalesteamMember(null);
+            setOrders([]);
+            setCoupones([]);
+
             if (data.data) {
-                setSalesteamMember(data.data.memberDetails || null); // Ensure member details are set properly
-                setOrders(data.data.orders || []); // If no orders, set an empty array
-                setCoupones(data.data.coupons || []); // If no orders, set an empty array
+                setSalesteamMember(data.data.memberDetails || null);
+                setOrders(data.data.orders || []);
+                setCoupones(data.data.coupons || []);
             } else {
                 setError("No data available for this sales team.");
-                setOrders([]); // Ensure orders remain an empty array if there's no data
-                setSalesteamMember(null); // Ensure member details are cleared
             }
 
             setLoading(false);
         } catch (err) {
             setError(err.message);
-            setOrders([]); // Ensure orders remain empty on error
-            setSalesteamMember(null); // Clear member details on error
+            setOrders([]);
+            setCoupones([]);
+            setSalesteamMember(null);
             setLoading(false);
         }
     };
-
-
     const calculateOrderSummary = () => {
         const totalOrders = salesteamMember.totalCount;
         const issuedOrders = salesteamMember.issuedCount;
@@ -112,8 +119,8 @@ const SaleteamDetail = ({ Saleteam }) => {
                                         <tbody>
                                         {coupones.map((coupon, index) => (
                                             <tr key={index}>
-                                                <td>{coupon.cpID}</td>
-                                                <td>Rs. {coupon.discount}</td>
+                                                <td>{coupon.couponId}</td>
+                                                <td>Rs. {coupon.couponDiscount}</td>
                                             </tr>
                                         ))}
                                         </tbody>

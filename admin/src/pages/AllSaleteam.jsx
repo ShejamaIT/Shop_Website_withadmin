@@ -8,14 +8,17 @@ import NavBar from "../components/header/navBar";
 import { useNavigate } from "react-router-dom";
 import AddEmployee from "./AddEmployee";
 import SaleteamDetail from "./SaleteamDetail";
+import DriverDetail from "./DriverDetail";
 
 const AllSaleteam = () => {
     const [mainTab, setMainTab] = useState("salesTeam"); // Tracks main tab selection
     const [activeSubTab, setActiveSubTab] = useState(""); // Tracks sub-tab for Sales Team
     const [salesteamMembers, setSalesteamMembers] = useState([]);
+    const [drivers, setDrivers] = useState([]);
 
     useEffect(() => {
         fetchSalesTeamMembers();
+        fetchDrivers();
     }, []);
 
     const fetchSalesTeamMembers = async () => {
@@ -29,6 +32,20 @@ const AllSaleteam = () => {
             }
         } catch (error) {
             console.error("Error fetching sales team members:", error);
+        }
+    };
+
+    const fetchDrivers = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/drivers");
+            const data = await response.json();
+
+            if (data.data && data.data.length > 0) {
+                setDrivers(data.data);
+                setActiveSubTab(data.data[0].devID); // Set first member as default sub-tab
+            }
+        } catch (error) {
+            console.error("Error fetching drivers:", error);
         }
     };
 
@@ -119,7 +136,34 @@ const AllSaleteam = () => {
 
                         {/* === DRIVERS TAB === */}
                         <TabPane tabId="drivers">
-                            <p className="mt-3">Drivers management will be implemented here.</p>
+                            {drivers.length > 0 ? (
+                                <>
+                                    <Nav tabs className="mt-3">
+                                        {drivers.map((member) => (
+                                            <NavItem key={member.devID}>
+                                                <NavLink
+                                                    className={activeSubTab === member.devID ? "active" : ""}
+                                                    onClick={() => setActiveSubTab(member.devID)}
+                                                >
+                                                    {member.employeeName}
+                                                </NavLink>
+                                            </NavItem>
+                                        ))}
+                                    </Nav>
+
+                                    <TabContent activeTab={activeSubTab} className="mt-3">
+                                        {drivers.map((member) => (
+                                            <TabPane tabId={member.devID} key={member.devID}>
+                                                {/*<SaleteamDetail Saleteam={member} />*/}
+                                                <DriverDetail driver={member}/>
+                                            </TabPane>
+                                        ))}
+                                    </TabContent>
+                                </>
+                            ) : (
+                                <p className="text-muted mt-3">No Drivers found.</p>
+                            )}
+                            {/*<p className="mt-3">Drivers management will be implemented here.</p>*/}
                         </TabPane>
 
                         {/* === ADD EMPLOYEE TAB === */}
