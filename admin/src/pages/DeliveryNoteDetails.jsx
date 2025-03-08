@@ -503,11 +503,11 @@ const DeliveryNoteDetails = () => {
                                         <Label><strong>Order ID:</strong> {selectedOrderId}</Label>
                                         <Label><strong>Due Amount:</strong> Rs.{selectedBalance}</Label>
 
-                                        <Label>Received Payment</Label>
+                                        <Label>Customer ➡ Driver</Label>
                                         <Input type="number" onChange={handleCustomerBalance} />
                                         <Label><strong>Customer Balance:</strong> Rs.{CustomerBalance.toFixed(2)}</Label>
 
-                                        <Label>Amount Received</Label>
+                                        <Label>Driver ➡ Shop</Label>
                                         <Input type="number" value={AmountRecevice} onChange={handleDriverBalance} />
                                         <Label><strong>Driver Balance:</strong> Rs.{DriverBalance.toFixed(2)}</Label>
                                     </FormGroup>
