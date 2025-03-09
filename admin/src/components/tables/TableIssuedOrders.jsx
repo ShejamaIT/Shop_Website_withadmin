@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import "../../style/TableThree.css"; // Importing the stylesheet
+import { useNavigate } from "react-router-dom";
+import "../../style/TableThree.css";
 
 const TableIssued = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchOrders();
@@ -14,14 +16,15 @@ const TableIssued = ({ refreshKey }) => {
 
     const fetchOrders = async () => {
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-issued"); // Adjust API URL if needed
+            const response = await fetch("http://localhost:5001/api/admin/main/orders-issued");
             const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }
 
-            setOrders(data.data); // Assuming `data.data` contains the array of completed orders
+            setOrders(data.data);
+            setFilteredOrders(data.data); // Initialize filtered orders
         } catch (err) {
             setError(err.message);
         } finally {
@@ -36,13 +39,34 @@ const TableIssued = ({ refreshKey }) => {
             .padStart(2, "0")}-${date.getFullYear()}`;
     };
 
-    // Function to navigate to order details page
     const handleViewOrder = (orderId) => {
-        navigate(`/issued-order-detail/${orderId}`); // Navigate to OrderDetails page
+        navigate(`/issued-order-detail/${orderId}`);
+    };
+
+    // Search function to filter by Order ID
+    const handleSearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const filteredData = orders.filter((order) =>
+            order.OrID.toString().toLowerCase().includes(query)
+        );
+
+        setFilteredOrders(filteredData);
     };
 
     return (
         <div className="table-container">
+            <h4 className="table-title">Issued Orders</h4>
+            {/* 🔍 Search Input */}
+            <input
+                type="text"
+                placeholder="Search by Order ID..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="search-input"
+            />
+
             <div className="table-wrapper">
                 <table className="styled-table">
                     <thead>
@@ -66,14 +90,14 @@ const TableIssued = ({ refreshKey }) => {
                         </tr>
                     ) : error ? (
                         <tr>
-                            <td colSpan="10" className="error-text text-center">No Issued orders</td>
+                            <td colSpan="10" className="error-text text-center">{error}</td>
                         </tr>
-                    ) : orders.length === 0 ? (
+                    ) : filteredOrders.length === 0 ? (
                         <tr>
                             <td colSpan="10" className="no-data text-center">No Issued orders found</td>
                         </tr>
                     ) : (
-                        orders.map((order) => (
+                        filteredOrders.map((order) => (
                             <tr key={order.OrID}>
                                 <td>{order.OrID}</td>
                                 <td>{formatDate(order.orDate)}</td>

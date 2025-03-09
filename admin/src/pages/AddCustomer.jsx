@@ -6,10 +6,9 @@ import {toast} from "react-toastify";
 
 const AddCustomer = () => {
     const [formData, setFormData] = useState({
-        firstName: "", lastName: "", email: "", id: "", address: "", contact: "", contact2: "",
+        firstName: "", lastName: "", email: "", id: "", address: "", contact: "", contact2: "",type:"",category:"",t_name:""
     });
     const [errors, setErrors] = useState({});
-
     const validateInput = (name, value) => {
         let error = "";
         if (!value.trim()) {
@@ -27,9 +26,17 @@ const AddCustomer = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        let updatedFormData = { ...formData, [name]: value };
+        // If type is Walking or On site, set t_name to "-"
+        if (name === "type") {
+            updatedFormData.t_name = ["Shop", "Force", "Hotel"].includes(value) ? "" : "-";
+        }
+        setFormData(updatedFormData);
+        // Validate input AFTER updating form data
         validateInput(name, value);
     };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,7 +46,6 @@ const AddCustomer = () => {
             Swal.fire("Error!", "Please fix validation errors before submitting.", "error");
             return;
         }
-
         try {
             const fullName = `${formData.firstName} ${formData.lastName}`.trim();
             const customerData = {
@@ -49,6 +55,9 @@ const AddCustomer = () => {
                 address: formData.address,
                 email: formData.email,
                 id: formData.id,
+                type: formData.type,
+                category: formData.category,
+                t_name: formData.t_name,
             };
 
             const response = await fetch("http://localhost:5001/api/admin/main/customer", {
@@ -77,10 +86,9 @@ const AddCustomer = () => {
     };
 
     const handleClear = () => {
-        setFormData({ firstName: "", lastName: "", address: "", contact: "", contact2: "", email: "", id: "" });
+        setFormData({ firstName: "", lastName: "", address: "", contact: "", contact2: "", email: "", id: "" ,type: "",category: "",t_name:""});
         setErrors({});
     };
-
     return (
         <Container className="add-item-container">
             <Row>
@@ -117,6 +125,36 @@ const AddCustomer = () => {
                             <Label for="address">Address</Label>
                             <Input type="textarea" name="address" value={formData.address} onChange={handleChange} />
                             {errors.address && <small className="text-danger">{errors.address}</small>}
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="type">Customer Type</Label>
+                            <Input type="select" name="type" id="type" value={formData.type} onChange={handleChange} required>
+                                <option value="">Select type</option>
+                                <option value="Walking">Walking</option>
+                                <option value="On site">On site</option>
+                                <option value="Shop">Shop</option>
+                                <option value="Force">Force</option>
+                                <option value="Hotel">Hotel</option>
+                            </Input>
+                        </FormGroup>
+
+                        {/* Show t_name input only for Shop, Force, Hotel */}
+                        {["Shop", "Force", "Hotel"].includes(formData.type) && (
+                            <FormGroup>
+                                <Label for="t_name">{formData.type} Name</Label>
+                                <Input type="text" name="t_name" value={formData.t_name} onChange={handleChange} required />
+                                {errors.t_name && <small className="text-danger">{errors.t_name}</small>}
+                            </FormGroup>
+                        )}
+
+                        <FormGroup>
+                            <Label for="type">Customer Category</Label>
+                            <Input type="select" name="category" id="category" value={formData.category} onChange={handleChange} required>
+                                <option value="">Select Category</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Credit">Credit</option>
+                                <option value="Loyal">Loyal</option>
+                            </Input>
                         </FormGroup>
                         <Row>
                             <Col md={6}>

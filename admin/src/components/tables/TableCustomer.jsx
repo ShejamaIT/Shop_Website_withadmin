@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 const TableCustomer = ({ filter, title }) => {
     const [customers, setCustomers] = useState([]);
+    const [filteredCustomers, setFilteredCustomers] = useState([]); // Stores search results
+    const [searchQuery, setSearchQuery] = useState(""); // Search input state
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -21,12 +23,15 @@ const TableCustomer = ({ filter, title }) => {
 
             if (response.ok) {
                 setCustomers(data);
+                setFilteredCustomers(data); // Initialize filtered list
             } else {
                 setCustomers([]);
+                setFilteredCustomers([]);
                 setError(data.message || "No customers available.");
             }
         } catch (error) {
             setCustomers([]);
+            setFilteredCustomers([]);
             setError("Error fetching customers.");
             console.error("Error fetching customers:", error);
         } finally {
@@ -34,9 +39,33 @@ const TableCustomer = ({ filter, title }) => {
         }
     };
 
+    // Handle search filter (Only by Name, NIC (ID), and Contact)
+    const handleSearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const filteredData = customers.filter((customer) =>
+            customer.name.toLowerCase().includes(query) ||
+            customer.id.toLowerCase().includes(query) ||
+            customer.contact1.toLowerCase().includes(query)
+        );
+
+        setFilteredCustomers(filteredData);
+    };
+
     return (
         <div className="table-container">
             <h4 className="table-title">{title}</h4>
+
+            {/* 🔍 Search Box */}
+            <input
+                type="text"
+                placeholder="Search by Name, NIC, or Contact..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="search-input"
+            />
+
             <div className="table-wrapper">
                 <table className="styled-table">
                     <thead>
@@ -46,24 +75,25 @@ const TableCustomer = ({ filter, title }) => {
                         <th>NIC</th>
                         <th>Contact</th>
                         <th>Balance</th>
+                        <th>Type</th>
                         <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
                     {loading ? (
                         <tr>
-                            <td colSpan="5" className="loading-text text-center">Loading...</td>
+                            <td colSpan="7" className="loading-text text-center">Loading...</td>
                         </tr>
                     ) : error ? (
                         <tr>
-                            <td colSpan="5" className="error-text text-center">{error}</td>
+                            <td colSpan="7" className="error-text text-center">{error}</td>
                         </tr>
-                    ) : customers.length === 0 ? (
+                    ) : filteredCustomers.length === 0 ? (
                         <tr>
-                            <td colSpan="5" className="no-items-message text-center">No customers found</td>
+                            <td colSpan="7" className="no-items-message text-center">No customers found</td>
                         </tr>
                     ) : (
-                        customers.map((customer) => (
+                        filteredCustomers.map((customer) => (
                             <tr key={customer.c_ID}>
                                 <td>{customer.c_ID}</td>
                                 <td>{customer.name}</td>
@@ -72,6 +102,7 @@ const TableCustomer = ({ filter, title }) => {
                                 <td className={customer.balance < 0 ? "negative-balance" : ""}>
                                     {customer.balance}
                                 </td>
+                                <td>{customer.type}</td>
                                 <td className="action-buttons">
                                     <button
                                         className="view-btn"

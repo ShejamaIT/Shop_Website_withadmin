@@ -40,7 +40,7 @@ const AllOrders = () => {
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}
                     <Nav tabs className="mb-3">
-                        {["Place Order", "Pending Orders", "Accepted Orders", "For Production", "In Production", "Completed Orders", "Delivery Notes" , "Issued Orders", "Returned Orders","Cancel Orders"].map((label, index) => (
+                        {["Place Order", "Pending Orders", "Accepted Orders", "Production", "Completed Orders", "Delivery Notes" , "Issued Orders", "Returned Orders","Cancel Orders"].map((label, index) => (
                             <NavItem key={index}>
                                 <NavLink
                                     className={classnames({ active: activeTab === index.toString() })}
@@ -105,23 +105,47 @@ const AllOrders = () => {
                         </TabPane>
 
                         <TabPane tabId="3" key={refreshKey}>
-                            <Row>
-                                <Col>
-                                    <Tableforproduction />
-                                </Col>
-                            </Row>
+                            <Nav tabs className="mb-3">
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "1" })}
+                                        onClick={() => setNestedActiveTab("1")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        For Production
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "2" })}
+                                        onClick={() => setNestedActiveTab("2")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        In Production
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+
+                            <TabContent activeTab={nestedActiveTab}>
+                                <TabPane tabId="1" key={refreshKey}>
+                                    <Row>
+                                        <Tableforproduction />
+                                    </Row>
+                                </TabPane>
+                                <TabPane tabId="2" key={refreshKey}>
+                                    <Row>
+                                        <TableInproduction />
+                                    </Row>
+                                </TabPane>
+                            </TabContent>
                         </TabPane>
+
                         <TabPane tabId="4" key={refreshKey}>
-                            <Row>
-                                <TableInproduction />
-                            </Row>
-                        </TabPane>
-                        <TabPane tabId="5" key={refreshKey}>
                             <Row>
                                 <TableCompleted />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="6" key={refreshKey}>
+                        <TabPane tabId="5" key={refreshKey}>
                             <Nav tabs className="mb-3">
                                 <NavItem>
                                     <NavLink
@@ -170,17 +194,17 @@ const AllOrders = () => {
                                 </TabPane>
                             </TabContent>
                         </TabPane>
-                        <TabPane tabId="7" key={refreshKey}>
+                        <TabPane tabId="6" key={refreshKey}>
                             <Row>
                                 <TableIssued />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="8" key={refreshKey}>
+                        <TabPane tabId="7" key={refreshKey}>
                             <Row>
                                 <TableReturned />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="9" key={refreshKey}>
+                        <TabPane tabId="8" key={refreshKey}>
                             <Row>
                                 <TableCancled />
                             </Row>

@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 const TableAllItem = () => {
     const [items, setItems] = useState([]);
+    const [filteredItems, setFilteredItems] = useState([]); // Stores search results
+    const [searchQuery, setSearchQuery] = useState(""); // Search input state
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchItems();
@@ -14,35 +16,60 @@ const TableAllItem = () => {
 
     // Fetch all items from API
     const fetchItems = async () => {
-        setLoading(true); // Start loading state
-
+        setLoading(true);
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitems");
             const data = await response.json();
 
             if (data.length > 0) {
-                setItems(data); // Store fetched items
+                setItems(data);
+                setFilteredItems(data); // Initialize filtered list
             } else {
-                setItems([]); // Set empty array
-                setError("No items available."); // Show "No items" message
+                setItems([]);
+                setFilteredItems([]);
+                setError("No items available.");
             }
         } catch (error) {
-            setItems([]); // Ensure items array is empty on error
+            setItems([]);
+            setFilteredItems([]);
             setError("Error fetching items.");
             console.error("Error fetching items:", error);
         } finally {
-            setLoading(false); // Stop loading state
+            setLoading(false);
         }
     };
 
     // Function to navigate to item details page
     const handleViewItem = (itemId) => {
-        navigate(`/item-detail/${itemId}`); // Navigate to ItemDetails page
+        navigate(`/item-detail/${itemId}`);
+    };
+
+    // Handle search filter (by Item ID or Item Name)
+    const handleSearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const filteredData = items.filter(
+            (item) =>
+                item.I_Id.toString().toLowerCase().includes(query) || // Match Item ID
+                item.I_name.toLowerCase().includes(query) // Match Item Name
+        );
+
+        setFilteredItems(filteredData);
     };
 
     return (
         <div className="table-container">
             <h4 className="table-title">All Items</h4>
+
+            {/* 🔍 Search Box */}
+            <input
+                type="text"
+                placeholder="Search by Item ID or Name..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="search-input"
+            />
 
             <div className="table-wrapper">
                 <table className="styled-table">
@@ -67,12 +94,12 @@ const TableAllItem = () => {
                         <tr>
                             <td colSpan="8" className="error-text text-center">{error}</td>
                         </tr>
-                    ) : items.length === 0 ? (
+                    ) : filteredItems.length === 0 ? (
                         <tr>
                             <td colSpan="8" className="no-items-message text-center">No items found</td>
                         </tr>
                     ) : (
-                        items.map((item) => (
+                        filteredItems.map((item) => (
                             <tr key={item.I_Id}>
                                 <td>
                                     <img

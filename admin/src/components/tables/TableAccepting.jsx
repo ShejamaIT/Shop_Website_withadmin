@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import "../../style/TableThree.css"; // Importing the stylesheet
+import { useNavigate } from "react-router-dom";
+import "../../style/TableThree.css";
 
 const TableAccepting = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchOrders();
@@ -14,14 +16,15 @@ const TableAccepting = ({ refreshKey }) => {
 
     const fetchOrders = async () => {
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-accept"); // Adjust API URL if needed
+            const response = await fetch("http://localhost:5001/api/admin/main/orders-accept");
             const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }
 
-            setOrders(data.bookedOrders); // Assuming `data.bookedOrders` contains the array of orders
+            setOrders(data.bookedOrders);
+            setFilteredOrders(data.bookedOrders); // Initialize filtered orders
         } catch (err) {
             setError(err.message);
         } finally {
@@ -36,13 +39,34 @@ const TableAccepting = ({ refreshKey }) => {
             .padStart(2, "0")}-${date.getFullYear()}`;
     };
 
-    // Function to navigate to order details page
     const handleViewOrder = (orderId) => {
-        navigate(`/accept-order-detail/${orderId}`); // Navigate to OrderDetails page
+        navigate(`/accept-order-detail/${orderId}`);
+    };
+
+    // Search function (filters by Order ID)
+    const handleSearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const filteredData = orders.filter((order) =>
+            order.OrID.toString().toLowerCase().includes(query)
+        );
+
+        setFilteredOrders(filteredData);
     };
 
     return (
         <div className="table-container">
+            <h4 className="table-title">Booked Orders</h4>
+            {/* 🔍 Search Box */}
+            <input
+                type="text"
+                placeholder="Search by Order ID..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="search-input"
+            />
+
             <div className="table-wrapper">
                 <table className="styled-table">
                     <thead>
@@ -68,12 +92,12 @@ const TableAccepting = ({ refreshKey }) => {
                         <tr>
                             <td colSpan="10" className="error-text text-center">{error}</td>
                         </tr>
-                    ) : orders.length === 0 ? (
+                    ) : filteredOrders.length === 0 ? (
                         <tr>
                             <td colSpan="10" className="no-data text-center">No Booked orders found</td>
                         </tr>
                     ) : (
-                        orders.map((order) => (
+                        filteredOrders.map((order) => (
                             <tr key={order.OrID}>
                                 <td>{order.OrID}</td>
                                 <td>{formatDate(order.orDate)}</td>

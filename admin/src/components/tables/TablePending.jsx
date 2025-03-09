@@ -4,6 +4,8 @@ import "../../style/TableThree.css";
 
 const TablePending = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [searchQuery, setSearchQuery] = useState(""); // Search input state
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -19,6 +21,7 @@ const TablePending = ({ refreshKey }) => {
             if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch`);
             const data = await response.json();
             setOrders(data.data);
+            setFilteredOrders(data.data); // Initialize filtered list
         } catch (err) {
             setError(err.message || "Unexpected error occurred.");
         } finally {
@@ -33,8 +36,30 @@ const TablePending = ({ refreshKey }) => {
         navigate(`/order-detail/${orderId}`);
     };
 
+    // Handle search filter (by Order ID)
+    const handleSearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const filteredData = orders.filter((order) =>
+            order.OrID.toString().toLowerCase().includes(query)
+        );
+
+        setFilteredOrders(filteredData);
+    };
+
     return (
         <div className="table-container">
+            <h4 className="table-title">Pending Orders</h4>
+            {/* 🔍 Search Box */}
+            <input
+                type="text"
+                placeholder="Search by Order ID..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="search-input"
+            />
+
             <div className="table-wrapper">
                 <table className="styled-table">
                     <thead>
@@ -60,12 +85,12 @@ const TablePending = ({ refreshKey }) => {
                         <tr>
                             <td colSpan="10" className="error-text text-center">No Orders....</td>
                         </tr>
-                    ) : orders.length === 0 ? (
+                    ) : filteredOrders.length === 0 ? (
                         <tr>
                             <td colSpan="10" className="no-data text-center">No orders found</td>
                         </tr>
                     ) : (
-                        orders.map((order) => (
+                        filteredOrders.map((order) => (
                             <tr key={order.OrID}>
                                 <td>{order.OrID}</td>
                                 <td>{formatDate(order.orDate)}</td>

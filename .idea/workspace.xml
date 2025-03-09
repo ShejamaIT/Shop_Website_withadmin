@@ -5,39 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAllCustomer.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableCustomer.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/AddCustomer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_03_2025_12_17_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_03_2025_12_17__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_03_2025_13_22_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_03_2025_13_22__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_11_25_AM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_11_25_AM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_11_59_AM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_11_59_AM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_12_25_PM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_12_25_PM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_2_19_PM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_2_19_PM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BASR-1-10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BASR-2-10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BASR-3-10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BASR-4-10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BASR-5-10.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BCSDBW-1-11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BCSDBW-2-11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BCSDBW-3-11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_BCSDBW-4-11.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_MM2D2DMA-1-12.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_MM2D2DMA-2-12.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/barcode_MM2D2DMA-3-12.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_3_1_2025_4_26_PM__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/header/navBar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllDelivery.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllCustomers.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAcceptingUnbooked.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAcceptingUnbooked.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAllCustomer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAllCustomer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAllItem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAllItem.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableCancelledOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableCancelledOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableCompleted.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableCompleted.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableCustomer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableCustomer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableIssuedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableIssuedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableReturnedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableReturnedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddCustomer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddCustomer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllCustomers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllCustomers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/TableThree.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/TableTwo.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/TableTwo.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
@@ -244,7 +227,7 @@
       <workItem from="1741356180570" duration="1395000" />
       <workItem from="1741359514225" duration="4341000" />
       <workItem from="1741404748488" duration="25348000" />
-      <workItem from="1741491477947" duration="13484000" />
+      <workItem from="1741491477947" duration="19644000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -589,7 +572,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="282" />
+    <option name="localTasksCounter" value="283" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

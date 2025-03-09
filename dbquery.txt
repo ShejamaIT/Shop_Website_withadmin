@@ -106,7 +106,9 @@ CREATE TABLE Customer(
        contact1 VARCHAR(10),
        contact2 VARCHAR(10),
        balance DOUBLE,
-       type VARCHAR(15)
+       category VARCHAR(15),
+       type VARCHAR(15),
+       t_name TEXT
 );
 CREATE TABLE sessionlogs (
   SessionID int(11) NOT NULL,

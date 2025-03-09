@@ -88,7 +88,7 @@ const AllCustomer = () => {
                         <TabPane tabId="3">
                             <Row>
                                 <Col>
-                                    <TableCustomer filter="balance_lt_0" title="Credit Customers" />
+                                    <TableCustomer filter="Credit" title="Credit Customers" />
                                 </Col>
                             </Row>
                         </TabPane>
@@ -96,7 +96,7 @@ const AllCustomer = () => {
                         <TabPane tabId="4">
                             <Row>
                                 <Col>
-                                    <TableCustomer filter="balance_eql_0" title="Cash Customers" />
+                                    <TableCustomer filter="Cash" title="Cash Customers" />
                                 </Col>
                             </Row>
                         </TabPane>
@@ -104,7 +104,7 @@ const AllCustomer = () => {
                         <TabPane tabId="5">
                             <Row>
                                 <Col>
-                                    <TableCustomer filter="balance_gt_0" title="Loyal Customers" />
+                                    <TableCustomer filter="Loyal" title="Loyal Customers" />
                                 </Col>
                             </Row>
                         </TabPane>
