@@ -405,6 +405,49 @@ router.get("/allitems", async (req, res) => {
     }
 });
 
+// Get all customers with filters for balance conditions
+router.get("/allcustomers", async (req, res) => {
+    try {
+        const { filter } = req.query; // Get filter type from query params
+        let query = "SELECT * FROM Customer";
+
+        // Apply filters based on balance conditions
+        if (filter === "balance_gt_0") {
+            query += " WHERE balance > 0";
+        } else if (filter === "balance_lt_0") {
+            query += " WHERE balance < 0";
+        } else if (filter === "balance_eql_0") {
+            query += " WHERE balance = 0";
+        }
+
+        const [customers] = await db.query(query);
+
+        // If no customers found, return a 404 status
+        if (customers.length === 0) {
+            return res.status(404).json({ message: "No customers found" });
+        }
+
+        // Format the customer data
+        const formattedCustomers = customers.map(customer => ({
+            c_ID: customer.c_ID, // Customer ID
+            name: customer.Name, // Full name
+            id: customer.id, // NIC or identifier
+            email: customer.email || "", // Email (nullable)
+            address: customer.address, // Address
+            contact1: customer.contact1, // Primary contact
+            contact2: customer.contact2 || "", // Secondary contact (nullable)
+            balance: customer.balance, // Account balance
+            type: customer.type,
+        }));
+
+        // Send the formatted customers as a JSON response
+        return res.status(200).json(formattedCustomers);
+    } catch (error) {
+        console.error("Error fetching customers:", error.message);
+        return res.status(500).json({ message: "Error fetching customers" });
+    }
+});
+
 // Get all delivery notes
 router.get("/alldeliverynotes", async (req, res) => {
     try {
@@ -461,13 +504,12 @@ router.get("/alldeliveries", async (req, res) => {
     }
 });
 
-//add a new supplier and items
+//add a new supplier
 router.post("/supplier", async (req, res) => {
     const { name, contact, contact2, address} = req.body;
 
     // Generate new supplier ID
     const s_ID = await generateNewId("supplier", "s_ID", "S");
-    console.log(s_ID);
     const sqlInsertSupplier = `
         INSERT INTO Supplier (s_ID, name, address, contact, contact2)
         VALUES (?, ?, ?, ?, ?)`;
@@ -497,6 +539,47 @@ router.post("/supplier", async (req, res) => {
         });
     } catch (err) {
         console.error("Error inserting supplier  data:", err.message);
+
+        // Respond with error details
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+//add a new customer
+router.post("/customer", async (req, res) => {
+    const { name,id , email, contact, contact2, address} = req.body;
+
+    // Generate new supplier ID
+    const c_ID = await generateNewId("Customer", "c_ID", "Cus");
+    console.log(c_ID);
+    const sqlInsertCustomer = `
+        INSERT INTO Customer (c_ID, name, address, contact1, contact2,email,id,balance,type) VALUES (?, ?, ?, ?, ?,?,?,?,?)`;
+    const valuesCustomer = [
+        c_ID, name,address, contact, contact2 || "", email,id ,0,'Cash'
+    ];
+
+    try {
+        // Insert the customer into the Supplier table
+        await db.query(sqlInsertCustomer, valuesCustomer);
+
+        // Respond with success message and new supplier details
+        return res.status(201).json({
+            success: true,
+            message: "Customer  added successfully",
+            data: {
+                c_ID,
+                name,
+                contact,
+                contact2,
+                id,
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting customer  data:", err.message);
 
         // Respond with error details
         return res.status(500).json({
@@ -2410,7 +2493,6 @@ router.get("/salesteam", async (req, res) => {
     }
 });
 
-
 //Get All driver members
 router.get("/drivers", async (req, res) => {
     try {
@@ -2537,7 +2619,6 @@ router.get("/orders/by-sales-team", async (req, res) => {
         return res.status(500).json({ message: "Error fetching orders, member details, and coupons." });
     }
 });
-
 
 // Get all categories
 router.get("/categories", async (req, res) => {
