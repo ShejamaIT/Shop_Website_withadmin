@@ -12,6 +12,7 @@ const nav__link = [
     { path: '/all-products', display: 'Items' },
     { path: '/all-saleteam', display: 'Employees' },
     { path: '/all-suppliers', display: 'Suppliers' },
+    { path: '/all-customers', display: 'Customers' },
 ];
 
 const NavBar = () => {
