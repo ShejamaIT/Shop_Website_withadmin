@@ -412,12 +412,12 @@ router.get("/allcustomers", async (req, res) => {
         let query = "SELECT * FROM Customer";
 
         // Apply filters based on balance conditions
-        if (filter === "balance_gt_0") {
-            query += " WHERE balance > 0";
-        } else if (filter === "balance_lt_0") {
-            query += " WHERE balance < 0";
-        } else if (filter === "balance_eql_0") {
-            query += " WHERE balance = 0";
+        if (filter === "Cash") {
+            query += " WHERE category = 'Cash'";
+        } else if (filter === "Credit") {
+            query += " WHERE category = 'Credit'";
+        } else if (filter === "Loyal") {
+            query += " WHERE category = 'Loyal'";
         }
 
         const [customers] = await db.query(query);
@@ -437,6 +437,7 @@ router.get("/allcustomers", async (req, res) => {
             contact1: customer.contact1, // Primary contact
             contact2: customer.contact2 || "", // Secondary contact (nullable)
             balance: customer.balance, // Account balance
+            category: customer.category,
             type: customer.type,
         }));
 
@@ -551,15 +552,15 @@ router.post("/supplier", async (req, res) => {
 
 //add a new customer
 router.post("/customer", async (req, res) => {
-    const { name,id , email, contact, contact2, address} = req.body;
+    const { name,id , email, contact, contact2, address,type,category,t_name} = req.body;
 
     // Generate new supplier ID
     const c_ID = await generateNewId("Customer", "c_ID", "Cus");
     console.log(c_ID);
     const sqlInsertCustomer = `
-        INSERT INTO Customer (c_ID, name, address, contact1, contact2,email,id,balance,type) VALUES (?, ?, ?, ?, ?,?,?,?,?)`;
+        INSERT INTO Customer (c_ID, name, address, contact1, contact2,email,id,balance,type,category,t_name) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)`;
     const valuesCustomer = [
-        c_ID, name,address, contact, contact2 || "", email,id ,0,'Cash'
+        c_ID, name,address, contact, contact2 || "", email,id ,0,type,category,t_name
     ];
 
     try {
