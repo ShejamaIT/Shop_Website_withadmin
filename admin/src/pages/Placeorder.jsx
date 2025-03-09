@@ -19,31 +19,59 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [discountAmount, setDiscountAmount] = useState(0);
     const [totalItemPrice, setTotalItemPrice] = useState(0);
     const [totalBillPrice, setTotalBillPrice] = useState(0);
+    const [customers, setCustomers] = useState([]);
+    const [filteredCustomers, setFilteredCustomers] = useState([]); // Stores search results
     const [errors, setErrors] = useState([]);
     const [openPopup, setOpenPopup] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     useEffect(() => {
-        const fetchItems = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/allitems");
-                const data = await response.json();
-                setItems(data || []);
-                setFilteredItems(data || []);
-            } catch (error) {
-                toast.error("Error fetching items.");
-            }
-        };
-        const fetchCoupons = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/coupon-details");
-                const data = await response.json();
-                setCoupons(data.data || []);
-            } catch (error) {
-                toast.error("Error fetching coupons.");
-            }
-        };
         fetchItems();
         fetchCoupons();
+        fetchCustomers();
     }, []);
+    const fetchItems = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/allitems");
+            const data = await response.json();
+            setItems(data || []);
+            setFilteredItems(data || []);
+        } catch (error) {
+            toast.error("Error fetching items.");
+        }
+    };
+    const fetchCoupons = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/coupon-details");
+            const data = await response.json();
+            setCoupons(data.data || []);
+        } catch (error) {
+            toast.error("Error fetching coupons.");
+        }
+    };
+    // Fetch customers from API with the provided filter
+    const fetchCustomers = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/allcustomers`);
+            const data = await response.json();
+
+            if (response.ok) {
+                setCustomers(data);
+                setFilteredCustomers(data); // Initialize filtered list
+            } else {
+                setCustomers([]);
+                setFilteredCustomers([]);
+                setError(data.message || "No customers available.");
+            }
+        } catch (error) {
+            setCustomers([]);
+            setFilteredCustomers([]);
+            setError("Error fetching customers.");
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change
@@ -214,142 +242,187 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setTotalItemPrice(0);
         setTotalBillPrice(0);
     };
+
     return (
         <Container className="place-order-container">
+            <h3 className="text-center">Place an Order</h3>
             <Row>
                 <Col lg="8" className="mx-auto">
-                    <h3 className="text-center">Place an Order</h3>
                     <Form onSubmit={handleSubmit}>
-                        <FormGroup>
-                            <Label>Delivery Method</Label>
-                            <div className="d-flex gap-3">
-                                <Label>
-                                    <Input type="radio" name="dvStatus" value="Delivery" onChange={handleChange} /> Delivery
-                                </Label>
-                                <Label>
-                                    <Input type="radio" name="dvStatus" value="Pickup" onChange={handleChange} /> Pickup
-                                </Label>
-                            </div>
-                        </FormGroup>
-
-                        <Row>
-                            <Col md={6}>
-                                <FormGroup>
-                                    <Label>First Name</Label>
-                                    <Input type="text" name="customerName" value={formData.customerName} onChange={handleChange} required />
-                                </FormGroup>
-                            </Col>
-
-                            <Col md={6}>
-                                <FormGroup>
-                                    <Label>Last Name</Label>
-                                    <Input type="text" name="surname" value={formData.surname} onChange={handleChange} required />
-                                </FormGroup>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={6}>
-                                <FormGroup>
-                                    <Label>Phone Number</Label>
-                                    <Input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
-                                </FormGroup>
-                            </Col>
-
-                            <Col md={6}>
-                                <FormGroup>
-                                    <Label>Optional Number</Label>
-                                    <Input type="text" name="otherNumber" value={formData.otherNumber} onChange={handleChange} required />
-                                </FormGroup>
-                            </Col>
-                        </Row>
-                        <FormGroup>
-                            <Label>Email</Label>
-                            <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label>Item Selection</Label>
-                            <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
-                            {searchTerm && filteredItems.length > 0 && (
-                                <div className="dropdown">
-                                    {filteredItems.map((item) => (
-                                        <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
-                                            {item.I_name} - Rs.{item.price}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </FormGroup>
-
-                        {selectedItems.map((item) => (
-                            <Row key={item.I_Id} className="mt-2">
-                                <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
-                                <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
-                                <Col md={2}><Button color="danger" onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>
-                            </Row>
-                        ))}
-                        {formData.dvStatus === "Delivery" && (
-                            <>
-                                <FormGroup>
-                                    <Label>City</Label>
-                                    <Input type="text" name="city" onChange={handleChange}></Input>
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label>Address</Label>
-                                    <Input type="text" name="address" value={formData.address} onChange={handleChange} required />
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label>District</Label>
-                                    <Input type="select" name="district" value={formData.district} onChange={handleChange} required>
-                                        <option value="">Select District</option>
-                                        {districts.map((district) => (
-                                            <option key={district} value={district}>{district}</option>
-                                        ))}
-                                    </Input>
-                                </FormGroup>
-                                {deliveryDates.length > 0 ? (
+                        <div className='order-details'>
+                            <h5 className='text-center'>Customer Details</h5>
+                            <Row>
+                                <Col md={6}>
                                     <FormGroup>
-                                        <Label>Expected Delivery Date</Label>
-                                        <Input type="select" name="expectedDate" onChange={handleChange}>
-                                            <option value="">Select Date</option>
-                                            {deliveryDates.map((date, index) => (
-                                                <option key={index} value={date}>{date}</option>
+                                        <Label>First Name</Label>
+                                        <Input type="text" name="customerName" value={formData.customerName} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+
+                                <Col md={6}>
+                                    <FormGroup>
+                                        <Label>Last Name</Label>
+                                        <Input type="text" name="surname" value={formData.surname} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={6}>
+                                    <FormGroup>
+                                        <Label>Phone Number</Label>
+                                        <Input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+
+                                <Col md={6}>
+                                    <FormGroup>
+                                        <Label>Optional Number</Label>
+                                        <Input type="text" name="otherNumber" value={formData.otherNumber} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={6}>
+                                    <FormGroup>
+                                        <Label>NIC</Label>
+                                        <Input type="text" name="id" value={formData.id} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+
+                                <Col md={6}>
+                                    <FormGroup>
+                                        <Label>Previous Balance</Label>
+                                        <Input type="text" name="balance" value={formData.balance} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+                            </Row>
+                            <FormGroup>
+                                <Label>Email</Label>
+                                <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
+                            </FormGroup>
+                            <Row>
+                                <Col md={6}>
+                                    <FormGroup>
+                                        <Label>Category</Label>
+                                        <Input type="text" name="category" value={formData.category} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+
+                                <Col md={6}>
+                                    <FormGroup>
+                                        <Label>Type</Label>
+                                        <Input type="text" name="type" value={formData.type} onChange={handleChange} required />
+                                    </FormGroup>
+                                </Col>
+                            </Row>
+                            <FormGroup>
+                                <Label>Address</Label>
+                                <Input type="text" name="address" value={formData.address} onChange={handleChange} required />
+                            </FormGroup>
+                        </div>
+                        <div className='order-details'>
+                            <h5 className='text-center'>Order Details</h5>
+                            <FormGroup>
+                                <Label>Item Selection</Label>
+                                <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
+                                {searchTerm && filteredItems.length > 0 && (
+                                    <div className="dropdown">
+                                        {filteredItems.map((item) => (
+                                            <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
+                                                {item.I_name} - Rs.{item.price}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </FormGroup>
+
+                            {selectedItems.map((item) => (
+                                <Row key={item.I_Id} className="mt-2">
+                                    <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
+                                    <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
+                                    <Col md={2}><Button color="danger" onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>
+                                </Row>
+                            ))}
+                            <FormGroup>
+                                <Label>Coupon Code</Label>
+                                <Input type="select" name="couponCode" onChange={handleChange}>
+                                    <option value="">Select Coupon</option>
+                                    {coupons.map((coupon) => (
+                                        <option key={coupon.id} value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name}) - {coupon.discount} Off</option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
+
+                            <FormGroup>
+                                <Label>Special Note</Label>
+                                <Input type="textarea" name="specialNote" onChange={handleChange}></Input>
+                            </FormGroup>
+                        </div>
+
+                        <div className='order-details'>
+                            <h5 className='text-center'>Delivery Details</h5>
+                            <FormGroup>
+                                <Label>Delivery Method</Label>
+                                <div className="d-flex gap-3">
+                                    <Label>
+                                        <Input type="radio" name="dvStatus" value="Delivery" onChange={handleChange} /> Delivery
+                                    </Label>
+                                    <Label>
+                                        <Input type="radio" name="dvStatus" value="Pickup" onChange={handleChange} /> Pickup
+                                    </Label>
+                                </div>
+                            </FormGroup>
+                            {formData.dvStatus === "Delivery" && (
+                                <>
+                                    <FormGroup>
+                                        <Label>City</Label>
+                                        <Input type="text" name="city" onChange={handleChange}></Input>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Address</Label>
+                                        <Input type="text" name="address" value={formData.address} onChange={handleChange} required />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>District</Label>
+                                        <Input type="select" name="district" value={formData.district} onChange={handleChange} required>
+                                            <option value="">Select District</option>
+                                            {districts.map((district) => (
+                                                <option key={district} value={district}>{district}</option>
                                             ))}
                                         </Input>
                                     </FormGroup>
-                                ) : (
+                                    {deliveryDates.length > 0 ? (
+                                        <FormGroup>
+                                            <Label>Expected Delivery Date</Label>
+                                            <Input type="select" name="expectedDate" onChange={handleChange}>
+                                                <option value="">Select Date</option>
+                                                {deliveryDates.map((date, index) => (
+                                                    <option key={index} value={date}>{date}</option>
+                                                ))}
+                                            </Input>
+                                        </FormGroup>
+                                    ) : (
+                                        <FormGroup>
+                                            <Label>Expected Delivery Date</Label>
+                                            <Input type="date" name="expectedDate" onChange={handleChange}></Input>
+                                        </FormGroup>
+                                    )}
+                                </>
+                            )}
+                            {formData.dvStatus === "Pickup" && (
+                                <>
                                     <FormGroup>
-                                        <Label>Expected Delivery Date</Label>
+                                        <Label>City</Label>
+                                        <Input type="text" name="city" onChange={handleChange}></Input>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label>Expected Date</Label>
                                         <Input type="date" name="expectedDate" onChange={handleChange}></Input>
                                     </FormGroup>
-                                )}
-                            </>
-                        )}
-                        {formData.dvStatus === "Pickup" && (
-                            <>
-                                <FormGroup>
-                                    <Label>City</Label>
-                                    <Input type="text" name="city" onChange={handleChange}></Input>
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label>Expected Date</Label>
-                                    <Input type="date" name="expectedDate" onChange={handleChange}></Input>
-                                </FormGroup>
-                            </>
-                        )}
-                        <FormGroup>
-                            <Label>Coupon Code</Label>
-                            <Input type="select" name="couponCode" onChange={handleChange}>
-                                <option value="">Select Coupon</option>
-                                {coupons.map((coupon) => (
-                                    <option key={coupon.id} value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name}) - {coupon.discount} Off</option>
-                                ))}
-                            </Input>
-                        </FormGroup>
+                                </>
+                            )}
+                        </div>
 
-                        <FormGroup>
-                            <Label>Special Note</Label>
-                            <Input type="textarea" name="specialNote" onChange={handleChange}></Input>
-                        </FormGroup>
                         <h5>Delivery Fee: Rs.{deliveryPrice}</h5>
                         <h5>Discount: Rs.{discountAmount}</h5>
                         <h5>Total Item Price: Rs.{totalItemPrice}</h5>

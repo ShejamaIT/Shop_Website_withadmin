@@ -1,16 +1,17 @@
 .place-order-container {
-    max-width: 800px;
+    max-width: 900px;
     margin: auto;
     padding: 20px;
     background: #fff;
     border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
 }
 
 .place-order-container h3 {
     text-align: center;
     margin-bottom: 20px;
     color: #333;
+    font-size: 1.5rem;
 }
 
 .form-group {
@@ -112,10 +113,104 @@
 .submit-buttons .clear-btn:hover {
     background: #c82333;
 }
+
 .popup-content {
     border-radius: 10px;
     padding: 20px;
     width: 400px;
     background-color: #fff;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+h5 {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+    font-size: 1rem;
+    padding: 8px;
+}
+
+button {
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 12px;
+    border: none;
+    color: white;
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+button[type="button"].clear-btn {
+    background-color: #dc3545;
+}
+
+button[type="button"].clear-btn:hover {
+    background-color: #c82333;
+}
+
+@media (max-width: 767px) {
+    .place-order-container {
+        padding: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .submit-buttons {
+        flex-direction: column;
+    }
+
+    .submit-buttons button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .dropdown {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .place-order-container h3 {
+        font-size: 1.25rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
 }

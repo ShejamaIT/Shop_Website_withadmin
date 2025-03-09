@@ -5,24 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/admin/src/test.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAccepting.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAcceptingUnbooked.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAcceptingUnbooked.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAllCustomer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAllCustomer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAllItem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAllItem.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableCancelledOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableCancelledOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableCompleted.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableCompleted.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableCustomer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableCustomer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableIssuedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableIssuedOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TablePending.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableReturnedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableReturnedOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddCustomer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddCustomer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllCustomers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllCustomers.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllOrders.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/TableThree.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/TableThree.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/TableTwo.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/TableTwo.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/placeorder.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/placeorder.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -227,7 +213,7 @@
       <workItem from="1741356180570" duration="1395000" />
       <workItem from="1741359514225" duration="4341000" />
       <workItem from="1741404748488" duration="25348000" />
-      <workItem from="1741491477947" duration="19644000" />
+      <workItem from="1741491477947" duration="24269000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -572,7 +558,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="283" />
+    <option name="localTasksCounter" value="284" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -591,7 +577,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add delivery note view" />
     <MESSAGE value="update final invoice" />
     <MESSAGE value="update item(add new colun)" />
     <MESSAGE value="remove unwanted console log" />
@@ -616,6 +601,7 @@
     <MESSAGE value="update delivery note update api" />
     <MESSAGE value="update delivery nte detail view" />
     <MESSAGE value="update api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update api" />
+    <MESSAGE value="update with search part" />
+    <option name="LAST_COMMIT_MESSAGE" value="update with search part" />
   </component>
 </project>
