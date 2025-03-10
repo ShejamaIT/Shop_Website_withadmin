@@ -430,7 +430,9 @@ router.get("/allcustomers", async (req, res) => {
         // Format the customer data
         const formattedCustomers = customers.map(customer => ({
             c_ID: customer.c_ID, // Customer ID
-            name: customer.Name, // Full name
+            title: customer.title,
+            FtName: customer.FtName,
+            SrName: customer.SrName,
             id: customer.id, // NIC or identifier
             email: customer.email || "", // Email (nullable)
             address: customer.address, // Address
@@ -439,6 +441,8 @@ router.get("/allcustomers", async (req, res) => {
             balance: customer.balance, // Account balance
             category: customer.category,
             type: customer.type,
+            occupation: customer.occupation,
+            workPlace:customer.workPlace,
         }));
 
         // Send the formatted customers as a JSON response
@@ -552,15 +556,16 @@ router.post("/supplier", async (req, res) => {
 
 //add a new customer
 router.post("/customer", async (req, res) => {
-    const { name,id , email, contact, contact2, address,type,category,t_name} = req.body;
+    const {title,FtName,SrName,id , email, contact, contact2, address,type,category,t_name,occupation,workPlace} = req.body;
 
     // Generate new supplier ID
     const c_ID = await generateNewId("Customer", "c_ID", "Cus");
     console.log(c_ID);
     const sqlInsertCustomer = `
-        INSERT INTO Customer (c_ID, name, address, contact1, contact2,email,id,balance,type,category,t_name) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)`;
+        INSERT INTO Customer (c_ID,title,FtName,SrName, address, contact1, contact2,email,id,balance,type,category,t_name,occupation,workPlace) VALUES 
+                    (?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?)`;
     const valuesCustomer = [
-        c_ID, name,address, contact, contact2 || "", email,id ,0,type,category,t_name
+        c_ID,title, FtName,SrName,address, contact, contact2 || "", email,id ,0,type,category,t_name,occupation,workPlace
     ];
 
     try {
@@ -573,7 +578,7 @@ router.post("/customer", async (req, res) => {
             message: "Customer  added successfully",
             data: {
                 c_ID,
-                name,
+                FtName,
                 contact,
                 contact2,
                 id,
