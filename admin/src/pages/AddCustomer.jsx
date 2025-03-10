@@ -6,7 +6,7 @@ import {toast} from "react-toastify";
 
 const AddCustomer = () => {
     const [formData, setFormData] = useState({
-        firstName: "", lastName: "", email: "", id: "", address: "", contact: "", contact2: "",type:"",category:"",t_name:""
+        title:"",firstName: "", lastName: "", email: "", id: "", address: "", contact: "", contact2: "",type:"",category:"",t_name:"",occupation:"",workPlace:""
     });
     const [errors, setErrors] = useState({});
     const validateInput = (name, value) => {
@@ -27,17 +27,22 @@ const AddCustomer = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         let updatedFormData = { ...formData, [name]: value };
-        // If type is Walking or On site, set t_name to "-"
+        // If type is "Walking" or "On site", ensure occupation and workPlace fields are required
         if (name === "type") {
+            if (["Walking", "On site"].includes(value)) {
+                updatedFormData.occupation = "";
+                updatedFormData.workPlace = "";
+            } else {
+                updatedFormData.occupation = "-"; // Default or non-required value
+                updatedFormData.workPlace = "-";
+            }
+            // Reset t_name for "Shop", "Force", "Hotel"
             updatedFormData.t_name = ["Shop", "Force", "Hotel"].includes(value) ? "" : "-";
         }
         setFormData(updatedFormData);
         // Validate input AFTER updating form data
         validateInput(name, value);
     };
-
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -47,9 +52,11 @@ const AddCustomer = () => {
             return;
         }
         try {
-            const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+            // const fullName = `${formData.firstName} ${formData.lastName}`.trim();
             const customerData = {
-                name: fullName,
+                title: formData.title,
+                FtName: formData.firstName,
+                SrName: formData.lastName,
                 contact: formData.contact,
                 contact2: formData.contact2 || "",
                 address: formData.address,
@@ -58,8 +65,11 @@ const AddCustomer = () => {
                 type: formData.type,
                 category: formData.category,
                 t_name: formData.t_name,
+                occupation: formData.occupation,
+                workPlace: formData.workPlace,
             };
 
+            console.log(customerData);
             const response = await fetch("http://localhost:5001/api/admin/main/customer", {
                 method: "POST",
                 headers: {
@@ -72,7 +82,6 @@ const AddCustomer = () => {
 
             if (response.ok) {
                 toast.success(result.message);
-                handleClear();
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
@@ -84,26 +93,39 @@ const AddCustomer = () => {
             toast.error("Error submitting customer data. Please try again.");
         }
     };
-
     const handleClear = () => {
-        setFormData({ firstName: "", lastName: "", address: "", contact: "", contact2: "", email: "", id: "" ,type: "",category: "",t_name:""});
+        setFormData({title:"",firstName: "", lastName: "", email: "", id: "", address: "", contact: "", contact2: "",type:"",category:"",t_name:"",occupation:"",workPlace:""});
         setErrors({});
     };
     return (
         <Container className="add-item-container">
             <Row>
                 <Col lg="8" className="mx-auto">
-                    <h3 className="text-center">Add New Customer</h3>
+                    <h3 className="text-center">Add New Customer</h3><hr/>
                     <Form onSubmit={handleSubmit}>
                         <Row>
-                            <Col md={6}>
+                            <Col md={2}>
+                                <FormGroup>
+                                    <Label for="type">Title</Label>
+                                    <Input type="select" name="title" id="title" value={formData.title} onChange={handleChange} required>
+                                        <option value="">Title</option>
+                                        <option value="Mr">Mr</option>
+                                        <option value="Mrs">Mrs</option>
+                                        <option value="Ms">Ms</option>
+                                        <option value="Master">Master</option>
+                                        <option value="Dr">Dr</option>
+                                        <option value="Rev">Rev</option>
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                            <Col md={5}>
                                 <FormGroup>
                                     <Label for="firstName">First Name</Label>
                                     <Input type="text" name="firstName" value={formData.firstName} onChange={handleChange} />
                                     {errors.firstName && <small className="text-danger">{errors.firstName}</small>}
                                 </FormGroup>
                             </Col>
-                            <Col md={6}>
+                            <Col md={5}>
                                 <FormGroup>
                                     <Label for="lastName">Last Name</Label>
                                     <Input type="text" name="lastName" value={formData.lastName} onChange={handleChange} />
@@ -145,6 +167,20 @@ const AddCustomer = () => {
                                 <Input type="text" name="t_name" value={formData.t_name} onChange={handleChange} required />
                                 {errors.t_name && <small className="text-danger">{errors.t_name}</small>}
                             </FormGroup>
+                        )}
+                        {["Walking", "On site"].includes(formData.type) && (
+                            <>
+                                <FormGroup>
+                                    <Label for="occupation">Occupation</Label>
+                                    <Input type="text" name="occupation" value={formData.occupation} onChange={handleChange} required />
+                                    {errors.occupation && <small className="text-danger">{errors.occupation}</small>}
+                                </FormGroup>
+                                <FormGroup>
+                                    <Label for="workPlace">Work Place</Label>
+                                    <Input type="text" name="workPlace" value={formData.workPlace} onChange={handleChange} required />
+                                    {errors.workPlace && <small className="text-danger">{errors.workPlace}</small>}
+                                </FormGroup>
+                            </>
                         )}
 
                         <FormGroup>

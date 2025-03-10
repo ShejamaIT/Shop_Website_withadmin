@@ -45,9 +45,11 @@ const TableCustomer = ({ filter, title }) => {
         setSearchQuery(query);
 
         const filteredData = customers.filter((customer) =>
-            customer.name.toLowerCase().includes(query) ||
+            customer.SrName.toLowerCase().includes(query) ||
+            customer.FtName.toLowerCase().includes(query) ||
             customer.id.toLowerCase().includes(query) ||
-            customer.contact1.toLowerCase().includes(query)
+            customer.contact1.toLowerCase().includes(query)||
+            customer.contact2.toLowerCase().includes(query)
         );
 
         setFilteredCustomers(filteredData);
@@ -71,9 +73,11 @@ const TableCustomer = ({ filter, title }) => {
                     <thead>
                     <tr>
                         <th>Customer Id</th>
-                        <th>Name</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
                         <th>NIC</th>
                         <th>Contact</th>
+                        <th>Optional</th>
                         <th>Balance</th>
                         <th>Type</th>
                         <th>Action</th>
@@ -96,9 +100,11 @@ const TableCustomer = ({ filter, title }) => {
                         filteredCustomers.map((customer) => (
                             <tr key={customer.c_ID}>
                                 <td>{customer.c_ID}</td>
-                                <td>{customer.name}</td>
+                                <td>{customer.FtName}</td>
+                                <td>{customer.SrName}</td>
                                 <td>{customer.id}</td>
                                 <td>{customer.contact1}</td>
+                                <td>{customer.contact2}</td>
                                 <td className={customer.balance < 0 ? "negative-balance" : ""}>
                                     {customer.balance}
                                 </td>

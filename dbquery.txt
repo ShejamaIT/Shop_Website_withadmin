@@ -54,7 +54,6 @@ CREATE TABLE item_supplier (
               ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
                 ON DELETE CASCADE ON UPDATE CASCADE
-
 );
 CREATE TABLE Employee(
       E_Id VARCHAR(15) PRIMARY KEY,
@@ -99,7 +98,9 @@ CREATE TABLE Customer_log(
 );
 CREATE TABLE Customer(
        c_ID VARCHAR(15) PRIMARY KEY,
-       Name TEXT,
+       title VARCHAR(10),
+       FtName TEXT,
+       SrName TEXT,
        id VARCHAR(15),
        email TEXT NULL,
        address TEXT,
@@ -108,7 +109,9 @@ CREATE TABLE Customer(
        balance DOUBLE,
        category VARCHAR(15),
        type VARCHAR(15),
-       t_name TEXT
+       t_name TEXT,
+       occupation TEXT,
+       workPlace TEXT
 );
 CREATE TABLE sessionlogs (
   SessionID int(11) NOT NULL,

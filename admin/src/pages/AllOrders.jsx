@@ -9,6 +9,7 @@ import TablePending from "../components/tables/TablePending";
 import TableAccepting from "../components/tables/TableAccepting";
 import TableCompleted from "../components/tables/TableCompleted";
 import PlaceOrder from "./Placeorder";
+// import PlaceOrder from "../test";
 import Tableforproduction from "../components/tables/Tableforproduction";
 import TableIssued from "../components/tables/TableIssuedOrders";
 import TableInproduction from "../components/tables/TableInProduction";
@@ -57,7 +58,8 @@ const AllOrders = () => {
                     <TabContent activeTab={activeTab}>
                         <TabPane tabId="0" key={refreshKey}>
                             <Row>
-                                <PlaceOrder onOrderPlaced={handleDataUpdate} />
+                                {/*<PlaceOrder onOrderPlaced={handleDataUpdate} />*/}
+                                <PlaceOrder onPlaceOrder={handleDataUpdate}/>
                             </Row>
                         </TabPane>
 
