@@ -190,145 +190,126 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 
 // Save a order
 router.post("/orders", async (req, res) => {
+    const {
+        FtName, SrName, address, balance, c_ID, category, city, couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
+        expectedDate, id, isNewCustomer, items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice, totalItemPrice,
+        type, workPlace, t_name
+    } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ success: false, message: "Invalid or missing items." });
+    }
+
     try {
-        const {
-            dvStatus,
-            address,
-            city,
-            district,
-            email,
-            name,
-            phoneNumber,
-            otherNumber,
-            items,
-            totalBillPrice,
-            deliveryPrice,
-            discountAmount,
-            totalItemPrice,
-            couponCode,
-            expectedDate,
-            specialNote,
-        } = req.body;
+        let Cust_id = c_ID;
+        let Occupation = "-", WorkPlace = "-", tType = "-";
+        let stID = null;
 
-        console.log(expectedDate);
+        if (type === 'Walking' || type === 'On site') {
+            Occupation = occupation;
+            WorkPlace = workPlace;
+        } else {
+            tType = t_name;
+        }
 
-        // Calculate net total and balance
-        const netTotal = parseFloat(totalBillPrice);
+        // **Handle New Customer Creation**
+        if (isNewCustomer) {
+            Cust_id = await generateNewId("Customer", "c_ID", "Cus");
+
+            const checkExistingCustomer = `SELECT c_ID FROM Customer WHERE email = ? OR contact1 = ? LIMIT 1`;
+            const [existingCustomer] = await db.query(checkExistingCustomer, [email, phoneNumber]);
+
+            if (existingCustomer.length > 0) {
+                return res.status(400).json({ success: false, message: "Customer already exists." });
+            }
+
+            const sqlInsertCustomer = `
+                INSERT INTO Customer (c_ID, title, FtName, SrName, address, contact1, contact2, email, id, balance, type, category, t_name, occupation, workPlace)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            const valuesCustomer = [
+                Cust_id, title, FtName, SrName, address, phoneNumber, otherNumber || "", email, id, 0, type, category, tType, Occupation, WorkPlace
+            ];
+
+            await db.query(sqlInsertCustomer, valuesCustomer);
+        }
+
+        // **Calculate Net Total and Balance**
+        const netTotal = parseFloat(totalBillPrice) || 0;
         const advance = 0;
-        const balance = netTotal - parseFloat(advance);
+        const balance = netTotal - advance;
 
-        // Generate unique order ID
+        // **Generate Order ID**
         const orID = `ORD_${Date.now()}`;
         const orderDate = new Date().toISOString().split("T")[0];
 
-        // Initialize stID and c_ID
-        let stID = null;
-        let c_ID = null;
-
-        // Check if customer already exists
-        const customerQuery = `
-            SELECT c_ID FROM Customer
-            WHERE (contact1 = ? AND contact2 = ?)
-               OR (contact1 = ? AND contact2 = ?)
-        `;
-        const [customerResult] = await db.query(customerQuery, [phoneNumber, otherNumber, otherNumber, phoneNumber]);
-
-
-        if (customerResult.length > 0) {
-            // Customer exists, get their ID
-            c_ID = customerResult[0].c_ID;
-        } else {
-            // Customer does not exist, insert new customer
-            const insertCustomerQuery = `
-                INSERT INTO Customer (Name,email, address, contact1, contact2, excessAmount)
-                VALUES (?,?, ?, ?, ?, ?)
-            `;
-            const [newCustomer] = await db.query(insertCustomerQuery, [name,email, address, phoneNumber, otherNumber, 0]);
-            c_ID = newCustomer.insertId; // Get the newly inserted customer ID
-        }
-
-        // Check if a coupon is provided and get stID
+        // **Handle Coupon Code**
         if (couponCode) {
             const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
             const [couponResult] = await db.query(couponQuery, [couponCode]);
 
             if (couponResult.length === 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid coupon code"
-                });
+                return res.status(400).json({ success: false, message: "Invalid coupon code." });
             }
 
             stID = couponResult[0].stID;
-
-            // Update sales team total order amount
-            const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
-            const updateSalesTeamQuery = `
-                UPDATE sales_team SET totalOrder = totalOrder + ? WHERE stID = ?
-            `;
+            const newTotalOrder = parseFloat(totalItemPrice);
+            const updateSalesTeamQuery = `UPDATE sales_team SET totalOrder = totalOrder + ? WHERE stID = ?`;
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
 
-        // Insert Order with the found or new c_ID
-        let orderQuery = `
-            INSERT INTO Orders (OrID, orDate, custName, customerEmail, contact1, contact2, orStatus, delStatus, city, delPrice, discount, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
-            VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?, ?, 'on-site', ?, ?, 'Pending')`;
-        let orderParams = [
-            orID, orderDate, name, email, phoneNumber, otherNumber, dvStatus, city,
-            parseFloat(deliveryPrice), parseFloat(discountAmount), parseFloat(totalBillPrice),
-            stID, expectedDate, specialNote, advance, balance
+        // **Insert Order**
+        const orderQuery = `
+            INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
+            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?, ?, 'on-site', ?, ?, 'Pending')`;
+
+        const orderParams = [
+            orID, orderDate, Cust_id, dvStatus, parseFloat(deliveryPrice) || 0, parseFloat(discountAmount) || 0,
+            parseFloat(totalItemPrice) || 0, parseFloat(totalBillPrice) || 0, stID, expectedDate, specialNote, advance, balance
         ];
 
         await db.query(orderQuery, orderParams);
 
-        // Insert Order Details
-        for (const item of items) {
-            let orderDetailQuery = `
-                INSERT INTO Order_Detail (orID, I_Id, qty, tprice)
-                VALUES (?, ?, ?, ?)`;
-            let orderDetailParams = [orID, item.I_Id, item.qty, parseFloat(item.price)];
+        // **Insert Order Details (Bulk Insert)**
+        const orderDetailValues = items.map(item => [
+            orID, item.I_Id, item.qty, parseFloat(item.price)
+        ]);
 
-            await db.query(orderDetailQuery, orderDetailParams);
-        }
+        const orderDetailQuery = `
+            INSERT INTO Order_Detail (orID, I_Id, qty, tprice) VALUES ?`;
 
-        // Insert Delivery Info if delivery is selected
+        await db.query(orderDetailQuery, [orderDetailValues]);
+
+        // **Insert Delivery Info**
         if (dvStatus === "Delivery") {
             const dvID = `DLV_${Date.now()}`;
-            let deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, contact, status, schedule_Date)
+            const deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date)
                 VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
-            let deliveryParams = [dvID, orID, address, district, phoneNumber, expectedDate];
 
-            await db.query(deliveryQuery, deliveryParams);
+            await db.query(deliveryQuery, [dvID, orID, address, district, Cust_id, expectedDate]);
         }
 
-        // Insert Coupon Info if a coupon is used
+        // **Insert Coupon Info**
         if (couponCode) {
             const ocID = `OCP_${Date.now()}`;
-            let couponQuery = `
-                INSERT INTO order_coupon (ocID, orID, cpID)
-                VALUES (?, ?, ?)`;
-            let couponParams = [ocID, orID, couponCode];
-
-            await db.query(couponQuery, couponParams);
+            const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
+            await db.query(couponQuery, [ocID, orID, couponCode]);
         }
 
         return res.status(201).json({
             success: true,
             message: "Order placed successfully",
-            data: {
-                orID: orID,
-                orderDate: orderDate,
-                expectedDate: expectedDate
-            },
+            data: { orID, orderDate, expectedDate }
         });
 
     } catch (error) {
-        console.error("Error inserting order data:", error.message);
+        console.error("Error inserting order data:", error);
+
         return res.status(500).json({
             success: false,
             message: "Error inserting data into database",
-            details: error.message,
+            details: error.message
         });
     }
 });
@@ -441,10 +422,10 @@ router.get("/allcustomers", async (req, res) => {
             balance: customer.balance, // Account balance
             category: customer.category,
             type: customer.type,
+            t_name: customer.t_name,
             occupation: customer.occupation,
-            workPlace:customer.workPlace,
+            workPlace: customer.workPlace,
         }));
-
         // Send the formatted customers as a JSON response
         return res.status(200).json(formattedCustomers);
     } catch (error) {
@@ -569,7 +550,7 @@ router.post("/customer", async (req, res) => {
     ];
 
     try {
-        // Insert the customer into the Supplier table
+        // Insert the customer into the Customer table
         await db.query(sqlInsertCustomer, valuesCustomer);
 
         // Respond with success message and new supplier details
