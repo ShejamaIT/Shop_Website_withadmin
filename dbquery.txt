@@ -132,15 +132,12 @@ CREATE TABLE delivery_schedule(
 CREATE TABLE Orders (
     OrID VARCHAR(25) PRIMARY KEY,
     orDate DATE,
-    custName VARCHAR(30),
-    customerEmail TEXT,
-    contact1 VARCHAR(14) NOT NULL,
-    contact2 VARCHAR(14),
+    c_ID VARCHAR(15),
     orStatus VARCHAR(15),
-    city VARCHAR(25),
     delStatus VARCHAR(10),
     delPrice DOUBLE,
     discount DOUBLE,
+    netTotal DOUBLE,
     total DOUBLE,
     advance DOUBLE,
     balance DOUBLE,
@@ -150,7 +147,9 @@ CREATE TABLE Orders (
     specialNote TEXT,
     ordertype VARCHAR(10),
     CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
-                        ON DELETE CASCADE ON UPDATE CASCADE
+                        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (c_ID) REFERENCES Customer (c_ID)
+                            ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE Order_Detail (
     orID VARCHAR(25),
@@ -168,12 +167,14 @@ CREATE TABLE delivery(
     orID VARCHAR(25),
     address TEXT,
     district VARCHAR(25) NOT NULL,
-    contact VARCHAR(15) NOT NULL,
+    c_ID VARCHAR(15),
     status VARCHAR(15),
     schedule_Date DATE,
     delivery_Date DATE,
         CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                   ON DELETE CASCADE ON UPDATE CASCADE
+                                   ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (c_ID) REFERENCES Customer (c_ID)
+                                    ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE accept_orders (
     ao_ID INT AUTO_INCREMENT PRIMARY KEY,
