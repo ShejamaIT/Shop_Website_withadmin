@@ -190,7 +190,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 // Save a order
 router.post("/orders", async (req, res) => {
     const {
-        FtName, SrName, address, balance, c_ID, category, city, couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
+        FtName, SrName, address, balance, c_ID, category,newAddress,isAddressChanged, couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice, totalItemPrice,
         type, workPlace, t_name
     } = req.body;
@@ -280,13 +280,20 @@ router.post("/orders", async (req, res) => {
         await db.query(orderDetailQuery, [orderDetailValues]);
 
         // **Insert Delivery Info**
-        if (dvStatus === "Delivery") {
+        if (dvStatus === "Delivery" && !isAddressChanged) {
             const dvID = `DLV_${Date.now()}`;
             const deliveryQuery = `
                 INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date)
                 VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
 
             await db.query(deliveryQuery, [dvID, orID, address, district, Cust_id, expectedDate]);
+        }else if (dvStatus === "Delivery" && isAddressChanged){
+            const dvID = `DLV_${Date.now()}`;
+            const deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
+
+            await db.query(deliveryQuery, [dvID, orID, newAddress, district, Cust_id, expectedDate]);
         }
 
         // **Insert Coupon Info**
@@ -4193,6 +4200,38 @@ router.post("/delivery-payment", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+// get delivery schdule by date
+router.get("/check-delivery", async (req, res) => {
+    const { date } = req.query; // Get date from query parameter
+    console.log(date);
+
+    if (!date) {
+        return res.status(400).json({ message: "Date is required" });
+    }
+
+    try {
+        // Check if the given date is already scheduled for delivery
+        const [result] = await db.query(
+            "SELECT COUNT(*) AS count FROM delivery_schedule WHERE ds_date = ?",
+            [date]
+        );
+        console.log(result);
+
+        // Reverse the logic: if count is 0, delivery is available; otherwise, it's not available
+        const available = result[0].count === 0;
+
+        return res.status(200).json({
+            message: available ? "Delivery available" : "No delivery available on this date",
+            available: available
+        });
+    } catch (error) {
+        console.error("Error checking delivery availability:", error.message);
+        return res.status(500).json({ message: "Error checking delivery availability" });
+    }
+});
+
+
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
