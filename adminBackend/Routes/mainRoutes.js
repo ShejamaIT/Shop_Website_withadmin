@@ -328,7 +328,7 @@ router.get("/orders", async (req, res) => {
         const formattedOrders = orders.map(order => ({
             OrID : order.OrID, // Assuming you have an id column
             orDate : order.orDate,
-            customerEmail : order.customerEmail,
+            customer : order.c_ID,
             ordertype : order.ordertype,
             orStatus : order.orStatus,
             delStatus : order.delStatus,
@@ -970,13 +970,15 @@ router.get("/order-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "Order ID is required" });
         }
 
-        // Fetch Order Info along with Sales Team details (Employee Name)
+        // Fetch Order Info along with Customer and Sales Team details
         const orderQuery = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.orStatus, o.delStatus,
-                o.delPrice, o.discount, o.total, o.advance , o.balance, o.payStatus, o.expectedDate,
-                o.specialNote, o.ordertype, s.stID, e.name AS salesEmployeeName
+                o.OrID, o.orDate, o.c_ID, c.title, c.FtName, c.SrName, c.address, c.contact1, c.contact2,
+                o.orStatus, o.delStatus, o.delPrice, o.discount, o.netTotal, o.total,
+                o.advance, o.balance, o.payStatus, o.expectedDate, o.specialNote, o.ordertype,
+                s.stID, e.name AS salesEmployeeName
             FROM Orders o
+                     LEFT JOIN Customer c ON o.c_ID = c.c_ID
                      LEFT JOIN sales_team s ON o.stID = s.stID
                      LEFT JOIN Employee e ON s.E_Id = e.E_Id
             WHERE o.OrID = ?`;
@@ -989,93 +991,64 @@ router.get("/order-details", async (req, res) => {
 
         const orderData = orderResult[0];
 
-        // Fetch Ordered Items with Updated Stock Fields
+        // Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.I_Id,
-                i.I_name,
-                i.color,
-                od.qty,
-                od.tprice,
-                i.price AS unitPrice,
-                i.bookedQty,
-                i.availableQty,
-                i.stockQty
+                od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
+                i.bookedQty, i.availableQty, i.stockQty
             FROM Order_Detail od
                      JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
+
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
-        // Prepare the order response
+        // Format customer name with title
+        const customerName = [orderData.title, orderData.FtName, orderData.SrName].filter(Boolean).join(" ");
+
+        // Prepare Order Response
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate: new Date(orderData.orDate).toLocaleDateString('en-CA'), // Fix date issue
-            customerEmail: orderData.customerEmail,
-            ordertype: orderData.ordertype,
-            phoneNumber: orderData.contact1,
-            optionalNumber: orderData.contact2,
-            orderStatus: orderData.orStatus,
-            deliveryStatus: orderData.delStatus,
-            deliveryCharge: orderData.delPrice,
-            discount: orderData.discount,
-            totalPrice: orderData.total,
-            advance: orderData.advance,
-            balance: orderData.balance,
-            payStatus : orderData.payStatus,
-            expectedDeliveryDate: new Date(orderData.expectedDate).toLocaleDateString('en-CA'), // Fix date issue
-            specialNote: orderData.specialNote,
+            orderDate: new Date(orderData.orDate).toISOString().split("T")[0], // ISO format
+            customer: {
+                id: orderData.c_ID,
+                name: customerName, // Title added to the name
+                address: orderData.address,
+                phoneNumber: orderData.contact1,
+                optionalNumber: orderData.contact2,
+            },
+            orderDetails: {
+                type: orderData.ordertype,
+                status: orderData.orStatus,
+                deliveryStatus: orderData.delStatus,
+                deliveryCharge: orderData.delPrice,
+                discount: orderData.discount,
+                netTotal: orderData.netTotal,
+                totalPrice: orderData.total,
+                advance: orderData.advance,
+                balance: orderData.balance,
+                paymentStatus: orderData.payStatus,
+                expectedDeliveryDate: new Date(orderData.expectedDate).toISOString().split("T")[0],
+                specialNote: orderData.specialNote,
+            },
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
-            items: [],
-        };
-
-        // If order is "Accepted", fetch booked items and accept_orders
-        if (orderData.orStatus === "Accepted") {
-            for (const item of itemsResult) {
-                let itemReceived = "No";
-                let itemStatus = "Incomplete";
-
-                // Fetch accept order data
-                const acceptQuery = `SELECT itemReceived, status FROM accept_orders WHERE orID = ? AND I_Id = ?`;
-                const [acceptResult] = await db.query(acceptQuery, [orID, item.I_Id]);
-                if (acceptResult.length > 0) {
-                    itemReceived = acceptResult[0].itemReceived;
-                    itemStatus = acceptResult[0].status;
-                }
-
-                orderResponse.items.push({
-                    itemId: item.I_Id,
-                    itemName: item.I_name,
-                    price: item.tprice,
-                    color: item.color,
-                    quantity: item.qty,
-                    unitPrice: item.unitPrice,
-                    booked: item.bookedQty > 0, // true if the item is booked
-                    bookedQuantity: item.bookedQty,
-                    availableQuantity: item.availableQty, // Updated field from Item table
-                    stockQuantity: item.stockQty,
-                    itemReceived: itemReceived,
-                    itemStatus: itemStatus
-                });
-            }
-        } else {
-            // If order is not "Accepted", return normal item details
-            orderResponse.items = itemsResult.map(item => ({
+            items: itemsResult.map(item => ({
                 itemId: item.I_Id,
                 itemName: item.I_name,
-                quantity: item.qty,
-                price: item.tprice,
                 color: item.color,
+                quantity: item.qty,
                 unitPrice: item.unitPrice,
+                totalPrice: item.tprice,
+                booked: item.bookedQty > 0,
                 bookedQuantity: item.bookedQty,
-                availableQuantity: item.availableQty, // Updated field
-                stockQuantity: item.stockQty
-            }));
-        }
+                availableQuantity: item.availableQty,
+                stockQuantity: item.stockQty,
+            })),
+        };
 
-        // If it's a delivery order, fetch delivery details
+        // Fetch Delivery Info if it's a delivery order
         if (orderData.delStatus === "Delivery") {
             const deliveryQuery = `
-                SELECT dv_id, address, district, contact, status, schedule_Date
+                SELECT dv_id, address, district, status, schedule_Date, delivery_Date, c_ID
                 FROM delivery
                 WHERE orID = ?`;
 
@@ -1083,12 +1056,19 @@ router.get("/order-details", async (req, res) => {
 
             if (deliveryResult.length > 0) {
                 const deliveryData = deliveryResult[0];
+
+                // Fetch customer contact from Customer table using c_ID from delivery table
+                const customerQuery = `SELECT contact1 FROM Customer WHERE c_ID = ?`;
+                const [customerResult] = await db.query(customerQuery, [deliveryData.c_ID]);
+
                 orderResponse.deliveryInfo = {
                     deliveryId: deliveryData.dv_id,
                     address: deliveryData.address,
                     district: deliveryData.district,
                     status: deliveryData.status,
-                    scheduleDate: deliveryData.schedule_Date,
+                    scheduleDate: new Date(deliveryData.schedule_Date).toISOString().split("T")[0],
+                    deliveryDate: deliveryData.delivery_Date ? new Date(deliveryData.delivery_Date).toISOString().split("T")[0] : null,
+                    contact: customerResult.length > 0 ? customerResult[0].contact1 : null,
                 };
             }
         }
@@ -1225,7 +1205,7 @@ router.get("/orders-pending", async (req, res) => {
         const formattedOrders = orders.map(order => ({
             OrID: order.OrID, // Order ID
             orDate: order.orDate, // Order Date
-            customerEmail: order.customerEmail, // Customer Email
+            customer: order.c_ID, // Customer Email
             ordertype : order.ordertype,
             orStatus: order.orStatus, // Order Status
             dvStatus: order.delStatus, // Delivery Status
@@ -1257,7 +1237,7 @@ router.get("/orders-accepting", async (req, res) => {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus
@@ -1281,7 +1261,7 @@ router.get("/orders-accepting", async (req, res) => {
                 groupedOrders[order.OrID] = {
                     OrID: order.OrID,
                     orDate: order.orDate,
-                    customerEmail: order.customerEmail,
+                    customer: order.c_ID,
                     ordertype: order.ordertype,
                     orStatus: order.orStatus,
                     dvStatus: order.delStatus,
@@ -1329,7 +1309,7 @@ router.get("/orders-completed", async (req, res) => {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus
@@ -1353,7 +1333,7 @@ router.get("/orders-completed", async (req, res) => {
                 groupedOrders[order.OrID] = {
                     OrID: order.OrID,
                     orDate: order.orDate,
-                    customerEmail: order.customerEmail,
+                    customer: order.c_ID,
                     ordertype: order.ordertype,
                     orStatus: order.orStatus,
                     dvStatus: order.delStatus,
@@ -1401,7 +1381,7 @@ router.get("/orders-issued", async (req, res) => {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus
@@ -1425,7 +1405,7 @@ router.get("/orders-issued", async (req, res) => {
                 groupedOrders[order.OrID] = {
                     OrID: order.OrID,
                     orDate: order.orDate,
-                    customerEmail: order.customerEmail,
+                    customer: order.c_ID,
                     ordertype: order.ordertype,
                     orStatus: order.orStatus,
                     dvStatus: order.delStatus,
@@ -1473,7 +1453,7 @@ router.get("/orders-returned", async (req, res) => {
         // Query to fetch returned orders with their acceptance status and return reason
         const query = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
                 ro.detail AS returnReason
@@ -1498,7 +1478,7 @@ router.get("/orders-returned", async (req, res) => {
                 groupedOrders[order.OrID] = {
                     OrID: order.OrID,
                     orDate: order.orDate,
-                    customerEmail: order.customerEmail,
+                    customer: order.c_ID,
                     ordertype: order.ordertype,
                     orStatus: order.orStatus,
                     dvStatus: order.delStatus,
@@ -1547,7 +1527,7 @@ router.get("/orders-canceled", async (req, res) => {
         // Query to fetch returned orders with their acceptance status and return reason
         const query = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
                 ro.detail AS returnReason
@@ -1572,7 +1552,7 @@ router.get("/orders-canceled", async (req, res) => {
                 groupedOrders[order.OrID] = {
                     OrID: order.OrID,
                     orDate: order.orDate,
-                    customerEmail: order.customerEmail,
+                    customer: order.c_ID,
                     ordertype: order.ordertype,
                     orStatus: order.orStatus,
                     dvStatus: order.delStatus,
@@ -2136,7 +2116,7 @@ router.get("/orders-accept", async (req, res) => {
         // Step 1: Fetch all the orders and their associated items' statuses from the accept_orders table.
         const query = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus
@@ -2161,7 +2141,7 @@ router.get("/orders-accept", async (req, res) => {
                 groupedOrders[order.OrID] = {
                     OrID: order.OrID,
                     orDate: order.orDate,
-                    customerEmail: order.customerEmail,
+                    customer: order.c_ID,
                     ordertype: order.ordertype,
                     orStatus: order.orStatus,
                     dvStatus: order.delStatus,
