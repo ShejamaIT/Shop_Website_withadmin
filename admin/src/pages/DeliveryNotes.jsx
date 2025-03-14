@@ -88,7 +88,9 @@ const DeliveryNotes = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates");
             const data = await response.json();
-            setRoutes(data.data || []);
+            console.log(data.data)
+            setRoutes(["All", ...data.data.map(route => route.district)]);
+            // setRoutes(data.data || []);
         } catch (error) {
             toast.error("Error fetching routes.");
         }
@@ -105,17 +107,24 @@ const DeliveryNotes = () => {
                 toast.error("Please select both route and delivery date.");
                 return;
             }
-            const response = await fetch(`http://localhost:5001/api/admin/main/find-completed-orders?district=${selectedRoute}&date=${date}`);
-            const data = await response.json();
-            if (data.orders) {
-                setOrders(data.orders);
+            console.log(selectedRoute , date);
+            let url;
+            if (selectedRoute === "All") {
+                url = `http://localhost:5001/api/admin/main/find-completed-orders-by-date?date=${date}`;
             } else {
-                setOrders([]); // Clear orders if no data
+                url = `http://localhost:5001/api/admin/main/find-completed-orders?district=${selectedRoute}&date=${date}`;
             }
+
+            console.log(url);
+
+            const response = await fetch(url);
+            const data = await response.json();
+            setOrders(data.orders || []);
         } catch (error) {
             toast.error("Error fetching orders.");
         }
     };
+
     const fetchDeliveryDates = async (district) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
@@ -136,10 +145,18 @@ const DeliveryNotes = () => {
     const handleRouteChange = (e) => {
         const routeId = e.target.value;
         setSelectedRoute(routeId);
-        fetchDeliveryDates(routeId); // Fetch the delivery schedule when the route changes
+
+        if (routeId === "All") {
+            setDeliveryDates([]); // Clear delivery dates when "All" is selected
+            setNoScheduleMessage(""); // Clear any messages
+        } else {
+            fetchDeliveryDates(routeId);
+        }
+
         setSelectedOrders([]);
         setTotalAmount(0);
     };
+
     const handleOrderSelection = (order) => {
         const updatedOrders = selectedOrders.includes(order)
             ? selectedOrders.filter(o => o !== order)
@@ -215,11 +232,23 @@ const DeliveryNotes = () => {
                             <Label for="routeSelect">Select Route</Label>
                             <Input type="select" id="routeSelect" value={selectedRoute} onChange={handleRouteChange}>
                                 <option value="">-- Select Route --</option>
-                                {routes.map(route => (
-                                    <option key={route.district} value={route.district}>{route.district}</option>
+                                {routes.map((district, index) => (
+                                    <option key={index} value={district}>{district}</option>
                                 ))}
                             </Input>
                         </FormGroup>
+                        {(selectedRoute === "All" || deliveryDates.length > 0) && (
+                            <FormGroup>
+                                <Label for="deliveryDateSelect">Select Delivery Date</Label>
+                                <Input
+                                    type="date"
+                                    id="deliveryDateSelect"
+                                    value={selectedDeliveryDate}
+                                    onChange={loadOders}
+                                >
+                                </Input>
+                            </FormGroup>
+                        )}
                         {/* Delivery Date Dropdown */}
                         {deliveryDates.length > 0 ? (
                             <div>
