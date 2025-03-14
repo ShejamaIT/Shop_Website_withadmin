@@ -74,11 +74,10 @@ const TableAcceptingUnbooked = ({ refreshKey }) => {
                         <th>Order Date</th>
                         <th>Order Type</th>
                         <th>Expected Date</th>
-                        <th>Customer Email</th>
+                        <th>Customer </th>
                         <th>Order Status</th>
                         <th>Delivery Status</th>
                         <th>Total Price</th>
-                        <th>Acceptance Status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -102,7 +101,7 @@ const TableAcceptingUnbooked = ({ refreshKey }) => {
                                 <td>{formatDate(order.orDate)}</td>
                                 <td>{order.ordertype}</td>
                                 <td>{formatDate(order.expectedDeliveryDate)}</td>
-                                <td>{order.customerEmail}</td>
+                                <td>{order.customer}</td>
                                 <td>
                                         <span className={`status ${order.orStatus.toLowerCase()}`}>
                                             {order.orStatus}
@@ -110,7 +109,6 @@ const TableAcceptingUnbooked = ({ refreshKey }) => {
                                 </td>
                                 <td>{order.dvStatus}</td>
                                 <td>Rs.{order.totPrice.toFixed(2)}</td>
-                                <td>{order.acceptanceStatus}</td>
                                 <td className="action-buttons">
                                     <button
                                         className="view-btn"
