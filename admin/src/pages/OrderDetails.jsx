@@ -71,6 +71,11 @@ const OrderDetails = () => {
     const calculateBalance = (total,advance) => {
         return Number(total) - Number(advance);
     }
+    const calculateItemTotal = () => {
+        return formData?.items && Array.isArray(formData.items)
+            ? formData.items.reduce((total, item) => total + (item.quantity * item.unitPrice || 0), 0)
+            : 0;
+    };
 
     const handleRemoveItem = (index) => {
         setFormData((prevFormData) => ({
@@ -79,33 +84,27 @@ const OrderDetails = () => {
         }));
     };
 
+
     const handleChange = (e, index) => {
         const { name, value, type, checked } = e.target;
 
-        setFormData(prevFormData => {
+        setFormData((prevFormData) => {
             let updatedFormData = { ...prevFormData };
 
-            console.log("Previous Form Data:", prevFormData);
-
             if (["deliveryStatus", "orderStatus", "payStatus"].includes(name)) {
-                // ✅ Ensure direct update for status fields
-                updatedFormData = { ...updatedFormData, [name]: value };
-            }
-            else if (name in prevFormData) {
+                updatedFormData[name] = value; // ✅ Handles payStatus update
+            } else if (name in prevFormData) {
                 updatedFormData[name] = value;
-            }
-            else if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
+            } else if (prevFormData.deliveryInfo && name in prevFormData.deliveryInfo) {
                 updatedFormData.deliveryInfo = {
                     ...prevFormData.deliveryInfo,
                     [name]: value,
                 };
-            }
-            else if (name === "booked" && index !== undefined) {
+            } else if (name === "booked") {
                 updatedFormData.items = prevFormData.items.map((item, i) =>
                     i === index ? { ...item, booked: checked } : item
                 );
-            }
-            else if (name === "quantity" && index !== undefined) {
+            } else if (name === "quantity") {
                 const newQuantity = value === "" ? 0 : parseInt(value, 10);
                 if (!isNaN(newQuantity) && newQuantity >= 0) {
                     updatedFormData.items = prevFormData.items.map((item, i) =>
@@ -114,28 +113,25 @@ const OrderDetails = () => {
                             : item
                     );
                 }
-            }
-            else if (["discount", "deliveryCharge"].includes(name)) {
+            } else if (["discount", "deliveryCharge"].includes(name)) {
                 const updatedValue = value === "" ? 0 : parseFloat(value);
                 if (!isNaN(updatedValue) && updatedValue >= 0) {
                     updatedFormData[name] = updatedValue;
+                    updatedFormData.totalPrice =
+                        updatedFormData.items.reduce((total, item) => total + item.price, 0) +
+                        (updatedFormData.deliveryCharge || 0) -
+                        (updatedFormData.discount || 0);
                 }
             }
-
-            // **Recalculate Total Price**
-            updatedFormData.totalPrice = (updatedFormData.items || []).reduce((total, item) => total + (item.price || 0), 0) +
-                (updatedFormData.deliveryCharge || 0) - (updatedFormData.discount || 0);
-
-            console.log("Updated Form Data:", updatedFormData);
             return updatedFormData;
         });
     };
 
-
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
+        const updatedItemTotal = calculateItemTotal();
         const updatedBalance = calculateBalance(updatedTotal,formData.advance);
-        const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance };
+        const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance , netTotal:updatedItemTotal};
         console.log(updatedData);
         let updatedGeneralOrder = null;
         try {
@@ -242,6 +238,7 @@ const OrderDetails = () => {
             updatedData.deliveryInfo !== order.deliveryInfo;
     };
 
+
     const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
         const updatedItem = {
@@ -267,6 +264,7 @@ const OrderDetails = () => {
                     booked: formData.booked,
                 }),
             });
+
             const data = await response.json();
 
             if (response.ok) {
@@ -318,6 +316,7 @@ const OrderDetails = () => {
     };
 
     const handleAddItem = (selectedItems) => {
+        console.log(selectedItems);
         setFormData((prevFormData) => ({
             ...prevFormData,
             items: [
@@ -342,6 +341,7 @@ const OrderDetails = () => {
         return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
     };
 
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
@@ -362,12 +362,12 @@ const OrderDetails = () => {
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="order-general">
                                         <p><strong>Order Date:</strong> {order.orderDate}</p>
-                                        <p><strong>Customer Email:</strong> {order.customer.name}</p>
+                                        <p><strong>Customer Name:</strong> {order.name}</p>
 
                                         {!isEditing ? (
                                             <p><strong>Order Status:</strong>
-                                                <span className={`status ${order.orderDetails.status.toLowerCase()}`}>
-                                                    {order.orderDetails.status}
+                                                <span className={`status ${order.orderStatus.toLowerCase()}`}>
+                                                    {order.orderStatus}
                                                 </span>
                                             </p>
                                         ) : (
@@ -376,20 +376,17 @@ const OrderDetails = () => {
                                                 <Input
                                                     type="select"
                                                     name="orderStatus"
-                                                    value={formData.orderDetails.status}
+                                                    value={formData.orderStatus}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="Pending">Pending</option>
-                                                    <option value="Accepted">Accepted</option>
-                                                    <option value="Processing">Processing</option>
-                                                    <option value="Completed">Completed</option>
-                                                    <option value="Cancelled">Cancelled</option>
+                                                    <option value="Pending">Pending</option><option value="Accepted">Accepted</option>
+                                                    <option value="Processing">Processing</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
                                         {!isEditing ? (
                                             <p><strong>Delivery Status:</strong>
-                                                {order.deliveryInfo.status}
+                                                {order.deliveryStatus}
                                             </p>
                                         ) : (
                                             <FormGroup>
@@ -397,7 +394,7 @@ const OrderDetails = () => {
                                                 <Input
                                                     type="select"
                                                     name="deliveryStatus"
-                                                    value={formData.deliveryInfo.status}
+                                                    value={formData.deliveryStatus}
                                                     onChange={handleChange}
                                                 >
                                                     <option value="Delivery">Delivery</option><option value="Pick up">Pick up</option>
@@ -407,7 +404,7 @@ const OrderDetails = () => {
                                         {!isEditing ? (
                                             <p><strong>Payment Status:</strong>
                                                 <span >
-                                                    {order.orderDetails.paymentStatus}
+                                                    {order.payStatus}
                                                 </span>
                                             </p>
                                         ) : (
@@ -416,7 +413,7 @@ const OrderDetails = () => {
                                                 <Input
                                                     type="select"
                                                     name="payStatus"
-                                                    value={formData.orderDetails.paymentStatus}
+                                                    value={formData.payStatus}
                                                     onChange={handleChange}
                                                 >
                                                     <option value="Pending">Pending</option><option value="Advanced">Advanced</option>
@@ -424,34 +421,34 @@ const OrderDetails = () => {
                                                 </Input>
                                             </FormGroup>
                                         )}
-                                        <p><strong>Expected Delivery Date:</strong> {order.deliveryInfo.scheduleDate}</p>
+                                        <p><strong>Expected Delivery Date:</strong> {order.expectedDeliveryDate}</p>
                                         {!isEditing ? (
-                                            <p><strong>Contact:</strong> {order.customer.phoneNumber}</p>
+                                            <p><strong>Contact:</strong> {order.phoneNumber}</p>
                                         ) : (
                                             <FormGroup>
                                                 <Label><strong>Contact:</strong></Label>
                                                 <Input
                                                     type="text"
                                                     name="phoneNumber"
-                                                    value={formData.customer.phoneNumber ?? order.customer.phoneNumber}
+                                                    value={formData.phoneNumber ?? order.phoneNumber}
                                                     onChange={handleChange}
                                                 />
                                             </FormGroup>
                                         )}
                                         {!isEditing ? (
-                                            <p><strong>Optional Contact:</strong> {order.customer.optionalNumber}</p>
+                                            <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
                                         ) : (
                                             <FormGroup>
                                                 <Label><strong>Optional Contact:</strong></Label>
                                                 <Input
                                                     type="text"
                                                     name="optionalNumber"
-                                                    value={formData.customer.optionalNumber ?? order.customer.optionalNumber}
+                                                    value={formData.optionalNumber ?? order.optionalNumber}
                                                     onChange={handleChange}
                                                 />
                                             </FormGroup>
                                         )}
-                                        <p><strong>Special Note:</strong> {order.orderDetails.specialNote}</p>
+                                        <p><strong>Special Note:</strong> {order.specialNote}</p>
                                         <p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>
                                     </div>
                                     {order.deliveryInfo && (
@@ -493,7 +490,7 @@ const OrderDetails = () => {
                                                 <p><strong>Item:</strong> {item.itemName}</p>
                                                 <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.price}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
                                                 {isEditing && (
@@ -520,26 +517,26 @@ const OrderDetails = () => {
                                 {/* Order Summary */}
                                 <div className="order-summary">
                                     {!isEditing ? (
-                                        <p><strong>Discount Price:</strong> Rs. {formData.orderDetails.discount ?? order.orderDetails.discount}</p>
+                                        <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>
                                     ) : (
                                         <FormGroup>
                                             <Label><strong>Discount Price:</strong></Label>
                                             <Input
-                                                type="text" name="discount" value={formData.orderDetails.discount ?? order.orderDetails.discount} onChange={handleChange}
+                                                type="text" name="discount" value={formData.discount ?? order.discount} onChange={handleChange}
                                             />
                                         </FormGroup>
                                     )}
 
                                     {formData.deliveryStatus === "Pick up" ? (
-                                        <p><strong>Delivery Amount:</strong> Rs. {formData.orderDetails.deliveryCharge ?? order.orderDetails.deliveryCharge}</p>
+                                        <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
                                     ) : (
                                         !isEditing ? (
-                                            <p><strong>Delivery Amount:</strong> Rs. {formData.orderDetails.deliveryCharge ?? order.orderDetails.deliveryCharge}</p>
+                                            <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
                                         ) : (
                                             <FormGroup>
                                                 <Label><strong>Delivery Amount:</strong></Label>
                                                 <Input
-                                                    type="text" name="deliveryCharge" value={formData.orderDetails.deliveryCharge ?? order.orderDetails.deliveryCharge} onChange={handleChange}
+                                                    type="text" name="deliveryCharge" value={formData.deliveryCharge ?? order.deliveryCharge} onChange={handleChange}
                                                 />
                                             </FormGroup>
                                         )
@@ -547,8 +544,8 @@ const OrderDetails = () => {
 
                                     {/*<p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>*/}
                                     <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
-                                    <p><strong>Advance Amount:</strong> Rs. {order.orderDetails.advance}</p>
-                                    <p><strong>Balance Amount:</strong> Rs. {order.orderDetails.balance}</p>
+                                    <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
+                                    <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
                                 </div>
 
                                 <div className="text-center mt-4">

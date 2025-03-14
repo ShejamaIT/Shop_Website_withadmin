@@ -82,7 +82,11 @@ const OrderDetails = () => {
     const calculateBalance = (total,advance) => {
         return Number(total) - Number(advance);
     }
-
+    const calculateItemTotal = () => {
+        return formData?.items && Array.isArray(formData.items)
+            ? formData.items.reduce((total, item) => total + (item.quantity * item.unitPrice || 0), 0)
+            : 0;
+    };
     const handleRemoveItem = (index) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -136,8 +140,9 @@ const OrderDetails = () => {
 
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
+        const updatedItemTotal = calculateItemTotal();
         const updatedBalance = calculateBalance(updatedTotal,formData.advance);
-        const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance };
+        const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance , netTotal:updatedItemTotal};
         let updatedGeneralOrder = null;
         try {
             // Step 1: Update order general details only if changed
@@ -411,7 +416,7 @@ const OrderDetails = () => {
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="order-general">
                                         <p><strong>Order Date:</strong> {order.orderDate}</p>
-                                        <p><strong>Customer Email:</strong> {order.customerEmail}</p>
+                                        <p><strong>Customer Name:</strong> {order.name}</p>
 
                                         {!isEditing ? (
                                             <p><strong>Order Status:</strong>

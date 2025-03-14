@@ -50,6 +50,11 @@ const CompleteOrderDetails = () => {
     const calculateBalance = (total,advance) => {
         return Number(total) - Number(advance);
     }
+    const calculateItemTotal = () => {
+        return formData?.items && Array.isArray(formData.items)
+            ? formData.items.reduce((total, item) => total + (item.quantity * item.unitPrice || 0), 0)
+            : 0;
+    };
 
     const handleRemoveItem = (index) => {
         setFormData((prevFormData) => ({
@@ -136,8 +141,9 @@ const CompleteOrderDetails = () => {
 
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
+        const updatedItemTotal = calculateItemTotal();
         const updatedBalance = calculateBalance(updatedTotal,formData.advance);
-        const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance };
+        const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance, netTotal:updatedItemTotal };
         let updatedGeneralOrder = null;
         try {
             // Step 1: Update order general details only if changed
