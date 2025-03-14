@@ -2932,7 +2932,7 @@ router.get("/find-cost", async (req, res) => {
     }
 });
 
-//find issuded order by district
+//find issuded orders by district & date
 router.get("/find-completed-orders", async (req, res) => {
     try {
         const { district, date } = req.query;
@@ -3068,6 +3068,137 @@ router.get("/find-completed-orders", async (req, res) => {
         });
     }
 });
+
+//find issuded orders by  date
+router.get("/find-completed-orders-by-date", async (req, res) => {
+    try {
+        const { date } = req.query;
+        if (!date) {
+            return res.status(400).json({ success: false, message: "Date is required." });
+        }
+
+        // Parse the date in DD/MM/YYYY format and convert it to YYYY-MM-DD format
+        const parsedDate = parseDate(date);
+        console.log(parsedDate);
+
+        // 1️⃣ Fetch Issued Orders with Sales Team & Customer Details
+        const orderQuery = `
+            SELECT
+                o.orId, o.orDate, o.customerEmail,o.custName, o.contact1, o.contact2, o.advance, o.balance,
+                o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype,
+                o.stID, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName,
+                d.address, d.district, d.contact, d.status AS deliveryStatus, d.schedule_Date
+            FROM Orders o
+                     JOIN delivery d ON o.orID = d.orID
+                     LEFT JOIN sales_team s ON o.stID = s.stID
+                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            WHERE o.orStatus = 'Completed' AND o.expectedDate = ?;
+        `;
+
+        const [orders] = await db.query(orderQuery, [district, parsedDate]);
+
+        if (orders.length === 0) {
+            return res.status(404).json({ success: false, message: "No issued orders found for this date." });
+        }
+
+        // 2️⃣ Fetch Ordered Items for Each Order
+        const orderDetails = await Promise.all(orders.map(async (order) => {
+            const itemsQuery = `
+                SELECT
+                    od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
+                    i.bookedQty, i.availableQty
+                FROM Order_Detail od
+                         JOIN Item i ON od.I_Id = i.I_Id
+                WHERE od.orID = ?`;
+
+            const [items] = await db.query(itemsQuery, [order.orId]);
+
+            // 3️⃣ Fetch Booked Items for Each Order
+            const bookedItemsQuery = `
+                SELECT bi.I_Id, i.I_name, bi.qty
+                FROM booked_item bi
+                         JOIN Item i ON bi.I_Id = i.I_Id
+                WHERE bi.orID = ?`;
+
+            const [bookedItems] = await db.query(bookedItemsQuery, [order.orId]);
+
+            // 4️⃣ Fetch Accepted Items
+            const acceptedOrdersQuery = `
+                SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
+                FROM accept_orders ao
+                         JOIN Item i ON ao.I_Id = i.I_Id
+                WHERE ao.orID = ?`;
+
+            const [acceptedOrders] = await db.query(acceptedOrdersQuery, [order.orId]);
+
+            // 5️⃣ Build the Response Object
+            return {
+                orderId: order.orId,
+                orderDate: order.orDate,
+                customerEmail: order.customerEmail,
+                customerName: order.custName,
+                ordertype: order.ordertype,
+                phoneNumber: order.contact1,
+                optionalNumber: order.contact2,
+                orderStatus: order.orStatus,
+                deliveryStatus: order.delStatus,
+                deliveryCharge: order.delPrice,
+                discount: order.discount,
+                saleID: order.stID,
+                totalPrice: order.total,
+                advance: order.advance,
+                balance: order.balance,
+                payStatus: order.payStatus,
+                expectedDeliveryDate: order.expectedDate,
+                specialNote: order.specialNote,
+                salesTeam: order.salesEmployeeName ? { employeeName: order.salesEmployeeName } : null,
+                deliveryInfo: {
+                    address: order.address,
+                    district: order.district,
+                    status: order.deliveryStatus,
+                    scheduleDate: order.schedule_Date,
+                    contact: order.contact
+                },
+                items: items.map(item => ({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    quantity: item.qty,
+                    color: item.color,
+                    price: item.tprice,
+                    unitPrice: item.unitPrice,
+                    bookedQuantity: item.bookedQty,
+                    availableQuantity: item.availableQty
+                })),
+                bookedItems: bookedItems.map(item => ({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    quantity: item.qty
+                })),
+                acceptedOrders: acceptedOrders.map(item => ({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    itemReceived: item.itemReceived,
+                    status: item.status
+                }))
+            };
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Issued orders fetched successfully.",
+            orders: orderDetails
+        });
+
+    } catch (error) {
+        console.error("Error fetching issued orders:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching issued orders.",
+            details: error.message
+        });
+    }
+});
+
 
 // Get subcat one detail by ca_id
 router.get("/getSubcategories", async (req, res) => {
@@ -4230,8 +4361,6 @@ router.get("/check-delivery", async (req, res) => {
         return res.status(500).json({ message: "Error checking delivery availability" });
     }
 });
-
-
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
