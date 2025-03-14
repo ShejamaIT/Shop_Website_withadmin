@@ -28,6 +28,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [error, setError] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false); // Controls dropdown visibility
     const [isNewCustomer, setIsNewCustomer] = useState(true); // State to determine new or previous customer
+    const [availableDelivery, setAvailableDelivery] = useState(null);
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -75,15 +76,61 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? checked : value, // Handle checkbox separately
+        }));
+
+        // Clear delivery price when changing status
+        if (name === "dvtype" || name === "dvStatus") {
+            setDeliveryPrice(0);
+        }
+
         if (name === "district") {
             setDeliveryPrice(deliveryRates[value] || 0);
             fetchDeliveryDates(value);
         }
+
         if (name === "couponCode") {
             const selectedCoupon = coupons.find((c) => c.coupon_code === value);
             setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
+        }
+
+        // If switching to Direct Delivery, reset district & expectedDate
+        if (name === "dvtype" && value === "Direct") {
+            setFormData((prev) => ({ ...prev, district: "", expectedDate: "", deliveryCharge: "" }));
+        }
+
+        // If Direct Delivery, use input field value as delivery charge instead of district rates
+        if (name === "deliveryCharge" && formData.dvtype === "Direct") {
+            setDeliveryPrice(value);
+        }
+
+        // If Expected Date is selected for Direct, check delivery availability
+        if (name === "expectedDate" && formData.dvtype === "Direct") {
+            checkDeliveryAvailability(value);
+        }
+
+        // If the address change checkbox is unchecked, remove the newAddress field
+        if (name === "isAddressChanged" && !checked) {
+            setFormData((prev) => ({
+                ...prev,
+                newAddress: "", // Reset new address
+            }));
+        }
+    };
+
+
+    const checkDeliveryAvailability = async (date) => {
+        try {
+            // Mock API call to check delivery availability (Replace with real API)
+            const response = await fetch(`http://localhost:5001/api/admin/main/check-delivery?date=${date}`);
+            const result = await response.json();
+            setAvailableDelivery(result.available);
+        } catch (error) {
+            console.error("Error checking delivery availability:", error);
         }
     };
     const fetchDeliveryDates = async (district) => {
@@ -157,7 +204,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const calculateTotalPrice = () => {
         const itemTotal = selectedItems.reduce((total, item) => total + item.price * item.qty, 0);
         setTotalItemPrice(itemTotal);
-        setTotalBillPrice((itemTotal - discountAmount ) + deliveryPrice);
+        const total = Number((Number(itemTotal) - Number(discountAmount) ) + Number(deliveryPrice));
+        setTotalBillPrice(total);
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -166,7 +214,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             return;
         }
 
-        if (formData.dvStatus === "Delivery" && (!formData.address || !formData.district || !formData.expectedDate)) {
+        if (formData.dvStatus === "Delivery" && formData.dvtype === "Combined" &&(!formData.address || !formData.district || !formData.expectedDate)) {
             toast.error("Please complete all delivery details.");
             return;
         }
@@ -178,7 +226,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
             deliveryPrice, discountAmount, totalItemPrice, totalBillPrice,
         };
-        console.log(orderData);
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders", {
                 method: "POST",
@@ -468,14 +515,16 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     ))}
                                 </Input>
                             </FormGroup>
-
                             <FormGroup>
                                 <Label className="fw-bold">Special Note</Label><Input type="textarea" name="specialNote" onChange={handleChange}></Input>
                             </FormGroup>
                         </div>
 
-                        <div className='order-details'>
-                            <h5 className='text-center underline'>Delivery Details</h5><hr/>
+                        <div className="order-details">
+                            <h5 className="text-center underline">Delivery Details</h5>
+                            <hr />
+
+                            {/* Delivery Method Selection */}
                             <FormGroup>
                                 <Label className="fw-bold">Delivery Method</Label>
                                 <div className="d-flex gap-3">
@@ -487,25 +536,139 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     </Label>
                                 </div>
                             </FormGroup>
+
+                            {/* Delivery Type (Direct / Combined) */}
                             {formData.dvStatus === "Delivery" && (
+                                <FormGroup>
+                                    <Label className="fw-bold">Delivery Type</Label>
+                                    <div className="d-flex gap-3">
+                                        <Label>
+                                            <Input type="radio" name="dvtype" value="Direct" onChange={handleChange} /> Direct
+                                        </Label>
+                                        <Label>
+                                            <Input type="radio" name="dvtype" value="Combined" onChange={handleChange} /> Combined
+                                        </Label>
+                                    </div>
+                                </FormGroup>
+                            )}
+
+                            {/* Direct Delivery Fields */}
+                            {formData.dvtype === "Direct" && (
                                 <>
                                     <FormGroup>
-                                        <Label className="fw-bold">City</Label>
-                                        <Input type="text" name="city" onChange={handleChange}></Input>
+                                        <Label className="fw-bold">Address</Label>
+                                        <Input
+                                            type="text"
+                                            name="address"
+                                            value={formData.address}
+                                            onChange={handleChange}
+                                            required
+                                        />
                                     </FormGroup>
+
+                                    {/* Checkbox for Address Change */}
+                                    <FormGroup check>
+                                        <Label check>
+                                            <Input
+                                                type="checkbox"
+                                                name="isAddressChanged"
+                                                checked={formData.isAddressChanged || false}
+                                                onChange={handleChange}
+                                            />
+                                            Address has changed
+                                        </Label>
+                                    </FormGroup>
+
+                                    {/* Optional New Address Field */}
+                                    {formData.isAddressChanged && (
+                                        <FormGroup>
+                                            <Label className="fw-bold">New Address</Label>
+                                            <Input
+                                                type="text"
+                                                name="newAddress"
+                                                value={formData.newAddress || ""}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                        </FormGroup>
+                                    )}
+
+                                    <FormGroup>
+                                        <Label className="fw-bold">Expected Date</Label>
+                                        <Input type="date" name="expectedDate" onChange={handleChange} />
+                                    </FormGroup>
+
+                                    {/* Display Delivery Availability */}
+                                    {formData.expectedDate && (
+                                        <p className={`text-${availableDelivery ? "success" : "danger"}`}>
+                                            {availableDelivery ? "Delivery is available on this date" : "No delivery available on this date"}
+                                        </p>
+                                    )}
+
+                                    <FormGroup>
+                                        <Label className="fw-bold">Delivery Charge</Label>
+                                        <Input type="number" name="deliveryCharge" onChange={handleChange} />
+                                    </FormGroup>
+                                </>
+                            )}
+
+                            {/* Combined Delivery Fields */}
+                            {formData.dvtype === "Combined" && (
+                                <>
                                     <FormGroup>
                                         <Label className="fw-bold">Address</Label>
-                                        <Input type="text" name="address" value={formData.address} onChange={handleChange} required />
+                                        <Input
+                                            type="text"
+                                            name="address"
+                                            value={formData.address}
+                                            onChange={handleChange}
+                                            required
+                                        />
                                     </FormGroup>
+
+                                    {/* Checkbox for Address Change */}
+                                    <FormGroup check>
+                                        <Label check>
+                                            <Input
+                                                type="checkbox"
+                                                name="isAddressChanged"
+                                                checked={formData.isAddressChanged || false}
+                                                onChange={handleChange}
+                                            />
+                                            Address has changed
+                                        </Label>
+                                    </FormGroup>
+
+                                    {/* Optional New Address Field */}
+                                    {formData.isAddressChanged && (
+                                        <FormGroup>
+                                            <Label className="fw-bold">New Address</Label>
+                                            <Input
+                                                type="text"
+                                                name="newAddress"
+                                                value={formData.newAddress || ""}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                        </FormGroup>
+                                    )}
+
                                     <FormGroup>
                                         <Label className="fw-bold">District</Label>
-                                        <Input type="select" name="district" value={formData.district} onChange={handleChange} required>
+                                        <Input
+                                            type="select"
+                                            name="district"
+                                            value={formData.district}
+                                            onChange={handleChange}
+                                            required
+                                        >
                                             <option value="">Select District</option>
                                             {districts.map((district) => (
                                                 <option key={district} value={district}>{district}</option>
                                             ))}
                                         </Input>
                                     </FormGroup>
+
                                     {deliveryDates.length > 0 ? (
                                         <FormGroup>
                                             <Label className="fw-bold">Expected Delivery Date</Label>
@@ -524,19 +687,24 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     )}
                                 </>
                             )}
+
+                            {/* Pickup Fields */}
                             {formData.dvStatus === "Pickup" && (
                                 <>
                                     <FormGroup>
                                         <Label className="fw-bold">City</Label>
-                                        <Input type="text" name="city" onChange={handleChange}></Input>
+                                        <Input type="text" name="city" onChange={handleChange} />
                                     </FormGroup>
+
                                     <FormGroup>
                                         <Label className="fw-bold">Expected Date</Label>
-                                        <Input type="date" name="expectedDate" onChange={handleChange}></Input>
+                                        <Input type="date" name="expectedDate" onChange={handleChange} />
                                     </FormGroup>
                                 </>
                             )}
                         </div>
+
+
                         <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>
                         <Row>
                             <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
