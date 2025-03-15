@@ -4,6 +4,7 @@ import { Button, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHe
 import { toast } from "react-toastify";
 
 const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => {
+    console.log(selectedOrder);
     const invoiceDate = new Date().toLocaleDateString();
     const [paymentType, setPaymentType] = useState(selectedOrder.payStatus);
     const [deliveryStatus, setDeliveryStatus] = useState(selectedOrder.deliveryStatus);
@@ -16,13 +17,15 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
     const [dropdownOpen, setDropdownOpen] = useState(false);  // To handle dropdown visibility
     const [filteredItems, setFilteredItems] = useState([]); // List to store filtered items based on search term
     const [selectedItem, setSelectedItem] = useState([]);
-    const calculateTotal = (item) => item.quantity * item.unitPrice;
-    const delivery = Number(selectedOrder.deliveryCharge);
-    const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
-    const totalAdvance = Number(advance) + Number(nowPay);
-    const netTotal = (subtotal + delivery) - Number(selectedOrder.discount);
-    const balance = netTotal - totalAdvance;
+    const [isLoading, setIsLoading] = useState(false);  // Loading state for stock fetch
 
+    const calculateTotal = (item) => item.quantity * item.unitPrice;
+    const discount = Number(selectedOrder.discount) || 0;  // Default to 0 if undefined or NaN
+    const delivery = Number(selectedOrder.deliveryPrice) || 0;  // Default to 0 if undefined or NaN
+    const subtotal = Number(selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0)) || 0;  // Ensure subtotal is a valid number
+    const totalAdvance = Number(advance) + Number(nowPay) || 0;  // Ensure advance is valid
+    const netTotal = (subtotal + delivery - (Number(selectedOrder.discount) || 0));  // Default discount to 0 if undefined or NaN
+    const balance = netTotal - totalAdvance;
     useEffect(() => {
         if (balance === 0) {
             setPaymentType('Settled');
@@ -34,6 +37,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
             setPaymentType('Advanced');
         }
     }, [advance]);
+
     const handlePrintAndSubmit = () => {
         console.log(paymentType);
 
@@ -56,10 +60,12 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
             });
         }
     };
+
     useEffect(() => {
         const itemIds = [...new Set(selectedOrder.items.map(item => item.itemId))];
         const fetchItems = async () => {
             try {
+                setIsLoading(true);  // Start loading
                 if (itemIds.length === 0) {
                     toast.error("No valid item IDs to fetch stock details.");
                     return;
@@ -70,7 +76,10 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                     body: JSON.stringify(itemIds)
                 });
 
-                if (!response.ok) throw new Error("Failed to fetch stock details");
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Failed to fetch stock details");
+                }
 
                 const data = await response.json();
                 if (data.stockDetails && data.stockDetails.length > 0) {
@@ -79,7 +88,9 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                     toast.error("No stock details found for selected items.");
                 }
             } catch (error) {
-                toast.error("Error loading stock details.");
+                toast.error("Error loading stock details: " + error.message);
+            } finally {
+                setIsLoading(false);  // Stop loading after fetch
             }
         };
 
@@ -97,6 +108,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
         setFilteredItems(filtered);
         setDropdownOpen(filtered.length > 0);
     };
+
     const handleSelectItem = (item) => {
         // Find the requested quantity for the selected item
         const orderedItem = selectedOrder.items.find(orderItem => orderItem.itemId === item.I_Id);
@@ -151,7 +163,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                 <h2 className="invoice-title">Final Invoice</h2>
                 <div className="invoice-section">
                     <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
-                    <p><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
+                    <p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
                     <p><strong>Invoice Date:</strong> {invoiceDate}</p>
                     <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
 
@@ -212,7 +224,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                             <th>Item ID</th>
                             <th>Batch ID</th>
                             <th>Stock ID</th>
-                            <th>Key</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -221,29 +232,31 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                                 <td>{item.I_Id}</td>
                                 <td>{item.sr_ID}</td>
                                 <td>{item.stock_Id}</td>
-                                <td>{item.srd_Id}</td>
                             </tr>
                         ))}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="invoice-summary">
-                    <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
-                    <p><strong>Discount:</strong> Rs. {selectedOrder.discount.toFixed(2)}</p>
-                    <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p>
-                    <p><strong>Net Total:</strong> Rs. {netTotal.toFixed(2)}</p>
-                    <p><strong>Total Advance:</strong> Rs. {totalAdvance.toFixed(2)}</p>
-                    <p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
-                </div>
+                <div className="invoice-footer">
+                    <div className="total-section">
+                        <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
+                        <p><strong>Discount:</strong> Rs. {discount.toFixed(2)}</p>
+                        <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p>
+                        <p><strong>Total:</strong> Rs. {netTotal.toFixed(2)}</p>
+                        <p><strong>Advance:</strong> Rs. {advance.toFixed(2)}</p>
+                        <p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
+                    </div>
 
-                <div className="modal-buttons">
-                    <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
-                    <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
-                    <button className="close-btn" onClick={() => setShowModal2(false)}>Close</button>
+                    <div className="modal-buttons">
+                        <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
+                        <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
+                        <button className="close-btn" onClick={() => setShowModal2(false)}>Close</button>
+                    </div>
                 </div>
             </div>
 
+            {/* Stock Modal */}
             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
                 <ModalBody>
@@ -268,7 +281,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                             <th>Item ID</th>
                             <th>Batch ID</th>
                             <th>Stock ID</th>
-                            <th>Key</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -277,7 +289,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                                 <td>{item.I_Id}</td>
                                 <td>{item.sr_ID}</td>
                                 <td>{item.stock_Id}</td>
-                                <td>{item.srd_Id}</td>
                             </tr>
                         ))}
                         </tbody>

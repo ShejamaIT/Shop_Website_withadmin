@@ -1,10 +1,10 @@
 import React from "react";
-import "../style/receiptView.css";
+import "../style/deliveryRecipt.css";
 
 const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
     // Destructure necessary values from the receiptData
     const { orders, vehicleId, driverName, hire, balanceToCollect, selectedDeliveryDate } = receiptData;
-
+    console.log(orders);
     // Format the date
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -35,7 +35,6 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                     <thead>
                     <tr>
                         <th>Order ID</th>
-                        <th>Customer Name</th>
                         <th>Total</th>
                         <th>Advance</th>
                         <th>Balance</th>
@@ -44,8 +43,7 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                     <tbody>
                     {orders.map((order, index) => (
                         <tr key={index}>
-                            <td>{order.orId}</td>
-                            <td>{order.customerName}</td>
+                            <td>{order.orderId}</td>
                             <td>Rs. {order.total.toFixed(2)}</td>
                             <td>Rs. {order.advance.toFixed(2)}</td>
                             <td>Rs. {order.balance.toFixed(2)}</td>
@@ -59,6 +57,7 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                     <thead>
                     <tr>
                         <th>Order ID</th>
+                        <th>Customer Name</th>
                         <th>Address</th>
                         <th>Contact 1</th>
                         <th>Contact 2</th>
@@ -67,7 +66,8 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                     <tbody>
                     {orders.map((order, index) => (
                         <tr key={index}>
-                            <td>{order.orId}</td>
+                            <td>{order.orderId}</td>
+                            <td>{order.customerName}</td>
                             <td>{order.address}</td>
                             <td>{order.contact1}</td>
                             <td>{order.contact2}</td>

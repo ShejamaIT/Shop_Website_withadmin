@@ -27,7 +27,16 @@ const DeliveryNotes = () => {
     const handleSubmit2 = async (formData) => {
         try {
             const updatedReceiptData = {
-                orders: selectedOrders,
+                orders: selectedOrders.map(order => ({
+                    orderId: order.orderId,
+                    customerName: order.customerName,
+                    balance: order.balance,
+                    address: order.deliveryInfo.address,
+                    contact1: order.phoneNumber,
+                    contact2: order.optionalNumber,
+                    total: order.totalPrice,
+                    advance: order.advance,
+                })),
                 vehicleId: formData.vehicleId,
                 driverName: formData.driverName,
                 hire: formData.hire,
@@ -44,7 +53,10 @@ const DeliveryNotes = () => {
                 date: selectedDeliveryDate,  // The selected delivery date
                 orders: selectedOrders.map(order => ({
                     orderId: order.orderId,
-                    balance: order.balance
+                    balance: order.balance,
+                    address: order.deliveryInfo.address,
+                    contact1: order.phoneNumber,
+                    contact2: order.optionalNumber
                 })),  // Extracting order IDs and balances correctly
                 district: selectedRoute,
                 balanceToCollect: formData.balanceToCollect,
@@ -69,9 +81,9 @@ const DeliveryNotes = () => {
                 setReceiptDataD(updatedReceiptData);
                 setShowModal2(false);
                 setShowDeliveryView(true);
-                setTimeout(() => {
-                    window.location.reload(); // Auto-refresh the page
-                }, 1000);
+                // setTimeout(() => {
+                //     window.location.reload(); // Auto-refresh the page
+                // }, 1000);
             } else {
                 toast.error(data.message || "Error creating delivery note.");
             }
@@ -161,6 +173,7 @@ const DeliveryNotes = () => {
     };
 
     const handleOrderSelection = (order) => {
+        console.log(order);
         const updatedOrders = selectedOrders.includes(order)
             ? selectedOrders.filter(o => o !== order)
             : [...selectedOrders, order];
@@ -183,9 +196,9 @@ const DeliveryNotes = () => {
 
     const handleSubmit3 = async (formData) => {
         console.log(formData);
-        setShowModal2(false);
         const updatedData = {
             orID: selectedOrder.orderId,
+            orderDate: selectedOrder.orderDate,
             delStatus: formData.deliveryStatus,
             delPrice: formData.delivery,
             discount: selectedOrder.discount,
@@ -194,7 +207,7 @@ const DeliveryNotes = () => {
             advance: formData.totalAdvance,
             payStatus: formData.paymentType,
             stID: selectedOrder.saleID,
-            paymentAmount: formData.addedAdvance,
+            paymentAmount: formData.addedAdvance || 0,
             selectedItems: formData.selectedItems,
             balance: formData.billTotal - formData.totalAdvance, // assuming balance calculation
             salesperson: selectedOrder.salesTeam.employeeName,

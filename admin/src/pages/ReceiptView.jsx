@@ -38,9 +38,9 @@ const ReceiptView = ({ receiptData, setShowReceiptView }) => {
                     {receiptData.items.map((item, index) => (
                         <tr key={index}>
                             <td>{item.itemName}</td>
-                            <td>{item.bookedQuantity}</td>
+                            <td>{item.quantity}</td>
                             <td>Rs. {item.unitPrice.toFixed(2)}</td>
-                            <td>Rs. {(item.bookedQuantity * item.unitPrice).toFixed(2)}</td>
+                            <td>Rs. {(item.quantity * item.unitPrice).toFixed(2)}</td>
                         </tr>
                     ))}
                     </tbody>

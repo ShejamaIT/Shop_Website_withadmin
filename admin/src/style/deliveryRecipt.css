@@ -1,0 +1,183 @@
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal Content (Receipt View) */
+.receipt-modal {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px; /* Increase max-width for larger screens */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;  /* Add scroll if content overflows */
+}
+
+.receipt-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+/* Paragraph Style */
+p {
+    font-size: 1.1rem; /* Slightly larger text */
+    margin: 0.5rem 0;
+    color: #333;  /* Darken the text color of p tags */
+}
+
+/* Table Styles */
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.receipt-table th, .receipt-table td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 1rem;  /* Ensure table font size is consistent */
+}
+
+.receipt-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Delivery Note Information */
+.delivery-note-info {
+    display: flex;            /* Use flexbox to align items on one line */
+    flex-wrap: wrap;          /* Allow wrapping if there's not enough space */
+    justify-content: flex-start; /* Align items to the left */
+    gap: 15px;                /* Space between items */
+    margin-bottom: 15px;      /* Space below the info */
+}
+
+.delivery-note-info p {
+    margin: 0;                /* Remove margin for <p> elements to keep the layout tight */
+    display: inline;          /* Ensure <p> elements stay inline */
+    font-size: 1rem;          /* Slightly adjust font size for better readability */
+}
+
+/* Summary */
+.receipt-summary p {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    color: #333;
+}
+
+/* Modal Buttons */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.print-btn, .close-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.1rem; /* Adjust font size for buttons */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.print-btn {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.print-btn:hover {
+    background-color: #45a049;
+}
+
+.close-btn {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.close-btn:hover {
+    background-color: #e53935;
+}
+
+/* Print Styles */
+@media print {
+    .modal-overlay, .close-btn {
+        display: none;
+    }
+
+    .receipt-modal {
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+        border: none;
+        padding: 1rem;
+    }
+
+    /* Adjust table for printing */
+    .receipt-table th, .receipt-table td {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    /* Remove the modal buttons when printing */
+    .modal-buttons {
+        display: none;
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    /* Reduce padding and adjust width for smaller screens */
+    .receipt-modal {
+        padding: 1rem;
+        width: 95%;
+    }
+
+    /* Adjust font size for smaller devices */
+    .receipt-title {
+        font-size: 1.5rem;
+    }
+
+    p {
+        font-size: 1rem;
+    }
+
+    .receipt-table th, .receipt-table td {
+        font-size: 0.9rem; /* Make text smaller on mobile */
+    }
+
+    .modal-buttons button {
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Further reduce font size for very small screens */
+    .receipt-title {
+        font-size: 1.3rem;
+    }
+
+    .receipt-table th, .receipt-table td {
+        font-size: 0.85rem;
+    }
+
+    .modal-buttons button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
