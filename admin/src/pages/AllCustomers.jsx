@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
+import { useLocation, useNavigate } from "react-router-dom";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
@@ -8,7 +9,34 @@ import TableAllCustomer from "../components/tables/TableAllCustomer";
 import TableCustomer from "../components/tables/TableCustomer";
 
 const AllCustomer = () => {
-    const [activeTab, setActiveTab] = useState("1"); // Manage active tab
+    const [activeTab, setActiveTab] = useState("Add Customer"); // Manage active tab name
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // List of tab names
+    const tabNames = [
+        "Add Customer",
+        "All Customers",
+        "Credit Customer",
+        "Cash Customer",
+        "Loyal Customer",
+        "Blacklisted Customer"
+    ];
+
+    // Read the active tab from the URL query parameter (using `tab`)
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const tab = searchParams.get("tab");
+        if (tab && tabNames.includes(tab)) {
+            setActiveTab(tab);
+        }
+    }, [location]);
+
+    // Update the URL when the active tab changes
+    const handleTabChange = (tabName) => {
+        setActiveTab(tabName);
+        navigate(`?tab=${tabName}`); // Update the URL with the tab query param
+    };
 
     return (
         <Helmet title={'All-Customers'}>
@@ -20,72 +48,40 @@ const AllCustomer = () => {
                 <Container className="all-products">
                     {/* Tab Navigation */}
                     <Nav tabs>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "1" ? "active" : ""}
-                                onClick={() => setActiveTab("1")}
-                            >
-                                Add Customer
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "2" ? "active" : ""}
-                                onClick={() => setActiveTab("2")}
-                            >
-                                All Customers
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "3" ? "active" : ""}
-                                onClick={() => setActiveTab("3")}
-                            >
-                                Credit Customer
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "4" ? "active" : ""}
-                                onClick={() => setActiveTab("4")}
-                            >
-                                Cash Customer
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "5" ? "active" : ""}
-                                onClick={() => setActiveTab("5")}
-                            >
-                                Loyal Customer
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "6" ? "active" : ""}
-                                onClick={() => setActiveTab("6")}
-                            >
-                                Blacklisted Customer
-                            </NavLink>
-                        </NavItem>
+                        {tabNames.map((label, index) => (
+                            <NavItem key={index}>
+                                <NavLink
+                                    className={activeTab === label ? "active" : ""}
+                                    onClick={() => handleTabChange(label)}
+                                >
+                                    {label}
+                                </NavLink>
+                            </NavItem>
+                        ))}
                     </Nav>
 
                     {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        {/* First Tab - Table */}
-                        <TabPane tabId="1">
-                            <Row>
-                                <AddCustomer/>
-                            </Row>
-                        </TabPane>
-                        <TabPane tabId="2">
+                        {/* Add Customer Tab */}
+                        <TabPane tabId="Add Customer">
                             <Row>
                                 <Col>
-                                    <TableAllCustomer/>
+                                    <AddCustomer />
                                 </Col>
                             </Row>
                         </TabPane>
-                        <TabPane tabId="3">
+
+                        {/* All Customers Tab */}
+                        <TabPane tabId="All Customers">
+                            <Row>
+                                <Col>
+                                    <TableAllCustomer />
+                                </Col>
+                            </Row>
+                        </TabPane>
+
+                        {/* Credit Customers Tab */}
+                        <TabPane tabId="Credit Customer">
                             <Row>
                                 <Col>
                                     <TableCustomer filter="Credit" title="Credit Customers" />
@@ -93,7 +89,8 @@ const AllCustomer = () => {
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="4">
+                        {/* Cash Customers Tab */}
+                        <TabPane tabId="Cash Customer">
                             <Row>
                                 <Col>
                                     <TableCustomer filter="Cash" title="Cash Customers" />
@@ -101,17 +98,20 @@ const AllCustomer = () => {
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="5">
+                        {/* Loyal Customers Tab */}
+                        <TabPane tabId="Loyal Customer">
                             <Row>
                                 <Col>
                                     <TableCustomer filter="Loyal" title="Loyal Customers" />
                                 </Col>
                             </Row>
                         </TabPane>
-                        <TabPane tabId="6">
+
+                        {/* Blacklisted Customers Tab */}
+                        <TabPane tabId="Blacklisted Customer">
                             <Row>
                                 <Col>
-
+                                    {/* You can add a table or other component here */}
                                 </Col>
                             </Row>
                         </TabPane>
