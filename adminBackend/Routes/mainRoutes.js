@@ -191,7 +191,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 router.post("/orders", async (req, res) => {
     const {
         FtName, SrName, address, balance, c_ID, category,newAddress,isAddressChanged, couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
-        expectedDate, id, isNewCustomer, items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice, totalItemPrice,
+        expectedDate, id, isNewCustomer, items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice, totalItemPrice,dvtype,
         type, workPlace, t_name
     } = req.body;
 
@@ -283,17 +283,17 @@ router.post("/orders", async (req, res) => {
         if (dvStatus === "Delivery" && !isAddressChanged) {
             const dvID = `DLV_${Date.now()}`;
             const deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?)`;
 
-            await db.query(deliveryQuery, [dvID, orID, address, district, Cust_id, expectedDate]);
+            await db.query(deliveryQuery, [dvID, orID, address, district, Cust_id, expectedDate,dvtype]);
         }else if (dvStatus === "Delivery" && isAddressChanged){
             const dvID = `DLV_${Date.now()}`;
             const deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?)`;
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?)`;
 
-            await db.query(deliveryQuery, [dvID, orID, newAddress, district, Cust_id, expectedDate]);
+            await db.query(deliveryQuery, [dvID, orID, newAddress, district, Cust_id, expectedDate,dvtype]);
         }
 
         // **Insert Coupon Info**
@@ -484,8 +484,8 @@ router.get("/alldeliveries", async (req, res) => {
             orID: delivery.orID,
             district: delivery.district,
             status: delivery.status,
-            schedule_Date: delivery.schedule_Date,
-            delivery_Date: delivery.delivery_Date,
+            schedule_Date: formatDate(delivery.schedule_Date),
+            delivery_Date: formatDate(delivery.delivery_Date),
         }));
 
         // Send the formatted items as a JSON response
@@ -644,7 +644,7 @@ router.get("/accept-order-details", async (req, res) => {
         // 6️⃣ Initialize Response Object
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate: new Date(orderData.orDate).toISOString().split("T")[0],
+            orderDate:formatDate(orderData.orDate),
             customerId: orderData.c_ID,
             customerName: customerName,
             address: orderData.address,
@@ -659,7 +659,7 @@ router.get("/accept-order-details", async (req, res) => {
             advance: orderData.advance,
             balance: orderData.balance,
             payStatus: orderData.payStatus,
-            expectedDeliveryDate: new Date(orderData.expectedDate).toISOString().split("T")[0],
+            expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: itemsResult.map(item => ({
@@ -703,8 +703,8 @@ router.get("/accept-order-details", async (req, res) => {
                     address: deliveryData.address,
                     district: deliveryData.district,
                     status: deliveryData.status,
-                    scheduleDate: new Date(deliveryData.schedule_Date).toISOString().split("T")[0],
-                    deliveryDate: deliveryData.delivery_Date ? new Date(deliveryData.delivery_Date).toISOString().split("T")[0] : null
+                    scheduleDate: formatDate(deliveryData.schedule_Date),
+                    deliveryDate: deliveryData.delivery_Date ? formatDate(deliveryData.delivery_Date) : null
                 };
             }
         }
@@ -779,7 +779,7 @@ router.get("/issued-order-details", async (req, res) => {
         // 5️⃣ Initialize Response Object
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate: new Date(orderData.orDate).toISOString().split("T")[0],
+            orderDate:formatDate(orderData.orDate),
             customerId: orderData.c_ID,
             customerName: customerName, // Title added to customer name
             address: orderData.address,
@@ -794,7 +794,7 @@ router.get("/issued-order-details", async (req, res) => {
             advance: orderData.advance,
             balance: orderData.balance,
             payStatus: orderData.payStatus,
-            expectedDeliveryDate: new Date(orderData.expectedDate).toISOString().split("T")[0],
+            expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: itemsResult.map(item => ({
@@ -835,6 +835,7 @@ router.get("/issued-order-details", async (req, res) => {
                     district: deliveryData.district,
                     status: deliveryData.status,
                     scheduleDate: new Date(deliveryData.schedule_Date).toISOString().split("T")[0],
+                    deliveryDate: deliveryData.delivery_Date ? formatDate(deliveryData.delivery_Date) : null,
                 };
             }
         }
@@ -911,7 +912,7 @@ router.get("/returned-order-details", async (req, res) => {
         // 5️⃣ Initialize Response Object
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate: new Date(orderData.orDate).toISOString().split("T")[0],
+            orderDate: formatDate(orderData.orDate),
             customerId: orderData.c_ID,
             customerName: customerName, // Title added to customer name
             address: orderData.address,
@@ -926,7 +927,7 @@ router.get("/returned-order-details", async (req, res) => {
             advance: orderData.advance,
             balance: orderData.balance,
             payStatus: orderData.payStatus,
-            expectedDeliveryDate: new Date(orderData.expectedDate).toISOString().split("T")[0],
+            expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             returnReason: orderData.returnReason || null, // Include return reason if available
@@ -967,7 +968,8 @@ router.get("/returned-order-details", async (req, res) => {
                     address: deliveryData.address,
                     district: deliveryData.district,
                     status: deliveryData.status,
-                    scheduleDate: new Date(deliveryData.schedule_Date).toISOString().split("T")[0],
+                    scheduleDate: formatDate(deliveryData.schedule_Date),
+                    deliveryDate: deliveryData.delivery_Date ? formatDate(deliveryData.delivery_Date) : null
                 };
             }
         }
@@ -1028,13 +1030,14 @@ router.get("/order-details", async (req, res) => {
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
+        console.log("view "+orderData.expectedDate);
         // Format customer name with title
         const customerName = [orderData.title, orderData.FtName, orderData.SrName].filter(Boolean).join(" ");
 
         // Prepare Order Response
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate: new Date(orderData.orDate).toISOString().split("T")[0], // ISO format
+            orderDate:  formatDate(orderData.orDate),
             ordertype: orderData.ordertype,
             phoneNumber: orderData.contact1,
             optionalNumber: orderData.contact2,
@@ -1050,7 +1053,7 @@ router.get("/order-details", async (req, res) => {
             customerId: orderData.c_ID,
             name: customerName, // Title added to the name
             address: orderData.address,
-            expectedDeliveryDate: new Date(orderData.expectedDate).toISOString().split("T")[0],
+            expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: itemsResult.map(item => ({
@@ -1083,8 +1086,9 @@ router.get("/order-details", async (req, res) => {
                     address: deliveryData.address,
                     district: deliveryData.district,
                     status: deliveryData.status,
-                    scheduleDate: new Date(deliveryData.schedule_Date).toISOString().split("T")[0],
-                    deliveryDate: deliveryData.delivery_Date ? new Date(deliveryData.delivery_Date).toISOString().split("T")[0] : null,
+                    scheduleDate: formatDate(deliveryData.schedule_Date),
+                    deliveryDate: deliveryData.delivery_Date ? formatDate(deliveryData.delivery_Date) : null
+
                 };
             }
         }
@@ -1216,6 +1220,8 @@ router.get("/orders-pending", async (req, res) => {
         if (orders.length === 0) {
             return res.status(404).json({ message: "No pending orders found" });
         }
+
+        // console.log("table "+order.expectedDate);
 
         // Format orders
         const formattedOrders = orders.map(order => ({
@@ -2225,11 +2231,11 @@ router.put("/update-order-details", async (req, res) => {
         //Update order details
         const orderUpdateQuery = `
             UPDATE orders SET c_ID =?, orStatus = ?, payStatus = ?,delStatus = ?, delPrice = ?, discount = ?,
-                              total = ?, advance = ?, balance = ?, expectedDate = ?, specialNote = ?, netTotal=?
+                              total = ?, advance = ?, balance = ?, specialNote = ?, netTotal=?
             WHERE OrID = ?`;
         await db.query(orderUpdateQuery, [
             customerId, orderStatus, payStatus, deliveryStatus, deliveryCharge, discount, totalPrice,
-            advance, balance, expectedDeliveryDate, specialNote,netTotal, orderId
+            advance, balance, specialNote,netTotal, orderId
         ]);
         // return res.status(200).json({ success: true, message: "Order details updated successfully" });
         return res.status(200).json({
@@ -2936,7 +2942,7 @@ router.get("/find-cost", async (req, res) => {
 router.get("/find-completed-orders", async (req, res) => {
     try {
         const { district, date } = req.query;
-        console.log(district,date)
+        console.log(district, date);
 
         if (!district) {
             return res.status(400).json({ success: false, message: "District is required." });
@@ -2950,25 +2956,26 @@ router.get("/find-completed-orders", async (req, res) => {
         const parsedDate = parseDate(date);
         console.log(parsedDate);
 
-
-        // 1️⃣ Fetch Issued Orders with Sales Team & Customer Details
+        // 1️⃣ Fetch Completed Orders with Sales Team & Customer Details
         const orderQuery = `
             SELECT
-                o.orId, o.orDate, o.customerEmail,o.custName, o.contact1, o.contact2, o.advance, o.balance,
-                o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype,
-                o.stID, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName,
-                d.address, d.district, d.contact, d.status AS deliveryStatus, d.schedule_Date
+                o.orId, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount, 
+                o.total, o.ordertype, o.stID, o.expectedDate, o.specialNote, o.advance, o.balance, 
+                o.payStatus, d.address, d.district, d.schedule_Date, d.type,
+                s.stID, e.name AS salesEmployeeName,
+                c.FtName, c.SrName, c.contact1, c.contact2
             FROM Orders o
-                     JOIN delivery d ON o.orID = d.orID
-                     LEFT JOIN sales_team s ON o.stID = s.stID
-                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            JOIN delivery d ON o.orID = d.orID
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID
             WHERE d.district = ? AND o.orStatus = 'Completed' AND o.expectedDate = ?;
         `;
 
         const [orders] = await db.query(orderQuery, [district, parsedDate]);
 
         if (orders.length === 0) {
-            return res.status(404).json({ success: false, message: "No issued orders found for this district and date." });
+            return res.status(404).json({ success: false, message: "No completed orders found for this district and date." });
         }
 
         // 2️⃣ Fetch Ordered Items for Each Order
@@ -2978,7 +2985,7 @@ router.get("/find-completed-orders", async (req, res) => {
                     od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
                     i.bookedQty, i.availableQty
                 FROM Order_Detail od
-                         JOIN Item i ON od.I_Id = i.I_Id
+                JOIN Item i ON od.I_Id = i.I_Id
                 WHERE od.orID = ?`;
 
             const [items] = await db.query(itemsQuery, [order.orId]);
@@ -2987,7 +2994,7 @@ router.get("/find-completed-orders", async (req, res) => {
             const bookedItemsQuery = `
                 SELECT bi.I_Id, i.I_name, bi.qty
                 FROM booked_item bi
-                         JOIN Item i ON bi.I_Id = i.I_Id
+                JOIN Item i ON bi.I_Id = i.I_Id
                 WHERE bi.orID = ?`;
 
             const [bookedItems] = await db.query(bookedItemsQuery, [order.orId]);
@@ -2996,7 +3003,7 @@ router.get("/find-completed-orders", async (req, res) => {
             const acceptedOrdersQuery = `
                 SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
                 FROM accept_orders ao
-                         JOIN Item i ON ao.I_Id = i.I_Id
+                JOIN Item i ON ao.I_Id = i.I_Id
                 WHERE ao.orID = ?`;
 
             const [acceptedOrders] = await db.query(acceptedOrdersQuery, [order.orId]);
@@ -3004,30 +3011,23 @@ router.get("/find-completed-orders", async (req, res) => {
             // 5️⃣ Build the Response Object
             return {
                 orderId: order.orId,
-                orderDate: order.orDate,
-                customerEmail: order.customerEmail,
-                customerName: order.custName,
-                ordertype: order.ordertype,
+                orderDate: formatDate(order.orDate),
+                expectedDeliveryDate: formatDate(order.expectedDate),
+                customerId: order.c_ID,
+                customerName: `${order.FtName} ${order.SrName}`,
                 phoneNumber: order.contact1,
                 optionalNumber: order.contact2,
                 orderStatus: order.orStatus,
                 deliveryStatus: order.delStatus,
-                deliveryCharge: order.delPrice,
-                discount: order.discount,
-                saleID: order.stID,
                 totalPrice: order.total,
                 advance: order.advance,
                 balance: order.balance,
                 payStatus: order.payStatus,
-                expectedDeliveryDate: order.expectedDate,
-                specialNote: order.specialNote,
-                salesTeam: order.salesEmployeeName ? { employeeName: order.salesEmployeeName } : null,
                 deliveryInfo: {
                     address: order.address,
                     district: order.district,
-                    status: order.deliveryStatus,
-                    scheduleDate: order.schedule_Date,
-                    contact: order.contact
+                    scheduleDate: formatDate(order.schedule_Date),
+                    type : order.type,
                 },
                 items: items.map(item => ({
                     itemId: item.I_Id,
@@ -3037,7 +3037,7 @@ router.get("/find-completed-orders", async (req, res) => {
                     price: item.tprice,
                     unitPrice: item.unitPrice,
                     bookedQuantity: item.bookedQty,
-                    availableQuantity: item.availableQty
+                    availableQuantity: item.availableQty,
                 })),
                 bookedItems: bookedItems.map(item => ({
                     itemId: item.I_Id,
@@ -3055,15 +3055,15 @@ router.get("/find-completed-orders", async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Issued orders fetched successfully.",
+            message: "Completed orders fetched successfully.",
             orders: orderDetails
         });
 
     } catch (error) {
-        console.error("Error fetching issued orders:", error.message);
+        console.error("Error fetching completed orders:", error.message);
         return res.status(500).json({
             success: false,
-            message: "Error fetching issued orders.",
+            message: "Error fetching completed orders.",
             details: error.message
         });
     }
@@ -3073,91 +3073,71 @@ router.get("/find-completed-orders", async (req, res) => {
 router.get("/find-completed-orders-by-date", async (req, res) => {
     try {
         const { date } = req.query;
+        console.log(date);
         if (!date) {
             return res.status(400).json({ success: false, message: "Date is required." });
         }
 
-        // Parse the date in DD/MM/YYYY format and convert it to YYYY-MM-DD format
+        // Ensure the date is in `YYYY-MM-DD` format for the database query
         const parsedDate = parseDate(date);
-        console.log(parsedDate);
+        if (!parsedDate) {
+            return res.status(400).json({ success: false, message: "Invalid date format. Use DD/MM/YYYY or YYYY-MM-DD." });
+        }
 
-        // 1️⃣ Fetch Issued Orders with Sales Team & Customer Details
+        console.log("Fetching completed orders for date:", parsedDate);
+
+        // Fetch completed orders with customer details
         const orderQuery = `
             SELECT
-                o.orId, o.orDate, o.customerEmail,o.custName, o.contact1, o.contact2, o.advance, o.balance,
-                o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype,
-                o.stID, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName,
-                d.address, d.district, d.contact, d.status AS deliveryStatus, d.schedule_Date
+                o.orId, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount,
+                o.total, o.ordertype, o.stID, o.expectedDate, o.specialNote, o.advance, o.balance,
+                o.payStatus, d.address, d.district, d.type, d.status AS deliveryStatus, d.schedule_Date,
+                s.stID, e.name AS salesEmployeeName,
+                c.FtName, c.SrName, c.contact1, c.contact2
             FROM Orders o
                      JOIN delivery d ON o.orID = d.orID
                      LEFT JOIN sales_team s ON o.stID = s.stID
                      LEFT JOIN Employee e ON s.E_Id = e.E_Id
+                     LEFT JOIN Customer c ON o.c_ID = c.c_ID
             WHERE o.orStatus = 'Completed' AND o.expectedDate = ?;
         `;
 
-        const [orders] = await db.query(orderQuery, [district, parsedDate]);
+        const [orders] = await db.query(orderQuery, [parsedDate]);
 
         if (orders.length === 0) {
-            return res.status(404).json({ success: false, message: "No issued orders found for this date." });
+            return res.status(404).json({ success: false, message: "No completed orders found for this date." });
         }
 
-        // 2️⃣ Fetch Ordered Items for Each Order
+        // Process orders
         const orderDetails = await Promise.all(orders.map(async (order) => {
             const itemsQuery = `
-                SELECT
-                    od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
-                    i.bookedQty, i.availableQty
+                SELECT od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
+                       i.bookedQty, i.availableQty
                 FROM Order_Detail od
-                         JOIN Item i ON od.I_Id = i.I_Id
+                JOIN Item i ON od.I_Id = i.I_Id
                 WHERE od.orID = ?`;
 
             const [items] = await db.query(itemsQuery, [order.orId]);
 
-            // 3️⃣ Fetch Booked Items for Each Order
-            const bookedItemsQuery = `
-                SELECT bi.I_Id, i.I_name, bi.qty
-                FROM booked_item bi
-                         JOIN Item i ON bi.I_Id = i.I_Id
-                WHERE bi.orID = ?`;
-
-            const [bookedItems] = await db.query(bookedItemsQuery, [order.orId]);
-
-            // 4️⃣ Fetch Accepted Items
-            const acceptedOrdersQuery = `
-                SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
-                FROM accept_orders ao
-                         JOIN Item i ON ao.I_Id = i.I_Id
-                WHERE ao.orID = ?`;
-
-            const [acceptedOrders] = await db.query(acceptedOrdersQuery, [order.orId]);
-
-            // 5️⃣ Build the Response Object
             return {
                 orderId: order.orId,
-                orderDate: order.orDate,
-                customerEmail: order.customerEmail,
-                customerName: order.custName,
-                ordertype: order.ordertype,
+                orderDate: formatDate(order.orDate),
+                expectedDeliveryDate: formatDate(order.expectedDate),
+                customerId: order.c_ID,
+                customerName: `${order.FtName} ${order.SrName}`,
                 phoneNumber: order.contact1,
                 optionalNumber: order.contact2,
                 orderStatus: order.orStatus,
                 deliveryStatus: order.delStatus,
-                deliveryCharge: order.delPrice,
-                discount: order.discount,
-                saleID: order.stID,
                 totalPrice: order.total,
                 advance: order.advance,
                 balance: order.balance,
                 payStatus: order.payStatus,
-                expectedDeliveryDate: order.expectedDate,
-                specialNote: order.specialNote,
-                salesTeam: order.salesEmployeeName ? { employeeName: order.salesEmployeeName } : null,
                 deliveryInfo: {
                     address: order.address,
                     district: order.district,
-                    status: order.deliveryStatus,
-                    scheduleDate: order.schedule_Date,
-                    contact: order.contact
+                    scheduleDate: formatDate(order.schedule_Date),
+                    type : order.type,
                 },
                 items: items.map(item => ({
                     itemId: item.I_Id,
@@ -3167,38 +3147,26 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
                     price: item.tprice,
                     unitPrice: item.unitPrice,
                     bookedQuantity: item.bookedQty,
-                    availableQuantity: item.availableQty
+                    availableQuantity: item.availableQty,
                 })),
-                bookedItems: bookedItems.map(item => ({
-                    itemId: item.I_Id,
-                    itemName: item.I_name,
-                    quantity: item.qty
-                })),
-                acceptedOrders: acceptedOrders.map(item => ({
-                    itemId: item.I_Id,
-                    itemName: item.I_name,
-                    itemReceived: item.itemReceived,
-                    status: item.status
-                }))
             };
         }));
 
         return res.status(200).json({
             success: true,
-            message: "Issued orders fetched successfully.",
-            orders: orderDetails
+            message: "Completed orders fetched successfully.",
+            orders: orderDetails,
         });
 
     } catch (error) {
-        console.error("Error fetching issued orders:", error.message);
+        console.error("Error fetching completed orders:", error.message);
         return res.status(500).json({
             success: false,
-            message: "Error fetching issued orders.",
-            details: error.message
+            message: "Error fetching completed orders.",
+            details: error.message,
         });
     }
 });
-
 
 // Get subcat one detail by ca_id
 router.get("/getSubcategories", async (req, res) => {
@@ -4376,17 +4344,32 @@ const generateNewId = async (table, column, prefix) => {
 
 // Helper function to parse date from DD/MM/YYYY format to YYYY-MM-DD format
 const parseDate = (dateStr) => {
-    const [month ,day, year] = dateStr.split("/");
-    console.log(day , month,year)
+    if (!dateStr) return null;
 
-    // Check if the date is valid
+    let year, month, day;
+
+    // Check if the date is in `YYYY-MM-DD` format
+    if (dateStr.includes("-")) {
+        [year, month, day] = dateStr.split("-");
+    }
+    // Check if the date is in `DD/MM/YYYY` format
+    else if (dateStr.includes("/")) {
+        [day, month, year] = dateStr.split("/");
+    } else {
+        return null; // Invalid format
+    }
+
+    // Validate components
     if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
         return null;
     }
-    // Ensure the day and month are two digits (e.g., "03" instead of "3")
-    const formattedDate = `${year}-${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}`;
-    console.log(formattedDate);
-    return formattedDate;
+
+    // Convert to `YYYY-MM-DD` for MySQL queries
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+};
+
+const formatDate = (date) => {
+    return date ? new Date(date).toLocaleDateString("en-GB") : null;
 };
 
 export default router;
