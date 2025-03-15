@@ -3020,6 +3020,8 @@ router.get("/find-completed-orders", async (req, res) => {
                 orderStatus: order.orStatus,
                 deliveryStatus: order.delStatus,
                 totalPrice: order.total,
+                deliveryPrice : order.delPrice,
+                discount : order.discount,
                 advance: order.advance,
                 balance: order.balance,
                 payStatus: order.payStatus,
@@ -3039,6 +3041,10 @@ router.get("/find-completed-orders", async (req, res) => {
                     bookedQuantity: item.bookedQty,
                     availableQuantity: item.availableQty,
                 })),
+                salesTeam: {
+                    stID: order.stID,
+                    employeeName: order.salesEmployeeName, // Sales team member's name
+                },
                 bookedItems: bookedItems.map(item => ({
                     itemId: item.I_Id,
                     itemName: item.I_name,
@@ -3086,7 +3092,7 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
 
         console.log("Fetching completed orders for date:", parsedDate);
 
-        // Fetch completed orders with customer details
+        // Fetch completed orders with customer details, sales team, and employee name
         const orderQuery = `
             SELECT
                 o.orId, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount,
@@ -3130,6 +3136,8 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
                 orderStatus: order.orStatus,
                 deliveryStatus: order.delStatus,
                 totalPrice: order.total,
+                deliveryPrice: order.delPrice,
+                discount: order.discount,
                 advance: order.advance,
                 balance: order.balance,
                 payStatus: order.payStatus,
@@ -3137,7 +3145,7 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
                     address: order.address,
                     district: order.district,
                     scheduleDate: formatDate(order.schedule_Date),
-                    type : order.type,
+                    type: order.type,
                 },
                 items: items.map(item => ({
                     itemId: item.I_Id,
@@ -3149,6 +3157,10 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
                     bookedQuantity: item.bookedQty,
                     availableQuantity: item.availableQty,
                 })),
+                salesTeam: {
+                    stID: order.stID,
+                    employeeName: order.salesEmployeeName, // Sales team member's name
+                },
             };
         }));
 
