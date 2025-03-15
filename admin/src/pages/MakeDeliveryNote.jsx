@@ -7,14 +7,13 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
     console.log("Selected Orders: ", selectedOrders);
 
     const [vehicleId, setVehicleId] = useState("");
-    const [driverName, setDriverName] = useState("");  // Updated: Stores the selected driver name
+    const [driverName, setDriverName] = useState("");
+    const [driverId, setDriverId] = useState("");  // New: Stores the selected driver ID (devID)
     const [drivers, setDrivers] = useState([]);
     const [hire, setHire] = useState("");
     const [balanceToCollect, setBalanceToCollect] = useState(0);
     const [ordersWithBalance, setOrdersWithBalance] = useState([]);
-    const [selectedDriver, setSelectedDriver] = useState(null);
     const [filteredDriver, setFilteredDriver] = useState([]);
-    const [searchTerm, setSearchTerm] = useState(""); // Keeps the search text separate
 
     // Filter orders with balance
     useEffect(() => {
@@ -45,14 +44,15 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
 
     // Handle submission & printing
     const handlePrintAndSubmit = () => {
-        if (balanceToCollect > 0 && (vehicleId === "" || hire === "" || !selectedDriver)) {
+        if (balanceToCollect > 0 && (vehicleId === "" || hire === "" || !driverId)) {
             toast.error("Please provide vehicle ID, hire value, and select a driver before submitting.");
             return;
         }
         handleDeliveryUpdate({
             orders: selectedOrders,
             vehicleId,
-            driverName,  // Updated: Send selected driver name
+            driverName,  // Includes selected driver name
+            driverId,    // Includes selected driver ID (devID)
             hire,
             balanceToCollect,
         });
@@ -61,13 +61,13 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
     // Handle driver search
     const handleSearchChange = (e) => {
         const value = e.target.value;
-        setDriverName(value); // Set search term in input field
+        setDriverName(value);
 
         if (!value.trim()) {
             setFilteredDriver([]);
         } else {
             const filtered = drivers.filter((driver) =>
-                driver.E_Id.toString().includes(value) || driver.employeeName.toLowerCase().includes(value.toLowerCase())
+                driver.devID.toString().includes(value) || driver.employeeName.toLowerCase().includes(value.toLowerCase())
             );
             setFilteredDriver(filtered);
         }
@@ -75,10 +75,9 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
 
     // Select driver from dropdown
     const handleSelectDriver = (driver) => {
-        setSelectedDriver(driver);
-        setDriverName(driver.employeeName); // Updated: Set the selected driver's name in the input field
-        setSearchTerm(""); // Clear search term
-        setFilteredDriver([]); // Hide dropdown
+        setDriverId(driver.devID);   // Store driver ID (devID)
+        setDriverName(driver.employeeName);  // Store driver name
+        setFilteredDriver([]);  // Hide dropdown
         console.log("Selected Driver: ", driver);
     };
 
@@ -138,7 +137,7 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                             <Input
                                 type="text"
                                 placeholder="Search driver"
-                                value={driverName} // Updated: Shows selected driver in input field
+                                value={driverName}
                                 onChange={handleSearchChange}
                             />
                             {driverName && filteredDriver.length > 0 && (

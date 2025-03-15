@@ -39,6 +39,7 @@ const DeliveryNotes = () => {
                 })),
                 vehicleId: formData.vehicleId,
                 driverName: formData.driverName,
+                driverId: formData.driverId,
                 hire: formData.hire,
                 balanceToCollect: formData.balanceToCollect,
                 selectedDeliveryDate: selectedDeliveryDate,
@@ -48,6 +49,7 @@ const DeliveryNotes = () => {
             // Prepare the data for API call (including necessary fields)
             const deliveryNoteData = {
                 driverName: formData.driverName,
+                driverId: formData.driverId,
                 vehicleName: formData.vehicleId,  // Assuming vehicleId maps to vehicleName
                 hire: formData.hire,
                 date: selectedDeliveryDate,  // The selected delivery date

@@ -23,7 +23,7 @@ const DeliveryNoteDetails = () => {
     const [selectedOrderId, setSelectedOrderId] = useState(null);
     const [selectedBalance, setSelectedBalance] = useState(0);
     const [selectedAction, setSelectedAction] = useState("Available");
-    const [payment, setPayment] = useState(0);
+    const [payment, setPayment] = useState();
     const [Rpayment, setRPayment] = useState(0);
     const [CustomerBalance, setCustomerBalance] = useState(0);
     const [AmountRecevice, setAmountRecevice] = useState(0);
@@ -149,10 +149,11 @@ const DeliveryNoteDetails = () => {
         // passReservedItem(selectedItems, selectedAction); // Ensure this function handles updates correctly
         setShowStockModal(false); // Close modal
     };
+
     const handlePayment = async () => {
         const CustBalance = parseFloat(CustomerBalance);
         const DrivBalance = parseFloat(DriverBalance);
-        console.log(selectedOrderId);
+        const orderId = selectedOrderId;  // Assuming selectedOrderId is set correctly in the state
 
         // Handle Customer Balance Alert
         const customerPromise = CustBalance !== 0
@@ -183,40 +184,26 @@ const DeliveryNoteDetails = () => {
                 })
                 : Promise.resolve();
 
-            // Once all alerts are resolved, call the API
-            driverPromise.then(async () => {
-                try {
-                    const response = await fetch("http://localhost:5001/api/admin/main/delivery-payment", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            orderid: selectedOrderId,
-                            driver: deliveryNote.driverName,
-                            payment : selectedBalance,
-                            RPayment: Rpayment,
-                            driverbalance: DrivBalance,
-                            customerbalance: CustBalance,
-                        }),
-                    });
+            // Once all alerts are resolved, store the values locally
+            driverPromise.then(() => {
+                // Store the payment data in state
+                const paymentData = {
+                    orderid: orderId,
+                    payment: selectedBalance, // the amount to be paid
+                    driver: deliveryNote.driverName, // driver name for the payment
+                    RPayment: Rpayment,  // the amount received from the customer
+                    driverbalance: DrivBalance,  // driver's current balance
+                    customerbalance: CustBalance,  // customer's current balance
+                };
+                // Store the payment data using setPayment (or another state function)
+                setPayment(paymentData); // This will store the values in the state
+                // You can log the stored values if needed
+                console.log("Stored Payment Data:", paymentData);
 
-                    const result = await response.json();
-                    if (result.success) {
-                        fetchDeliveryNote();
-                        toast.success("Delivery note marked as done successfully.");
-                    } else {
-                        alert("Failed to mark delivery note as done.");
-                    }
-                } catch (error) {
-                    console.error("API Error:", error);
-                    alert("Error processing payment.");
-                }
-
-                setShowStockModal1(false); // Close modal after API call
+                setShowStockModal1(false); // Close modal after storing the values
             });
         });
     };
-
-
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
@@ -224,34 +211,63 @@ const DeliveryNoteDetails = () => {
     const handleSave = async () => {
         const rescheduledDate = selectedDeliveryDate || "";
 
+        // Log the payment data
+        console.log("Payment data:", payment);
+
+        // Log the orders to check if they contain the necessary information
+        console.log("Orders:", orders);
+
+        // Update the orders with the relevant information, including the payment data
         const updatedOrders = orders
-            .filter(order =>
-                order.orderStatus !== order.originalOrderStatus ||
-                order.deliveryStatus !== order.originalDeliveryStatus
-            )
-            .map(order => ({
-                OrID: order.OrID,
-                orderStatus: order.orderStatus,
-                deliveryStatus: order.deliveryStatus,
-                reason: reasons[order.OrID]?.reason || "N/A",
-                reasonType: reasons[order.OrID]?.type || "N/A",
-                rescheduledDate,
-                returnedItems: (order.orderStatus === "Returned" || order.orderStatus === "Cancelled")
-                    ? (selectedItems[order.OrID]?.map(itemKey => {
-                        const [itemId, stockId] = itemKey.split("-");
-                        const itemStatus = selectedItemStatus[itemKey] || "Available";
-                        return { itemId, stockId, status: itemStatus };
-                    }) || [])
-                    : [],
-            }));
+            .filter(order => {
+                // Log the original and updated order statuses
+                console.log("Checking order:", order.OrID, order.orderStatus, order.originalOrderStatus, order.deliveryStatus, order.originalDeliveryStatus);
+                return (
+                    order.orderStatus !== order.originalOrderStatus ||
+                    order.deliveryStatus !== order.originalDeliveryStatus
+                );
+            })
+            .map(order => {
+                // Log the reason for filtering out certain orders
+                console.log("Mapping order:", order.OrID);
 
-        console.log("Updated Orders:", updatedOrders);
+                // Extract payment info for the current order
+                const orderPayment = {
+                    orderid: order.OrID,
+                    payment: payment?.payment || 0,  // Set to 0 if no payment is available
+                    driver: payment?.driver || "",
+                    RPayment: payment?.RPayment || 0,
+                    driverbalance: payment?.driverbalance || 0,
+                    customerbalance: payment?.customerbalance || 0,
+                };
 
+                return {
+                    OrID: order.OrID,
+                    orderStatus: order.orderStatus,
+                    deliveryStatus: order.deliveryStatus,
+                    reason: reasons[order.OrID]?.reason || "N/A",
+                    reasonType: reasons[order.OrID]?.type || "N/A",
+                    rescheduledDate,
+                    returnedItems: (order.orderStatus === "Returned" || order.orderStatus === "Cancelled")
+                        ? (selectedItems[order.OrID]?.map(itemKey => {
+                            const [itemId, stockId] = itemKey.split("-");
+                            const itemStatus = selectedItemStatus[itemKey] || "Available";
+                            return { itemId, stockId, status: itemStatus };
+                        }) || [])
+                        : [],
+                    paymentDetails: orderPayment, // Add payment data for this order
+                };
+            });
+
+        // Log the updated orders with payment information
+        console.log("Updated Orders with Payment Info:", updatedOrders);
+
+        // Proceed with the API call
         try {
             const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ deliveryNoteId: id, updatedOrders }),
+                body: JSON.stringify({ deliveryNoteId: id, updatedOrders , driver:deliveryNote.devID }),
             });
 
             if (!returnResponse.ok) {
@@ -272,7 +288,6 @@ const DeliveryNoteDetails = () => {
             alert(`An error occurred: ${error.message}`);
         }
     };
-
 
     // Function to open modal and set selected order details
     const handleOpenModal = (OrID, balance) => {

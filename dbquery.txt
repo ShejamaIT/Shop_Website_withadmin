@@ -65,6 +65,11 @@ CREATE TABLE Employee(
       job VARCHAR(15),
       basic DOUBLE
 );
+CREATE TABLE driver(
+    devID VARCHAR(25) PRIMARY KEY,
+    E_ID VARCHAR(15),
+    balance DOUBLE
+);
 CREATE TABLE sales_team(
     stID VARCHAR(25) PRIMARY KEY,
     E_Id VARCHAR(15),
@@ -75,11 +80,7 @@ CREATE TABLE sales_team(
         CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
                                    ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE driver(
-    devID VARCHAR(25) PRIMARY KEY,
-    E_ID VARCHAR(15),
-    balance DOUBLE
-);
+
 CREATE TABLE sales_coupon(
     cpID VARCHAR(25) PRIMARY KEY,
     stID VARCHAR(25),
@@ -276,12 +277,15 @@ CREATE TABLE m_s_r_detail(
 CREATE TABLE delivery_note(
     delNoID INT AUTO_INCREMENT PRIMARY KEY,
     driverName VARCHAR(25),
+    devID VARCHAR(25),
     vehicalName VARCHAR(25),
     date DATE,
     hire DOUBLE,
     district VARCHAR(35),
     balanceToCollect DOUBLE,
-    status VARCHAR(15)
+    status VARCHAR(15),
+    CONSTRAINT FOREIGN KEY (devID) REFERENCES driver (devID)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE delivery_note_orders(
     delNoID INT,
