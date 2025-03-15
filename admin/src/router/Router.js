@@ -22,6 +22,7 @@ import DeliveryNoteDetails from "../pages/DeliveryNoteDetails";
 import DeliveryNotes from "../pages/DeliveryNotes";
 import ReturnedOrderDetails from "../pages/ReturnedOrder";
 import AllCustomer from "../pages/AllCustomers";
+import PlaceOrder from "../pages/Placeorder";
 const Router = () => {
     return(
         <Routes>
@@ -48,6 +49,7 @@ const Router = () => {
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />
             <Route path="saleteam-detail/:id" element={<SaleteamDetail />} />
             <Route path="create-delivery-note" element={<DeliveryNotes />} />
+            <Route path="place-order" element={<PlaceOrder />} />
         </Routes>
     ) ;
 };

@@ -575,7 +575,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                                 checked={formData.isAddressChanged || false}
                                                 onChange={handleChange}
                                             />
-                                            Address has changed
+                                            Changed Address
                                         </Label>
                                     </FormGroup>
 
@@ -635,7 +635,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                                 checked={formData.isAddressChanged || false}
                                                 onChange={handleChange}
                                             />
-                                            Address has changed
+                                            Changed Address
                                         </Label>
                                     </FormGroup>
 

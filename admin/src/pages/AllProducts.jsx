@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
+import { useLocation, useNavigate } from "react-router-dom";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
@@ -10,7 +11,33 @@ import AddProduct from "./AddProducts";
 import AddOtherDetails from "./AddOtherDetails";
 
 const AllProducts = () => {
-    const [activeTab, setActiveTab] = useState("1"); // Manage active tab
+    const [activeTab, setActiveTab] = useState("Add Item"); // Manage active tab name
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // List of tab names
+    const tabNames = [
+        "Add Item",
+        "All Products",
+        "For Production",
+        "In Production",
+        "Add Categories"
+    ];
+
+    // Read the active tab from the URL query parameter (using `tab`)
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const tab = searchParams.get("tab");
+        if (tab && tabNames.includes(tab)) {
+            setActiveTab(tab);
+        }
+    }, [location]);
+
+    // Update the URL when the active tab changes
+    const handleTabChange = (tabName) => {
+        setActiveTab(tabName);
+        navigate(`?tab=${tabName}`); // Update the URL with the tab query param
+    };
 
     return (
         <Helmet title={'All-Products'}>
@@ -22,73 +49,47 @@ const AllProducts = () => {
                 <Container className="all-products">
                     {/* Tab Navigation */}
                     <Nav tabs>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "1" ? "active" : ""}
-                                onClick={() => setActiveTab("1")}
-                            >
-                                Add Item
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "2" ? "active" : ""}
-                                onClick={() => setActiveTab("2")}
-                            >
-                                All Products
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "3" ? "active" : ""}
-                                onClick={() => setActiveTab("3")}
-                            >
-                                For Production
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "4" ? "active" : ""}
-                                onClick={() => setActiveTab("4")}
-                            >
-                                In Production
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "5" ? "active" : ""}
-                                onClick={() => setActiveTab("5")}
-                            >
-                                Add Categories
-                            </NavLink>
-                        </NavItem>
+                        {tabNames.map((label, index) => (
+                            <NavItem key={index}>
+                                <NavLink
+                                    className={activeTab === label ? "active" : ""}
+                                    onClick={() => handleTabChange(label)}
+                                >
+                                    {label}
+                                </NavLink>
+                            </NavItem>
+                        ))}
                     </Nav>
 
                     {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        {/* First Tab - Table */}
-                        <TabPane tabId="1">
+                        {/* Add Item Tab */}
+                        <TabPane tabId="Add Item">
                             <Row>
                                 <Col>
                                     <AddProduct />
                                 </Col>
                             </Row>
                         </TabPane>
-                        <TabPane tabId="2">
+
+                        {/* All Products Tab */}
+                        <TabPane tabId="All Products">
                             <Row>
                                 <TableAllItem />
                             </Row>
                         </TabPane>
 
-                        {/* Second Tab - Placeholder (Add any content here) */}
-                        <TabPane tabId="3">
+                        {/* For Production Tab */}
+                        <TabPane tabId="For Production">
                             <Row>
                                 <Col>
                                     <Tableforproduction />
                                 </Col>
                             </Row>
                         </TabPane>
-                        <TabPane tabId="4">
+
+                        {/* In Production Tab */}
+                        <TabPane tabId="In Production">
                             <Row>
                                 <Col>
                                     <TableInProduction />
@@ -96,7 +97,8 @@ const AllProducts = () => {
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="5">
+                        {/* Add Categories Tab */}
+                        <TabPane tabId="Add Categories">
                             <Row>
                                 <Col>
                                     <AddOtherDetails />

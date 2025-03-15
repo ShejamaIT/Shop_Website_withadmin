@@ -171,6 +171,7 @@ CREATE TABLE delivery(
     status VARCHAR(15),
     schedule_Date DATE,
     delivery_Date DATE,
+    type VARCHAR(10),
         CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                                    ON DELETE CASCADE ON UPDATE CASCADE,
         CONSTRAINT FOREIGN KEY (c_ID) REFERENCES Customer (c_ID)

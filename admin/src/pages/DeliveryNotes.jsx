@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import "../style/deliverynotes.css";
 import MakeDeliveryNote from "./MakeDeliveryNote";
 import DeliveryNoteView from "./DeliveryNoteView";
-import {logDOM} from "@testing-library/react";
 import ReceiptView from "./ReceiptView";
 import FinalInvoice2 from "./FinalInvoice2";
 
@@ -24,13 +23,14 @@ const DeliveryNotes = () => {
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
     const [receiptDataD, setReceiptDataD] = useState(null);
+
     const handleSubmit2 = async (formData) => {
         try {
             const updatedReceiptData = {
                 orders: selectedOrders,
                 vehicleId: formData.vehicleId,
                 driverName: formData.driverName,
-                hire:formData.hire,
+                hire: formData.hire,
                 balanceToCollect: formData.balanceToCollect,
                 selectedDeliveryDate: selectedDeliveryDate,
                 district: selectedRoute,
@@ -80,6 +80,7 @@ const DeliveryNotes = () => {
             toast.error("An unexpected error occurred while submitting the delivery note.");
         }
     };
+
     useEffect(() => {
         fetchRoutes();
     }, []);
@@ -88,14 +89,14 @@ const DeliveryNotes = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates");
             const data = await response.json();
-            console.log(data.data)
+            console.log(data.data);
             setRoutes(["All", ...data.data.map(route => route.district)]);
-            // setRoutes(data.data || []);
         } catch (error) {
             toast.error("Error fetching routes.");
         }
     };
-    const loadOders = (e) => {
+
+    const loadOrders = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
         fetchOrders(routedate);
@@ -107,7 +108,7 @@ const DeliveryNotes = () => {
                 toast.error("Please select both route and delivery date.");
                 return;
             }
-            console.log(selectedRoute , date);
+            console.log(selectedRoute, date);
             let url;
             if (selectedRoute === "All") {
                 url = `http://localhost:5001/api/admin/main/find-completed-orders-by-date?date=${date}`;
@@ -119,6 +120,7 @@ const DeliveryNotes = () => {
 
             const response = await fetch(url);
             const data = await response.json();
+            console.log(data.orders);
             setOrders(data.orders || []);
         } catch (error) {
             toast.error("Error fetching orders.");
@@ -142,6 +144,7 @@ const DeliveryNotes = () => {
             setNoScheduleMessage("No schedule available for this district.");
         }
     };
+
     const handleRouteChange = (e) => {
         const routeId = e.target.value;
         setSelectedRoute(routeId);
@@ -153,8 +156,8 @@ const DeliveryNotes = () => {
             fetchDeliveryDates(routeId);
         }
 
-        setSelectedOrders([]);
-        setTotalAmount(0);
+        setSelectedOrders([]);  // Clear selected orders
+        setTotalAmount(0);  // Clear total amount
     };
 
     const handleOrderSelection = (order) => {
@@ -166,15 +169,18 @@ const DeliveryNotes = () => {
         handleEditClick1(order);
         calculateTotal(updatedOrders);
     };
+
     const handleEditClick1 = (order) => {
         if (!order) return;
         setSelectedOrder(order);
         setShowModal1(true);
     };
+
     const calculateTotal = (orders) => {
         const total = orders.reduce((sum, order) => sum + order.balance, 0);
         setTotalAmount(total);
     };
+
     const handleSubmit3 = async (formData) => {
         console.log(formData);
         setShowModal2(false);
@@ -216,6 +222,7 @@ const DeliveryNotes = () => {
             console.error("Error making API request:", error.message);
         }
     };
+
     const handleEditClick3 = (selectedOrders) => {
         if (!selectedOrders) return;
         setSelectedOrders(selectedOrders);
@@ -237,68 +244,69 @@ const DeliveryNotes = () => {
                                 ))}
                             </Input>
                         </FormGroup>
-                        {(selectedRoute === "All" || deliveryDates.length > 0) && (
+                        {/* Show Date Input if 'All' Route is selected */}
+                        {selectedRoute === "All" && (
                             <FormGroup>
                                 <Label for="deliveryDateSelect">Select Delivery Date</Label>
                                 <Input
                                     type="date"
                                     id="deliveryDateSelect"
                                     value={selectedDeliveryDate}
-                                    onChange={loadOders}
+                                    onChange={loadOrders}
+                                />
+                            </FormGroup>
+                        )}
+                        {/* Show Date Dropdown if specific district is selected */}
+                        {selectedRoute !== "All" && deliveryDates.length > 0 && (
+                            <FormGroup>
+                                <Label for="deliveryDateSelect">Select Delivery Date</Label>
+                                <Input
+                                    type="select"
+                                    id="deliveryDateSelect"
+                                    value={selectedDeliveryDate} // Add state to track selected date
+                                    onChange={loadOrders} // Update selected date on change
                                 >
+                                    <option value="">-- Select Date --</option>
+                                    {deliveryDates.map((date, index) => (
+                                        <option key={index} value={new Date(date).toLocaleDateString()}>
+                                            {new Date(date).toLocaleDateString()}
+                                        </option>
+                                    ))}
                                 </Input>
                             </FormGroup>
                         )}
-                        {/* Delivery Date Dropdown */}
-                        {deliveryDates.length > 0 ? (
-                            <div>
-                                <FormGroup>
-                                    <Label for="deliveryDateSelect">Select Delivery Date</Label>
-                                    <Input
-                                        type="select"
-                                        id="deliveryDateSelect"
-                                        value={selectedDeliveryDate} // Add state to track selected date
-                                        onChange={loadOders}// Update selected date on change
-                                    >
-                                        <option value="">-- Select Date --</option>
-                                        {deliveryDates.map((date, index) => (
-                                            <option key={index} value={new Date(date).toLocaleDateString()}>
-                                                {new Date(date).toLocaleDateString()}
-                                            </option>
-                                        ))}
-                                    </Input>
-                                </FormGroup>
-                                {orders.length > 0 && (
-                                    <Table bordered responsive className="order-table">
-                                        <thead>
-                                        <tr>
-                                            <th>Select</th>
-                                            <th>Order ID</th>
-                                            <th>Customer</th>
-                                            <th>Total</th>
-                                            <th>Advance</th>
-                                            <th>Balance</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {orders.map(order => (
-                                            <tr key={order.id}>
-                                                <td>
-                                                    <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
-                                                </td>
-                                                <td>{order.orderId}</td>
-                                                <td>{order.customerName}</td>
-                                                <td>Rs.{order.totalPrice}</td>
-                                                <td>Rs.{order.advance}</td>
-                                                <td>Rs.{order.balance}</td>
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                    </Table>
-                                )}
-                            </div>
-                        ) : (
-                            <p className="mt-4 text-danger">{noScheduleMessage}</p>
+                        {/* Orders Table */}
+                        {orders.length > 0 && (
+                            <Table bordered responsive className="order-table">
+                                <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Advance</th>
+                                    <th>Balance</th>
+                                    <th>District</th>
+                                    <th>Type</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {orders.map(order => (
+                                    <tr key={order.id}>
+                                        <td>
+                                            <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
+                                        </td>
+                                        <td>{order.orderId}</td>
+                                        <td>{order.customerName}</td>
+                                        <td>Rs.{order.totalPrice}</td>
+                                        <td>Rs.{order.advance}</td>
+                                        <td>Rs.{order.balance}</td>
+                                        <td>{order.deliveryInfo.district}</td>
+                                        <td>{order.deliveryInfo.type}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </Table>
                         )}
                         <h5 className="text-end mt-3">Total Balance: Rs.{totalAmount}</h5>
                     </Form>
@@ -306,6 +314,7 @@ const DeliveryNotes = () => {
                     <div className="text-center mt-4">
                         <Button color="primary" onClick={() => handleEditClick3(selectedOrders)}>Get Delivery Note</Button>
                     </div>
+                    {/* Modals for Delivery Note and Receipt */}
                     {showModal2 && selectedOrders && (
                         <MakeDeliveryNote
                             selectedOrders={selectedOrders}
@@ -337,4 +346,5 @@ const DeliveryNotes = () => {
         </Container>
     );
 };
+
 export default DeliveryNotes;

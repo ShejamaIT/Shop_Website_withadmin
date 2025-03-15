@@ -238,7 +238,6 @@ const OrderDetails = () => {
             updatedData.deliveryInfo !== order.deliveryInfo;
     };
 
-
     const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
         const updatedItem = {
@@ -316,7 +315,6 @@ const OrderDetails = () => {
     };
 
     const handleAddItem = (selectedItems) => {
-        console.log(selectedItems);
         setFormData((prevFormData) => ({
             ...prevFormData,
             items: [
@@ -477,7 +475,7 @@ const OrderDetails = () => {
                                                     </FormGroup>
                                                 )}
                                                 <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
-                                                <p><strong>Scheduled Date:</strong> {new Date(order.deliveryInfo.scheduleDate).toLocaleDateString()}</p>
+                                                <p><strong>Scheduled Date:</strong> {order.deliveryInfo.scheduleDate}</p>
                                             </div>
                                         </>
                                     )}
