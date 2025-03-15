@@ -3866,7 +3866,7 @@ router.post("/employees", async (req, res) => {
 // Save Delivery Notes
 router.post("/create-delivery-note", async (req, res) => {
     try {
-        const { driverName, vehicleName, hire, date, district, orders, balanceToCollect } = req.body;
+        const { driverName,driverId, vehicleName, hire, date, district, orders, balanceToCollect } = req.body;
         console.log(orders);
 
         const delHire = parseFloat(hire);
@@ -3882,9 +3882,9 @@ router.post("/create-delivery-note", async (req, res) => {
 
         // Insert into the delivery_note table
         const [result] = await db.query(`
-            INSERT INTO delivery_note (driverName, vehicalName, date, hire, district, balanceToCollect, status)
-            VALUES (?, ?, ?, ?, ?, ?, 'Incomplete')
-        `, [driverName, vehicleName, formattedDate, delHire, district, balanceToCollect]);
+            INSERT INTO delivery_note (driverName,devID, vehicalName, date, hire, district, balanceToCollect, status)
+            VALUES (?,?, ?, ?, ?, ?, ?, 'Incomplete')
+        `, [driverName,driverId, vehicleName, formattedDate, delHire, district, balanceToCollect]);
 
         // Get the generated delNoID (Delivery Note ID)
         const delNoID = result.insertId;
@@ -3933,9 +3933,13 @@ router.get("/delivery-note", async (req, res) => {
             return res.status(400).json({ success: false, message: "Delivery Note ID is required." });
         }
 
-        // Fetch delivery note details
+        // Fetch delivery note details including driver ID (devID) and driver name from Employee
         const [deliveryNote] = await db.query(
-            "SELECT * FROM delivery_note WHERE delNoID = ?",
+            `SELECT dn.*, e.name AS driverName
+             FROM delivery_note dn
+                      LEFT JOIN driver d ON dn.devID = d.devID
+                      LEFT JOIN Employee e ON d.E_Id = e.E_Id
+             WHERE dn.delNoID = ?`,
             [delNoID]
         );
 
@@ -3980,7 +3984,7 @@ router.get("/delivery-note", async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Delivery note details fetched successfully",
-            details: deliveryNote[0], // Delivery note details
+            details: deliveryNote[0], // Delivery note details including devID and driver name
             orders: ordersWithIssuedItems // Orders with issued items grouped
         });
 
@@ -4116,20 +4120,97 @@ router.post("/delivery-done", async (req, res) => {
 });
 
 // Update delivery note when order status issued (done)
+// router.post("/delivery-return", async (req, res) => {
+//     const { updatedOrders, deliveryNoteId, driver } = req.body;
+//     if (!updatedOrders || !Array.isArray(updatedOrders) || updatedOrders.length === 0) {
+//         return res.status(400).json({ success: false, message: "No valid orders provided." });
+//     }
+//     try {
+//         for (const order of updatedOrders) {
+//             const { OrID, orderStatus, reason, reasonType, rescheduledDate, returnedItems, paymentDetails } = order;
+//             const { RPayment, driverbalance, customerbalance } = paymentDetails || {};
+//             const receivedAmount = Number(RPayment) || 0;
+//             const DrivBalance = Number(driverbalance) || 0;
+//             const CustBalanc = Number(customerbalance) || 0;
+//             const CustBalance = Number(CustBalanc) * (-1);
+//
+//             // Fetch order details
+//             const [rows] = await db.query(
+//                 "SELECT orID, c_ID, balance, advance, total, netTotal, discount, delPrice FROM Orders WHERE orID = ?",
+//                 [OrID]
+//             );
+//
+//             if (!rows || rows.length === 0) {
+//                 throw new Error(`Order ${OrID} not found.`);
+//             }
+//
+//             const { balance, advance, total, discount, delPrice, c_ID } = rows[0];
+//
+//             // Fetch customer and driver details
+//             const [customerData] = await db.query("SELECT balance FROM Customer WHERE c_ID = ?", [c_ID]);
+//             const customerBalance = Number(customerData[0]?.balance || 0) + CustBalance;
+//
+//             const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driver]);
+//             const driverNewBalance = Number(driverData[0]?.balance || 0) + DrivBalance;
+//
+//             // Calculate new order balance & advance
+//             const newAdvance = Number(advance || 0) + receivedAmount;
+//             const newBalance = Number(balance || 0) - receivedAmount;
+//
+//             console.log("Advance :"+newAdvance+"  Balance :"+newBalance);
+//             console.log("Customer :"+customerBalance+"  Driver :"+DrivBalance);
+//             for (const item of returnedItems) {
+//                 console.log(item);
+//             }
+//             if (orderStatus === "Issued" || orderStatus === "Returned" || orderStatus === "Cancelled") {
+//                 console.log(`${orderStatus} order processing...`);
+//
+//                 let payStatus = newBalance === 0 ? "Settled" : "N-Settled";
+//                 await db.query(
+//                     "UPDATE Orders SET advance = ?, balance = ?, payStatus = ?, orStatus = ? WHERE OrID = ?",
+//                     [newAdvance, newBalance, payStatus, orderStatus, OrID]
+//                 );
+//
+//                 await db.query("UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?", [orderStatus, rescheduledDate || rows[0].expectedDate, OrID]);
+//
+//                 if (orderStatus === "Returned" || orderStatus === "Cancelled") {
+//                     for (const item of returnedItems) {
+//                         await db.query("UPDATE m_s_r_detail SET status = ?, datetime = NOW() WHERE stock_Id = ? AND I_Id = ?",
+//                             [item.status, item.stockId, item.itemId]);
+//                         const [price] = await db.query("SELECT price FROM Item WHERE I_Id = ?", [item.itemId]);
+//                     }
+//                     const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
+//                     await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [OrID, reason]);
+//                 }
+//             }
+//             await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driver]);
+//             await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
+//             await db.query("INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())", [OrID, receivedAmount]);
+//             await db.query("UPDATE delivery_note SET status = ? WHERE delNoID = ?", ["Complete", deliveryNoteId]);
+//         }
+//         return res.status(200).json({ success: true, message: "Orders updated successfully." });
+//     } catch (err) {
+//         console.error("Error updating orders:", err.message);
+//         return res.status(500).json({ success: false, message: "Error updating orders", details: err.message });
+//     }
+// });
 router.post("/delivery-return", async (req, res) => {
-    const { updatedOrders, deliveryNoteId } = req.body;
-
+    const { updatedOrders, deliveryNoteId, driver } = req.body;
     if (!updatedOrders || !Array.isArray(updatedOrders) || updatedOrders.length === 0) {
         return res.status(400).json({ success: false, message: "No valid orders provided." });
     }
-
     try {
         for (const order of updatedOrders) {
-            const { OrID, orderStatus, deliveryStatus, received, reason, reasonType, rescheduledDate, returnedItems } = order;
+            const { OrID, orderStatus, reason, reasonType, rescheduledDate, returnedItems, paymentDetails } = order;
+            const { RPayment, driverbalance, customerbalance } = paymentDetails || {};
+            const receivedAmount = Number(RPayment) || 0;
+            const DrivBalance = Number(driverbalance) || 0;
+            const CustBalanc = Number(customerbalance) || 0;
+            const CustBalance = Number(CustBalanc) * (-1);
 
             // Fetch order details
             const [rows] = await db.query(
-                "SELECT orID, custName, balance, payStatus, expectedDate, stID, advance, total, discount, delPrice, contact1, contact2 FROM Orders WHERE orID = ?",
+                "SELECT orID, c_ID, balance, advance, total, netTotal, discount, delPrice FROM Orders WHERE orID = ?",
                 [OrID]
             );
 
@@ -4137,81 +4218,57 @@ router.post("/delivery-return", async (req, res) => {
                 throw new Error(`Order ${OrID} not found.`);
             }
 
-            const { balance, advance, total, discount, delPrice, stID, contact1, contact2 } = rows[0];
+            const { balance, advance, total, discount, delPrice, c_ID } = rows[0];
 
-            if (orderStatus === "Issued") {
-                console.log(`Issuing order ${OrID}...`);
+            // Fetch customer and driver details
+            const [customerData] = await db.query("SELECT balance FROM Customer WHERE c_ID = ?", [c_ID]);
+            const customerBalance = Number(customerData[0]?.balance || 0) + CustBalance;
 
-                await db.query(`UPDATE Orders SET balance = ?, payStatus = ? WHERE OrID = ?`,
-                    [0, "Settled", OrID]);
+            const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driver]);
+            const driverNewBalance = Number(driverData[0]?.balance || 0) + DrivBalance;
 
-                await db.query(`UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?`,
-                    [advance, stID]);
+            // Calculate new order balance & advance
+            const newAdvance = Number(advance || 0) + receivedAmount;
+            const newBalance = Number(balance || 0) - receivedAmount;
 
-                await db.query(`INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())`,
-                    [OrID, advance]);
-
-                await db.query(`UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?`,
-                    ["Delivered", rescheduledDate || rows[0].expectedDate, OrID]);
-
-                console.log(`Order ${OrID} marked as Issued & Delivered.`);
+            console.log("Advance :" + newAdvance + "  Balance :" + newBalance);
+            console.log("Customer :" + customerBalance + "  Driver :" + DrivBalance);
+            for (const item of returnedItems) {
+                console.log(item);
             }
+            if (orderStatus === "Issued" || orderStatus === "Returned" || orderStatus === "Cancelled") {
+                console.log(`${orderStatus} order processing...`);
 
-            if (orderStatus === "Returned" || orderStatus === "Cancelled") {
-                console.log(`${orderStatus} order - Updating order and stock.`);
+                let payStatus = newBalance === 0 ? "Settled" : "N-Settled";
+                await db.query(
+                    "UPDATE Orders SET advance = ?, balance = ?, payStatus = ?, orStatus = ? WHERE OrID = ?",
+                    [newAdvance, newBalance, payStatus, orderStatus, OrID]
+                );
 
-                let newTotal = parseFloat(total);
-                let newBalance = parseFloat(balance);
-                let excessAmount = 0;
+                await db.query("UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?", [orderStatus, rescheduledDate || rows[0].expectedDate, OrID]);
 
-                for (const item of returnedItems) {
-                    const detail = orderDetails.find(d => d.I_Id === item.itemId);
-                    if (detail) {
-                        let itemQty = parseFloat(item.qty) || 0;
-                        let detailQty = parseFloat(detail.qty) || 1;
-                        let itemTPrice = parseFloat(detail.tprice) || 0;
-                        let unitPrice = itemTPrice / detailQty;
-                        let totalReturnedAmount = unitPrice * itemQty;
-
-                        newTotal -= totalReturnedAmount;
-                        console.log(`Returned Item: ${item.itemId}, Unit Price: ${unitPrice}, Deducted Amount: ${totalReturnedAmount}`);
-                    } else {
-                        console.warn(`Item ${item.itemId} not found in order details.`);
+                if (orderStatus === "Returned" || orderStatus === "Cancelled") {
+                    for (const item of returnedItems) {
+                        await db.query("UPDATE m_s_r_detail SET status = ?, datetime = NOW() WHERE stock_Id = ? AND I_Id = ?",
+                            [item.status, item.stockId, item.itemId]);
+                        const [price] = await db.query("SELECT price FROM Item WHERE I_Id = ?", [item.itemId]);
                     }
-
-                    await db.query(`UPDATE m_s_r_detail SET status = ?, datetime = NOW() WHERE stock_Id = ? AND I_Id = ?`,
-                        [item.status, item.stockId, item.itemId]);
+                    const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
+                    await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [OrID, reason]);
                 }
-
-                newBalance = (newTotal - discount + delPrice) - advance;
-                excessAmount = advance - newTotal;
-
-                await db.query(`UPDATE Orders SET total = ?, balance = ?, payStatus = ?, orStatus = ?, expectedDate = ? WHERE OrID = ?`,
-                    [newTotal, newBalance, 'Credit', orderStatus, rescheduledDate, OrID]);
-
-                await db.query(`UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?`,
-                    [orderStatus, rescheduledDate, OrID]);
-
-                await db.query(`UPDATE Customer SET excessAmount = ? WHERE (contact1 = ? AND contact2 = ?) OR (contact1 = ? AND contact2 = ?)`,
-
-                    [excessAmount, contact1, contact2, contact2, contact1]);
-
-                const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
-                await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`,
-                    [OrID, reason]);
             }
-
-            // Mark delivery note as complete
-            await db.query(`UPDATE delivery_note SET status = ? WHERE delNoID = ?`, ["Complete", deliveryNoteId]);
+            await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driver]);
+            await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
+            await db.query("INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())", [OrID, receivedAmount]);
+            await db.query("UPDATE delivery_note SET status = ? WHERE delNoID = ?", ["Complete", deliveryNoteId]);
         }
-
         return res.status(200).json({ success: true, message: "Orders updated successfully." });
-
     } catch (err) {
         console.error("Error updating orders:", err.message);
         return res.status(500).json({ success: false, message: "Error updating orders", details: err.message });
     }
 });
+
 
 // update payment in delivery note
 router.post("/delivery-payment", async (req, res) => {
