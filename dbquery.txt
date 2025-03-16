@@ -297,4 +297,14 @@ CREATE TABLE delivery_note_orders(
     CONSTRAINT FOREIGN KEY (delNoID) REFERENCES delivery_note (delNoID)
                                  ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE issued_items(
+    delNoID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    srd_Id INT,
+    status VARCHAR(15),
+    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                 ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (srd_Id) REFERENCES m_s_r_detail (srd_Id)
+                                     ON DELETE CASCADE ON UPDATE CASCADE
+);
 

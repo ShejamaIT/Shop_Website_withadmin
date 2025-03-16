@@ -1,25 +1,39 @@
-import React from "react";
+import React, { useRef } from "react";
+import html2canvas from "html2canvas";
 import "../style/receiptView.css";
 
 const ReceiptView = ({ receiptData, setShowReceiptView }) => {
     console.log(receiptData);
     const currentDateTime = new Date().toLocaleString();
+    const receiptRef = useRef(null);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
     };
 
+    const saveAsImage = () => {
+        if (receiptRef.current) {
+            html2canvas(receiptRef.current, { scale: 2 }).then((canvas) => {
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement("a");
+                link.href = image;
+                link.download = `receipt_${receiptData.orID}.png`;
+                link.click();
+            });
+        }
+    };
+
     return (
         <div className="modal-overlay">
-            <div className="modal-content receipt-modal">
+            <div className="modal-content receipt-modal" ref={receiptRef}>
                 <h3 className="text-dark text-center">Shejama Groups</h3>
                 <h5 className="text-center">No.75, Sri Premarathana Mw, Moratumulla</h5>
                 <h5 className="text-center">071 3 608 108 / 077 3 608 108</h5>
                 <hr />
 
                 <p><strong>Order ID:</strong> #{receiptData.orID}</p>
-                <p><strong>Order Date:</strong> {formatDate(receiptData.orderDate || currentDateTime)}</p>
+                <p><strong>Order Date:</strong> {receiptData.orderDate}</p>
                 <p><strong>Date & Time:</strong> {currentDateTime}</p>
                 <p><strong>Salesperson:</strong> {receiptData.salesperson}</p>
                 <p><strong>Delivery Status:</strong> {receiptData.delStatus}</p>
@@ -53,11 +67,11 @@ const ReceiptView = ({ receiptData, setShowReceiptView }) => {
                     <p><strong>Advance Paid:</strong> Rs. {receiptData.advance.toFixed(2)}</p>
                     <p><strong>Balance:</strong> Rs. {receiptData.balance.toFixed(2)}</p>
                 </div>
+            </div>
 
-                <div className="modal-buttons">
-                    <button onClick={() => window.print()} className="print-btn">Print</button>
-                    <button onClick={() => setShowReceiptView(false)} className="close-btn">Close</button>
-                </div>
+            <div className="modal-buttons">
+                <button onClick={saveAsImage} className="print-btn">Save</button>
+                <button onClick={() => setShowReceiptView(false)} className="close-btn">Close</button>
             </div>
         </div>
     );

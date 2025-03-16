@@ -1,34 +1,41 @@
-CREATE TABLE Orders (
-    OrID VARCHAR(25) PRIMARY KEY,
-    delPrice DOUBLE,
-    discount DOUBLE,
-    total DOUBLE,
-    advance DOUBLE,
-    balance DOUBLE,
-    payStatus VARCHAR(20),
-    CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
-                        ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE Payment(
-    op_ID INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    amount DOUBLE,
-    dateTime DATETIME ,
-    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                         ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE driver(
-    devID VARCHAR(25) PRIMARY KEY,
-    E_ID VARCHAR(15),
-    balance DOUBLE
-);
-CREATE TABLE Customer(
-        c_ID INT AUTO_INCREMENT PRIMARY KEY,
-        Name TEXT,
-        email TEXT NULL,
-        address TEXT,
-        contact1 VARCHAR(10),
-        contact2 VARCHAR(10),
-        excessAmount DOUBLE,
-        credit DOUBLE
-);
+customReason: null
+deliveryStatus:"Delivery"
+driver: "Senevirathna"
+driverId: "DI_001"
+orderId: "ORD_1742107407630"
+orderStatus: "Issued"
+paymentDetails:
+RPayment: "29300"
+customerbalance: 200
+drive: "Senevirathna"
+driverbalance: 300
+orderid: "ORD_1742107407630"
+payment: 29500
+[[Prototype]]: Object
+reason: "N/A"
+rescheduledDate: null
+returnedItems: []
+
+
+
+// Commit the transaction and update balances for the customer and driver
+        // await db.query(
+        //     "UPDATE Customer SET balance = ? WHERE c_ID = ?",
+        //     [customerBalance, c_ID]
+        // );
+        //
+        // await db.query(
+        //     "UPDATE Driver SET balance = ? WHERE devID = ?",
+        //     [driverNewBalance, driver]
+        // );
+        //
+        // // Optionally, update the order status and any other details (e.g., delivery status)
+        // await db.query(
+        //     "UPDATE Orders SET balance = ?, advance = ?, orderStatus = ? WHERE OrID = ?",
+        //     [balance1, advance1, orderStatus, orderId]
+        // );
+        //
+        // // Additional handling for delivery status, custom reasons, or rescheduling
+        // if (deliveryStatus) {
+        //     await db.query("UPDATE DeliveryNote SET status = ?, reason = ?, rescheduledDate = ? WHERE OrID = ?", [deliveryStatus, reason, rescheduledDate, orderId]);
+        // }

@@ -149,7 +149,34 @@ const DeliveryNoteDetails = () => {
         // passReservedItem(selectedItems, selectedAction); // Ensure this function handles updates correctly
         setShowStockModal(false); // Close modal
     };
+    const handleSave = async () => {
 
+        // Proceed with the API call
+        try {
+            const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ deliveryNoteId: id }),
+            });
+
+            if (!returnResponse.ok) {
+                throw new Error(`Server Error: ${returnResponse.status}`);
+            }
+
+            const returnResult = await returnResponse.json();
+            if (!returnResult.success) {
+                toast.error(`Failed: ${returnResult.details || "Unknown error"}`);
+                return;
+            }
+
+            toast.success("Orders updated successfully.");
+            fetchDeliveryNote();
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Error updating delivery note:", error);
+            alert(`An error occurred: ${error.message}`);
+        }
+    };
     const handlePayment = async () => {
         const CustBalance = parseFloat(CustomerBalance);
         const DrivBalance = parseFloat(DriverBalance);
@@ -191,6 +218,7 @@ const DeliveryNoteDetails = () => {
                     orderid: orderId,
                     payment: selectedBalance, // the amount to be paid
                     driver: deliveryNote.driverName, // driver name for the payment
+                    driverId: deliveryNote.devID, // driver name for the payment
                     RPayment: Rpayment,  // the amount received from the customer
                     driverbalance: DrivBalance,  // driver's current balance
                     customerbalance: CustBalance,  // customer's current balance
@@ -204,90 +232,74 @@ const DeliveryNoteDetails = () => {
             });
         });
     };
+    const updateOrder = async (orderId, index) => {
+        try {
+            // Get the selected order details
+            const order = orders[index];
+
+            // Extract payment info for the current order
+            const orderPayment = {
+                orderid: order.OrID,
+                payment: payment?.payment || 0,  // Set to 0 if no payment is available
+                driver: payment?.driver || "",
+                RPayment: payment?.RPayment || 0,
+                driverbalance: payment?.driverbalance || 0,
+                customerbalance: payment?.customerbalance || 0,
+            };
+
+            // Construct updated order details
+            const updatedOrder = {
+                orderId: order.OrID,
+                driver: deliveryNote.driverName, // driver name for the payment
+                driverId: deliveryNote.devID, // driver name for the payment
+                deliveryDate:deliveryNote.date,
+                orderStatus: order.orderStatus,
+                deliveryStatus: order.deliveryStatus,
+                reason: reasons[order.OrID]?.reason || "N/A",
+                customReason: reasons[order.OrID]?.customReason || null,
+                rescheduledDate: selectedDeliveryDate || null,
+                returnedItems: (order.orderStatus === "Returned" || order.orderStatus === "Cancelled")
+                    ? (selectedItems[order.OrID]?.map(itemKey => {
+                        const [itemId, stockId] = itemKey.split("-");
+                        const itemStatus = selectedItemStatus[itemKey] || "Available";
+                        return { itemId, stockId, status: itemStatus };
+                    }) || [])
+                    : [],
+                paymentDetails: orderPayment, // Include payment data
+            };
+
+            console.log("Updating order:", updatedOrder);
+
+            // API call to update the order
+            const response = await fetch(`http://localhost:5001/api/admin/main/delivery-payment`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedOrder),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setPayment();
+                toast.success("Order updated successfully!");
+                // setIsEditing(false);  // Exit edit mode after successful update
+            } else {
+                toast.error(data.message || "Error updating order.");
+            }
+        } catch (error) {
+            toast.error("An unexpected error occurred while updating the order.");
+            console.error("Update Order Error:", error);
+        }
+    };
+
+
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
     };
-    const handleSave = async () => {
-        const rescheduledDate = selectedDeliveryDate || "";
 
-        // Log the payment data
-        console.log("Payment data:", payment);
-
-        // Log the orders to check if they contain the necessary information
-        console.log("Orders:", orders);
-
-        // Update the orders with the relevant information, including the payment data
-        const updatedOrders = orders
-            .filter(order => {
-                // Log the original and updated order statuses
-                console.log("Checking order:", order.OrID, order.orderStatus, order.originalOrderStatus, order.deliveryStatus, order.originalDeliveryStatus);
-                return (
-                    order.orderStatus !== order.originalOrderStatus ||
-                    order.deliveryStatus !== order.originalDeliveryStatus
-                );
-            })
-            .map(order => {
-                // Log the reason for filtering out certain orders
-                console.log("Mapping order:", order.OrID);
-
-                // Extract payment info for the current order
-                const orderPayment = {
-                    orderid: order.OrID,
-                    payment: payment?.payment || 0,  // Set to 0 if no payment is available
-                    driver: payment?.driver || "",
-                    RPayment: payment?.RPayment || 0,
-                    driverbalance: payment?.driverbalance || 0,
-                    customerbalance: payment?.customerbalance || 0,
-                };
-
-                return {
-                    OrID: order.OrID,
-                    orderStatus: order.orderStatus,
-                    deliveryStatus: order.deliveryStatus,
-                    reason: reasons[order.OrID]?.reason || "N/A",
-                    reasonType: reasons[order.OrID]?.type || "N/A",
-                    rescheduledDate,
-                    returnedItems: (order.orderStatus === "Returned" || order.orderStatus === "Cancelled")
-                        ? (selectedItems[order.OrID]?.map(itemKey => {
-                            const [itemId, stockId] = itemKey.split("-");
-                            const itemStatus = selectedItemStatus[itemKey] || "Available";
-                            return { itemId, stockId, status: itemStatus };
-                        }) || [])
-                        : [],
-                    paymentDetails: orderPayment, // Add payment data for this order
-                };
-            });
-
-        // Log the updated orders with payment information
-        console.log("Updated Orders with Payment Info:", updatedOrders);
-
-        // Proceed with the API call
-        try {
-            const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ deliveryNoteId: id, updatedOrders , driver:deliveryNote.devID }),
-            });
-
-            if (!returnResponse.ok) {
-                throw new Error(`Server Error: ${returnResponse.status}`);
-            }
-
-            const returnResult = await returnResponse.json();
-            if (!returnResult.success) {
-                toast.error(`Failed: ${returnResult.details || "Unknown error"}`);
-                return;
-            }
-
-            toast.success("Orders updated successfully.");
-            fetchDeliveryNote();
-            setIsEditing(false);
-        } catch (error) {
-            console.error("Error updating delivery note:", error);
-            alert(`An error occurred: ${error.message}`);
-        }
-    };
 
     // Function to open modal and set selected order details
     const handleOpenModal = (OrID, balance) => {
@@ -350,6 +362,7 @@ const DeliveryNoteDetails = () => {
                                                 {orders.map((order, index) => (
                                                     <div key={order.OrID} className="order-box">
                                                         <p><strong>Order ID:</strong> {order.OrID}</p>
+
                                                         {!isEditing ? (
                                                             <p><strong>Order Status:</strong> {order.orderStatus}</p>
                                                         ) : (
@@ -362,6 +375,7 @@ const DeliveryNoteDetails = () => {
                                                                         <option value="Cancelled">Cancelled</option>
                                                                     </Input>
                                                                 </FormGroup>
+
                                                                 {(order.orderStatus === "Returned" || order.orderStatus === "Cancelled") && (
                                                                     <FormGroup>
                                                                         <Label><strong>{order.orderStatus} Reason</strong></Label>
@@ -379,6 +393,7 @@ const DeliveryNoteDetails = () => {
                                                                         )}
                                                                     </FormGroup>
                                                                 )}
+
                                                                 {order.orderStatus === "Returned" && (
                                                                     <FormGroup>
                                                                         <Label><strong>Reschedule Date</strong></Label>
@@ -398,6 +413,7 @@ const DeliveryNoteDetails = () => {
                                                                 )}
                                                             </>
                                                         )}
+
                                                         {!isEditing ? (
                                                             <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
                                                         ) : (
@@ -409,12 +425,12 @@ const DeliveryNoteDetails = () => {
                                                                 </Input>
                                                             </FormGroup>
                                                         )}
-                                                        {/* Display Issued Items for this Order */}
+
                                                         <div className="issued-items">
                                                             <h6 className="mt-3">Issued Items:</h6>
                                                             {order.issuedItems.length > 0 ? (
                                                                 order.issuedItems.map((item, itemIndex) => {
-                                                                    const itemKey = `${item.I_Id}-${item.stock_Id}`;  // Use both itemId and stockId as the key
+                                                                    const itemKey = `${item.I_Id}-${item.stock_Id}`;
                                                                     return (
                                                                         <div key={itemIndex} className="item-box">
                                                                             <p><strong>Item ID:</strong> {item.I_Id}</p>
@@ -423,8 +439,7 @@ const DeliveryNoteDetails = () => {
 
                                                                             {(order.orderStatus === "Returned" || order.orderStatus === "Cancelled") && (
                                                                                 <div className="form-check">
-                                                                                    <input type="checkbox" className="form-check-input" id={`select-item-${order.OrID}-${itemKey}`} checked={selectedItems[order.OrID]?.includes(itemKey) || false} onChange={() => handleItemSelection(order.OrID, item.I_Id, item.stock_Id)}  // Pass both itemId and stockId
-                                                                                    />
+                                                                                    <input type="checkbox" className="form-check-input" id={`select-item-${order.OrID}-${itemKey}`} checked={selectedItems[order.OrID]?.includes(itemKey) || false} onChange={() => handleItemSelection(order.OrID, item.I_Id, item.stock_Id)} />
                                                                                     <label className="form-check-label" htmlFor={`select-item-${order.OrID}-${itemKey}`}>
                                                                                         Select Item
                                                                                     </label>
@@ -437,6 +452,7 @@ const DeliveryNoteDetails = () => {
                                                                 <p className="text-muted">No issued items found for this order.</p>
                                                             )}
                                                         </div>
+
                                                         {order.balanceAmount > 0 ? (
                                                             isEditing ? (
                                                                 <FormGroup>
@@ -452,6 +468,15 @@ const DeliveryNoteDetails = () => {
                                                             )
                                                         ) : (
                                                             <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
+                                                        )}
+
+                                                        {/* Update Order Button */}
+                                                        {isEditing && (
+                                                            <div className="text-center mt-3">
+                                                                <Button color="primary" onClick={() => updateOrder(order.OrID, index)}>
+                                                                    Update Order
+                                                                </Button>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 ))}

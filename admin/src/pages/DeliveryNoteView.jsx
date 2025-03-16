@@ -1,36 +1,43 @@
-import React from "react";
+import React, { useRef } from "react";
+import html2canvas from "html2canvas";
 import "../style/deliveryRecipt.css";
 
 const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
-    // Destructure necessary values from the receiptData
     const { orders, vehicleId, driverName, hire, balanceToCollect, selectedDeliveryDate } = receiptData;
-    console.log(orders);
-    // Format the date
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
-    };
+    const receiptRef = useRef(null);
 
-    // Current Date and Time
+    const Dhire = Number(hire);
+
     const currentDateTime = new Date().toLocaleString();
+
+    // Function to save the receipt as an image
+    const saveAsImage = () => {
+        if (receiptRef.current) {
+            html2canvas(receiptRef.current, { scale: 2 }).then((canvas) => {
+                const image = canvas.toDataURL("image/png"); // Convert canvas to image URL (Base64)
+                const link = document.createElement("a");
+                link.href = image;
+                link.download = `deliveryNote_${Date.now()}.png`; // Set the download file name
+                link.click(); // Trigger the download action
+            });
+        }
+    };
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content receipt-modal">
+            <div className="modal-content receipt-modal" ref={receiptRef}>
                 <h4 className="text-dark text-center">Shejama Groups</h4>
                 <h5 className="text-center">No.75, Sri Premarathana Mw, Moratumulla</h5>
                 <h5 className="text-center">071 3 608 108 / 077 3 608 108</h5>
                 <hr />
 
-                {/* Display Delivery Note Information */}
                 <div className="delivery-note-info">
-                    <p><strong>Delivery Note Date:</strong> {(selectedDeliveryDate || currentDateTime)} | </p>
-                    <p><strong>Vehicle ID:</strong> {vehicleId} | </p>
-                    <p><strong>Driver Name:</strong> {driverName} | </p>
-                    <p><strong>Hire:</strong> {hire}</p>
+                    <p><strong>Delivery Note Date:</strong> {(selectedDeliveryDate || currentDateTime)}</p>
+                    <p><strong>Vehicle ID:</strong> {vehicleId}</p>
+                    <p><strong>Driver Name:</strong> {driverName}</p>
+                    <p><strong>Hire:</strong> Rs. {Dhire}</p>
                 </div>
 
-                {/* Orders Table */}
                 <table className="receipt-table">
                     <thead>
                     <tr>
@@ -53,6 +60,7 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                 </table>
 
                 <p><strong>Balance to Collect:</strong> Rs. {balanceToCollect.toFixed(2)}</p>
+
                 <table className="receipt-table">
                     <thead>
                     <tr>
@@ -75,12 +83,11 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                     ))}
                     </tbody>
                 </table>
+            </div>
 
-                {/* Action Buttons */}
-                <div className="modal-buttons">
-                    <button onClick={() => window.print()} className="print-btn">Print</button>
-                    <button onClick={() => setShowDeliveryView(false)} className="close-btn">Close</button>
-                </div>
+            <div className="modal-buttons">
+                <button onClick={saveAsImage} className="print-btn">Save</button>
+                <button onClick={() => setShowDeliveryView(false)} className="close-btn">Close</button>
             </div>
         </div>
     );
