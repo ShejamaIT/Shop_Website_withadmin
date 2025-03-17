@@ -252,7 +252,7 @@ router.post("/orders", async (req, res) => {
             }
 
             stID = couponResult[0].stID;
-            const newTotalOrder = parseFloat(totalItemPrice);
+            const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
             const updateSalesTeamQuery = `UPDATE sales_team SET totalOrder = totalOrder + ? WHERE stID = ?`;
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
@@ -549,8 +549,8 @@ router.post("/customer", async (req, res) => {
     const c_ID = await generateNewId("Customer", "c_ID", "Cus");
     console.log(c_ID);
     const sqlInsertCustomer = `
-        INSERT INTO Customer (c_ID,title,FtName,SrName, address, contact1, contact2,email,id,balance,type,category,t_name,occupation,workPlace) VALUES 
-                    (?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?)`;
+        INSERT INTO Customer (c_ID,title,FtName,SrName, address, contact1, contact2,email,id,balance,type,category,t_name,occupation,workPlace) VALUES
+            (?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?)`;
     const valuesCustomer = [
         c_ID,title, FtName,SrName,address, contact, contact2 || "", email,id ,0,type,category,t_name,occupation,workPlace
     ];
@@ -2421,7 +2421,7 @@ router.get("/salesteam", async (req, res) => {
                 e.job,
                 e.basic
             FROM sales_team st
-            JOIN Employee e ON st.E_Id = e.E_Id;
+                     JOIN Employee e ON st.E_Id = e.E_Id;
         `);
 
         // If no sales team members found, return a 404 status
@@ -2558,8 +2558,8 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 COALESCE(SUM(o.total), 0) AS totalOrderValue,
                 COALESCE(SUM(CASE WHEN o.orStatus = 'issued' THEN o.total ELSE 0 END), 0) AS issuedOrderValue
             FROM sales_team st
-            JOIN Employee e ON e.E_Id = st.E_Id
-            LEFT JOIN Orders o ON o.stID = st.stID
+                     JOIN Employee e ON e.E_Id = st.E_Id
+                     LEFT JOIN Orders o ON o.stID = st.stID
             WHERE st.stID = ?
             GROUP BY st.stID, e.E_Id, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic,
                      st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued;
@@ -2959,16 +2959,16 @@ router.get("/find-completed-orders", async (req, res) => {
         // 1️⃣ Fetch Completed Orders with Sales Team & Customer Details
         const orderQuery = `
             SELECT
-                o.orId, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount, 
-                o.total, o.ordertype, o.stID, o.expectedDate, o.specialNote, o.advance, o.balance, 
+                o.orId, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount,
+                o.total, o.ordertype, o.stID, o.expectedDate, o.specialNote, o.advance, o.balance,
                 o.payStatus, d.address, d.district, d.schedule_Date, d.type,
                 s.stID, e.name AS salesEmployeeName,
                 c.FtName, c.SrName, c.contact1, c.contact2
             FROM Orders o
-            JOIN delivery d ON o.orID = d.orID
-            LEFT JOIN sales_team s ON o.stID = s.stID
-            LEFT JOIN Employee e ON s.E_Id = e.E_Id
-            LEFT JOIN Customer c ON o.c_ID = c.c_ID
+                     JOIN delivery d ON o.orID = d.orID
+                     LEFT JOIN sales_team s ON o.stID = s.stID
+                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
+                     LEFT JOIN Customer c ON o.c_ID = c.c_ID
             WHERE d.district = ? AND o.orStatus = 'Completed' AND o.expectedDate = ?;
         `;
 
@@ -2985,7 +2985,7 @@ router.get("/find-completed-orders", async (req, res) => {
                     od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
                     i.bookedQty, i.availableQty
                 FROM Order_Detail od
-                JOIN Item i ON od.I_Id = i.I_Id
+                         JOIN Item i ON od.I_Id = i.I_Id
                 WHERE od.orID = ?`;
 
             const [items] = await db.query(itemsQuery, [order.orId]);
@@ -2994,7 +2994,7 @@ router.get("/find-completed-orders", async (req, res) => {
             const bookedItemsQuery = `
                 SELECT bi.I_Id, i.I_name, bi.qty
                 FROM booked_item bi
-                JOIN Item i ON bi.I_Id = i.I_Id
+                         JOIN Item i ON bi.I_Id = i.I_Id
                 WHERE bi.orID = ?`;
 
             const [bookedItems] = await db.query(bookedItemsQuery, [order.orId]);
@@ -3003,7 +3003,7 @@ router.get("/find-completed-orders", async (req, res) => {
             const acceptedOrdersQuery = `
                 SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
                 FROM accept_orders ao
-                JOIN Item i ON ao.I_Id = i.I_Id
+                         JOIN Item i ON ao.I_Id = i.I_Id
                 WHERE ao.orID = ?`;
 
             const [acceptedOrders] = await db.query(acceptedOrdersQuery, [order.orId]);
@@ -3020,7 +3020,7 @@ router.get("/find-completed-orders", async (req, res) => {
                 orderStatus: order.orStatus,
                 deliveryStatus: order.delStatus,
                 totalPrice: order.total,
-                deliveryPrice : order.delPrice,
+                deliveryCharge : order.delPrice,
                 discount : order.discount,
                 advance: order.advance,
                 balance: order.balance,
@@ -3120,7 +3120,7 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
                 SELECT od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
                        i.bookedQty, i.availableQty
                 FROM Order_Detail od
-                JOIN Item i ON od.I_Id = i.I_Id
+                         JOIN Item i ON od.I_Id = i.I_Id
                 WHERE od.orID = ?`;
 
             const [items] = await db.query(itemsQuery, [order.orId]);
@@ -3136,7 +3136,7 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
                 orderStatus: order.orStatus,
                 deliveryStatus: order.delStatus,
                 totalPrice: order.total,
-                deliveryPrice: order.delPrice,
+                deliveryCharge: order.delPrice,
                 discount: order.discount,
                 advance: order.advance,
                 balance: order.balance,
@@ -3615,16 +3615,12 @@ router.post("/get-stock-details", async (req, res) => {
 });
 
 // Issued order
-router.post("/isssued-order", async (req, res) => {
-    const { orID, delStatus, delPrice, discount,subtotal, total, advance, balance, payStatus, stID, paymentAmount, selectedItems } = req.body;
-
-    console.log(req.body);
+router.post("/issued-order", async (req, res) => {
+    const { orID, delStatus, delPrice, discount, subtotal, total, advance, balance, payStatus, stID, paymentAmount, selectedItems } = req.body;
 
     if (!orID || !stID || paymentAmount === undefined || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
-    const IssuedPrice = parseFloat(paymentAmount);
-
 
     try {
         // 1. Update Orders table
@@ -3635,44 +3631,60 @@ router.post("/isssued-order", async (req, res) => {
             [delStatus, delPrice, discount, total, advance, balance, payStatus, stID, orID]
         );
 
-        // 2. Update m_s_r_detail table (Mark selected items as issued)
-        for (const item of selectedItems) {
+        // 2.Update m_s_r_detail table (Mark selected items as issued)
+        const updateItemPromises = selectedItems.map(async (item) => {
             await db.query(
                 `UPDATE m_s_r_detail
-                 SET status = 'Issued', orID = ?, datetime = NOW()
-                 WHERE srd_Id = ?`,
+         SET status = 'Issued', orID = ?, datetime = NOW()
+         WHERE srd_Id = ?`,
                 [orID, item.srd_Id]
             );
-        }
 
-        // 3. Update sales_team table
-        await db.query(
-            `UPDATE sales_team
-             SET totalIssued = totalIssued + ?
-             WHERE stID = ?`,
-            [IssuedPrice, stID]
+            await db.query(
+                `INSERT INTO issued_items (orID, srd_Id, status) VALUES (?, ?, 'Issued')`,
+                [orID, item.srd_Id]
+            );
+        });
+
+        // Run all queries in parallel
+        await Promise.all(updateItemPromises);
+
+        // 3. Get Order Details
+        const [[orderDetail]] = await db.query(
+            `SELECT advance, balance, discount, total AS netTotal FROM Orders WHERE OrID = ?`,
+            [orID]
         );
 
-        // 4. Update Item stock quantities using Order_Detail table
+        // 4. Update sales_team table
+        const issuedPrice = orderDetail.balance === 0
+            ? parseFloat(orderDetail.netTotal) - parseFloat(orderDetail.discount)
+            : orderDetail.advance || 0;
+
+        await db.query(
+            `UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?`,
+            [issuedPrice, stID]
+        );
+
+        // 5. Update Item stock quantities
         const [orderItems] = await db.query(
             `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
             [orID]
         );
 
-        for (const item of orderItems) {
-            await db.query(
-                `UPDATE Item
-                 SET stockQty = stockQty - ?, bookedQty = bookedQty - ?
-                 WHERE I_Id = ?`,
-                [item.qty, item.qty, item.I_Id]
-            );
-        }
+        const updateStockPromises = orderItems.map(item =>
+            db.query(
+                `UPDATE Item SET stockQty = stockQty - ?, bookedQty = bookedQty - ? WHERE I_Id = ? AND stockQty >= ?`,
+                [item.qty, item.qty, item.I_Id, item.qty]
+            )
+        );
 
-        // 5. Delete from booked_item & accept_orders
+        await Promise.all(updateStockPromises);
+
+        // 6. Delete from booked_item & accept_orders
         await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
         await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
 
-        // 6. Insert into Payment table
+        // 7. Insert into Payment table
         await db.query(
             `INSERT INTO Payment (orID, amount, dateTime)
              VALUES (?, ?, NOW())`,
@@ -3870,28 +3882,13 @@ router.post("/employees", async (req, res) => {
 // Save Delivery Notes
 router.post("/create-delivery-note", async (req, res) => {
     try {
-        console.log("Received request body:", req.body);
 
         const { driverName, driverId, vehicleName, hire, date, district, orders, balanceToCollect } = req.body;
-
-        // Debugging logs
-        console.log("Received orders:", orders);
 
         // Validate required fields
         if (!driverName || !vehicleName || !date || !hire || !Array.isArray(orders) || orders.length === 0) {
             return res.status(400).json({ message: "Driver name, vehicle name, hire, date, and orders are required." });
         }
-
-        // if (!date || !date.includes('/')) {
-        //     return res.status(400).json({ message: "Invalid date format. Expected DD/MM/YY." });
-        // }
-        //
-        // const delHire = parseFloat(hire);
-        //
-        // // Convert date from DD/MM/YY to YYYY-MM-DD
-        // const [day, month, year] = date.split('-');
-        // const formattedDate = `20${year.length === 2 ? year : year.slice(2)}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-
         // Insert into delivery_note table
         const [result] = await db.query(`
             INSERT INTO delivery_note (driverName, devID, vehicalName, date, hire, district, balanceToCollect, status)
@@ -3900,8 +3897,6 @@ router.post("/create-delivery-note", async (req, res) => {
 
         // Get the generated Delivery Note ID
         const delNoID = result.insertId;
-        console.log("Generated Delivery Note ID:", delNoID);
-
         // Insert orders into delivery_note_orders table
         const orderQueries = orders.map(async ({ orderId, balance = 0 }) => {
             try {
@@ -3986,10 +3981,10 @@ router.get("/delivery-note", async (req, res) => {
 
         if (orderIds.length > 0) {
             [issuedItems] = await db.query(
-                `SELECT ii.orID, ii.srd_Id, ii.status AS itemStatus, 
+                `SELECT ii.orID, ii.srd_Id, ii.status AS itemStatus,
                         msrd.stock_Id, msrd.barcode, msrd.datetime, msrd.I_Id
                  FROM issued_items ii
-                 JOIN m_s_r_detail msrd ON ii.srd_Id = msrd.srd_Id
+                          JOIN m_s_r_detail msrd ON ii.srd_Id = msrd.srd_Id
                  WHERE ii.orID IN (?)`,
                 [orderIds]
             );
@@ -4261,15 +4256,16 @@ router.post("/delivery-return", async (req, res) => {
     }
 });
 
-
 // update payment in delivery note
 router.post("/delivery-payment", async (req, res) => {
-    const {customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems} = req.body;
+    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems } = req.body;
+    const { RPayment, customerbalance, driverbalance, profitOrLoss } = paymentDetails || {};
 
-    const { RPayment, customerbalance, driverbalance } = paymentDetails || {};
     const receivedPayment = Number(RPayment) || 0;
     const DrivBalance = Number(driverbalance) || 0;
     const CustBalance = Number(customerbalance) || 0;
+    const Loss = Number(profitOrLoss) || 0;
+    console.log(Loss);
 
     try {
         // Fetch order details
@@ -4278,16 +4274,16 @@ router.post("/delivery-payment", async (req, res) => {
             [orderId]
         );
 
-        if (!Orderpayment) {
+        if (!Orderpayment.length) {
             console.error("No order found for this order ID.");
             return res.status(404).json({ error: "Order not found." });
         }
 
         // Ensure all values are numeric
-        const {orID, c_ID, balance, advance, total , netTotal , discount , delPrice , stID} = Orderpayment[0];
+        const { orID, c_ID, balance, advance, total, netTotal, discount, delPrice, stID } = Orderpayment[0];
 
-        let NetTotal1 = Number(netTotal) || 0;
-        let totalAmount = Number(total) || 0;
+        let NetTotal1 = Math.max(0, Number(netTotal) || 0);
+        let totalAmount = Math.max(0, Number(total) || 0);
         let discountAmount = Number(discount) || 0;
         let deliveryCharge = Number(delPrice) || 0;
 
@@ -4298,13 +4294,16 @@ router.post("/delivery-payment", async (req, res) => {
         // Fetch customer balance
         const [customerData] = await db.query("SELECT balance FROM Customer WHERE c_ID = ?", [c_ID]);
         let customerBalance = Number(customerData?.[0]?.balance || 0) + CustBalance;
+
         // Fetch driver balance
         const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driverId]);
         let driverNewBalance = Number(driverData?.[0]?.balance || 0) + DrivBalance;
 
         // Update order advance & balance
-        const advance1 = Number(advance) + receivedPayment;
-        const balance1 = Number(totalAmount) - receivedPayment;
+        let advance1 = Loss !== 0 ? Number(advance) + (receivedPayment + Loss) : Number(advance) + receivedPayment;
+        let balance1 = Math.max(0, totalAmount - advance1);
+
+        console.log(advance1);
 
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
@@ -4313,43 +4312,20 @@ router.post("/delivery-payment", async (req, res) => {
 
                 const [price] = await db.query("SELECT price FROM Item WHERE I_Id = ?", [item.itemId]);
                 if (price?.[0]?.price) {
-                    const itemPrice = parseFloat(price[0].price);
-                    NetTotal1 -= itemPrice;
-                    console.log(`Price of returned item (ID: ${item.itemId}): Rs. ${itemPrice}`);
+                    NetTotal1 -= parseFloat(price[0].price);
                 }
             }
         }
 
-        // Ensure NetTotal1 is valid
-        NetTotal1 = isNaN(NetTotal1) ? 0 : NetTotal1;
+        NetTotal1 = Math.max(0, NetTotal1); // Ensure NetTotal1 is valid
 
-        let newTotal = 0;
-        let reducePrice = 0;
+        let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
+        let reducePrice = newTotal - totalAmount;
+        customerBalance += NetTotal1 === 0 ? receivedPayment : reducePrice;
 
-        if (NetTotal1 === 0) {
-            newTotal = (NetTotal1 - discountAmount) + deliveryCharge;
-            reducePrice = newTotal - totalAmount;
-            customerBalance += receivedPayment;
-        } else {
-            newTotal = (NetTotal1 - discountAmount) + deliveryCharge;
-            reducePrice = newTotal - totalAmount;
-            customerBalance += reducePrice;
-        }
-
-        // Ensure customer balance is valid
-        customerBalance = isNaN(customerBalance) ? 0 : customerBalance;
-
-        // Update customer balance
-        await db.query(
-            "UPDATE Customer SET balance = ? WHERE c_ID = ?",
-            [customerBalance, c_ID]
-        );
-
-        // Update driver balance
-        await db.query(
-            "UPDATE Driver SET balance = ? WHERE devID = ?",
-            [driverNewBalance, driverId]
-        );
+        // Update customer & driver balance
+        await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
+        await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
 
         // Update order details
         const payStatus = (NetTotal1 === 0 || balance1 === 0) ? "Settled" : "N-Settled";
@@ -4371,51 +4347,38 @@ router.post("/delivery-payment", async (req, res) => {
             for (const item of returnedItems) {
                 if (!item.itemId || !item.stockId) continue;
 
-                await db.query(
-                    "UPDATE m_s_r_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
-                    [item.status, item.itemId, item.stockId]
-                );
+                await db.query("UPDATE m_s_r_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
 
-                const [srdData] = await db.query(
-                    "SELECT srd_Id FROM m_s_r_detail WHERE I_Id = ? AND stock_Id = ?",
-                    [item.itemId, item.stockId]
-                );
+                const [srdData] = await db.query("SELECT srd_Id FROM m_s_r_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
                 const srdId = srdData?.[0]?.srd_Id || null;
 
                 if (srdId) {
-                    await db.query(
-                        "UPDATE issued_items SET status = ? WHERE srd_Id = ? AND orID = ?",
-                        [item.status, srdId, orderId]
-                    );
+                    await db.query("UPDATE issued_items SET status = ? WHERE srd_Id = ? AND orID = ?", [item.status, srdId, orderId]);
                 }
             }
         }
-        // update balance
-        await db.query(
-            "UPDATE delivery_note_orders SET balance = ? WHERE orID = ?",
-            [balance1, orderId]
-        );
+
+        // Update balance in delivery note orders
+        await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
 
         // Insert payment record
-        await db.query(
-            "INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())",
-            [orderId, receivedPayment]
-        );
+        await db.query("INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())", [orderId, receivedPayment]);
 
         // Update sales team records
         if (orderStatus !== "Returned" && orderStatus !== "Cancelled") {
-            await db.query(
-                "UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?",
-                [receivedPayment, stID]
-            );
+            await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
         }
 
-        // Insert into return or canceled orders
-        const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
-        await db.query(
-            `INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`,
-            [orID, reason]
-        );
+        // Insert loss profit if applicable
+        if (Loss !== 0) {
+            await db.query("INSERT INTO profit (orID, amount) VALUES (?, ?)", [orderId, Loss]);
+        }
+
+        // Insert return or canceled orders only if necessary
+        if (orderStatus === "Returned" || orderStatus === "Cancelled") {
+            const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
+            await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [orID, reason]);
+        }
 
         res.json({ success: true, message: "Payment processed successfully." });
 
@@ -4424,6 +4387,7 @@ router.post("/delivery-payment", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
 
 // get delivery schdule by date
 router.get("/check-delivery", async (req, res) => {
