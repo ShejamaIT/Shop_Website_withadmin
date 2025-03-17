@@ -4,8 +4,6 @@ import { toast } from "react-toastify";
 import { Input } from "reactstrap";
 
 const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }) => {
-    console.log("Selected Orders: ", selectedOrders);
-
     const [vehicleId, setVehicleId] = useState("");
     const [driverName, setDriverName] = useState("");
     const [driverId, setDriverId] = useState("");  // New: Stores the selected driver ID (devID)
@@ -33,7 +31,6 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
             try {
                 const response = await fetch("http://localhost:5001/api/admin/main/drivers");
                 const data = await response.json();
-                console.log("Fetched Drivers: ", data.data);
                 setDrivers(data.data || []);
             } catch (error) {
                 toast.error("Error fetching drivers.");
@@ -78,7 +75,6 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
         setDriverId(driver.devID);   // Store driver ID (devID)
         setDriverName(driver.employeeName);  // Store driver name
         setFilteredDriver([]);  // Hide dropdown
-        console.log("Selected Driver: ", driver);
     };
 
     return (

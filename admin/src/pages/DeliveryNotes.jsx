@@ -69,10 +69,6 @@ const DeliveryNotes = () => {
                 district: selectedRoute || "Unknown",
                 balanceToCollect: formData.balanceToCollect || 0,
             };
-
-            console.log("Updated Receipt Data:", updatedReceiptData);
-            console.log("Delivery Note Data:", deliveryNoteData);
-
             // Make the API call
             const response = await fetch("http://localhost:5001/api/admin/main/create-delivery-note", {
                 method: "POST",
@@ -92,6 +88,9 @@ const DeliveryNotes = () => {
             setReceiptDataD(updatedReceiptData);
             setShowModal2(false);
             setShowDeliveryView(true);
+            setTimeout(() => {
+                window.location.reload(); // Auto-refresh the page
+            }, 1000);
 
         } catch (error) {
             console.error("Error while submitting delivery note:", error);
@@ -202,7 +201,6 @@ const DeliveryNotes = () => {
     };
 
     const handleSubmit3 = async (formData) => {
-        console.log(formData);
         const updatedData = {
             orID: selectedOrder.orderId,
             orderDate: selectedOrder.orderDate,

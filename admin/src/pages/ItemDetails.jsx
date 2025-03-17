@@ -182,8 +182,6 @@ const ItemDetails = () => {
 
     const handleSave = async () => {
         try {
-            console.log("Original Form Data:", formData);
-
             let formDataToSend = formData instanceof FormData ? formData : new FormData();
 
             // If formData is an object, convert it into FormData
@@ -196,9 +194,6 @@ const ItemDetails = () => {
                     }
                 });
             }
-
-            console.log("Final Form Data:", formDataToSend);
-
             const updateResponse = await fetch("http://localhost:5001/api/admin/main/update-item", {
                 method: "PUT",
                 body: formDataToSend,
@@ -264,8 +259,6 @@ const ItemDetails = () => {
             if (!response.ok) throw new Error("Failed to fetch item details.");
             const data = await response.json();
             setItem(data.item);
-            console.log(data.item);
-            console.log(data.item.stockDetails);
             setSuppliers(data.item.suppliers || []); // Set suppliers
             setStock(data.item.stockDetails || []); // set stockDetails
             setFormData(data.item); // Copy item details for editing

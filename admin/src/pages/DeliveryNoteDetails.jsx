@@ -29,6 +29,7 @@ const DeliveryNoteDetails = () => {
     const [AmountRecevice, setAmountRecevice] = useState(0);
     const [DriverBalance, setDriverBalance] = useState(0);
     const [selectedItemStatus, setSelectedItemStatus] = useState({});
+    const [orderIds, setOrderIds] = useState([]); // Initialize as an array
 
     // State for Return & Cancel Reasons
     const [reasons, setReasons] = useState({});
@@ -43,16 +44,27 @@ const DeliveryNoteDetails = () => {
             if (!response.ok) {
                 throw new Error("Failed to fetch delivery note details.");
             }
+
             const data = await response.json();
             console.log(data);
+
             setDeliveryNote(data.details);
             fetchDeliveryDates(data.details.district);
+
+            // Extract and store only order IDs
+            const extractedOrderIds = data.orders.map(order => order.OrID);
+            setOrderIds(extractedOrderIds);
+
+            // Set orders with additional properties
             setOrders(
                 data.orders.map(order => ({
                     ...order,
-                    originalOrderStatus: order.orderStatus, originalDeliveryStatus: order.deliveryStatus, received: false,
+                    originalOrderStatus: order.orderStatus,
+                    originalDeliveryStatus: order.deliveryStatus,
+                    received: false,
                 }))
             );
+
             // Initialize reason state for each order
             const initialReasons = {};
             data.orders.forEach(order => {
@@ -156,7 +168,7 @@ const DeliveryNoteDetails = () => {
             const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ deliveryNoteId: id }),
+                body: JSON.stringify({ deliveryNoteId: id,orderIds:orderIds }),
             });
 
             if (!returnResponse.ok) {
@@ -282,7 +294,7 @@ const DeliveryNoteDetails = () => {
             const data = await response.json();
 
             if (response.ok) {
-                setPayment();
+                setPayment(null);
                 toast.success("Order updated successfully!");
                 // setIsEditing(false);  // Exit edit mode after successful update
             } else {
