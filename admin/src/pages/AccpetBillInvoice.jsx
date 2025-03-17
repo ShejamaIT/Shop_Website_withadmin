@@ -3,7 +3,6 @@ import "../style/invoice.css"; // Make sure this file includes the print styles
 
 const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
     const invoiceDate = new Date().toLocaleDateString();
-
     const [deliveryCharge, setDeliveryCharge] = useState(selectedOrder.deliveryCharge);
     const [previousDeliveryCharge, setPreviousDeliveryCharge] = useState(selectedOrder.deliveryCharge);
     const [discount, setDiscount] = useState(selectedOrder.discount);
@@ -11,7 +10,6 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
     const [nowPay, setNowPay] = useState(0);
     // const [isPickup, setIsPickup] = useState(false);
     const [isPickup, setIsPickup] = useState(selectedOrder.deliveryStatus === "Pick up");
-
 
     const calculateTotal = (item) => item.quantity * item.unitPrice;
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
@@ -42,7 +40,6 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
             balance: balance,
             isPickup: isPickup
         });
-
         window.print(); // This will now hide the buttons when printing
     };
 
@@ -58,8 +55,8 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
 
                 <div className="invoice-section">
                     <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
-                    <p><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
-                    <p><strong>Invoice Date:</strong> {formatDate(invoiceDate)}</p>
+                    <p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
+                    <p><strong>Invoice Date:</strong> {invoiceDate}</p>
                     <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
                 </div>
 

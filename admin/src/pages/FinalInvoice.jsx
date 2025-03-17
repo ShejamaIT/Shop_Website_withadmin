@@ -17,7 +17,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
     const [filteredItems, setFilteredItems] = useState([]); // List to store filtered items based on search term
     const [selectedItem, setSelectedItem] = useState([]);
     const calculateTotal = (item) => item.quantity * item.unitPrice;
-    const delivery = Number(selectedOrder.deliveryCharge);
+    const delivery = Number(selectedOrder.deliveryCharge ) ;
     const subtotal = selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0);
     const totalAdvance = Number(advance) + Number(nowPay);
     const netTotal = (subtotal + delivery) - Number(selectedOrder.discount);

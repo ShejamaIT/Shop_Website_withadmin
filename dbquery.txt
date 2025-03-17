@@ -307,4 +307,11 @@ CREATE TABLE issued_items(
     CONSTRAINT FOREIGN KEY (srd_Id) REFERENCES m_s_r_detail (srd_Id)
                                      ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE profit(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    amount DOUBLE,
+    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                     ON DELETE CASCADE ON UPDATE CASCADE
+);
 

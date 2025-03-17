@@ -87,7 +87,6 @@ const Dashboard = () => {
             alert("Failed to add coupon. Please try again.");
         }
     };
-
     const handlePromotionSubmit = async (e) => {
         // e.preventDefault();
         // alert(`Promotion ${date} added!`);

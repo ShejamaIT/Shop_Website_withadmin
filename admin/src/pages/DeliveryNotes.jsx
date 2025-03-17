@@ -6,6 +6,7 @@ import MakeDeliveryNote from "./MakeDeliveryNote";
 import DeliveryNoteView from "./DeliveryNoteView";
 import ReceiptView from "./ReceiptView";
 import FinalInvoice2 from "./FinalInvoice2";
+import FinalInvoice from "./FinalInvoice";
 
 const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);
@@ -97,7 +98,6 @@ const DeliveryNotes = () => {
             toast.error(error.message || "An unexpected error occurred while submitting the delivery note.");
         }
     };
-
 
     useEffect(() => {
         fetchRoutes();
@@ -242,6 +242,7 @@ const DeliveryNotes = () => {
     };
 
     const handleEditClick3 = (selectedOrders) => {
+        console.log(selectedOrders);
         if (!selectedOrders) return;
         setSelectedOrders(selectedOrders);
         setShowModal2(true);
@@ -359,6 +360,13 @@ const DeliveryNotes = () => {
                             handlePaymentUpdate={handleSubmit3}
                         />
                     )}
+                    {/*{showModal1 && selectedOrder && (*/}
+                    {/*    <FinalInvoice*/}
+                    {/*        selectedOrder={selectedOrder}*/}
+                    {/*        setShowModal2={setShowModal1}*/}
+                    {/*        handlePaymentUpdate={handleSubmit3}*/}
+                    {/*    />*/}
+                    {/*)}*/}
                 </Col>
             </Row>
         </Container>

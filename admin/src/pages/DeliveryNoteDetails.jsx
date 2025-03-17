@@ -190,9 +190,9 @@ const DeliveryNoteDetails = () => {
         }
     };
     const handlePayment = async () => {
-        const CustBalance = parseFloat(CustomerBalance);
-        const DrivBalance = parseFloat(DriverBalance);
-        const orderId = selectedOrderId;  // Assuming selectedOrderId is set correctly in the state
+        let CustBalance = parseFloat(CustomerBalance);
+        let DrivBalance = parseFloat(DriverBalance);
+        const orderId = selectedOrderId; // Assuming selectedOrderId is set correctly in the state
 
         // Handle Customer Balance Alert
         const customerPromise = CustBalance !== 0
@@ -205,11 +205,17 @@ const DeliveryNoteDetails = () => {
                 focusConfirm: false,
                 confirmButtonText: "👍 Pass!",
                 cancelButtonText: "👎",
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    return { newCustBalance: 0, profitOrLoss: CustBalance };
+                }
+                return { newCustBalance: CustBalance, profitOrLoss: 0 };
             })
-            : Promise.resolve();
+            : Promise.resolve({ newCustBalance: 0, profitOrLoss: 0 });
 
         // Handle Driver Balance Alert (Chained After Customer Alert)
-        customerPromise.then(() => {
+        customerPromise.then(({ newCustBalance, profitOrLoss }) => {
+            CustBalance = newCustBalance; // Update customer balance after alert
             const driverPromise = DrivBalance !== 0
                 ? Swal.fire({
                     title: "<strong>Driver <u>Balance</u></strong>",
@@ -228,22 +234,25 @@ const DeliveryNoteDetails = () => {
                 // Store the payment data in state
                 const paymentData = {
                     orderid: orderId,
-                    payment: selectedBalance, // the amount to be paid
-                    driver: deliveryNote.driverName, // driver name for the payment
-                    driverId: deliveryNote.devID, // driver name for the payment
-                    RPayment: Rpayment,  // the amount received from the customer
-                    driverbalance: DrivBalance,  // driver's current balance
-                    customerbalance: CustBalance,  // customer's current balance
+                    payment: selectedBalance, // The amount to be paid
+                    driver: deliveryNote.driverName, // Driver name for the payment
+                    driverId: deliveryNote.devID, // Driver ID for the payment
+                    RPayment: Rpayment, // The amount received from the customer
+                    driverbalance: DrivBalance, // Driver's current balance
+                    customerbalance: CustBalance, // Updated customer's current balance
+                    profitOrLoss: profitOrLoss, // Stores original balance if canceled
                 };
-                // Store the payment data using setPayment (or another state function)
+
+                // Store the payment data using setPayment
                 setPayment(paymentData); // This will store the values in the state
-                // You can log the stored values if needed
+
                 console.log("Stored Payment Data:", paymentData);
 
                 setShowStockModal1(false); // Close modal after storing the values
             });
         });
     };
+
     const updateOrder = async (orderId, index) => {
         try {
             // Get the selected order details
@@ -306,12 +315,10 @@ const DeliveryNoteDetails = () => {
         }
     };
 
-
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
     };
-
 
     // Function to open modal and set selected order details
     const handleOpenModal = (OrID, balance) => {
