@@ -4217,13 +4217,33 @@ router.post("/delivery-done", async (req, res) => {
 //     }
 // });
 router.post("/delivery-return", async (req, res) => {
-    const { deliveryNoteId } = req.body;
+    const { deliveryNoteId, orderIds } = req.body;
 
-    if (!deliveryNoteId) {
-        return res.status(400).json({ error: "Missing deliveryNoteId in request body." });
+    if (!deliveryNoteId || !Array.isArray(orderIds) || orderIds.length === 0) {
+        return res.status(400).json({ error: "Missing deliveryNoteId or invalid orderIds in request body." });
     }
 
     try {
+        // Fetch all orders related to the delivery note
+        const [orders] = await db.query(
+            "SELECT OrID, payStatus FROM Orders WHERE OrID IN (?)",
+            [orderIds]
+        );
+
+        if (orders.length === 0) {
+            return res.status(404).json({ error: "No orders found for the given order IDs." });
+        }
+
+        // Check if all orders are either "Settled" or "N-Settled"
+        const allSettled = orders.every(order => order.payStatus === "Settled" || order.payStatus === "N-Settled");
+
+        if (!allSettled) {
+            return res.status(400).json({
+                error: "Some orders are not settled. Delivery note update aborted."
+            });
+        }
+
+        // Update the delivery note status to "Complete"
         const [result] = await db.query(
             "UPDATE delivery_note SET status = ? WHERE delNoID = ?",
             ["Complete", deliveryNoteId]
@@ -4234,6 +4254,7 @@ router.post("/delivery-return", async (req, res) => {
         }
 
         return res.status(200).json({ success: true, message: "Delivery note updated successfully." });
+
     } catch (error) {
         console.error("Error updating delivery note:", error);
         return res.status(500).json({ error: "Internal server error." });
@@ -4246,9 +4267,9 @@ router.post("/delivery-payment", async (req, res) => {
     const {customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems} = req.body;
 
     const { RPayment, customerbalance, driverbalance } = paymentDetails || {};
-    const receivedPayment = parseFloat(RPayment) || 0;
-    const DrivBalance = parseFloat(driverbalance) || 0;
-    const CustBalance = parseFloat(customerbalance) || 0;
+    const receivedPayment = Number(RPayment) || 0;
+    const DrivBalance = Number(driverbalance) || 0;
+    const CustBalance = Number(customerbalance) || 0;
 
     try {
         // Fetch order details
@@ -4265,10 +4286,10 @@ router.post("/delivery-payment", async (req, res) => {
         // Ensure all values are numeric
         const {orID, c_ID, balance, advance, total , netTotal , discount , delPrice , stID} = Orderpayment[0];
 
-        let NetTotal1 = parseFloat(netTotal) || 0;
-        let totalAmount = parseFloat(total) || 0;
-        let discountAmount = parseFloat(discount) || 0;
-        let deliveryCharge = parseFloat(delPrice) || 0;
+        let NetTotal1 = Number(netTotal) || 0;
+        let totalAmount = Number(total) || 0;
+        let discountAmount = Number(discount) || 0;
+        let deliveryCharge = Number(delPrice) || 0;
 
         // Fetch delivery details
         const [deliveryData] = await db.query("SELECT dv_id FROM delivery WHERE orID = ?", [orderId]);
@@ -4276,22 +4297,14 @@ router.post("/delivery-payment", async (req, res) => {
 
         // Fetch customer balance
         const [customerData] = await db.query("SELECT balance FROM Customer WHERE c_ID = ?", [c_ID]);
-        let customerBalance = parseFloat(customerData?.[0]?.balance || 0) + CustBalance;
-
+        let customerBalance = Number(customerData?.[0]?.balance || 0) + CustBalance;
         // Fetch driver balance
-        const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driver]);
-        let driverNewBalance = parseFloat(driverData?.[0]?.balance || 0) + DrivBalance;
+        const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driverId]);
+        let driverNewBalance = Number(driverData?.[0]?.balance || 0) + DrivBalance;
 
         // Update order advance & balance
-        const advance1 = parseFloat(advance) + receivedPayment;
-        const balance1 = parseFloat(totalAmount) - receivedPayment;
-
-        console.log("Updated Values:");
-        console.log("Total:", totalAmount);
-        console.log("New Order Advance:", advance1);
-        console.log("New Order Balance:", balance1);
-        console.log("New Customer Credit Balance:", customerBalance);
-        console.log("New Driver Balance:", driverNewBalance);
+        const advance1 = Number(advance) + receivedPayment;
+        const balance1 = Number(totalAmount) - receivedPayment;
 
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
@@ -4325,10 +4338,6 @@ router.post("/delivery-payment", async (req, res) => {
 
         // Ensure customer balance is valid
         customerBalance = isNaN(customerBalance) ? 0 : customerBalance;
-
-        console.log("New Order Total:", newTotal);
-        console.log("Reduced Price:", reducePrice);
-        console.log("Updated Customer Credit Balance:", customerBalance);
 
         // Update customer balance
         await db.query(
@@ -4381,7 +4390,6 @@ router.post("/delivery-payment", async (req, res) => {
                 }
             }
         }
-
         // update balance
         await db.query(
             "UPDATE delivery_note_orders SET balance = ? WHERE orID = ?",
