@@ -1,20 +1,46 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Table, Button, Form, FormGroup, Label, Input } from "reactstrap";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
 import '../style/Dashboard.css';
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
     const [salesteamMembers, setSalesteamMembers] = useState([]);
+    const [couponCode, setCouponCode] = useState("");
+    const [saleteamCode, setSaleteamCode] = useState("");
+    const [discount, setDiscount] = useState("");
+    const [date, setDate] = useState("");
+    const [promoImage, setPromoImage] = useState(null);
+
+    // State variables for sales data
+    const [dailySales, setDailySales] = useState([]);
+    const [monthlySales, setMonthlySales] = useState([]);
+
+    // Fetch sales team members and sales data
+    const fetchSalesTeamMembersOrders = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/sales/count");
+            const data = await response.json();
+            console.log(data.data);
+
+            if (data.data) {
+                setDailySales(data.data.dailySales ?? []);
+                setMonthlySales(data.data.monthlySales ?? []);
+            }
+        } catch (error) {
+            console.error("Error fetching sales team members:", error);
+        }
+    };
 
     const fetchSalesTeamMembers = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
             const data = await response.json();
             console.log(data.data);
-            if (data.data && data.data.length > 0) {
+
+            if (data.data) {
                 setSalesteamMembers(data.data);
             }
         } catch (error) {
@@ -23,39 +49,22 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
+        fetchSalesTeamMembersOrders();
         fetchSalesTeamMembers();
     }, []);
 
-    // Sample sales data
-    const dailySales = [
-        { id: 1, name: "Thushani", sales: 45000 },
-        { id: 2, name: "Kalani", sales: 18000 },
-        { id: 3, name: "Chathyrya", sales: 25000 }
-    ];
-
-    const monthlySales = [
-        { id: 1, name: "Thushani", sales: 52000 },
-        { id: 2, name: "Kalani", sales: 35000 },
-        { id: 3, name: "Chathyrya", sales: 44000 }
-    ];
-
-    const dailyTotal = dailySales.reduce((acc, sale) => acc + sale.sales, 0);
-    const monthlyTotal = monthlySales.reduce((acc, sale) => acc + sale.sales, 0);
+    // Calculate total sales
+    const dailyTotal = dailySales.reduce((acc, sale) => acc + (sale.sales ?? 0), 0);
+    const monthlyTotal = monthlySales.reduce((acc, sale) => acc + (sale.sales ?? 0), 0);
 
     const salesData = [
         { name: "Daily Sales", value: dailyTotal },
         { name: "Monthly Sales", value: monthlyTotal }
     ];
 
-    const [couponCode, setCouponCode] = useState("");
-    const [saleteamCode, setSaleteamCode] = useState("");
-    const [discount, setDiscount] = useState("");
-    const [date, setDate] = useState("");
-    const [promoImage, setPromoImage] = useState(null);
-
+    // Handle coupon submission
     const handleCouponSubmit = async (e) => {
         e.preventDefault();
-        // Check if fields are filled
         if (!couponCode || !saleteamCode || !discount) {
             alert("Please fill in all fields.");
             return;
@@ -66,16 +75,11 @@ const Dashboard = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    couponCode,
-                    saleteamCode,
-                    discount,
-                }),
+                body: JSON.stringify({ couponCode, saleteamCode, discount }),
             });
             const data = await response.json();
             if (data.success) {
                 toast.success(`Coupon ${couponCode} added successfully!`);
-                // Clear form fields after successful submission
                 setCouponCode("");
                 setDiscount("");
                 setSaleteamCode("");
@@ -87,44 +91,20 @@ const Dashboard = () => {
             alert("Failed to add coupon. Please try again.");
         }
     };
-    const handlePromotionSubmit = async (e) => {
-        // e.preventDefault();
-        // alert(`Promotion ${date} added!`);
-        // setDate(""); setPromoImage(null);
 
+    // Handle promotion submission
+    const handlePromotionSubmit = async (e) => {
         e.preventDefault();
-        // Check if fields are filled
         if (!date || !promoImage) {
             alert("Please fill in all fields.");
             return;
         }
-        try {
-            const response = await fetch("http://localhost:5001/api/admin/main/coupone", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    couponCode,
-                    saleteamCode,
-                    discount,
-                }),
-            });
-            const data = await response.json();
-            if (data.success) {
-                toast.success(`Coupon ${couponCode} added successfully!`);
-                // Clear form fields after successful submission
-                setCouponCode("");
-                setDiscount("");
-                setSaleteamCode("");
-            } else {
-                alert(`Error: ${data.message}`);
-            }
-        } catch (error) {
-            console.error("Error submitting coupon:", error);
-            alert("Failed to add coupon. Please try again.");
-        }
+        toast.success(`Promotion added for ${date}!`);
+        setDate("");
+        setPromoImage(null);
     };
+
+    // Handle image upload
     const handleImageUpload = (event) => {
         setPromoImage(URL.createObjectURL(event.target.files[0]));
     };
@@ -150,10 +130,10 @@ const Dashboard = () => {
                                 </thead>
                                 <tbody>
                                 {dailySales.map((sale) => (
-                                    <tr key={sale.id}>
-                                        <td>{sale.id}</td>
-                                        <td>{sale.name}</td>
-                                        <td>{sale.sales}</td>
+                                    <tr key={sale.stID}>
+                                        <td>{sale.stID}</td>
+                                        <td>{sale.salesperson_name}</td>
+                                        <td>{sale.sales ?? 0}</td>
                                     </tr>
                                 ))}
                                 </tbody>
@@ -167,15 +147,15 @@ const Dashboard = () => {
                                 <tr>
                                     <th>ID</th>
                                     <th>Salesperson</th>
-                                    <th>Sales (Rs)</th>
+                                    <th>Sales (Rs.)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {monthlySales.map((sale) => (
-                                    <tr key={sale.id}>
-                                        <td>{sale.id}</td>
-                                        <td>{sale.name}</td>
-                                        <td>{sale.sales}</td>
+                                    <tr key={sale.stID}>
+                                        <td>{sale.stID}</td>
+                                        <td>{sale.salesperson_name}</td>
+                                        <td>{sale.sales ?? 0}</td>
                                     </tr>
                                 ))}
                                 </tbody>
@@ -190,21 +170,20 @@ const Dashboard = () => {
                             <div className="general">
                                 <Form onSubmit={handleCouponSubmit}>
                                     <FormGroup>
-                                        <Label for="coupon">Coupon Code</Label>
+                                        <Label>Coupon Code</Label>
                                         <Input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Enter coupon code" required />
                                     </FormGroup>
                                     <FormGroup>
-                                        <Label for="saleteamCode">Sale Team ID</Label>
-
-                                        <Input type="select" name="saleteamCode" onChange={(e) => setSaleteamCode(e.target.value)} required >
-                                            <option value="">Sale team ID</option>
+                                        <Label>Sale Team ID</Label>
+                                        <Input type="select" name="saleteamCode" onChange={(e) => setSaleteamCode(e.target.value)} required>
+                                            <option value="">Select Sale Team</option>
                                             {salesteamMembers.map((member) => (
-                                                <option key={member.stID} value={member.stID}>{member.stID}-({member.employeeName})</option>
+                                                <option key={member.stID} value={member.stID}>{member.stID} - ({member.employeeName})</option>
                                             ))}
                                         </Input>
                                     </FormGroup>
                                     <FormGroup>
-                                        <Label for="discount">Discount Price</Label>
+                                        <Label>Discount Price</Label>
                                         <Input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="Enter discount amount" required />
                                     </FormGroup>
                                     <Button color="primary" type="submit">Add Coupon</Button>
@@ -216,11 +195,11 @@ const Dashboard = () => {
                             <div className="general">
                                 <Form onSubmit={handlePromotionSubmit}>
                                     <FormGroup>
-                                        <Label for="date">Date</Label>
+                                        <Label>Date</Label>
                                         <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
                                     </FormGroup>
                                     <FormGroup>
-                                        <Label for="promoImage">Upload Promotion Image</Label>
+                                        <Label>Upload Promotion Image</Label>
                                         <Input type="file" onChange={handleImageUpload} />
                                         {promoImage && <img src={promoImage} alt="Promotion" className="promo-img" />}
                                     </FormGroup>

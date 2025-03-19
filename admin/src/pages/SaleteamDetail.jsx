@@ -58,7 +58,6 @@ const SaleteamDetail = ({ Saleteam }) => {
         const issuedOrders = salesteamMember.issuedCount;
         const totalOrderPrice = salesteamMember.totalOrder;
         const totalIssuedPrice = salesteamMember.totalIssued;
-        // const totalPrice = orders.reduce((acc, order) => acc + order.totalPrice, 0); // Adjust to field name from your response
         return { totalOrders, issuedOrders , totalOrderPrice, totalIssuedPrice};
     };
 
@@ -167,14 +166,16 @@ const SaleteamDetail = ({ Saleteam }) => {
                                         <th>Order ID</th>
                                         <th>Order Date</th>
                                         <th>Total Amount</th>
+                                        <th>Order Status</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {orders.map((order, index) => (
                                         <tr key={index}>
-                                            <td>{order.orderId}</td> {/* Adjust field names as per response */}
-                                            <td>{formatDate(order.orderDate)}</td> {/* Adjust field names as per response */}
-                                            <td>Rs. {order.totalPrice}</td> {/* Adjust field names as per response */}
+                                            <td>{order.orderId}</td>
+                                            <td>{formatDate(order.orderDate)}</td>
+                                            <td>Rs. {order.totalPrice}</td>
+                                            <td>{order.orderStatus}</td>
                                         </tr>
                                     ))}
                                     </tbody>

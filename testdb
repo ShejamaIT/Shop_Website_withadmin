@@ -1,41 +1,42 @@
-customReason: null
-deliveryStatus:"Delivery"
-driver: "Senevirathna"
-driverId: "DI_001"
-orderId: "ORD_1742107407630"
-orderStatus: "Issued"
-paymentDetails:
-RPayment: "29300"
-customerbalance: 200
-drive: "Senevirathna"
-driverbalance: 300
-orderid: "ORD_1742107407630"
-payment: 29500
-[[Prototype]]: Object
-reason: "N/A"
-rescheduledDate: null
-returnedItems: []
-
-
-
-// Commit the transaction and update balances for the customer and driver
-        // await db.query(
-        //     "UPDATE Customer SET balance = ? WHERE c_ID = ?",
-        //     [customerBalance, c_ID]
-        // );
-        //
-        // await db.query(
-        //     "UPDATE Driver SET balance = ? WHERE devID = ?",
-        //     [driverNewBalance, driver]
-        // );
-        //
-        // // Optionally, update the order status and any other details (e.g., delivery status)
-        // await db.query(
-        //     "UPDATE Orders SET balance = ?, advance = ?, orderStatus = ? WHERE OrID = ?",
-        //     [balance1, advance1, orderStatus, orderId]
-        // );
-        //
-        // // Additional handling for delivery status, custom reasons, or rescheduling
-        // if (deliveryStatus) {
-        //     await db.query("UPDATE DeliveryNote SET status = ?, reason = ?, rescheduledDate = ? WHERE OrID = ?", [deliveryStatus, reason, rescheduledDate, orderId]);
-        // }
+CREATE TABLE Employee(
+      E_Id VARCHAR(15) PRIMARY KEY,
+      name TEXT ,
+      address TEXT,
+      nic VARCHAR(12),
+      dob DATE,
+      contact VARCHAR(15),
+      job VARCHAR(15),
+      basic DOUBLE
+);
+CREATE TABLE sales_team(
+    stID VARCHAR(25) PRIMARY KEY,
+    E_Id VARCHAR(15),
+    orderTarget DOUBLE,
+    issuedTarget DOUBLE,
+    totalOrder DOUBLE,
+    totalIssued DOUBLE,
+        CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
+                                   ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE Orders (
+    OrID VARCHAR(25) PRIMARY KEY,
+    orDate DATE,
+    c_ID VARCHAR(15),
+    orStatus VARCHAR(15),
+    delStatus VARCHAR(10),
+    delPrice DOUBLE,
+    discount DOUBLE,
+    netTotal DOUBLE,
+    total DOUBLE,
+    advance DOUBLE,
+    balance DOUBLE,
+    payStatus VARCHAR(20),
+    stID VARCHAR(25),
+    expectedDate DATE,
+    specialNote TEXT,
+    ordertype VARCHAR(10),
+    CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
+                        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (c_ID) REFERENCES Customer (c_ID)
+                            ON DELETE CASCADE ON UPDATE CASCADE
+);
