@@ -2537,7 +2537,7 @@ router.get("/orders/by-sales-team", async (req, res) => {
         const { stID } = req.query;
         console.log(stID);
 
-        // Fetch sales team details and orders (without duplicate coupons)
+        // Fetch sales team details
         const [results] = await db.query(`
             SELECT
                 e.E_Id AS employeeId,
@@ -2554,9 +2554,9 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 st.totalOrder,
                 st.totalIssued,
                 COUNT(o.OrID) AS totalCount,
-                SUM(CASE WHEN o.orStatus = 'issued' THEN 1 ELSE 0 END) AS issuedCount,
-                COALESCE(SUM(o.total), 0) AS totalOrderValue,
-                COALESCE(SUM(CASE WHEN o.orStatus = 'issued' THEN o.total ELSE 0 END), 0) AS issuedOrderValue
+                SUM(CASE WHEN o.orStatus = 'Issued' THEN 1 ELSE 0 END) AS issuedCount,
+                COALESCE(SUM(o.netTotal - o.discount), 0) AS totalOrderValue,
+                COALESCE(SUM(CASE WHEN o.orStatus = 'Issued' THEN o.netTotal - o.discount ELSE 0 END), 0) AS issuedOrderValue
             FROM sales_team st
                      JOIN Employee e ON e.E_Id = st.E_Id
                      LEFT JOIN Orders o ON o.stID = st.stID
@@ -2564,24 +2564,49 @@ router.get("/orders/by-sales-team", async (req, res) => {
             GROUP BY st.stID, e.E_Id, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic,
                      st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued;
         `, [stID]);
+        console.log(results);
 
         if (results.length === 0) {
             return res.status(404).json({ message: "No data found for this sales team member." });
         }
 
-        // Extract member details
         const memberDetails = results[0];
 
-        // Fetch orders separately
-        const [orders] = await db.query(`
+        // Get the current date and calculate the first day of the current month and last month
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth(); // Current month (0-11)
+        const firstDayOfCurrentMonth = new Date(currentYear, currentMonth, 1);
+        const firstDayOfLastMonth = new Date(currentYear, currentMonth - 1, 1);
+        const lastDayOfLastMonth = new Date(currentYear, currentMonth, 0); // Last day of the previous month
+
+        // Fetch orders for the current month
+        const [ordersThisMonth] = await db.query(`
             SELECT
                 o.OrID AS orderId,
                 o.orDate AS orderDate,
-                o.total AS totalPrice,
+                o.netTotal - o.discount AS totalPrice,  
                 o.orStatus AS orderStatus
             FROM Orders o
-            WHERE o.stID = ?;
-        `, [stID]);
+            WHERE o.stID = ? AND o.orDate >= ? AND o.orDate <= ?
+        `, [stID, firstDayOfCurrentMonth, currentDate]);
+
+        // Fetch orders for the last month
+        const [ordersLastMonth] = await db.query(`
+            SELECT
+                o.OrID AS orderId,
+                o.orDate AS orderDate,
+                o.netTotal - o.discount AS totalPrice, 
+                o.orStatus AS orderStatus
+            FROM Orders o
+            WHERE o.stID = ? AND o.orDate >= ? AND o.orDate <= ?
+        `, [stID, firstDayOfLastMonth, lastDayOfLastMonth]);
+
+        // Separate orders into Issued and Other types
+        const ordersThisMonthIssued = ordersThisMonth.filter(order => order.orderStatus === 'Issued');
+        const ordersThisMonthOther = ordersThisMonth.filter(order => order.orderStatus !== 'Issued');
+        const ordersLastMonthIssued = ordersLastMonth.filter(order => order.orderStatus === 'Issued');
+        const ordersLastMonthOther = ordersLastMonth.filter(order => order.orderStatus !== 'Issued');
 
         // Fetch coupon separately (ensuring only one per sales team member)
         const [coupons] = await db.query(`
@@ -2593,10 +2618,13 @@ router.get("/orders/by-sales-team", async (req, res) => {
         `, [stID]);
 
         return res.status(200).json({
-            message: "Sales team details, orders, and coupons fetched successfully.",
+            message: "Sales team details, orders for current and last month, and coupons fetched successfully.",
             data: {
                 memberDetails,
-                orders: orders.length > 0 ? orders : [],
+                ordersThisMonthIssued: ordersThisMonthIssued.length > 0 ? ordersThisMonthIssued : [],
+                ordersThisMonthOther: ordersThisMonthOther.length > 0 ? ordersThisMonthOther : [],
+                ordersLastMonthIssued: ordersLastMonthIssued.length > 0 ? ordersLastMonthIssued : [],
+                ordersLastMonthOther: ordersLastMonthOther.length > 0 ? ordersLastMonthOther : [],
                 coupons: coupons.length > 0 ? [coupons[0]] : [] // ✅ Ensure only one coupon is included
             }
         });
