@@ -4388,7 +4388,6 @@ router.post("/delivery-payment", async (req, res) => {
     }
 });
 
-
 // get delivery schdule by date
 router.get("/check-delivery", async (req, res) => {
     const { date } = req.query; // Get date from query parameter
@@ -4418,6 +4417,46 @@ router.get("/check-delivery", async (req, res) => {
         return res.status(500).json({ message: "Error checking delivery availability" });
     }
 });
+
+// Get total order count sum
+router.get("/sales/count", async (req, res) => {
+    try {
+        // Get the current system date
+        const currentDate = new Date();
+        const formattedDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        const firstDayOfMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+        // Query to get daily sales total per sales team member with their names, ensuring missing values return 0
+        const [dailySales] = await db.query(`
+            SELECT sales_team.stID, Employee.name AS salesperson_name, COALESCE(SUM(Orders.netTotal), 0) AS sales
+            FROM sales_team
+            LEFT JOIN Orders ON sales_team.stID = Orders.stID AND Orders.orDate = ?
+            LEFT JOIN Employee ON sales_team.E_Id = Employee.E_Id
+            GROUP BY sales_team.stID, Employee.name;
+        `, [formattedDate]);
+
+        // Query to get monthly sales total per sales team member with their names, ensuring missing values return 0
+        const [monthlySales] = await db.query(`
+            SELECT sales_team.stID, Employee.name AS salesperson_name, COALESCE(SUM(Orders.netTotal), 0) AS sales
+            FROM sales_team
+            LEFT JOIN Orders ON sales_team.stID = Orders.stID AND Orders.orDate BETWEEN ? AND ?
+            LEFT JOIN Employee ON sales_team.E_Id = Employee.E_Id
+            GROUP BY sales_team.stID, Employee.name;
+        `, [firstDayOfMonth, formattedDate]);
+
+        return res.status(200).json({
+            message: "Daily and monthly sales total fetched successfully.",
+            data: {
+                dailySales,
+                monthlySales
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching sales total:", error.message);
+        return res.status(500).json({ message: "Error fetching sales total." });
+    }
+});
+
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
     const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
