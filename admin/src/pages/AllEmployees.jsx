@@ -10,8 +10,8 @@ import AddEmployee from "./AddEmployee";
 import SaleteamDetail from "./SaleteamDetail";
 import DriverDetail from "./DriverDetail";
 
-const AllSaleteam = () => {
-    const [mainTab, setMainTab] = useState("salesTeam"); // Tracks main tab selection
+const AllEmployees = () => {
+    const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
     const [activeSubTab, setActiveSubTab] = useState(""); // Tracks sub-tab for Sales Team
     const [salesteamMembers, setSalesteamMembers] = useState([]);
     const [drivers, setDrivers] = useState([]);
@@ -107,6 +107,13 @@ const AllSaleteam = () => {
             navigate(`?tab=salesTeam&subTab=${newSalesMember.stID}`); // Update URL with the new sub-tab
         }
     };
+    useEffect(() => {
+        if (mainTab === "drivers" && drivers.length > 0 && !activeSubTab) {
+            setActiveSubTab(drivers[0].devID);
+            navigate(`?tab=drivers&subTab=${drivers[0].devID}`);
+        }
+    }, [mainTab, drivers, activeSubTab, navigate]);
+
 
     return (
         <Helmet title="All-Saleteam">
@@ -118,6 +125,14 @@ const AllSaleteam = () => {
                 <Container className="all-products">
                     {/* === MAIN NAVIGATION TABS === */}
                     <Nav tabs>
+                        <NavItem>
+                            <NavLink
+                                className={mainTab === "addEmployee" ? "active" : ""}
+                                onClick={() => handleMainTabChange("addEmployee")}
+                            >
+                                Add Employee
+                            </NavLink>
+                        </NavItem>
                         <NavItem>
                             <NavLink
                                 className={mainTab === "salesTeam" ? "active" : ""}
@@ -134,17 +149,17 @@ const AllSaleteam = () => {
                                 Drivers
                             </NavLink>
                         </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={mainTab === "addEmployee" ? "active" : ""}
-                                onClick={() => handleMainTabChange("addEmployee")}
-                            >
-                                Add Employee
-                            </NavLink>
-                        </NavItem>
                     </Nav>
 
                     <TabContent activeTab={mainTab}>
+                        {/* === ADD EMPLOYEE TAB === */}
+                        <TabPane tabId="addEmployee">
+                            <Row>
+                                <Col>
+                                    <AddEmployee onAddEmployee={handleAddEmployee} />
+                                </Col>
+                            </Row>
+                        </TabPane>
                         {/* === SALES TEAM TAB === */}
                         <TabPane tabId="salesTeam">
                             {salesteamMembers.length > 0 ? (
@@ -204,15 +219,6 @@ const AllSaleteam = () => {
                                 <p className="text-muted mt-3">No Drivers found.</p>
                             )}
                         </TabPane>
-
-                        {/* === ADD EMPLOYEE TAB === */}
-                        <TabPane tabId="addEmployee">
-                            <Row>
-                                <Col>
-                                    <AddEmployee onAddEmployee={handleAddEmployee} />
-                                </Col>
-                            </Row>
-                        </TabPane>
                     </TabContent>
                 </Container>
             </section>
@@ -220,4 +226,4 @@ const AllSaleteam = () => {
     );
 };
 
-export default AllSaleteam;
+export default AllEmployees;

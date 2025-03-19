@@ -14,7 +14,6 @@ import SignUp from "../pages/SignUp";
 import Orders from "../pages/Orders";
 import AccepetOrderDetails from "../pages/AccepetOrder";
 import CompleteOrderDetails from "../pages/CompletedOrders";
-import AllSaleteam from "../pages/AllSaleteam";
 import SaleteamDetail  from "../pages/SaleteamDetail";
 import AllSuppliers from "../pages/AllSuppliers";
 import IssuedOrderDetails from "../pages/IssuedOrder";
@@ -23,6 +22,7 @@ import DeliveryNotes from "../pages/DeliveryNotes";
 import ReturnedOrderDetails from "../pages/ReturnedOrder";
 import AllCustomer from "../pages/AllCustomers";
 import PlaceOrder from "../pages/Placeorder";
+import AllEmployees from "../pages/AllEmployees";
 const Router = () => {
     return(
         <Routes>
@@ -33,7 +33,7 @@ const Router = () => {
             <Route path='all-orders' element={<AllOrders/>}/>
             <Route path='dashboard/users' element={<User/>}/>
             <Route path='all-products' element={<AllProducts/>}/>
-            <Route path='all-saleteam' element={<AllSaleteam/>}/>
+            <Route path='all-employee' element={<AllEmployees/>}/>
             <Route path='all-suppliers' element={<AllSuppliers/>}/>
             <Route path='all-customers' element={<AllCustomer/>}/>
             <Route path='dashboard/add-products' element={<AddProduct/>}/>
