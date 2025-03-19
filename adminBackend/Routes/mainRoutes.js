@@ -347,7 +347,6 @@ router.get("/orders", async (req, res) => {
             stID:  order.stID,
             expectedDeliveryDate: order.expectedDate
         }));
-        // console.log(formattedOrders);
 
         // Send the formatted promotions as a JSON response
         return res.status(200).json({
@@ -547,7 +546,6 @@ router.post("/customer", async (req, res) => {
 
     // Generate new supplier ID
     const c_ID = await generateNewId("Customer", "c_ID", "Cus");
-    console.log(c_ID);
     const sqlInsertCustomer = `
         INSERT INTO Customer (c_ID,title,FtName,SrName, address, contact1, contact2,email,id,balance,type,category,t_name,occupation,workPlace) VALUES
             (?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?)`;
@@ -1030,7 +1028,6 @@ router.get("/order-details", async (req, res) => {
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
-        console.log("view "+orderData.expectedDate);
         // Format customer name with title
         const customerName = [orderData.title, orderData.FtName, orderData.SrName].filter(Boolean).join(" ");
 
@@ -1165,7 +1162,6 @@ router.get("/item-details", async (req, res) => {
             ORDER BY srd_Id ASC , FIELD(status, 'Available', 'Reserved', 'Damage')`;
 
         const [stockResults] = await db.query(stockQuery, [I_Id]);
-        console.log(I_Id);
 
         const stockDetails = stockResults.map(stock => ({
             srd_Id: stock.srd_Id,
@@ -1173,7 +1169,6 @@ router.get("/item-details", async (req, res) => {
             sr_ID: stock.sr_ID,
             status: stock.status
         }));
-        console.log(stockDetails);
 
         // ✅ Construct final response
         const responseData = {
@@ -1220,8 +1215,6 @@ router.get("/orders-pending", async (req, res) => {
         if (orders.length === 0) {
             return res.status(404).json({ message: "No pending orders found" });
         }
-
-        // console.log("table "+order.expectedDate);
 
         // Format orders
         const formattedOrders = orders.map(order => ({
@@ -1945,8 +1938,6 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
             return res.status(400).json({ error: "Item ID does not exist in item table" });
         }
 
-        console.log("Validated Item ID:", itemId);
-
         // Handle image upload
         let imagePath = null;
         if (imageFile) {
@@ -1961,9 +1952,7 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
             INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail)
             VALUES (?, ?, ?, ?, ?, ?)`;
         const [result] = await db.query(insertQuery, [supId, itemId, rDate, receivedQty, cost, detail || ""]);
-        console.log(result);
         const receivedStockId = result.insertId;
-        console.log(receivedStockId);
 
         // Fetch last stock_Id for this item
         const [lastStockResult] = await db.query(
@@ -1976,7 +1965,6 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
         const insertDetailQuery = `
             INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode,status,orID,datetime)
             VALUES (?, ?, ?, ?,'Available','','')`;
-        console.log(insertDetailQuery);
 
         // Ensure barcode folder exists
         const barcodeFolderPath = path.join("./uploads/barcodes");
@@ -2048,7 +2036,6 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
 // Update order in invoice part
 router.put("/update-invoice", async (req, res) => {
     try {
-        console.log(req.body);
 
         const {
             orID,
@@ -2274,10 +2261,6 @@ router.put("/update-order-items", async (req, res) => {
 // Identify items to remove (exist in DB but not in the request)
         const itemsToRemove = existingItemIds.filter(id => !newItemIds.includes(id));
 
-        console.log("Existing records:", existingItemIds);
-        console.log("New records:", newItemIds);
-        console.log("Items to remove:", itemsToRemove);
-
 // Remove missing items from Order_Detail
         for (const itemId of itemsToRemove) {
             const deleteOrderDetailQuery = `DELETE FROM Order_Detail WHERE orID = ? AND I_Id = ?`;
@@ -2361,7 +2344,6 @@ router.put("/update-order-items", async (req, res) => {
 router.put("/update-delivery", async (req, res) => {
     try {
         const { orderId, deliveryStatus, phoneNumber, deliveryInfo } = req.body;
-        console.log(orderId , deliveryInfo , deliveryStatus , phoneNumber);
 
         if (!orderId || !deliveryStatus) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -2535,7 +2517,6 @@ router.get("/drivers", async (req, res) => {
 router.get("/orders/by-sales-team", async (req, res) => {
     try {
         const { stID } = req.query;
-        console.log(stID);
 
         // Fetch sales team details
         const [results] = await db.query(`
@@ -2564,7 +2545,6 @@ router.get("/orders/by-sales-team", async (req, res) => {
             GROUP BY st.stID, e.E_Id, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic,
                      st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued;
         `, [stID]);
-        console.log(results);
 
         if (results.length === 0) {
             return res.status(404).json({ message: "No data found for this sales team member." });
@@ -2883,8 +2863,6 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
         );
         let lastStockId = lastStockResult[0]?.lastStockId || 0;
 
-        console.log("Last stock ID before insert:", lastStockId);
-
         const insertDetailQuery = `
             INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode, status, orID, datetime)
             VALUES (?, ?, ?, ?, 'Available', ?, NOW())`;
@@ -2918,7 +2896,6 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
 
             // Save barcode details in the database
             await db.query(insertDetailQuery, [itemId, lastStockId, receivedStockId, barcodeData, ""]);
-            console.log(`Inserted barcode for stock ID: ${lastStockId}`);
         }
 
         return res.status(201).json({
@@ -2970,7 +2947,6 @@ router.get("/find-cost", async (req, res) => {
 router.get("/find-completed-orders", async (req, res) => {
     try {
         const { district, date } = req.query;
-        console.log(district, date);
 
         if (!district) {
             return res.status(400).json({ success: false, message: "District is required." });
@@ -2982,7 +2958,6 @@ router.get("/find-completed-orders", async (req, res) => {
 
         // Parse the date in DD/MM/YYYY format and convert it to YYYY-MM-DD format
         const parsedDate = parseDate(date);
-        console.log(parsedDate);
 
         // 1️⃣ Fetch Completed Orders with Sales Team & Customer Details
         const orderQuery = `
@@ -3107,7 +3082,6 @@ router.get("/find-completed-orders", async (req, res) => {
 router.get("/find-completed-orders-by-date", async (req, res) => {
     try {
         const { date } = req.query;
-        console.log(date);
         if (!date) {
             return res.status(400).json({ success: false, message: "Date is required." });
         }
@@ -3117,8 +3091,6 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
         if (!parsedDate) {
             return res.status(400).json({ success: false, message: "Invalid date format. Use DD/MM/YYYY or YYYY-MM-DD." });
         }
-
-        console.log("Fetching completed orders for date:", parsedDate);
 
         // Fetch completed orders with customer details, sales team, and employee name
         const orderQuery = `
@@ -3211,7 +3183,6 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
 // Get subcat one detail by ca_id
 router.get("/getSubcategories", async (req, res) => {
     const { Ca_Id } = req.query;
-    console.log(Ca_Id);
     if (!Ca_Id) {
         return res.status(400).json({
             success: false,
@@ -3391,7 +3362,6 @@ router.post("/subcategory", upload.fields([{ name: "subcatone_img" }, { name: "s
 router.post("/add-supplier-item", async (req, res) => {
     try {
         const { I_Id, s_ID, unit_cost } = req.body;
-        console.log(I_Id, s_ID, unit_cost);
 
         // Validate input
         if (!I_Id || !s_ID || !unit_cost) {
@@ -3530,7 +3500,6 @@ router.get("/delivery-schedule", async (req, res) => {
 // Update change qty
 router.put("/change-quantity", async (req, res) => {
     const { orId, itemId, newQuantity, updatedPrice, booked } = req.body;
-    console.log(req.body);
 
     // Validation: Check required fields
     if (!orId || !itemId || newQuantity == null || updatedPrice == null) {
@@ -3543,7 +3512,6 @@ router.put("/change-quantity", async (req, res) => {
             "SELECT bookedQty, availableQty FROM Item WHERE I_Id = ?",
             [itemId]
         );
-        console.log("Current Item:", currentItem);
 
         if (!currentItem || currentItem.length === 0) {
             return res.status(404).json({ message: "Item not found." });
@@ -3731,8 +3699,6 @@ router.post("/issued-order", async (req, res) => {
 router.post("/isssued-items", async (req, res) => {
     const { orID, payStatus, selectedItems } = req.body;
 
-    console.log(req.body);
-
     if (!orID || !payStatus || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
@@ -3819,8 +3785,6 @@ router.post("/delivery-rates", async (req, res) => {
 // Save Scheduled dates
 router.post("/delivery-dates", async (req, res) => {
     try {
-        console.log(req.body);
-
         const { District, dates } = req.body; // Extract district and dates array
 
         if (!District || !Array.isArray(dates) || dates.length === 0) {
@@ -3860,7 +3824,6 @@ router.post("/delivery-dates", async (req, res) => {
 router.post("/employees", async (req, res) => {
     try {
         const { name, address, nic, dob, contact, job, basic, orderTarget , issuedTarget } = req.body;
-        console.log(req.body);
 
         if (!name || !address || !nic || !dob || !contact || !job || !basic ) {
             return res.status(400).json({
@@ -4084,7 +4047,6 @@ router.post("/promotion", upload.single('img'), async (req, res) => {
         req.file.buffer,  // The image file is in `req.file.buffer`
         req.body.date,
     ];
-    console.log(values);
 
     // try {
     //     const [result] = await db.query(sql, values);
@@ -4108,137 +4070,6 @@ router.post("/promotion", upload.single('img'), async (req, res) => {
 });
 
 // Update delivery note when order status issued (done)
-router.post("/delivery-done", async (req, res) => {
-    const { updatedOrders, deliveryNoteId } = req.body; // Extract orders array and delivery note ID
-
-    if (!updatedOrders || !Array.isArray(updatedOrders) || updatedOrders.length === 0) {
-        return res.status(400).json({ success: false, message: "No valid orders provided." });
-    }
-
-    try {
-        for (const order of updatedOrders) {
-            console.log(order);
-            const { OrID, orderStatus, deliveryStatus, received, reason, reasonType, rescheduledDate } = order;
-            console.log(OrID);
-
-            // Ensure the order exists before updating
-            const [rows] = await db.query(
-                "SELECT orID, custName, balance, payStatus, expectedDate, stID FROM Orders WHERE orID = ?",
-                [OrID]
-            );
-
-            if (!rows || rows.length === 0) {
-                throw new Error(`Order ${OrID} not found.`);
-            }
-
-            const existingOrder = rows[0]; // Fix: Get the first row properly
-
-            const { orID, custName, balance, payStatus, expectedDate, stID } = existingOrder;
-            console.log(orID, custName, balance, payStatus, expectedDate, stID);
-
-            // Ensure balance is valid
-            const updatedBalance = parseFloat(balance) || 0;
-            console.log(updatedBalance);
-
-            // Uncomment this when testing is done
-            await db.query(`UPDATE Orders SET advance = ?, balance = ?, payStatus = ? WHERE OrID = ?`, [updatedBalance, 0, 'Settled', OrID]);
-            await db.query(`UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?`, [updatedBalance, stID]);
-            await db.query(`INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())`, [OrID, updatedBalance]);
-            await db.query(`UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?`, ["Delivered", expectedDate, OrID]);
-            await db.query(`UPDATE delivery_note SET status = ? WHERE delNoID = ?`, ["Complete", deliveryNoteId]);
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: "Orders updated successfully.",
-        });
-
-    } catch (err) {
-        console.error("Error updating orders:", err.message);
-        return res.status(500).json({
-            success: false,
-            message: "Error updating orders",
-            details: err.message,
-        });
-    }
-});
-
-// Update delivery note when order status issued (done)
-
-// router.post("/delivery-return", async (req, res) => {
-//     const { updatedOrders, deliveryNoteId, driver } = req.body;
-//     if (!updatedOrders || !Array.isArray(updatedOrders) || updatedOrders.length === 0) {
-//         return res.status(400).json({ success: false, message: "No valid orders provided." });
-//     }
-//     try {
-//         for (const order of updatedOrders) {
-//             const { OrID, orderStatus, reason, reasonType, rescheduledDate, returnedItems, paymentDetails } = order;
-//             const { RPayment, driverbalance, customerbalance } = paymentDetails || {};
-//             const receivedAmount = Number(RPayment) || 0;
-//             const DrivBalance = Number(driverbalance) || 0;
-//             const CustBalanc = Number(customerbalance) || 0;
-//             const CustBalance = Number(CustBalanc) * (-1);
-//
-//             // Fetch order details
-//             const [rows] = await db.query(
-//                 "SELECT orID, c_ID, balance, advance, total, netTotal, discount, delPrice FROM Orders WHERE orID = ?",
-//                 [OrID]
-//             );
-//
-//             if (!rows || rows.length === 0) {
-//                 throw new Error(`Order ${OrID} not found.`);
-//             }
-//
-//             const { balance, advance, total, discount, delPrice, c_ID } = rows[0];
-//
-//             // Fetch customer and driver details
-//             const [customerData] = await db.query("SELECT balance FROM Customer WHERE c_ID = ?", [c_ID]);
-//             const customerBalance = Number(customerData[0]?.balance || 0) + CustBalance;
-//
-//             const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driver]);
-//             const driverNewBalance = Number(driverData[0]?.balance || 0) + DrivBalance;
-//
-//             // Calculate new order balance & advance
-//             const newAdvance = Number(advance || 0) + receivedAmount;
-//             const newBalance = Number(balance || 0) - receivedAmount;
-//
-//             console.log("Advance :"+newAdvance+"  Balance :"+newBalance);
-//             console.log("Customer :"+customerBalance+"  Driver :"+DrivBalance);
-//             for (const item of returnedItems) {
-//                 console.log(item);
-//             }
-//             if (orderStatus === "Issued" || orderStatus === "Returned" || orderStatus === "Cancelled") {
-//                 console.log(`${orderStatus} order processing...`);
-//
-//                 let payStatus = newBalance === 0 ? "Settled" : "N-Settled";
-//                 await db.query(
-//                     "UPDATE Orders SET advance = ?, balance = ?, payStatus = ?, orStatus = ? WHERE OrID = ?",
-//                     [newAdvance, newBalance, payStatus, orderStatus, OrID]
-//                 );
-//
-//                 await db.query("UPDATE delivery SET status = ?, delivery_Date = ? WHERE orID = ?", [orderStatus, rescheduledDate || rows[0].expectedDate, OrID]);
-//
-//                 if (orderStatus === "Returned" || orderStatus === "Cancelled") {
-//                     for (const item of returnedItems) {
-//                         await db.query("UPDATE m_s_r_detail SET status = ?, datetime = NOW() WHERE stock_Id = ? AND I_Id = ?",
-//                             [item.status, item.stockId, item.itemId]);
-//                         const [price] = await db.query("SELECT price FROM Item WHERE I_Id = ?", [item.itemId]);
-//                     }
-//                     const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
-//                     await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [OrID, reason]);
-//                 }
-//             }
-//             await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driver]);
-//             await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
-//             await db.query("INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())", [OrID, receivedAmount]);
-//             await db.query("UPDATE delivery_note SET status = ? WHERE delNoID = ?", ["Complete", deliveryNoteId]);
-//         }
-//         return res.status(200).json({ success: true, message: "Orders updated successfully." });
-//     } catch (err) {
-//         console.error("Error updating orders:", err.message);
-//         return res.status(500).json({ success: false, message: "Error updating orders", details: err.message });
-//     }
-// });
 router.post("/delivery-return", async (req, res) => {
     const { deliveryNoteId, orderIds } = req.body;
 
@@ -4293,7 +4124,6 @@ router.post("/delivery-payment", async (req, res) => {
     const DrivBalance = Number(driverbalance) || 0;
     const CustBalance = Number(customerbalance) || 0;
     const Loss = Number(profitOrLoss) || 0;
-    console.log(Loss);
 
     try {
         // Fetch order details
@@ -4330,8 +4160,6 @@ router.post("/delivery-payment", async (req, res) => {
         // Update order advance & balance
         let advance1 = Loss !== 0 ? Number(advance) + (receivedPayment + Loss) : Number(advance) + receivedPayment;
         let balance1 = Math.max(0, totalAmount - advance1);
-
-        console.log(advance1);
 
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
@@ -4419,7 +4247,6 @@ router.post("/delivery-payment", async (req, res) => {
 // get delivery schdule by date
 router.get("/check-delivery", async (req, res) => {
     const { date } = req.query; // Get date from query parameter
-    console.log(date);
 
     if (!date) {
         return res.status(400).json({ message: "Date is required" });
@@ -4431,7 +4258,6 @@ router.get("/check-delivery", async (req, res) => {
             "SELECT COUNT(*) AS count FROM delivery_schedule WHERE ds_date = ?",
             [date]
         );
-        console.log(result);
 
         // Reverse the logic: if count is 0, delivery is available; otherwise, it's not available
         const available = result[0].count === 0;
@@ -4501,10 +4327,7 @@ const generateNewId = async (table, column, prefix) => {
     const [rows] = await db.query(`SELECT ${column} FROM ${table} ORDER BY ${column} DESC LIMIT 1`);
     if (rows.length === 0) return `${prefix}_001`; // First entry
     const lastId = rows[0][column]; // Get last ID
-    console.log(lastId);
     const lastNum = parseInt(lastId.split("_")[1],10) + 1; // Extract number and increment
-    console.log(lastNum);
-    console.log(`${prefix}_${String(lastNum).padStart(3, "0")}`);
     return `${prefix}_${String(lastNum).padStart(3, "0")}`;
 };
 
