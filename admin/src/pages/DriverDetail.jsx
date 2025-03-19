@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Table } from "reactstrap";
+import { Container, Row, Col, Table, Spinner, Alert } from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
 import "../style/SaleteamDetail.css";
 
@@ -27,9 +27,10 @@ const DriverDetail = ({ driver }) => {
             if (!response.ok) throw new Error("Failed to fetch driver details.");
 
             const data = await response.json();
+            console.log(data.data);
 
-            setDriverDetails(data.data.driverDetails || null);
-            setDeliveryCharges(data.data.deliveryCharges || null);
+            setDriverDetails(data.data || {});
+            setDeliveryCharges(data.data.deliveryCharges || {});
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -69,57 +70,66 @@ const DriverDetail = ({ driver }) => {
                 <Container>
                     <Row>
                         <Col lg="12">
-                            {/* ✅ Show Error Message If Any, But Keep the Table Structure */}
-                            {error && <p className="error-text">Something went wrong: {error}</p>}
+                            {/* ✅ Show Loading Spinner */}
+                            {loading && (
+                                <div className="text-center">
+                                    <Spinner color="primary" />
+                                    <p>Loading driver details...</p>
+                                </div>
+                            )}
+
+                            {/* ✅ Show Error Message If Any */}
+                            {error && <Alert color="danger">⚠️ {error}</Alert>}
 
                             {/* Driver Details */}
-                            <div className="driver-details">
-                                <Table bordered className="driver-table">
-                                    <tbody>
-                                    <tr>
-                                        <td><strong>Employee Name</strong></td>
-                                        <td>{finalDriverDetails.employeeName}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Employee ID</strong></td>
-                                        <td>{finalDriverDetails.employeeId}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Phone</strong></td>
-                                        <td>{finalDriverDetails.employeeContact}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>NIC</strong></td>
-                                        <td>{finalDriverDetails.employeeNic}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Job</strong></td>
-                                        <td>{finalDriverDetails.employeeJob}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Balance</strong></td>
-                                        <td>Rs. {finalDriverDetails.balance}</td>
-                                    </tr>
-                                    </tbody>
-                                </Table>
-                            </div>
+                            {!loading && !error && (
+                                <>
+                                    <div className="driver-details">
+                                        <h4 className="sub-title">Driver Information</h4>
+                                        <Table bordered className="driver-table">
+                                            <tbody>
+                                            <tr>
+                                                <td><strong>Employee Name</strong></td>
+                                                <td>{finalDriverDetails.name}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Employee ID</strong></td>
+                                                <td>{finalDriverDetails.devID}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Phone</strong></td>
+                                                <td>{finalDriverDetails.contact}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>NIC</strong></td>
+                                                <td>{finalDriverDetails.nic}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Balance</strong></td>
+                                                <td>Rs. {finalDriverDetails.balance}</td>
+                                            </tr>
+                                            </tbody>
+                                        </Table>
+                                    </div>
 
-                            {/* Delivery Charges */}
-                            <div className="delivery-charges">
-                                <h4 className="sub-title">Delivery Charges</h4>
-                                <Table bordered className="charges-table">
-                                    <tbody>
-                                    <tr>
-                                        <td><strong>Daily Charge</strong></td>
-                                        <td>Rs. {finalDeliveryCharges.dailyCharge}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Monthly Charge</strong></td>
-                                        <td>Rs. {finalDeliveryCharges.monthlyCharge}</td>
-                                    </tr>
-                                    </tbody>
-                                </Table>
-                            </div>
+                                    {/* Delivery Charges */}
+                                    <div className="delivery-charges">
+                                        <h4 className="sub-title">Delivery Charges</h4>
+                                        <Table bordered className="charges-table">
+                                            <tbody>
+                                            <tr>
+                                                <td><strong>Daily Charge</strong></td>
+                                                <td>Rs. {finalDeliveryCharges.dailyCharge}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Monthly Charge</strong></td>
+                                                <td>Rs. {finalDeliveryCharges.monthlyCharge}</td>
+                                            </tr>
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                </>
+                            )}
                         </Col>
                     </Row>
                 </Container>
@@ -127,4 +137,5 @@ const DriverDetail = ({ driver }) => {
         </Helmet>
     );
 };
+
 export default DriverDetail;

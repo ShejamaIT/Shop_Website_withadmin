@@ -173,10 +173,14 @@ CREATE TABLE delivery(
     schedule_Date DATE,
     delivery_Date DATE,
     type VARCHAR(10),
+    devID VARCHAR(15),
+    driverBalance DOUBLE,
         CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                                    ON DELETE CASCADE ON UPDATE CASCADE,
         CONSTRAINT FOREIGN KEY (c_ID) REFERENCES Customer (c_ID)
-                                    ON DELETE CASCADE ON UPDATE CASCADE
+                                    ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (devID) REFERENCES driver (devID)
+                                            ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE accept_orders (
     ao_ID INT AUTO_INCREMENT PRIMARY KEY,
