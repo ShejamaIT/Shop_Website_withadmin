@@ -283,15 +283,15 @@ router.post("/orders", async (req, res) => {
         if (dvStatus === "Delivery" && !isAddressChanged) {
             const dvID = `DLV_${Date.now()}`;
             const deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?)`;
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type,driverBalance)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?,0)`;
 
             await db.query(deliveryQuery, [dvID, orID, address, district, Cust_id, expectedDate,dvtype]);
         }else if (dvStatus === "Delivery" && isAddressChanged){
             const dvID = `DLV_${Date.now()}`;
             const deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?)`;
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type,driverBalance)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?,0)`;
 
             await db.query(deliveryQuery, [dvID, orID, newAddress, district, Cust_id, expectedDate,dvtype]);
         }
@@ -2615,6 +2615,58 @@ router.get("/orders/by-sales-team", async (req, res) => {
     }
 });
 
+//Get in detail for a specific driver (devID)
+router.get("/drivers/details", async (req, res) => {
+    try {
+        const { devID } = req.query;
+
+        if (!devID) {
+            return res.status(400).json({ message: "Missing devID parameter." });
+        }
+
+        // ✅ Fetch Driver & Employee Details
+        const driverQuery = `
+            SELECT d.devID, d.balance, e.E_Id, e.name, e.address, e.nic, e.dob, e.contact, e.job, e.basic
+            FROM driver d
+            INNER JOIN Employee e ON d.E_ID = e.E_Id
+            WHERE d.devID = ?;
+        `;
+        const [driverResults] = await db.execute(driverQuery, [devID]);
+
+        if (driverResults.length === 0) {
+            return res.status(404).json({ message: "Driver not found." });
+        }
+
+        // ✅ Fetch & Calculate Delivery Charges
+        const chargeQuery = `
+            SELECT 
+                SUM(CASE WHEN DATE(delivery_Date) = CURDATE() THEN driverBalance ELSE 0 END) AS dailyCharge,
+                SUM(CASE WHEN MONTH(delivery_Date) = MONTH(CURDATE()) AND YEAR(delivery_Date) = YEAR(CURDATE()) THEN driverBalance ELSE 0 END) AS monthlyCharge
+            FROM delivery
+            WHERE devID = ?;
+        `;
+        const [chargeResults] = await db.execute(chargeQuery, [devID]);
+
+        const dailyCharge = chargeResults[0].dailyCharge || 0; // ✅ Only today's deliveries
+        const monthlyCharge = chargeResults[0].monthlyCharge || 0; // ✅ Current month's deliveries
+
+        // ✅ Prepare Final Response
+        const responseData = {
+            ...driverResults[0],
+            deliveryCharges: {
+                dailyCharge,
+                monthlyCharge,
+            }
+        };
+
+        return res.status(200).json({ success: true, data: responseData });
+
+    } catch (error) {
+        console.error("Error fetching driver details:", error.message);
+        return res.status(500).json({ message: "Error fetching driver details." });
+    }
+});
+
 // Get all categories
 router.get("/categories", async (req, res) => {
     try {
@@ -4193,8 +4245,8 @@ router.post("/delivery-payment", async (req, res) => {
         // Update delivery details
         if (dv_id) {
             await db.query(
-                "UPDATE delivery SET delivery_Date = ?, status = ? WHERE dv_id = ?",
-                [deliveryDate, deliveryStatus, dv_id]
+                "UPDATE delivery SET delivery_Date = ?, status = ? ,driverBalance =?, devID=? WHERE dv_id = ?",
+                [deliveryDate, deliveryStatus,DrivBalance,driverId, dv_id]
             );
         }
 
