@@ -53,14 +53,21 @@ const Dashboard = () => {
         fetchSalesTeamMembers();
     }, []);
 
-    // Calculate total sales
-    const dailyTotal = dailySales.reduce((acc, sale) => acc + (sale.sales ?? 0), 0);
-    const monthlyTotal = monthlySales.reduce((acc, sale) => acc + (sale.sales ?? 0), 0);
+    // Calculate total sales for issued and other sales
+    const dailyIssuedTotal = dailySales.reduce((acc, sale) => acc + (sale.issued_sales ?? 0), 0);
+    const dailyOtherTotal = dailySales.reduce((acc, sale) => acc + (sale.other_sales ?? 0), 0);
 
+    const monthlyIssuedTotal = monthlySales.reduce((acc, sale) => acc + (sale.issued_sales ?? 0), 0);
+    const monthlyOtherTotal = monthlySales.reduce((acc, sale) => acc + (sale.other_sales ?? 0), 0);
+
+// Create an array with the four total values
     const salesData = [
-        { name: "Daily Sales", value: dailyTotal },
-        { name: "Monthly Sales", value: monthlyTotal }
+        { name: "Daily Issued Sales", value: dailyIssuedTotal },
+        { name: "Daily Other Sales", value: dailyOtherTotal },
+        { name: "Monthly Issued Sales", value: monthlyIssuedTotal },
+        { name: "Monthly Other Sales", value: monthlyOtherTotal }
     ];
+
 
     // Handle coupon submission
     const handleCouponSubmit = async (e) => {
@@ -125,7 +132,8 @@ const Dashboard = () => {
                                 <tr>
                                     <th>ID</th>
                                     <th>Salesperson</th>
-                                    <th>Sales (Rs.)</th>
+                                    <th>Other Sales (Rs.)</th>
+                                    <th>Issued Sales (Rs.)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -133,12 +141,16 @@ const Dashboard = () => {
                                     <tr key={sale.stID}>
                                         <td>{sale.stID}</td>
                                         <td>{sale.salesperson_name}</td>
-                                        <td>{sale.sales ?? 0}</td>
+                                        <td>{sale.other_sales?? 0}</td>
+                                        <td>{sale.issued_sales?? 0}</td>
                                     </tr>
                                 ))}
                                 </tbody>
                             </Table>
-                            <h5>Total: Rs.{dailyTotal}</h5>
+                            <div>
+                                <h5>Total Daily Orders: Rs.{dailyOtherTotal}</h5>
+                                <h5>Total Daily Issued: Rs.{dailyIssuedTotal}</h5>
+                            </div>
                         </Col>
                         <Col md={6}>
                             <h4>Monthly Sales</h4>
@@ -147,7 +159,8 @@ const Dashboard = () => {
                                 <tr>
                                     <th>ID</th>
                                     <th>Salesperson</th>
-                                    <th>Sales (Rs.)</th>
+                                    <th>Other Sales (Rs.)</th>
+                                    <th>Issued Sales (Rs.)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -155,14 +168,30 @@ const Dashboard = () => {
                                     <tr key={sale.stID}>
                                         <td>{sale.stID}</td>
                                         <td>{sale.salesperson_name}</td>
-                                        <td>{sale.sales ?? 0}</td>
+                                        <td>{sale.other_sales?? 0}</td>
+                                        <td>{sale.issued_sales?? 0}</td>
                                     </tr>
                                 ))}
                                 </tbody>
                             </Table>
-                            <h5>Total: Rs.{monthlyTotal}</h5>
+                            <div>
+                                <h5>Total Monthly Orders: Rs.{monthlyOtherTotal}</h5>
+                                <h5>Total Monthly Issued: Rs.{monthlyIssuedTotal}</h5>
+                            </div>
+
                         </Col>
                     </Row>
+                    <h2>Sales Chart</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={salesData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="value" fill="#8884d8" />
+                        </BarChart>
+                    </ResponsiveContainer>
 
                     <Row>
                         <Col md={6}>
@@ -208,18 +237,6 @@ const Dashboard = () => {
                             </div>
                         </Col>
                     </Row>
-
-                    <h2>Sales Chart</h2>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={salesData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="value" fill="#8884d8" />
-                        </BarChart>
-                    </ResponsiveContainer>
                 </Container>
             </section>
         </Helmet>

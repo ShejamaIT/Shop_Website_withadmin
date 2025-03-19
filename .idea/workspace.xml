@@ -7,9 +7,7 @@
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" afterPath="$PROJECT_DIR$/testdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -229,7 +227,7 @@
       <workItem from="1742123319311" duration="7030000" />
       <workItem from="1742138102745" duration="725000" />
       <workItem from="1742183322248" duration="25680000" />
-      <workItem from="1742355935460" duration="3500000" />
+      <workItem from="1742355935460" duration="5714000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -574,7 +572,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="298" />
+    <option name="localTasksCounter" value="299" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -593,7 +591,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update with item stock" />
     <MESSAGE value="update delivery side" />
     <MESSAGE value="update delivery side api" />
     <MESSAGE value="rename file name" />
@@ -618,6 +615,7 @@
     <MESSAGE value="update with search part" />
     <MESSAGE value="update with tab name" />
     <MESSAGE value="update DeliveryNotes" />
-    <option name="LAST_COMMIT_MESSAGE" value="update DeliveryNotes" />
+    <MESSAGE value="update Dashboard with saleteam" />
+    <option name="LAST_COMMIT_MESSAGE" value="update Dashboard with saleteam" />
   </component>
 </project>
