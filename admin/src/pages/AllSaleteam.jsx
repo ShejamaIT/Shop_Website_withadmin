@@ -5,7 +5,7 @@ import {
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AddEmployee from "./AddEmployee";
 import SaleteamDetail from "./SaleteamDetail";
 import DriverDetail from "./DriverDetail";
@@ -15,6 +15,30 @@ const AllSaleteam = () => {
     const [activeSubTab, setActiveSubTab] = useState(""); // Tracks sub-tab for Sales Team
     const [salesteamMembers, setSalesteamMembers] = useState([]);
     const [drivers, setDrivers] = useState([]);
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Update both main tab and sub-tab from URL query parameters
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const tab = searchParams.get("tab");
+        const subTab = searchParams.get("subTab");
+
+        // Set the main tab based on the query parameter (or default to salesTeam)
+        if (tab && ["salesTeam", "drivers", "addEmployee"].includes(tab)) {
+            setMainTab(tab);
+        }
+
+        // Set the sub-tab based on the query parameter (or default to the first member's ID)
+        if (subTab) {
+            setActiveSubTab(subTab);
+        } else if (salesteamMembers.length > 0) {
+            setActiveSubTab(salesteamMembers[0].stID); // Default to first member
+        } else if (drivers.length > 0) {
+            setActiveSubTab(drivers[0].devID); // Default to first driver
+        }
+    }, [location, salesteamMembers, drivers]);
 
     useEffect(() => {
         fetchSalesTeamMembers();
@@ -28,7 +52,9 @@ const AllSaleteam = () => {
 
             if (data.data && data.data.length > 0) {
                 setSalesteamMembers(data.data);
-                setActiveSubTab(data.data[0].stID); // Set first member as default sub-tab
+                if (!activeSubTab) {
+                    setActiveSubTab(data.data[0].stID); // Set first member as default sub-tab
+                }
             }
         } catch (error) {
             console.error("Error fetching sales team members:", error);
@@ -42,11 +68,25 @@ const AllSaleteam = () => {
 
             if (data.data && data.data.length > 0) {
                 setDrivers(data.data);
-                setActiveSubTab(data.data[0].devID); // Set first member as default sub-tab
+                if (!activeSubTab) {
+                    setActiveSubTab(data.data[0].devID); // Set first driver as default sub-tab
+                }
             }
         } catch (error) {
             console.error("Error fetching drivers:", error);
         }
+    };
+
+    const handleMainTabChange = (tabName) => {
+        setMainTab(tabName);
+        setActiveSubTab(""); // Reset the sub-tab when changing the main tab
+        navigate(`?tab=${tabName}`); // Update the URL with the main tab query param
+    };
+
+    const handleSubTabChange = (subTabId) => {
+        setActiveSubTab(subTabId);
+        const newTab = mainTab === "salesTeam" ? "salesTeam" : "drivers"; // Keep the main tab the same
+        navigate(`?tab=${newTab}&subTab=${subTabId}`); // Update the URL with the sub-tab query param
     };
 
     const handleAddEmployee = (newEmployee) => {
@@ -63,7 +103,8 @@ const AllSaleteam = () => {
 
             setSalesteamMembers((prevMembers) => [...prevMembers, newSalesMember]);
             setMainTab("salesTeam"); // Switch to Sales Team tab if an employee is added
-            setActiveSubTab(newSalesMember.stID);
+            setActiveSubTab(newSalesMember.stID); // Set the new employee as the active sub-tab
+            navigate(`?tab=salesTeam&subTab=${newSalesMember.stID}`); // Update URL with the new sub-tab
         }
     };
 
@@ -80,7 +121,7 @@ const AllSaleteam = () => {
                         <NavItem>
                             <NavLink
                                 className={mainTab === "salesTeam" ? "active" : ""}
-                                onClick={() => setMainTab("salesTeam")}
+                                onClick={() => handleMainTabChange("salesTeam")}
                             >
                                 Sales Team
                             </NavLink>
@@ -88,7 +129,7 @@ const AllSaleteam = () => {
                         <NavItem>
                             <NavLink
                                 className={mainTab === "drivers" ? "active" : ""}
-                                onClick={() => setMainTab("drivers")}
+                                onClick={() => handleMainTabChange("drivers")}
                             >
                                 Drivers
                             </NavLink>
@@ -96,7 +137,7 @@ const AllSaleteam = () => {
                         <NavItem>
                             <NavLink
                                 className={mainTab === "addEmployee" ? "active" : ""}
-                                onClick={() => setMainTab("addEmployee")}
+                                onClick={() => handleMainTabChange("addEmployee")}
                             >
                                 Add Employee
                             </NavLink>
@@ -113,7 +154,7 @@ const AllSaleteam = () => {
                                             <NavItem key={member.stID}>
                                                 <NavLink
                                                     className={activeSubTab === member.stID ? "active" : ""}
-                                                    onClick={() => setActiveSubTab(member.stID)}
+                                                    onClick={() => handleSubTabChange(member.stID)}
                                                 >
                                                     {member.employeeName}
                                                 </NavLink>
@@ -143,7 +184,7 @@ const AllSaleteam = () => {
                                             <NavItem key={member.devID}>
                                                 <NavLink
                                                     className={activeSubTab === member.devID ? "active" : ""}
-                                                    onClick={() => setActiveSubTab(member.devID)}
+                                                    onClick={() => handleSubTabChange(member.devID)}
                                                 >
                                                     {member.employeeName}
                                                 </NavLink>
@@ -154,8 +195,7 @@ const AllSaleteam = () => {
                                     <TabContent activeTab={activeSubTab} className="mt-3">
                                         {drivers.map((member) => (
                                             <TabPane tabId={member.devID} key={member.devID}>
-                                                {/*<SaleteamDetail Saleteam={member} />*/}
-                                                <DriverDetail driver={member}/>
+                                                <DriverDetail driver={member} />
                                             </TabPane>
                                         ))}
                                     </TabContent>
@@ -163,7 +203,6 @@ const AllSaleteam = () => {
                             ) : (
                                 <p className="text-muted mt-3">No Drivers found.</p>
                             )}
-                            {/*<p className="mt-3">Drivers management will be implemented here.</p>*/}
                         </TabPane>
 
                         {/* === ADD EMPLOYEE TAB === */}

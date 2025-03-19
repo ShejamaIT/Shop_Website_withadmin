@@ -18,7 +18,6 @@ const AllSuppliers = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
             const data = await response.json();
-            console.log(data.suppliers);
             if (data.suppliers && data.suppliers.length > 0) {
                 setSuppliers(data.suppliers);
                 setActiveTab(data.suppliers[0].s_ID); // Set the first supplier as the default active tab
@@ -52,6 +51,15 @@ const AllSuppliers = () => {
                 <Container className="all-products">
                     {/* Tab Navigation */}
                     <Nav tabs>
+                        {/* Add Supplier Tab */}
+                        <NavItem>
+                            <NavLink
+                                className={activeTab === "addSupplier" ? "active" : ""}
+                                onClick={() => setActiveTab("addSupplier")}
+                            >
+                                Add New Supplier
+                            </NavLink>
+                        </NavItem>
                         {suppliers.map((supplier) => (
                             <NavItem key={supplier.s_ID}>
                                 <NavLink
@@ -62,26 +70,10 @@ const AllSuppliers = () => {
                                 </NavLink>
                             </NavItem>
                         ))}
-
-                        {/* Add Supplier Tab */}
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "addSupplier" ? "active" : ""}
-                                onClick={() => setActiveTab("addSupplier")}
-                            >
-                                Add New Supplier
-                            </NavLink>
-                        </NavItem>
                     </Nav>
 
                     {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        {suppliers.map((supplier) => (
-                            <TabPane tabId={supplier.s_ID} key={supplier.s_ID}>
-                                <SupplierDetails supplier={supplier} />
-                            </TabPane>
-                        ))}
-
                         {/* Add Supplier Tab Content */}
                         <TabPane tabId="addSupplier">
                             <Row>
@@ -90,6 +82,11 @@ const AllSuppliers = () => {
                                 </Col>
                             </Row>
                         </TabPane>
+                        {suppliers.map((supplier) => (
+                            <TabPane tabId={supplier.s_ID} key={supplier.s_ID}>
+                                <SupplierDetails supplier={supplier} />
+                            </TabPane>
+                        ))}
                     </TabContent>
                 </Container>
             </section>
