@@ -4426,18 +4426,28 @@ router.get("/sales/count", async (req, res) => {
         const formattedDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
         const firstDayOfMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
 
-        // Query to get daily sales total per sales team member with their names, ensuring missing values return 0
+        // Query to get daily sales total per sales team member with their names, sale price (netTotal - discount),
+        // categorized by 'issued' orders and 'other' statuses (pending, accepted, completed)
         const [dailySales] = await db.query(`
-            SELECT sales_team.stID, Employee.name AS salesperson_name, COALESCE(SUM(Orders.netTotal), 0) AS sales
+            SELECT 
+                sales_team.stID, 
+                Employee.name AS salesperson_name, 
+                COALESCE(SUM(CASE WHEN Orders.orStatus = 'issued' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS issued_sales,
+                COALESCE(SUM(CASE WHEN Orders.orStatus NOT IN ('issued') THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS other_sales
             FROM sales_team
             LEFT JOIN Orders ON sales_team.stID = Orders.stID AND Orders.orDate = ?
             LEFT JOIN Employee ON sales_team.E_Id = Employee.E_Id
             GROUP BY sales_team.stID, Employee.name;
         `, [formattedDate]);
 
-        // Query to get monthly sales total per sales team member with their names, ensuring missing values return 0
+        // Query to get monthly sales total per sales team member with their names, sale price (netTotal - discount),
+        // categorized by 'issued' orders and 'other' statuses (pending, accepted, completed)
         const [monthlySales] = await db.query(`
-            SELECT sales_team.stID, Employee.name AS salesperson_name, COALESCE(SUM(Orders.netTotal), 0) AS sales
+            SELECT 
+                sales_team.stID, 
+                Employee.name AS salesperson_name, 
+                COALESCE(SUM(CASE WHEN Orders.orStatus = 'issued' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS issued_sales,
+                COALESCE(SUM(CASE WHEN Orders.orStatus NOT IN ('issued') THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS other_sales
             FROM sales_team
             LEFT JOIN Orders ON sales_team.stID = Orders.stID AND Orders.orDate BETWEEN ? AND ?
             LEFT JOIN Employee ON sales_team.E_Id = Employee.E_Id
@@ -4445,7 +4455,7 @@ router.get("/sales/count", async (req, res) => {
         `, [firstDayOfMonth, formattedDate]);
 
         return res.status(200).json({
-            message: "Daily and monthly sales total fetched successfully.",
+            message: "Daily and monthly sales totals fetched successfully.",
             data: {
                 dailySales,
                 monthlySales
@@ -4456,6 +4466,7 @@ router.get("/sales/count", async (req, res) => {
         return res.status(500).json({ message: "Error fetching sales total." });
     }
 });
+
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
