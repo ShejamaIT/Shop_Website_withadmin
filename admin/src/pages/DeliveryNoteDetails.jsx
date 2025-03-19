@@ -266,6 +266,7 @@ const DeliveryNoteDetails = () => {
                 RPayment: payment?.RPayment || 0,
                 driverbalance: payment?.driverbalance || 0,
                 customerbalance: payment?.customerbalance || 0,
+                profitOrLoss: payment?.profitOrLoss,
             };
 
             // Construct updated order details
