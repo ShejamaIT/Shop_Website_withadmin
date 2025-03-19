@@ -27,7 +27,6 @@ const DriverDetail = ({ driver }) => {
             if (!response.ok) throw new Error("Failed to fetch driver details.");
 
             const data = await response.json();
-            console.log(data);
 
             setDriverDetails(data.data.driverDetails || null);
             setDeliveryCharges(data.data.deliveryCharges || null);

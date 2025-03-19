@@ -32,11 +32,6 @@ const AddEmployee = ({ onAddEmployee }) => {
             return;
         }
 
-        // if (formData.job === "Sales" && !formData.orderTarget && !formData.issuedTarget) {
-        //     toast.error("Please enter sales team details.");
-        //     return;
-        // }
-
         try {
             const employeeData = {
                 name: formData.name,
@@ -60,7 +55,6 @@ const AddEmployee = ({ onAddEmployee }) => {
 
             // 👉 Debugging: Log the raw response before parsing JSON
             const textResponse = await response.text();
-            console.log("Raw Response:", textResponse);
 
             // 👉 Parse JSON if response is valid
             const result = JSON.parse(textResponse);

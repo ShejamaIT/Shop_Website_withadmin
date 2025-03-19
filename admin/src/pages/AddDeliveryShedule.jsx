@@ -17,8 +17,6 @@ const AddDeliverySchedule = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates"); // Replace with your API endpoint
             const data = await response.json();
-            console.log(data)
-            console.log(data.data)
             if (data.success) {
                 setDbRates(data.data); // If data is available, store it in the dbRates state
 
@@ -127,7 +125,6 @@ const AddDeliverySchedule = () => {
                 body: JSON.stringify(scheduledDates),
             });
             const data = await response.json();
-            console.log("API Response:", data);
 
             if (data.success) {
                 toast.success("Delivery dates added successfully!")

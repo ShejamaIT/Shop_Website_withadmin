@@ -69,7 +69,6 @@ const AddCustomer = () => {
                 workPlace: formData.workPlace,
             };
 
-            console.log(customerData);
             const response = await fetch("http://localhost:5001/api/admin/main/customer", {
                 method: "POST",
                 headers: {

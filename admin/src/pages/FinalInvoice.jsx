@@ -35,7 +35,6 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
         }
     }, [advance]);
     const handlePrintAndSubmit = () => {
-        console.log(paymentType);
 
         // Ensure balance is 0 or paymentType is either 'COD' or 'Credit'
         if (balance !== 0 && (paymentType !== 'COD' && paymentType !== 'Credit')) {

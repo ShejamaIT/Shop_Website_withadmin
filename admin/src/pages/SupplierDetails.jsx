@@ -20,7 +20,6 @@ const SupplierDetails = ({ supplier }) => {
             try {
                 const response = await fetch("http://localhost:5001/api/admin/main/allitems");  // API to fetch all items
                 const data = await response.json();
-                console.log(data);
 
                 if (response.ok) {
                     setItemData(data); // Store all items for search
@@ -117,7 +116,6 @@ const SupplierDetails = ({ supplier }) => {
             warrantyPeriod: selectedItem.warrantyPeriod
         };
 
-        console.log("New Item to Add:", newItem);
 
         const itemDetail ={
             I_Id: selectedItem.I_Id,

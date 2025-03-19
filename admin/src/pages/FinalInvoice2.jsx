@@ -4,7 +4,6 @@ import { Button, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHe
 import { toast } from "react-toastify";
 
 const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => {
-    console.log(selectedOrder);
     const invoiceDate = new Date().toLocaleDateString();
     const [paymentType, setPaymentType] = useState(selectedOrder.payStatus);
     const [deliveryStatus, setDeliveryStatus] = useState(selectedOrder.deliveryStatus);
@@ -39,8 +38,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
     }, [advance]);
 
     const handlePrintAndSubmit = () => {
-        console.log(paymentType);
-
         // Ensure balance is 0 or paymentType is either 'COD' or 'Credit'
         if (balance !== 0 && (paymentType !== 'COD' && paymentType !== 'Credit')) {
             toast.error("If balance is not settled, the payment type must be either 'COD' or 'Credit'.");

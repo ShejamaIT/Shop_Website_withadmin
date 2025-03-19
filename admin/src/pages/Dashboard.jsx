@@ -23,7 +23,6 @@ const Dashboard = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/sales/count");
             const data = await response.json();
-            console.log(data.data);
 
             if (data.data) {
                 setDailySales(data.data.dailySales ?? []);
@@ -38,8 +37,6 @@ const Dashboard = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
             const data = await response.json();
-            console.log(data.data);
-
             if (data.data) {
                 setSalesteamMembers(data.data);
             }
@@ -67,7 +64,6 @@ const Dashboard = () => {
         { name: "Monthly Issued Sales", value: monthlyIssuedTotal },
         { name: "Monthly Other Sales", value: monthlyOtherTotal }
     ];
-
 
     // Handle coupon submission
     const handleCouponSubmit = async (e) => {

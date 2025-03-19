@@ -45,7 +45,6 @@ const OrderDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/order-details?orID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
             const data = await response.json();
-            console.log(data);
             setOrder(data.order);
             setFormData({
                 ...data.order,
@@ -132,7 +131,6 @@ const OrderDetails = () => {
         const updatedItemTotal = calculateItemTotal();
         const updatedBalance = calculateBalance(updatedTotal,formData.advance);
         const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance , netTotal:updatedItemTotal};
-        console.log(updatedData);
         let updatedGeneralOrder = null;
         try {
             // Step 1: Update order general details only if changed
@@ -268,7 +266,6 @@ const OrderDetails = () => {
 
             if (response.ok) {
                 fetchOrder();
-                console.log("Quantity updated successfully:", data.message);
                 alert("Quantity updated successfully!");
             } else {
                 console.error("Failed to update quantity:", data.message);
@@ -334,11 +331,6 @@ const OrderDetails = () => {
             ],
         }));
     };
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
-    };
-
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;

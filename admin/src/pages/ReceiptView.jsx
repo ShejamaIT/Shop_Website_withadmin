@@ -3,7 +3,6 @@ import html2canvas from "html2canvas";
 import "../style/receiptView.css";
 
 const ReceiptView = ({ receiptData, setShowReceiptView }) => {
-    console.log(receiptData);
     const currentDateTime = new Date().toLocaleString();
     const receiptRef = useRef(null);
 

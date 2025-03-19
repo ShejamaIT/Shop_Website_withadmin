@@ -69,7 +69,6 @@ const CompleteOrderDetails = () => {
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
-            console.log(data);
 
             // Ensure `isBooked` updates correctly
             const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);
@@ -134,7 +133,6 @@ const CompleteOrderDetails = () => {
                         (updatedFormData.discount || 0);
                 }
             }
-
             return updatedFormData;
         });
     };
@@ -255,7 +253,6 @@ const CompleteOrderDetails = () => {
     };
     const handleEditClick3 = (order) => {
         if (!order) return;
-        console.log(order);
         setSelectedOrder(order);
         setShowModal2(true);
     };
@@ -290,7 +287,6 @@ const CompleteOrderDetails = () => {
 
             if (response.ok) {
                 fetchOrder();
-                console.log("Quantity updated successfully:", data.message);
                 alert("Quantity updated successfully!");
             } else {
                 console.error("Failed to update quantity:", data.message);
@@ -303,10 +299,7 @@ const CompleteOrderDetails = () => {
     }
 
     const handleSubmit3 = async (formData) => {
-        console.log(order);
-        console.log(formData);
         setShowModal2(false);
-
         const updatedData = {
             orID: order.orderId,
             delStatus: formData.deliveryStatus,
@@ -338,7 +331,6 @@ const CompleteOrderDetails = () => {
 
             if (response.ok) {
                 // Successfully updated
-                console.log("Order updated successfully:", result.message);
                 // Optionally, handle success, e.g., navigate or show a success message
                 setReceiptData(updatedData);  // Set data for receipt
                 setShowReceiptView(true);         // Show receipt view
@@ -435,7 +427,6 @@ const CompleteOrderDetails = () => {
     };
 
     const handleAddItem = (selectedItems) => {
-        console.log(selectedItems);
         setFormData((prevFormData) => ({
             ...prevFormData,
             items: [

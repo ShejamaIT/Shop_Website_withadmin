@@ -46,8 +46,6 @@ const DeliveryNoteDetails = () => {
             }
 
             const data = await response.json();
-            console.log(data);
-
             setDeliveryNote(data.details);
             fetchDeliveryDates(data.details.district);
 
@@ -82,7 +80,6 @@ const DeliveryNoteDetails = () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-schedule?district=${district}`);
             const data = await response.json();
-            console.log(data);
             if (data.upcomingDates && data.upcomingDates.length > 0) {
                 setDeliveryDates(data.upcomingDates);
             } else {
@@ -137,9 +134,6 @@ const DeliveryNoteDetails = () => {
         }));
     };
     const handleItemStatusChange = (itemKey, newStatus) => {
-        console.log("Updating status for:", itemKey);
-        console.log("New status:", newStatus);
-
         setSelectedItemStatus(prev => ({
             ...prev,
             [itemKey]: newStatus,  // Update status for this specific item
@@ -245,9 +239,6 @@ const DeliveryNoteDetails = () => {
 
                 // Store the payment data using setPayment
                 setPayment(paymentData); // This will store the values in the state
-
-                console.log("Stored Payment Data:", paymentData);
-
                 setShowStockModal1(false); // Close modal after storing the values
             });
         });
@@ -289,8 +280,6 @@ const DeliveryNoteDetails = () => {
                     : [],
                 paymentDetails: orderPayment, // Include payment data
             };
-
-            console.log("Updating order:", updatedOrder);
 
             // API call to update the order
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-payment`, {

@@ -92,7 +92,6 @@ const AddItem = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting Form:", formData);
 
         try {
             const materialToSend = formData.material === "Other" ? formData.otherMaterial : formData.material;

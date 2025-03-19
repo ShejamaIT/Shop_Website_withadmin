@@ -107,7 +107,6 @@ const DeliveryNotes = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates");
             const data = await response.json();
-            console.log(data.data);
             setRoutes(["All", ...data.data.map(route => route.district)]);
         } catch (error) {
             toast.error("Error fetching routes.");
@@ -126,19 +125,14 @@ const DeliveryNotes = () => {
                 toast.error("Please select both route and delivery date.");
                 return;
             }
-            console.log(selectedRoute, date);
             let url;
             if (selectedRoute === "All") {
                 url = `http://localhost:5001/api/admin/main/find-completed-orders-by-date?date=${date}`;
             } else {
                 url = `http://localhost:5001/api/admin/main/find-completed-orders?district=${selectedRoute}&date=${date}`;
             }
-
-            console.log(url);
-
             const response = await fetch(url);
             const data = await response.json();
-            console.log(data.orders);
             setOrders(data.orders || []);
         } catch (error) {
             toast.error("Error fetching orders.");
@@ -179,7 +173,6 @@ const DeliveryNotes = () => {
     };
 
     const handleOrderSelection = (order) => {
-        console.log(order);
         const updatedOrders = selectedOrders.includes(order)
             ? selectedOrders.filter(o => o !== order)
             : [...selectedOrders, order];
@@ -242,7 +235,6 @@ const DeliveryNotes = () => {
     };
 
     const handleEditClick3 = (selectedOrders) => {
-        console.log(selectedOrders);
         if (!selectedOrders) return;
         setSelectedOrders(selectedOrders);
         setShowModal2(true);

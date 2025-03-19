@@ -11,12 +11,10 @@ const User = () => {
     const [loading, setLoading] = useState(false);
 
     const getAllUsers = async () => {
-        console.log("Fetching users...");
         setLoading(true);
         try {
             const response = await axios.get("http://localhost:4000/users", { withCredentials: true });
             setUsers(response.data.data);
-            console.log(users.length)
         } catch (err) {
             console.log(err);
         } finally {
@@ -24,7 +22,6 @@ const User = () => {
         }
     };
     const deleteUser = async (userId) => {
-        console.log(`Deleting user with id: ${userId}`);
         const headers = {
             'Content-Type': 'application/json',
         };

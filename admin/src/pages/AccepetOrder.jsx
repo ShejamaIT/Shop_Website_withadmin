@@ -375,7 +375,6 @@ const OrderDetails = () => {
     };
 
     const handleAddItem = (selectedItems) => {
-        console.log(selectedItems);
         setFormData((prevFormData) => ({
             ...prevFormData,
             items: [

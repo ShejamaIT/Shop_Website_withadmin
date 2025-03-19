@@ -6,8 +6,24 @@
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllSaleteam.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllSaleteam.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllSuppliers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllSuppliers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddCustomer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddCustomer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddDeliveryShedule.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddDeliveryShedule.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddEmployee.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddEmployee.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/ReceiptView.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ReceiptView.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Supplier.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Supplier.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SupplierDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/User.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/User.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -227,7 +243,7 @@
       <workItem from="1742123319311" duration="7030000" />
       <workItem from="1742138102745" duration="725000" />
       <workItem from="1742183322248" duration="25680000" />
-      <workItem from="1742355935460" duration="11194000" />
+      <workItem from="1742355935460" duration="14618000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -572,7 +588,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="301" />
+    <option name="localTasksCounter" value="302" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -591,7 +607,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="rename file name" />
     <MESSAGE value="change file place" />
     <MESSAGE value="update changeqty" />
     <MESSAGE value="update sale  team part" />
@@ -616,6 +631,7 @@
     <MESSAGE value="update Dashboard with saleteam" />
     <MESSAGE value="update Dashboard with saleteam orders" />
     <MESSAGE value="update saleteam with oders" />
-    <option name="LAST_COMMIT_MESSAGE" value="update saleteam with oders" />
+    <MESSAGE value="update view" />
+    <option name="LAST_COMMIT_MESSAGE" value="update view" />
   </component>
 </project>

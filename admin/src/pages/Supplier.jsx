@@ -33,7 +33,6 @@ const SupplierDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/item-suppliers?I_Id=${id}`);
             if (!response.ok) throw new Error("Failed to fetch supplier details.");
             const data = await response.json();
-            console.log(data);
             setSuppliers(data.suppliers);
         } catch (err) {
             console.error("Error fetching supplier details:", err);
@@ -48,7 +47,6 @@ const SupplierDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/item-detail?Id=${id}`);
             if (!response.ok) throw new Error("Failed to fetch item details.");
             const data = await response.json();
-            console.log(data);
             setItem(data.item);
         } catch (err) {
             console.error("Error fetching item details:", err);
