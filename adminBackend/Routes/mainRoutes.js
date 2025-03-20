@@ -4299,7 +4299,7 @@ router.post("/delivery-payment", async (req, res) => {
 // get delivery schdule by date
 router.get("/check-delivery", async (req, res) => {
     const { date } = req.query; // Get date from query parameter
-
+    console.log(date);
     if (!date) {
         return res.status(400).json({ message: "Date is required" });
     }
@@ -4386,6 +4386,7 @@ const generateNewId = async (table, column, prefix) => {
 // Helper function to parse date from DD/MM/YYYY format to YYYY-MM-DD format
 const parseDate = (dateStr) => {
     if (!dateStr) return null;
+    console.log(dateStr);
 
     let year, month, day;
 
@@ -4399,6 +4400,7 @@ const parseDate = (dateStr) => {
     } else {
         return null; // Invalid format
     }
+    console.log(day,month,year);
 
     // Validate components
     if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
