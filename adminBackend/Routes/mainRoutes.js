@@ -3498,8 +3498,60 @@ router.get("/delivery-rates", async (req, res) => {
 });
 
 // GET API to fetch delivery schedule by district
+// router.get("/delivery-schedule", async (req, res) => {
+//     const { district } = req.query; // Get district from query parameter
+//
+//     if (!district) {
+//         return res.status(400).json({ message: "District is required" });
+//     }
+//
+//     try {
+//         // Fetch all delivery dates for the given district
+//         const [result] = await db.query(
+//             "SELECT ds_date FROM delivery_schedule WHERE district = ?",
+//             [district]
+//         );
+//         console.log(result);
+//
+//         if (result.length === 0) {
+//             return res.status(404).json({ message: "District not found" });
+//         }
+//
+//         // Format the dates correctly without timezone shifts
+//         const upcomingDates = result
+//             .map(row => {
+//                 // Ensure the date remains in IST (India Standard Time)
+//                 const date = new Date(row.ds_date);
+//                 date.setHours(0, 0, 0, 0); // Remove any possible time shifts
+//
+//                 // Use toLocaleDateString('en-CA') to keep format as YYYY-MM-DD
+//                 const formattedDate = date.toLocaleDateString('en-CA');
+//
+//                 return formattedDate;
+//             })
+//             .filter(date => {
+//                 const today = new Date().toLocaleDateString('en-CA');
+//                 return date >= today; // Keep today's date and all upcoming dates
+//             })
+//             .sort((a, b) => new Date(a) - new Date(b)); // Sort dates
+//
+//         if (upcomingDates.length === 0) {
+//             return res.status(404).json({ message: "No upcoming delivery dates available" });
+//         }
+//
+//         return res.status(200).json({
+//             message: "Upcoming delivery dates found",
+//             district: district,
+//             upcomingDates: upcomingDates,
+//         });
+//     } catch (error) {
+//         console.error("Error fetching delivery schedule:", error.message);
+//         return res.status(500).json({ message: "Error fetching delivery schedule" });
+//     }
+// });
+
 router.get("/delivery-schedule", async (req, res) => {
-    const { district } = req.query; // Get district from query parameter
+    const { district } = req.query;
 
     if (!district) {
         return res.status(400).json({ message: "District is required" });
@@ -3511,28 +3563,20 @@ router.get("/delivery-schedule", async (req, res) => {
             "SELECT ds_date FROM delivery_schedule WHERE district = ?",
             [district]
         );
+        console.log(result);
 
         if (result.length === 0) {
             return res.status(404).json({ message: "District not found" });
         }
 
-        // Format the dates correctly without timezone shifts
+        // Format the dates correctly
         const upcomingDates = result
-            .map(row => {
-                // Ensure the date remains in IST (India Standard Time)
-                const date = new Date(row.ds_date);
-                date.setHours(0, 0, 0, 0); // Remove any possible time shifts
-
-                // Use toLocaleDateString('en-CA') to keep format as YYYY-MM-DD
-                const formattedDate = date.toLocaleDateString('en-CA');
-
-                return formattedDate;
-            })
+            .map(row => parseDate(row.ds_date)) // Use helper function
             .filter(date => {
-                const today = new Date().toLocaleDateString('en-CA');
+                const today = new Date().toISOString().split("T")[0];
                 return date >= today; // Keep today's date and all upcoming dates
             })
-            .sort((a, b) => new Date(a) - new Date(b)); // Sort dates
+            .sort((a, b) => new Date(a) - new Date(b));
 
         if (upcomingDates.length === 0) {
             return res.status(404).json({ message: "No upcoming delivery dates available" });
@@ -3548,6 +3592,7 @@ router.get("/delivery-schedule", async (req, res) => {
         return res.status(500).json({ message: "Error fetching delivery schedule" });
     }
 });
+
 
 // Update change qty
 router.put("/change-quantity", async (req, res) => {
