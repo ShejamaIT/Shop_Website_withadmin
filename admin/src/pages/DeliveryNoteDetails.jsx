@@ -271,7 +271,14 @@ const DeliveryNoteDetails = () => {
                 reason: reasons[order.OrID]?.reason || "N/A",
                 customReason: reasons[order.OrID]?.customReason || null,
                 rescheduledDate: selectedDeliveryDate || null,
-                returnedItems: (order.orderStatus === "Returned" || order.orderStatus === "Cancelled")
+                returnedItems: (order.orderStatus === "Returned")
+                    ? (selectedItems[order.OrID]?.map(itemKey => {
+                        const [itemId, stockId] = itemKey.split("-");
+                        const itemStatus = selectedItemStatus[itemKey] || "Available";
+                        return { itemId, stockId, status: itemStatus };
+                    }) || [])
+                    : [],
+                cancelledItems: (order.orderStatus === "Cancelled")
                     ? (selectedItems[order.OrID]?.map(itemKey => {
                         const [itemId, stockId] = itemKey.split("-");
                         const itemStatus = selectedItemStatus[itemKey] || "Available";

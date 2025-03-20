@@ -318,4 +318,14 @@ CREATE TABLE profit(
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                                      ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE ST_order_review(
+    stID VARCHAR(25),
+    year int,
+    month VARCHAR(15),
+    totalOrder DOUBLE,
+    totalIssued DOUBLE,
+        PRIMARY KEY (stID, year,month),
+        CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
+                                ON DELETE CASCADE ON UPDATE CASCADE
+);
 

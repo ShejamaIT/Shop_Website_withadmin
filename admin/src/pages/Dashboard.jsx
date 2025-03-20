@@ -58,9 +58,12 @@ const Dashboard = () => {
     const monthlyOtherTotal = monthlySales.reduce((acc, sale) => acc + (sale.other_sales ?? 0), 0);
 
 // Create an array with the four total values
-    const salesData = [
+    const DailysalesData = [
         { name: "Daily Issued Sales", value: dailyIssuedTotal },
-        { name: "Daily Other Sales", value: dailyOtherTotal },
+        { name: "Daily Other Sales", value: dailyOtherTotal }
+    ];
+
+    const MonthlysalesData = [
         { name: "Monthly Issued Sales", value: monthlyIssuedTotal },
         { name: "Monthly Other Sales", value: monthlyOtherTotal }
     ];
@@ -120,10 +123,10 @@ const Dashboard = () => {
                 </Row>
                 <Container className='dashboard'>
                     <h2>Sales Overview</h2>
-                    <Row>
+                    <Row >
                         <Col md={6}>
                             <h4>Daily Sales</h4>
-                            <Table striped>
+                            <Table striped bordered className="items-table">
                                 <thead>
                                 <tr>
                                     <th>ID</th>
@@ -143,14 +146,14 @@ const Dashboard = () => {
                                 ))}
                                 </tbody>
                             </Table>
-                            <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <h5>Total Daily Orders: Rs.{dailyOtherTotal}</h5>
                                 <h5>Total Daily Issued: Rs.{dailyIssuedTotal}</h5>
                             </div>
                         </Col>
                         <Col md={6}>
                             <h4>Monthly Sales</h4>
-                            <Table striped>
+                            <Table striped bordered className="items-table">
                                 <thead>
                                 <tr>
                                     <th>ID</th>
@@ -170,24 +173,43 @@ const Dashboard = () => {
                                 ))}
                                 </tbody>
                             </Table>
-                            <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <h5>Total Monthly Orders: Rs.{monthlyOtherTotal}</h5>
                                 <h5>Total Monthly Issued: Rs.{monthlyIssuedTotal}</h5>
                             </div>
 
                         </Col>
                     </Row>
-                    <h2>Sales Chart</h2>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={salesData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="value" fill="#8884d8" />
-                        </BarChart>
-                    </ResponsiveContainer>
+
+                    <Row>
+                        <Col md={6}>
+                            <h2>Daily Sales Chart</h2>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={DailysalesData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Bar dataKey="value" fill="#4CAF50" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </Col>
+
+                        <Col md={6}>
+                            <h2>Monthly Sales Chart</h2>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={MonthlysalesData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Bar dataKey="value" fill="#2196F3" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </Col>
+                    </Row>
 
                     <Row>
                         <Col md={6}>

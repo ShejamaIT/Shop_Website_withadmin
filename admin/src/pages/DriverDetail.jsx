@@ -6,6 +6,8 @@ import "../style/SaleteamDetail.css";
 const DriverDetail = ({ driver }) => {
     const [driverDetails, setDriverDetails] = useState(null);
     const [deliveryCharges, setDeliveryCharges] = useState(null);
+    const [thisMonthNotes, setThisMonthNotes] = useState([]);
+    const [lastMonthNotes, setLastMonthNotes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -31,38 +33,18 @@ const DriverDetail = ({ driver }) => {
 
             setDriverDetails(data.data || {});
             setDeliveryCharges(data.data.deliveryCharges || {});
+            setThisMonthNotes(data.data.deliveryNotes.thisMonth || []);
+            setLastMonthNotes(data.data.deliveryNotes.lastMonth || []);
             setLoading(false);
         } catch (err) {
             setError(err.message);
-            setDriverDetails(null); // ✅ Reset data on failure
+            setDriverDetails(null);
             setDeliveryCharges(null);
+            setThisMonthNotes([]);
+            setLastMonthNotes([]);
             setLoading(false);
         }
     };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : "N/A";
-    };
-
-    // **Default Structure Data in Case of API Failure**
-    const defaultDriverDetails = {
-        employeeName: "N/A",
-        employeeId: "N/A",
-        employeeContact: "N/A",
-        employeeNic: "N/A",
-        employeeJob: "N/A",
-        balance: "N/A"
-    };
-
-    const defaultDeliveryCharges = {
-        dailyCharge: "N/A",
-        monthlyCharge: "N/A"
-    };
-
-    // **Use Data or Default Values**
-    const finalDriverDetails = driverDetails || defaultDriverDetails;
-    const finalDeliveryCharges = deliveryCharges || defaultDeliveryCharges;
 
     return (
         <Helmet title={`Driver Detail`}>
@@ -70,61 +52,75 @@ const DriverDetail = ({ driver }) => {
                 <Container>
                     <Row>
                         <Col lg="12">
-                            {/* ✅ Show Loading Spinner */}
                             {loading && (
                                 <div className="text-center">
                                     <Spinner color="primary" />
                                     <p>Loading driver details...</p>
                                 </div>
                             )}
-
-                            {/* ✅ Show Error Message If Any */}
                             {error && <Alert color="danger">⚠️ {error}</Alert>}
-
-                            {/* Driver Details */}
                             {!loading && !error && (
                                 <>
                                     <div className="driver-details">
                                         <h4 className="sub-title">Driver Information</h4>
                                         <Table bordered className="driver-table">
                                             <tbody>
-                                            <tr>
-                                                <td><strong>Employee Name</strong></td>
-                                                <td>{finalDriverDetails.name}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Employee ID</strong></td>
-                                                <td>{finalDriverDetails.devID}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Phone</strong></td>
-                                                <td>{finalDriverDetails.contact}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>NIC</strong></td>
-                                                <td>{finalDriverDetails.nic}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Balance</strong></td>
-                                                <td>Rs. {finalDriverDetails.balance}</td>
-                                            </tr>
+                                            <tr><td><strong>Employee Name</strong></td><td>{driverDetails.name}</td></tr>
+                                            <tr><td><strong>Employee ID</strong></td><td>{driverDetails.devID}</td></tr>
+                                            <tr><td><strong>Phone</strong></td><td>{driverDetails.contact}</td></tr>
+                                            <tr><td><strong>NIC</strong></td><td>{driverDetails.nic}</td></tr>
+                                            <tr><td><strong>Balance</strong></td><td>Rs. {driverDetails.balance}</td></tr>
                                             </tbody>
                                         </Table>
                                     </div>
-
-                                    {/* Delivery Charges */}
-                                    <div className="delivery-charges">
-                                        <h4 className="sub-title">Delivery Charges</h4>
-                                        <Table bordered className="charges-table">
+                                    {/*<div className="delivery-charges">*/}
+                                    {/*    <h4 className="sub-title">Delivery Charges</h4>*/}
+                                    {/*    <Table bordered className="charges-table">*/}
+                                    {/*        <tbody>*/}
+                                    {/*        <tr><td><strong>Daily Charge</strong></td><td>Rs. {deliveryCharges.dailyCharge}</td></tr>*/}
+                                    {/*        <tr><td><strong>Monthly Charge</strong></td><td>Rs. {deliveryCharges.monthlyCharge}</td></tr>*/}
+                                    {/*        </tbody>*/}
+                                    {/*    </Table>*/}
+                                    {/*</div>*/}
+                                    <div className="delivery-notes">
+                                        <h4 className="sub-title">Delivery Notes - This Month</h4>
+                                        <Table striped bordered className="items-table">
+                                            <thead>
+                                            <tr>
+                                                <th>Delivery Note ID</th>
+                                                <th>District</th>
+                                                <th>Hire</th>
+                                            </tr>
+                                            </thead>
                                             <tbody>
+                                            {thisMonthNotes.length > 0 ? thisMonthNotes.map(note => (
+                                                <tr key={note.delNoID}>
+                                                    <td>{note.delNoID}</td>
+                                                    <td>{note.district}</td>
+                                                    <td>Rs. {note.hire}</td>
+                                                </tr>
+                                            )) : <tr><td colSpan="3">No records found</td></tr>}
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                    <div className="delivery-notes">
+                                        <h4 className="sub-title">Delivery Notes - Last Month</h4>
+                                        <Table striped bordered className="items-table">
+                                            <thead>
                                             <tr>
-                                                <td><strong>Daily Charge</strong></td>
-                                                <td>Rs. {finalDeliveryCharges.dailyCharge}</td>
+                                                <th>Delivery Note ID</th>
+                                                <th>District</th>
+                                                <th>Hire</th>
                                             </tr>
-                                            <tr>
-                                                <td><strong>Monthly Charge</strong></td>
-                                                <td>Rs. {finalDeliveryCharges.monthlyCharge}</td>
-                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {lastMonthNotes.length > 0 ? lastMonthNotes.map(note => (
+                                                <tr key={note.delNoID}>
+                                                    <td>{note.delNoID}</td>
+                                                    <td>{note.district}</td>
+                                                    <td>Rs. {note.hire}</td>
+                                                </tr>
+                                            )) : <tr><td colSpan="3">No records found</td></tr>}
                                             </tbody>
                                         </Table>
                                     </div>
