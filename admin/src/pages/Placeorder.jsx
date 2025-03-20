@@ -128,6 +128,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             // Mock API call to check delivery availability (Replace with real API)
             const response = await fetch(`http://localhost:5001/api/admin/main/check-delivery?date=${date}`);
             const result = await response.json();
+            console.log(result.available);
             setAvailableDelivery(result.available);
         } catch (error) {
             console.error("Error checking delivery availability:", error);
