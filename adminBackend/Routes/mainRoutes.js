@@ -2650,12 +2650,29 @@ router.get("/drivers/details", async (req, res) => {
         const dailyCharge = chargeResults[0].dailyCharge || 0; // ✅ Only today's deliveries
         const monthlyCharge = chargeResults[0].monthlyCharge || 0; // ✅ Current month's deliveries
 
+        // ✅ Fetch Delivery Notes for This Month & Last Month
+        const deliveryNoteQuery = `
+            SELECT delNoID, district, hire, MONTH(date) AS month, YEAR(date) AS year
+            FROM delivery_note
+            WHERE devID = ? AND status = 'complete'
+            AND (MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())
+                OR MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE()));
+        `;
+        const [deliveryNotes] = await db.execute(deliveryNoteQuery, [devID]);
+
+        const thisMonthNotes = deliveryNotes.filter(note => note.month === new Date().getMonth() + 1);
+        const lastMonthNotes = deliveryNotes.filter(note => note.month === new Date().getMonth());
+
         // ✅ Prepare Final Response
         const responseData = {
             ...driverResults[0],
             deliveryCharges: {
                 dailyCharge,
                 monthlyCharge,
+            },
+            deliveryNotes: {
+                thisMonth: thisMonthNotes,
+                lastMonth: lastMonthNotes,
             }
         };
 
@@ -2666,6 +2683,7 @@ router.get("/drivers/details", async (req, res) => {
         return res.status(500).json({ message: "Error fetching driver details." });
     }
 });
+
 
 // Get all categories
 router.get("/categories", async (req, res) => {
@@ -3602,7 +3620,6 @@ router.get("/delivery-schedule", async (req, res) => {
     }
 });
 
-
 // Update change qty
 router.put("/change-quantity", async (req, res) => {
     const { orId, itemId, newQuantity, updatedPrice, booked } = req.body;
@@ -4223,8 +4240,9 @@ router.post("/delivery-return", async (req, res) => {
 
 // update payment in delivery note
 router.post("/delivery-payment", async (req, res) => {
-    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems } = req.body;
+    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems,cancelledItems } = req.body;
     const { RPayment, customerbalance, driverbalance, profitOrLoss } = paymentDetails || {};
+    console.log(returnedItems,cancelledItems);
 
     const receivedPayment = Number(RPayment) || 0;
     const DrivBalance = Number(driverbalance) || 0;
@@ -4278,69 +4296,83 @@ router.post("/delivery-payment", async (req, res) => {
                 }
             }
         }
-
-        NetTotal1 = Math.max(0, NetTotal1); // Ensure NetTotal1 is valid
-
-        let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
-        let reducePrice = newTotal - totalAmount;
-        customerBalance += NetTotal1 === 0 ? receivedPayment : reducePrice;
-
-        // Update customer & driver balance
-        await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
-        await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
-
-        // Update order details
-        const payStatus = (NetTotal1 === 0 || balance1 === 0) ? "Settled" : "N-Settled";
-        await db.query(
-            "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
-            [balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
-        );
-
-        // Update delivery details
-        if (dv_id) {
-            await db.query(
-                "UPDATE delivery SET delivery_Date = ?, status = ? ,driverBalance =?, devID=? WHERE dv_id = ?",
-                [deliveryDate, deliveryStatus,DrivBalance,driverId, dv_id]
-            );
-        }
-
         // Process returned items
-        if (returnedItems && Array.isArray(returnedItems)) {
-            for (const item of returnedItems) {
+        if (cancelledItems && Array.isArray(cancelledItems)) {
+            for (const item of cancelledItems) {
                 if (!item.itemId || !item.stockId) continue;
 
-                await db.query("UPDATE m_s_r_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
-
-                const [srdData] = await db.query("SELECT srd_Id FROM m_s_r_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
-                const srdId = srdData?.[0]?.srd_Id || null;
-
-                if (srdId) {
-                    await db.query("UPDATE issued_items SET status = ? WHERE srd_Id = ? AND orID = ?", [item.status, srdId, orderId]);
+                const [price] = await db.query("SELECT price FROM Item WHERE I_Id = ?", [item.itemId]);
+                if (price?.[0]?.price) {
+                    NetTotal1 -= parseFloat(price[0].price);
                 }
             }
         }
 
-        // Update balance in delivery note orders
-        await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
+        NetTotal1 = Math.max(0, NetTotal1); // Ensure NetTotal1 is valid
 
-        // Insert payment record
-        await db.query("INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())", [orderId, receivedPayment]);
+        // Update order details
+        const payStatus = (NetTotal1 === 0 || balance1 === 0) ? "Settled" : "N-Settled";
 
-        // Update sales team records
-        if (orderStatus !== "Returned" && orderStatus !== "Cancelled") {
-            await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
-        }
+        let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
+        let reducePrice = newTotal - totalAmount;
+        customerBalance += NetTotal1 === 0 ? receivedPayment : reducePrice;
+        console.log(balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId);
 
-        // Insert loss profit if applicable
-        if (Loss !== 0) {
-            await db.query("INSERT INTO profit (orID, amount) VALUES (?, ?)", [orderId, Loss]);
-        }
+        // Update customer & driver balance
+        // await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
+        // await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
+        //
 
-        // Insert return or canceled orders only if necessary
-        if (orderStatus === "Returned" || orderStatus === "Cancelled") {
-            const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
-            await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [orID, reason]);
-        }
+        // await db.query(
+        //     "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
+        //     [balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
+        // );
+        //
+        // // Update delivery details
+        // if (dv_id) {
+        //     await db.query(
+        //         "UPDATE delivery SET delivery_Date = ?, status = ? ,driverBalance =?, devID=? WHERE dv_id = ?",
+        //         [deliveryDate, deliveryStatus,DrivBalance,driverId, dv_id]
+        //     );
+        // }
+        //
+        // // Process returned items
+        // if (returnedItems && Array.isArray(returnedItems)) {
+        //     for (const item of returnedItems) {
+        //         if (!item.itemId || !item.stockId) continue;
+        //
+        //         await db.query("UPDATE m_s_r_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
+        //
+        //         const [srdData] = await db.query("SELECT srd_Id FROM m_s_r_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
+        //         const srdId = srdData?.[0]?.srd_Id || null;
+        //
+        //         if (srdId) {
+        //             await db.query("UPDATE issued_items SET status = ? WHERE srd_Id = ? AND orID = ?", [item.status, srdId, orderId]);
+        //         }
+        //     }
+        // }
+        //
+        // // Update balance in delivery note orders
+        // await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
+        //
+        // // Insert payment record
+        // await db.query("INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())", [orderId, receivedPayment]);
+        //
+        // // Update sales team records
+        // if (orderStatus !== "Returned" && orderStatus !== "Cancelled") {
+        //     await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
+        // }
+        //
+        // // Insert loss profit if applicable
+        // if (Loss !== 0) {
+        //     await db.query("INSERT INTO profit (orID, amount) VALUES (?, ?)", [orderId, Loss]);
+        // }
+        //
+        // // Insert return or canceled orders only if necessary
+        // if (orderStatus === "Returned" || orderStatus === "Cancelled") {
+        //     const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
+        //     await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [orID, reason]);
+        // }
 
         res.json({ success: true, message: "Payment processed successfully." });
 
@@ -4426,6 +4458,9 @@ router.get("/sales/count", async (req, res) => {
         return res.status(500).json({ message: "Error fetching sales total." });
     }
 });
+
+
+// pass sale team value to review in month end
 
 
 // Function to generate new ida
