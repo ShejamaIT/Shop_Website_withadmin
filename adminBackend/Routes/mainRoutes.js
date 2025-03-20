@@ -3569,12 +3569,21 @@ router.get("/delivery-schedule", async (req, res) => {
             return res.status(404).json({ message: "District not found" });
         }
 
-        // Format the dates correctly
+        // Convert UTC timestamps to IST and format them as YYYY-MM-DD
         const upcomingDates = result
-            .map(row => parseDate(row.ds_date)) // Use helper function
+            .map(row => {
+                const utcDate = new Date(row.ds_date);
+
+                // Convert to IST (UTC +5:30)
+                const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
+
+                return istDate.toISOString().split("T")[0]; // Extract YYYY-MM-DD
+            })
             .filter(date => {
-                const today = new Date().toISOString().split("T")[0];
-                return date >= today; // Keep today's date and all upcoming dates
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
+
+                return new Date(date) >= today; // Keep today's and upcoming dates
             })
             .sort((a, b) => new Date(a) - new Date(b));
 
