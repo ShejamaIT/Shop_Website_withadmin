@@ -18,8 +18,7 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-2-25.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-3-25.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -243,7 +242,7 @@
       <workItem from="1742355935460" duration="14618000" />
       <workItem from="1742374281838" duration="9331000" />
       <workItem from="1742463838506" duration="9620000" />
-      <workItem from="1742528525536" duration="20502000" />
+      <workItem from="1742528525536" duration="21485000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -588,7 +587,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="309" />
+    <option name="localTasksCounter" value="310" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

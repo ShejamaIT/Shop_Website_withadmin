@@ -29,6 +29,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [showDropdown, setShowDropdown] = useState(false); // Controls dropdown visibility
     const [isNewCustomer, setIsNewCustomer] = useState(true); // State to determine new or previous customer
     const [availableDelivery, setAvailableDelivery] = useState(null);
+    const [orderType, setOrderType] = useState("On-site");
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -121,8 +122,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             }));
         }
     };
-
-
     const checkDeliveryAvailability = async (date) => {
         try {
             // Mock API call to check delivery availability (Replace with real API)
@@ -224,9 +223,11 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         const orderData = {
             ...formData,
             isNewCustomer,
+            orderType,
             items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
             deliveryPrice, discountAmount, totalItemPrice, totalBillPrice,
         };
+        console.log(orderData);
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders", {
                 method: "POST",
@@ -303,7 +304,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setSearchTerm("");
         setFilteredCustomers([]);
     };
-
     const setCustomer = (value) => {
         if (value === "New") {
             setIsNewCustomer(true);
@@ -320,6 +320,31 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 <Col lg="8" className="mx-auto">
                     <Form onSubmit={handleSubmit}>
                         <div className='order-details'>
+                            <h5 className='text-center underline'>Order Type</h5><hr/><Row>
+                            <Label className="fw-bold">Select Order Type</Label>
+                            <div className="d-flex gap-3">
+                                <Label>
+                                    <Input
+                                        type="radio"
+                                        name="orderType"
+                                        value="On-site"
+                                        checked={orderType === "On-site"} // Check if this radio button is selected
+                                        onChange={() => setOrderType("On-site")} // Update the state when selected
+                                    />{" "}
+                                    On-Site
+                                </Label>
+                                <Label>
+                                    <Input
+                                        type="radio"
+                                        name="orderType"
+                                        value="Walking"
+                                        checked={orderType === "Walking"} // Check if this radio button is selected
+                                        onChange={() => setOrderType("Walking")} // Update the state when selected
+                                    />{" "}
+                                    Walking
+                                </Label>
+                            </div>
+                        </Row>
                             <h5 className='text-center underline'>Customer Details</h5><hr/>
                             <Row>
                                 <Label className="fw-bold">Select Customer Type</Label>
@@ -341,7 +366,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                         /> Previous Customer
                                     </Label>
                                 </div>
-
                             </Row>
                             {!isNewCustomer && (
                                 <>
