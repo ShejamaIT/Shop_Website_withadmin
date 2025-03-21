@@ -2036,18 +2036,7 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
 // Update order in invoice part
 router.put("/update-invoice", async (req, res) => {
     try {
-
-        const {
-            orID,
-            isPickup,
-            netTotal,
-            totalAdvance,
-            previousAdvance,
-            balance,
-            addedAdvance,
-            updatedDeliveryCharge,
-            updatedDiscount
-        } = req.body;
+        const {orID, isPickup, netTotal, totalAdvance, previousAdvance, balance, addedAdvance, updatedDeliveryCharge, updatedDiscount} = req.body;
 
         if (!orID) {
             return res.status(400).json({
@@ -2684,7 +2673,6 @@ router.get("/drivers/details", async (req, res) => {
     }
 });
 
-
 // Get all categories
 router.get("/categories", async (req, res) => {
     try {
@@ -3010,6 +2998,40 @@ router.get("/find-cost", async (req, res) => {
     } catch (error) {
         console.error("Error fetching cost:", error.message);
         return res.status(500).json({ message: "Error fetching cost" });
+    }
+});
+
+// Find subcategory by Ca_Id
+router.get("/find-subcategory", async (req, res) => {
+    try {
+        const { Ca_Id } = req.query;
+
+        // Validate query parameter
+        if (!Ca_Id) {
+            return res.status(400).json({ message: "Ca_Id is required." });
+        }
+
+        // Query the database
+        const [subcategories] = await db.query(`
+            SELECT sb_c_id, subcategory 
+            FROM subCat_one 
+            WHERE Ca_Id = ?;
+        `, [Ca_Id]);
+
+        // If no subcategories found, return a 404 response
+        if (subcategories.length === 0) {
+            return res.status(404).json({ message: "No subcategories found for this Ca_Id." });
+        }
+
+        // Return the result
+        return res.status(200).json({
+            message: "Subcategories found.",
+            data: subcategories,  // Returns an array of subcategories
+        });
+
+    } catch (error) {
+        console.error("Error fetching subcategories:", error.message);
+        return res.status(500).json({ message: "Error fetching subcategories" });
     }
 });
 
@@ -3394,13 +3416,13 @@ router.post("/subcategory", upload.fields([{ name: "subcatone_img" }, { name: "s
             "INSERT INTO subCat_one (sb_c_id, subcategory, Ca_Id, img) VALUES (?, ?, ?, ?)",
             [sb_c_id, sub_one, Ca_Id, subcatone_img]
         );
-
+    //
         let sb_cc_id = null;
         if (sub_two !== "None" && subcattwo_img) {
             // Generate ID for subCat_two
             sb_cc_id = await generateNewId("subCat_two", "sb_cc_id", "S2");
 
-            // Insert into subCat_two
+            //Insert into subCat_two
             await db.query(
                 "INSERT INTO subCat_two (sb_cc_id, subcategory, sb_c_id, img) VALUES (?, ?, ?, ?)",
                 [sb_cc_id, sub_two, sb_c_id, subcattwo_img]
@@ -3516,58 +3538,6 @@ router.get("/delivery-rates", async (req, res) => {
 });
 
 // GET API to fetch delivery schedule by district
-// router.get("/delivery-schedule", async (req, res) => {
-//     const { district } = req.query; // Get district from query parameter
-//
-//     if (!district) {
-//         return res.status(400).json({ message: "District is required" });
-//     }
-//
-//     try {
-//         // Fetch all delivery dates for the given district
-//         const [result] = await db.query(
-//             "SELECT ds_date FROM delivery_schedule WHERE district = ?",
-//             [district]
-//         );
-//         console.log(result);
-//
-//         if (result.length === 0) {
-//             return res.status(404).json({ message: "District not found" });
-//         }
-//
-//         // Format the dates correctly without timezone shifts
-//         const upcomingDates = result
-//             .map(row => {
-//                 // Ensure the date remains in IST (India Standard Time)
-//                 const date = new Date(row.ds_date);
-//                 date.setHours(0, 0, 0, 0); // Remove any possible time shifts
-//
-//                 // Use toLocaleDateString('en-CA') to keep format as YYYY-MM-DD
-//                 const formattedDate = date.toLocaleDateString('en-CA');
-//
-//                 return formattedDate;
-//             })
-//             .filter(date => {
-//                 const today = new Date().toLocaleDateString('en-CA');
-//                 return date >= today; // Keep today's date and all upcoming dates
-//             })
-//             .sort((a, b) => new Date(a) - new Date(b)); // Sort dates
-//
-//         if (upcomingDates.length === 0) {
-//             return res.status(404).json({ message: "No upcoming delivery dates available" });
-//         }
-//
-//         return res.status(200).json({
-//             message: "Upcoming delivery dates found",
-//             district: district,
-//             upcomingDates: upcomingDates,
-//         });
-//     } catch (error) {
-//         console.error("Error fetching delivery schedule:", error.message);
-//         return res.status(500).json({ message: "Error fetching delivery schedule" });
-//     }
-// });
-
 router.get("/delivery-schedule", async (req, res) => {
     const { district } = req.query;
 
@@ -4459,9 +4429,7 @@ router.get("/sales/count", async (req, res) => {
     }
 });
 
-
 // pass sale team value to review in month end
-
 
 // Function to generate new ida
 const generateNewId = async (table, column, prefix) => {
