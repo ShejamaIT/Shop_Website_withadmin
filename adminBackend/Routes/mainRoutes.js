@@ -2610,15 +2610,25 @@ router.get("/orders/by-sales-team", async (req, res) => {
             WHERE sc.stID = ?;
         `, [stID]);
 
+        // Fetch total advance for the current month
+        const [advanceResults] = await db.query(`
+            SELECT SUM(amount) AS totalAdvance
+            FROM advance_payment
+            WHERE E_Id IN (SELECT E_Id FROM sales_team WHERE stID = ?) AND MONTH(dateTime) = MONTH(CURDATE()) AND YEAR(dateTime) = YEAR(CURDATE());
+        `, [stID]);
+
+        const totalAdvance = advanceResults[0].totalAdvance || 0; // Total advance for the current month
+
         return res.status(200).json({
-            message: "Sales team details, orders for current and last month, and coupons fetched successfully.",
+            message: "Sales team details, orders for current and last month, coupons, and total advance fetched successfully.",
             data: {
                 memberDetails,
                 ordersThisMonthIssued: ordersThisMonthIssued.length > 0 ? ordersThisMonthIssued : [],
                 ordersThisMonthOther: ordersThisMonthOther.length > 0 ? ordersThisMonthOther : [],
                 ordersLastMonthIssued: ordersLastMonthIssued.length > 0 ? ordersLastMonthIssued : [],
                 ordersLastMonthOther: ordersLastMonthOther.length > 0 ? ordersLastMonthOther : [],
-                coupons: coupons.length > 0 ? [coupons[0]] : [] // ✅ Ensure only one coupon is included
+                coupons: coupons.length > 0 ? [coupons[0]] : [], // ✅ Ensure only one coupon is included
+                totalAdvance // Add total advance for the current month
             }
         });
 
@@ -2627,6 +2637,7 @@ router.get("/orders/by-sales-team", async (req, res) => {
         return res.status(500).json({ message: "Error fetching orders, member details, and coupons." });
     }
 });
+
 
 //Get in detail for a specific driver (devID)
 router.get("/drivers/details", async (req, res) => {
@@ -2676,6 +2687,16 @@ router.get("/drivers/details", async (req, res) => {
         const thisMonthNotes = deliveryNotes.filter(note => note.month === new Date().getMonth() + 1);
         const lastMonthNotes = deliveryNotes.filter(note => note.month === new Date().getMonth());
 
+        // ✅ Fetch Total Advance for Current Month
+        const advanceQuery = `
+            SELECT SUM(amount) AS totalAdvance
+            FROM advance_payment
+            WHERE E_Id = ? AND MONTH(dateTime) = MONTH(CURDATE()) AND YEAR(dateTime) = YEAR(CURDATE());
+        `;
+        const [advanceResults] = await db.execute(advanceQuery, [devID]);
+
+        const totalAdvance = advanceResults[0].totalAdvance || 0; // Total advance for the current month
+
         // ✅ Prepare Final Response
         const responseData = {
             ...driverResults[0],
@@ -2686,7 +2707,8 @@ router.get("/drivers/details", async (req, res) => {
             deliveryNotes: {
                 thisMonth: thisMonthNotes,
                 lastMonth: lastMonthNotes,
-            }
+            },
+            totalAdvance, // Add total advance amount to the response
         };
 
         return res.status(200).json({ success: true, data: responseData });
@@ -2696,6 +2718,7 @@ router.get("/drivers/details", async (req, res) => {
         return res.status(500).json({ message: "Error fetching driver details." });
     }
 });
+
 
 // Get all categories
 router.get("/categories", async (req, res) => {
@@ -4367,7 +4390,8 @@ router.post("/delivery-payment", async (req, res) => {
         let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
         let reducePrice = newTotal - totalAmount;
         customerBalance += NetTotal1 === 0 ? receivedPayment : reducePrice;
-        console.log(balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId);
+        // Generate unique Advance Payment ID
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
         // Update customer & driver balance
         // await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
@@ -4407,7 +4431,8 @@ router.post("/delivery-payment", async (req, res) => {
         // await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
         //
         // // Insert payment record
-        // await db.query("INSERT INTO Payment (orID, amount, dateTime) VALUES (?, ?, NOW())", [orderId, receivedPayment]);
+        // await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
+        // await db.query("INSERT INTO payment (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
         //
         // // Update sales team records
         // if (orderStatus !== "Returned" && orderStatus !== "Cancelled") {
