@@ -455,6 +455,7 @@ router.get("/alldeliverynotes", async (req, res) => {
             delNoID: deliverynote.delNoID,
             driverName: deliverynote.driverName,
             date: deliverynote.date,
+            status: deliverynote.status,
             district: deliverynote.district
         }));
 
@@ -666,7 +667,7 @@ router.get("/accept-order-details", async (req, res) => {
                 color: item.color,
                 quantity: item.qty,
                 unitPrice: item.unitPrice,
-                totalPrice: item.tprice,
+                totalPrice: Number(item.qty) * Number(item.unitPrice),
                 booked: item.bookedQty > 0,
                 bookedQuantity: item.bookedQty,
                 availableQuantity: item.availableQty,
@@ -727,6 +728,7 @@ router.get("/accept-order-details", async (req, res) => {
 router.get("/issued-order-details", async (req, res) => {
     try {
         const { orID } = req.query;
+        console.log(orID);
         if (!orID) {
             return res.status(400).json({ success: false, message: "Order ID is required" });
         }
@@ -734,14 +736,12 @@ router.get("/issued-order-details", async (req, res) => {
         // 1️⃣ Fetch Order Info with Customer and Sales Team Details
         const orderQuery = `
             SELECT
-                o.OrID, o.orDate, o.customerEmail, o.contact1, o.contact2, o.advance, o.balance, o.payStatus,
-                o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, o.ordertype, o.stID,
-                o.expectedDate, o.specialNote, c.title, c.FtName, c.SrName, c.address,
-                s.stID, e.name AS salesEmployeeName
+                o.OrID, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount, o.netTotal, o.total,
+                o.advance, o.balance, o.payStatus, o.stID, o.expectedDate, o.specialNote, o.ordertype,
+                c.title, c.FtName, c.SrName, c.email, c.contact1, c.contact2, c.balance AS customerBalance,
+                c.category, c.type, c.t_name, c.occupation, c.workPlace
             FROM Orders o
-                     LEFT JOIN Customer c ON o.c_ID = c.c_ID
-                     LEFT JOIN sales_team s ON o.stID = s.stID
-                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID
             WHERE o.OrID = ?`;
 
         const [orderResult] = await db.query(orderQuery, [orID]);
@@ -756,72 +756,91 @@ router.get("/issued-order-details", async (req, res) => {
                 od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
                 i.bookedQty, i.availableQty
             FROM Order_Detail od
-                     JOIN Item i ON od.I_Id = i.I_Id
+            JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
-        // 3️⃣ Fetch Issued Items for this Order from `m_s_r_detail`
+        // 3️⃣ Fetch Issued Items for this Order from `issued_items` (Now including `date` field)
         const issuedItemsQuery = `
             SELECT
-                m.I_Id, i.I_name, m.stock_Id, m.sr_ID, m.barcode, m.status, m.datetime
-            FROM m_s_r_detail m
-                     JOIN Item i ON m.I_Id = i.I_Id
-            WHERE m.orID = ?`;
+                ii.delNoID, ii.orID, ii.srd_Id, ii.status, ii.date AS issuedDate, m.barcode
+            FROM issued_items ii
+            JOIN m_s_r_detail m ON ii.srd_Id = m.srd_Id
+            WHERE ii.orID = ?`;
 
         const [issuedItemsResult] = await db.query(issuedItemsQuery, [orID]);
 
-        // 4️⃣ Format Customer Name with Title
+        // 4️⃣ Fetch Order Payment History
+        const paymentHistoryQuery = `
+            SELECT
+                op.op_ID, op.orID, op.amount, op.dateTime
+            FROM order_payment op
+            WHERE op.orID = ?`;
+
+        const [paymentHistoryResult] = await db.query(paymentHistoryQuery, [orID]);
+
+        // 5️⃣ Format Customer Name with Title
         const customerName = [orderData.title, orderData.FtName, orderData.SrName].filter(Boolean).join(" ");
 
-        // 5️⃣ Initialize Response Object
+        // 6️⃣ Initialize Response Object
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate:formatDate(orderData.orDate),
+            orderDate: formatDate(orderData.orDate),
             customerId: orderData.c_ID,
             customerName: customerName, // Title added to customer name
-            address: orderData.address,
-            ordertype: orderData.ordertype,
-            phoneNumber: orderData.contact1,
-            optionalNumber: orderData.contact2,
+            customerEmail: orderData.email, // Customer email
+            customerPhone: orderData.contact1, // Primary contact number
+            customerOptionalPhone: orderData.contact2, // Secondary contact number
+            customerBalance: orderData.customerBalance, // Customer balance
+            customerCategory: orderData.category, // Customer category
+            customerType: orderData.type, // Customer type
+            customerOccupation: orderData.occupation, // Customer occupation
+            customerWorkplace: orderData.workPlace, // Customer workplace
             orderStatus: orderData.orStatus,
             deliveryStatus: orderData.delStatus,
             deliveryCharge: orderData.delPrice,
             discount: orderData.discount,
             totalPrice: orderData.total,
+            netTotal: orderData.netTotal,
             advance: orderData.advance,
             balance: orderData.balance,
             payStatus: orderData.payStatus,
             expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
-            salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: itemsResult.map(item => ({
                 itemId: item.I_Id,
                 itemName: item.I_name,
                 color: item.color,
                 quantity: item.qty,
                 unitPrice: item.unitPrice,
-                totalPrice: item.tprice,
+                totalPrice: Number(item.qty) * Number(item.unitPrice),
                 bookedQuantity: item.bookedQty,
                 availableQuantity: item.availableQty
             })),
             issuedItems: issuedItemsResult.map(item => ({
-                itemId: item.I_Id,
-                itemName: item.I_name,
-                stockId: item.stock_Id,
-                srID: item.sr_ID,
-                barcode: item.barcode.toString('base64'), // Convert to readable format if needed
+                delNoID: item.delNoID,
+                srdId: item.srd_Id,
                 status: item.status,
-                datetime: item.datetime
+                issuedDate: formatDate(item.issuedDate), // Now returning the issued date
+                barcode: item.barcode
+            })),
+            paymentHistory: paymentHistoryResult.map(payment => ({
+                paymentId: payment.op_ID,
+                amount: payment.amount,
+                paymentDate: formatDate(payment.dateTime)
             }))
         };
 
-        // 6️⃣ Fetch Delivery Info If Order is for Delivery
+        // 7️⃣ Fetch Delivery Info If Order is for Delivery
         if (orderData.delStatus === "Delivery") {
             const deliveryQuery = `
-                SELECT dv_id, address, district, contact, status, schedule_Date
-                FROM delivery
-                WHERE orID = ?`;
+                SELECT 
+                    dv.dv_id, dv.address, dv.district, dv.status, dv.schedule_Date, dv.delivery_Date, 
+                    dv.type, dv.devID, dv.driverBalance, c.contact1 AS customerContact
+                FROM delivery dv
+                LEFT JOIN Customer c ON dv.c_ID = c.c_ID
+                WHERE dv.orID = ?`;
 
             const [deliveryResult] = await db.query(deliveryQuery, [orID]);
 
@@ -834,6 +853,10 @@ router.get("/issued-order-details", async (req, res) => {
                     status: deliveryData.status,
                     scheduleDate: new Date(deliveryData.schedule_Date).toISOString().split("T")[0],
                     deliveryDate: deliveryData.delivery_Date ? formatDate(deliveryData.delivery_Date) : null,
+                    type: deliveryData.type,
+                    driverId: deliveryData.devID,
+                    driverBalance: deliveryData.driverBalance,
+                    customerContact: deliveryData.customerContact // Customer contact
                 };
             }
         }
@@ -1059,7 +1082,7 @@ router.get("/order-details", async (req, res) => {
                 color: item.color,
                 quantity: item.qty,
                 unitPrice: item.unitPrice,
-                totalPrice: item.tprice,
+                totalPrice: Number(item.qty) * Number(item.unitPrice),
                 booked: item.bookedQty > 0,
                 bookedQuantity: item.bookedQty,
                 availableQuantity: item.availableQty,
@@ -2068,6 +2091,7 @@ router.put("/update-invoice", async (req, res) => {
                 message: "Order ID is required",
             });
         }
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
         // 🔍 Check if the order exists
         const orderCheckQuery = `SELECT * FROM Orders WHERE OrID = ?`;
@@ -2110,11 +2134,9 @@ router.put("/update-invoice", async (req, res) => {
 
         // 💰 Insert a new entry into the Payment table
         if (addedAdvance > 0) {
-            const insertPaymentQuery = `
-                INSERT INTO Payment (orID, amount, dateTime)
-                VALUES (?, ?, ?)`;
-            const paymentParams = [orID, addedAdvance, currentDateTime];
-            await db.query(insertPaymentQuery, paymentParams);
+            await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orID, addedAdvance]);
+            await db.query("INSERT INTO payment (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", addedAdvance]);
+
         }
 
         return res.status(200).json({
@@ -2638,7 +2660,6 @@ router.get("/orders/by-sales-team", async (req, res) => {
     }
 });
 
-
 //Get in detail for a specific driver (devID)
 router.get("/drivers/details", async (req, res) => {
     try {
@@ -2718,7 +2739,6 @@ router.get("/drivers/details", async (req, res) => {
         return res.status(500).json({ message: "Error fetching driver details." });
     }
 });
-
 
 // Get all categories
 router.get("/categories", async (req, res) => {
@@ -3792,7 +3812,7 @@ router.post("/issued-order", async (req, res) => {
             );
 
             await db.query(
-                `INSERT INTO issued_items (orID, srd_Id, status) VALUES (?, ?, 'Issued')`,
+                `INSERT INTO issued_items (orID, srd_Id, status,date) VALUES (?, ?, 'Issued',NOW())`,
                 [orID, item.srd_Id]
             );
         });
@@ -3874,7 +3894,7 @@ router.post("/isssued-items", async (req, res) => {
                 [orID, item.srd_Id]
             );
             await db.query(
-                `INSERT INTO issued_items (orID,srd_Id,status) VALUES (?,?,'Issued')`,
+                `INSERT INTO issued_items (orID,srd_Id,status,date) VALUES (?,?,'Issued',NOW())`,
                 [orID, item.srd_Id]
             );
         }
@@ -4394,61 +4414,60 @@ router.post("/delivery-payment", async (req, res) => {
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
         // Update customer & driver balance
-        // await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
-        // await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
-        //
+        await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
+        await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
 
-        // await db.query(
-        //     "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
-        //     [balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
-        // );
-        //
-        // // Update delivery details
-        // if (dv_id) {
-        //     await db.query(
-        //         "UPDATE delivery SET delivery_Date = ?, status = ? ,driverBalance =?, devID=? WHERE dv_id = ?",
-        //         [deliveryDate, deliveryStatus,DrivBalance,driverId, dv_id]
-        //     );
-        // }
-        //
-        // // Process returned items
-        // if (returnedItems && Array.isArray(returnedItems)) {
-        //     for (const item of returnedItems) {
-        //         if (!item.itemId || !item.stockId) continue;
-        //
-        //         await db.query("UPDATE m_s_r_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
-        //
-        //         const [srdData] = await db.query("SELECT srd_Id FROM m_s_r_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
-        //         const srdId = srdData?.[0]?.srd_Id || null;
-        //
-        //         if (srdId) {
-        //             await db.query("UPDATE issued_items SET status = ? WHERE srd_Id = ? AND orID = ?", [item.status, srdId, orderId]);
-        //         }
-        //     }
-        // }
-        //
-        // // Update balance in delivery note orders
-        // await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
-        //
-        // // Insert payment record
-        // await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
-        // await db.query("INSERT INTO payment (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
-        //
-        // // Update sales team records
-        // if (orderStatus !== "Returned" && orderStatus !== "Cancelled") {
-        //     await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
-        // }
-        //
-        // // Insert loss profit if applicable
-        // if (Loss !== 0) {
-        //     await db.query("INSERT INTO profit (orID, amount) VALUES (?, ?)", [orderId, Loss]);
-        // }
-        //
-        // // Insert return or canceled orders only if necessary
-        // if (orderStatus === "Returned" || orderStatus === "Cancelled") {
-        //     const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
-        //     await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [orID, reason]);
-        // }
+        await db.query(
+            "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
+            [balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
+        );
+
+        // Update delivery details
+        if (dv_id) {
+            await db.query(
+                "UPDATE delivery SET delivery_Date = ?, status = ? ,driverBalance =?, devID=? WHERE dv_id = ?",
+                [deliveryDate, deliveryStatus,DrivBalance,driverId, dv_id]
+            );
+        }
+
+        // Process returned items
+        if (returnedItems && Array.isArray(returnedItems)) {
+            for (const item of returnedItems) {
+                if (!item.itemId || !item.stockId) continue;
+
+                await db.query("UPDATE m_s_r_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
+
+                const [srdData] = await db.query("SELECT srd_Id FROM m_s_r_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
+                const srdId = srdData?.[0]?.srd_Id || null;
+
+                if (srdId) {
+                    await db.query("UPDATE issued_items SET status = ? WHERE srd_Id = ? AND orID = ?", [item.status, srdId, orderId]);
+                }
+            }
+        }
+
+        // Update balance in delivery note orders
+        await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
+
+        // Insert payment record
+        await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
+        await db.query("INSERT INTO payment (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
+
+        // Update sales team records
+        if (orderStatus !== "Returned" && orderStatus !== "Cancelled") {
+            await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
+        }
+
+        // Insert loss profit if applicable
+        if (Loss !== 0) {
+            await db.query("INSERT INTO profit (orID, amount) VALUES (?, ?)", [orderId, Loss]);
+        }
+
+        // Insert return or canceled orders only if necessary
+        if (orderStatus === "Returned" || orderStatus === "Cancelled") {
+            const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
+            await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [orID, reason]);
+        }
 
         res.json({ success: true, message: "Payment processed successfully." });
 
