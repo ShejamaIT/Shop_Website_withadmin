@@ -2068,6 +2068,7 @@ router.put("/update-invoice", async (req, res) => {
                 message: "Order ID is required",
             });
         }
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
         // 🔍 Check if the order exists
         const orderCheckQuery = `SELECT * FROM Orders WHERE OrID = ?`;
@@ -2110,11 +2111,9 @@ router.put("/update-invoice", async (req, res) => {
 
         // 💰 Insert a new entry into the Payment table
         if (addedAdvance > 0) {
-            const insertPaymentQuery = `
-                INSERT INTO Payment (orID, amount, dateTime)
-                VALUES (?, ?, ?)`;
-            const paymentParams = [orID, addedAdvance, currentDateTime];
-            await db.query(insertPaymentQuery, paymentParams);
+            await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orID, addedAdvance]);
+            await db.query("INSERT INTO payment (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", addedAdvance]);
+
         }
 
         return res.status(200).json({
@@ -2638,7 +2637,6 @@ router.get("/orders/by-sales-team", async (req, res) => {
     }
 });
 
-
 //Get in detail for a specific driver (devID)
 router.get("/drivers/details", async (req, res) => {
     try {
@@ -2718,7 +2716,6 @@ router.get("/drivers/details", async (req, res) => {
         return res.status(500).json({ message: "Error fetching driver details." });
     }
 });
-
 
 // Get all categories
 router.get("/categories", async (req, res) => {
