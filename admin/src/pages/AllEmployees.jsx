@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-    Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button
-} from "reactstrap";
+import {Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button} from "reactstrap";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../components/header/navBar";
@@ -9,12 +7,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AddEmployee from "./AddEmployee";
 import SaleteamDetail from "./SaleteamDetail";
 import DriverDetail from "./DriverDetail";
+import AdancePayment from "./AdancePayment";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
     const [activeSubTab, setActiveSubTab] = useState(""); // Tracks sub-tab for Sales Team
     const [salesteamMembers, setSalesteamMembers] = useState([]);
     const [drivers, setDrivers] = useState([]);
+    const [paymentSubTab, setPaymentSubTab] = useState("advance");
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -114,6 +114,10 @@ const AllEmployees = () => {
         }
     }, [mainTab, drivers, activeSubTab, navigate]);
 
+    const handlePaymentSubTabChange = (subTabName) => {
+        setPaymentSubTab(subTabName);
+        navigate(`?tab=payment&paySubTab=${subTabName}`);
+    };
 
     return (
         <Helmet title="All-Saleteam">
@@ -147,6 +151,14 @@ const AllEmployees = () => {
                                 onClick={() => handleMainTabChange("drivers")}
                             >
                                 Drivers
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={mainTab === "payment" ? "active" : ""}
+                                onClick={() => handleMainTabChange("payment")}
+                            >
+                                Salary
                             </NavLink>
                         </NavItem>
                     </Nav>
@@ -218,6 +230,28 @@ const AllEmployees = () => {
                             ) : (
                                 <p className="text-muted mt-3">No Drivers found.</p>
                             )}
+                        </TabPane>
+                        <TabPane tabId="payment">
+                            <Nav tabs className="mt-3">
+                                <NavItem>
+                                    <NavLink className={paymentSubTab === "advance" ? "active" : ""} onClick={() => handlePaymentSubTabChange("advance")}>
+                                        Advance
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className={paymentSubTab === "monthlySalary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("monthlySalary")}>
+                                        Monthly Salary
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+                            <TabContent activeTab={paymentSubTab} className="mt-3">
+                                <TabPane tabId="advance">
+                                    <AdancePayment />
+                                </TabPane>
+                                <TabPane tabId="monthlySalary">
+                                    <p>Monthly Salary Details...</p>
+                                </TabPane>
+                            </TabContent>
                         </TabPane>
                     </TabContent>
                 </Container>

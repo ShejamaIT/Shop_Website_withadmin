@@ -23,6 +23,7 @@ import ReturnedOrderDetails from "../pages/ReturnedOrder";
 import AllCustomer from "../pages/AllCustomers";
 import PlaceOrder from "../pages/Placeorder";
 import AllEmployees from "../pages/AllEmployees";
+import AdvancePayment from "../pages/AdancePayment";
 const Router = () => {
     return(
         <Routes>
@@ -50,6 +51,7 @@ const Router = () => {
             <Route path="saleteam-detail/:id" element={<SaleteamDetail />} />
             <Route path="create-delivery-note" element={<DeliveryNotes />} />
             <Route path="place-order" element={<PlaceOrder />} />
+            <Route path="advance" element={<AdvancePayment />} />
         </Routes>
     ) ;
 };

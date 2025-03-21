@@ -48,6 +48,7 @@ const AddOtherDetails = () => {
 
     const handleSubcategoryChange = (e) => {
         const value = e.target.value;
+        console.log(value);
         setSelectedSubcategory(value);
         setFormData((prev) => ({ ...prev, sub_one: value === "New" ? "" : value }));
     };
@@ -120,8 +121,6 @@ const AddOtherDetails = () => {
             toast.error("Failed to add sub-category.");
         }
     };
-
-
 
     return (
         <Container className="add-item-container">
