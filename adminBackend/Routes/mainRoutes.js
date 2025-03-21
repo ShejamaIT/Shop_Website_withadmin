@@ -3403,26 +3403,41 @@ router.post("/category", async (req, res) => {
 
 // Save New Sub category one and two with image
 router.post("/subcategory", upload.fields([{ name: "subcatone_img" }, { name: "subcattwo_img" }]), async (req, res) => {
-    const { Ca_Id, sub_one, sub_two } = req.body;
+    const { Ca_Id, sub_one, sub_two, isNewSubOne } = req.body;
     const subcatone_img = req.files["subcatone_img"] ? req.files["subcatone_img"][0].buffer : null;
     const subcattwo_img = req.files["subcattwo_img"] ? req.files["subcattwo_img"][0].buffer : null;
 
     try {
-        // Generate ID for subCat_one
-        const sb_c_id = await generateNewId("subCat_one", "sb_c_id", "S1");
+        let sb_c_id;
 
-        // Insert into subCat_one
-        await db.query(
-            "INSERT INTO subCat_one (sb_c_id, subcategory, Ca_Id, img) VALUES (?, ?, ?, ?)",
-            [sb_c_id, sub_one, Ca_Id, subcatone_img]
-        );
-    //
+        if (isNewSubOne === "true") {
+            // Generate ID for new subCat_one
+            sb_c_id = await generateNewId("subCat_one", "sb_c_id", "S1");
+
+            // Insert new subcategory into subCat_one
+            await db.query(
+                "INSERT INTO subCat_one (sb_c_id, subcategory, Ca_Id, img) VALUES (?, ?, ?, ?)",
+                [sb_c_id, sub_one, Ca_Id, subcatone_img]
+            );
+        } else {
+            // Fetch existing sb_c_id for selected subcategory
+            const [existingSub] = await db.query(
+                "SELECT sb_c_id FROM subCat_one WHERE subcategory = ? AND Ca_Id = ?",
+                [sub_one, Ca_Id]
+            );
+
+            if (!existingSub.length) {
+                return res.status(400).json({ success: false, message: "Invalid subcategory selection." });
+            }
+            sb_c_id = existingSub[0].sb_c_id;
+        }
+
         let sb_cc_id = null;
         if (sub_two !== "None" && subcattwo_img) {
             // Generate ID for subCat_two
             sb_cc_id = await generateNewId("subCat_two", "sb_cc_id", "S2");
 
-            //Insert into subCat_two
+            // Insert into subCat_two
             await db.query(
                 "INSERT INTO subCat_two (sb_cc_id, subcategory, sb_c_id, img) VALUES (?, ?, ?, ?)",
                 [sb_cc_id, sub_two, sb_c_id, subcattwo_img]
@@ -3449,6 +3464,9 @@ router.post("/subcategory", upload.fields([{ name: "subcatone_img" }, { name: "s
         });
     }
 });
+
+
+
 
 //Save new item to supplier
 router.post("/add-supplier-item", async (req, res) => {
