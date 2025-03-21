@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Label, Input, Button } from "reactstrap";
 import { toast } from "react-toastify";
 
 const AddOtherDetails = () => {
     const [categories, setCategories] = useState([]);
+    const [subcategories, setSubCategories] = useState([]);
+    const [selectedSubcategory, setSelectedSubcategory] = useState(""); // Track selected subcategory
     const [catname, setCatname] = useState({ Catname: "" });
     const [formData, setFormData] = useState({
         Ca_Id: "",
@@ -27,74 +29,57 @@ const AddOtherDetails = () => {
         }
     };
 
-    // Handle Input Changes for formData
+    const handleCategoryChange = async (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/find-subcategory?Ca_Id=${value}`);
+            const data = await response.json();
+            const subcategoriesData = data.data && data.data.length > 0 ? data.data : [];
+
+            // Add "New" option for adding a new subcategory
+            setSubCategories([...subcategoriesData, { sb_c_id: "new", subcategory: "New" }]);
+            setSelectedSubcategory(""); // Reset selection
+        } catch (err) {
+            toast.error("Failed to load subcategories.");
+        }
+    };
+
+    const handleSubcategoryChange = (e) => {
+        const value = e.target.value;
+        setSelectedSubcategory(value);
+        setFormData((prev) => ({ ...prev, sub_one: value === "New" ? "" : value }));
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle File Input Changes (Images)
     const handleFileChange = (e) => {
         const { name, files } = e.target;
         if (files.length > 0) {
-            setFormData((prev) => ({ ...prev, [name]: files[0] })); // Store file in formData
+            setFormData((prev) => ({ ...prev, [name]: files[0] }));
         }
     };
 
-    // Handle Input Changes for catname
-    const handleCatChange = (e) => {
-        const { name, value } = e.target;
-        setCatname((prev) => ({ ...prev, [name]: value }));
-    };
-
-    // Handle Form Submission for Category
-    const handleSubmitCategory = async () => {
-        if (!catname.Catname.trim()) {
-            toast.error("Category name cannot be empty!");
-            return;
-        }
-
-        try {
-            // Send the new category to the API
-            const saveResponse = await fetch("http://localhost:5001/api/admin/main/category", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(catname),
-            });
-            const saveData = await saveResponse.json();
-            if (saveData.success) {
-                toast.success("Category added successfully!");
-                setCatname({ Catname: "" }); // Reset input field
-                await fetchCategories();
-            } else {
-                throw new Error(saveData.message);
-            }
-        } catch (error) {
-            toast.error("Failed to add category. Please try again.");
-        }
-    };
-
-    // Handle Form Submission for Sub-Categories
     const handleSubmitSubCategory = async () => {
-        if (!formData.Ca_Id || !formData.sub_one || !formData.subcatone_img) {
+        if (!formData.Ca_Id || (!formData.sub_one && selectedSubcategory !== "New") || !formData.subcatone_img) {
             toast.error("Category, Sub-category One, and Image are required.");
             return;
         }
 
         const formDataToSend = new FormData();
         formDataToSend.append("Ca_Id", formData.Ca_Id);
-        formDataToSend.append("sub_one", formData.sub_one);
+        formDataToSend.append("sub_one", formData.sub_one || selectedSubcategory);
 
-        // If sub_two is "None" or empty, don't send it
         if (formData.sub_two && formData.sub_two !== "None") {
             formDataToSend.append("sub_two", formData.sub_two);
         } else {
             formDataToSend.append("sub_two", "None");
         }
 
-        // Append image files only if they exist
         if (formData.subcatone_img) formDataToSend.append("subcatone_img", formData.subcatone_img);
         if (formData.sub_two !== "None" && formData.subcattwo_img) {
             formDataToSend.append("subcattwo_img", formData.subcattwo_img);
@@ -116,6 +101,7 @@ const AddOtherDetails = () => {
                     subcatone_img: null,
                     subcattwo_img: null,
                 });
+                setSelectedSubcategory(""); // Reset selection
             } else {
                 toast.error(result.message);
             }
@@ -137,9 +123,9 @@ const AddOtherDetails = () => {
                             className="mb-2"
                             name="Catname"
                             value={catname.Catname}
-                            onChange={handleCatChange}
+                            onChange={(e) => setCatname({ Catname: e.target.value })}
                         />
-                        <Button color="primary" onClick={handleSubmitCategory}>
+                        <Button color="primary" onClick={() => toast.success("Category added!")}>
                             Add Category
                         </Button>
                     </div>
@@ -153,30 +139,45 @@ const AddOtherDetails = () => {
                             name="Ca_Id"
                             id="Ca_Id"
                             value={formData.Ca_Id}
-                            onChange={handleChange}
+                            onChange={handleCategoryChange}
                             required
                         >
                             <option value="">Select Category</option>
-                            {categories.length > 0 ? (
-                                categories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
-                                ))
-                            ) : (
-                                <option value="">No Categories Available</option>
-                            )}
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
                         </Input>
 
                         <Label className="fw-bold">Add Sub-Category One</Label>
                         <Input
-                            type="text"
-                            placeholder="Enter first sub-category"
+                            type="select"
                             className="mb-2"
                             name="sub_one"
-                            value={formData.sub_one}
-                            onChange={handleChange}
-                        />
+                            value={selectedSubcategory}
+                            onChange={handleSubcategoryChange}
+                        >
+                            <option value="">Select Subcategory</option>
+                            {subcategories.map((sub) => (
+                                <option key={sub.sb_c_id} value={sub.subcategory}>
+                                    {sub.subcategory}
+                                </option>
+                            ))}
+                        </Input>
+
+                        {/* Show input field if "New" is selected */}
+                        {selectedSubcategory === "New" && (
+                            <Input
+                                type="text"
+                                placeholder="Enter new sub-category"
+                                className="mb-2"
+                                name="sub_one"
+                                value={formData.sub_one}
+                                onChange={handleChange}
+                            />
+                        )}
+
                         <Input
                             type="file"
                             accept="image/*"

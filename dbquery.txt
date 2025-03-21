@@ -242,15 +242,30 @@ CREATE TABLE production(
         CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
                     			    ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE Payment(
-    op_ID INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE order_payment(
+    op_ID VARCHAR(25) PRIMARY KEY,
     orID VARCHAR(25),
     amount DOUBLE,
     dateTime DATETIME ,
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                          ON DELETE CASCADE ON UPDATE CASCADE
 );
-
+CREATE TABLE advance_payment(
+    ad_ID VARCHAR(25) PRIMARY KEY,
+    E_Id VARCHAR(25),
+    amount DOUBLE,
+    dateTime DATETIME ,
+    CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
+                         ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE payment (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    reason VARCHAR(45),
+    ref VARCHAR(25),
+    ref_type ENUM('order', 'advance','other') NOT NULL,
+    dateTime DATETIME,
+    amount DOUBLE
+);
 CREATE TABLE main_stock_received (
     sr_ID INT AUTO_INCREMENT PRIMARY KEY,
     s_ID VARCHAR(25) NOT NULL,
