@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/AdancePayment.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-3-26.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-4-26.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-5-26.png" afterDir="false" />
@@ -19,9 +18,8 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-2-25.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-3-25.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddOtherDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllEmployees.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllEmployees.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SaleteamDetail.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -245,7 +243,7 @@
       <workItem from="1742355935460" duration="14618000" />
       <workItem from="1742374281838" duration="9331000" />
       <workItem from="1742463838506" duration="9620000" />
-      <workItem from="1742528525536" duration="17963000" />
+      <workItem from="1742528525536" duration="20502000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -590,7 +588,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="308" />
+    <option name="localTasksCounter" value="309" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -609,7 +607,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update sale  team part" />
     <MESSAGE value="update payment" />
     <MESSAGE value="update dashboard" />
     <MESSAGE value="update delivery note" />
@@ -634,6 +631,7 @@
     <MESSAGE value="update driver" />
     <MESSAGE value="update" />
     <MESSAGE value="update add category" />
-    <option name="LAST_COMMIT_MESSAGE" value="update add category" />
+    <MESSAGE value="add &amp; update advance payment" />
+    <option name="LAST_COMMIT_MESSAGE" value="add &amp; update advance payment" />
   </component>
 </project>

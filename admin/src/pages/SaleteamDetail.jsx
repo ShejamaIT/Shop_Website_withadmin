@@ -5,6 +5,7 @@ import "../style/SaleteamDetail.css";
 
 const SaleteamDetail = ({ Saleteam }) => {
     const [salesteamMember, setSalesteamMember] = useState(null);
+    const [monthAdvance, setMonthAdvance] = useState(null);
     const [ordersThisMonthIssued, setOrdersThisMonthIssued] = useState([]);
     const [ordersThisMonthOther, setOrdersThisMonthOther] = useState([]);
     const [ordersLastMonthIssued, setOrdersLastMonthIssued] = useState([]);
@@ -13,9 +14,8 @@ const SaleteamDetail = ({ Saleteam }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Separate active tab states for "This Month" and "Last Month"
-    const [activeTabThisMonth, setActiveTabThisMonth] = useState("1-1"); // Default to "This Month" Issued Orders tab
-    const [activeTabLastMonth, setActiveTabLastMonth] = useState("2-1"); // Default to "Last Month" Issued Orders tab
+    const [activeTabThisMonth, setActiveTabThisMonth] = useState("1-1");
+    const [activeTabLastMonth, setActiveTabLastMonth] = useState("2-1");
 
     useEffect(() => {
         if (!Saleteam.stID) {
@@ -39,6 +39,7 @@ const SaleteamDetail = ({ Saleteam }) => {
             setOrdersLastMonthIssued(data.data.ordersLastMonthIssued || []);
             setOrdersLastMonthOther(data.data.ordersLastMonthOther || []);
             setCoupones(data.data.coupons || []);
+            setMonthAdvance(data.data.totalAdvance);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -72,22 +73,11 @@ const SaleteamDetail = ({ Saleteam }) => {
                             <div className="salesteam-details">
                                 <Table bordered className="member-table">
                                     <tbody>
-                                    <tr>
-                                        <td><strong>Employee Name</strong></td>
-                                        <td>{salesteamMember?.employeeName}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Employee ID</strong></td>
-                                        <td>{salesteamMember?.stID}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Phone</strong></td>
-                                        <td>{salesteamMember?.employeeContact}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Nic</strong></td>
-                                        <td>{salesteamMember?.employeeNic}</td>
-                                    </tr>
+                                    <tr><td><strong>Employee Name</strong></td><td>{salesteamMember?.employeeName}</td></tr>
+                                    <tr><td><strong>Employee ID</strong></td><td>{salesteamMember?.stID}</td></tr>
+                                    <tr><td><strong>Phone</strong></td><td>{salesteamMember?.employeeContact}</td></tr>
+                                    <tr><td><strong>Nic</strong></td><td>{salesteamMember?.employeeNic}</td></tr>
+                                    <tr><td><strong>Advance</strong></td><td>Rs. {monthAdvance ?? '0.00'}</td></tr>
                                     </tbody>
                                 </Table>
                             </div>
@@ -132,14 +122,12 @@ const SaleteamDetail = ({ Saleteam }) => {
                                         <td>Rs. {salesteamMember.totalOrder}</td>
                                         <td>Rs. {salesteamMember.orderTarget}</td>
                                         <td><strong>Order Received Target</strong></td>
-
                                     </tr>
                                     <tr>
                                         <td><strong>Total Order Issued</strong></td>
                                         <td>Rs. {salesteamMember.totalIssued}</td>
                                         <td>Rs. {salesteamMember.issuedTarget}</td>
                                         <td><strong>Order Issued Target</strong></td>
-
                                     </tr>
                                     </tbody>
                                 </Table>
@@ -294,4 +282,3 @@ const SaleteamDetail = ({ Saleteam }) => {
 };
 
 export default SaleteamDetail;
-

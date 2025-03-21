@@ -70,6 +70,7 @@ const DriverDetail = ({ driver }) => {
                                             <tr><td><strong>Phone</strong></td><td>{driverDetails.contact}</td></tr>
                                             <tr><td><strong>NIC</strong></td><td>{driverDetails.nic}</td></tr>
                                             <tr><td><strong>Balance</strong></td><td>Rs. {driverDetails.balance}</td></tr>
+                                            <tr><td><strong>Advance</strong></td><td>Rs. {driverDetails.totalAdvance}</td></tr>
                                             </tbody>
                                         </Table>
                                     </div>
