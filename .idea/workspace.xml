@@ -18,8 +18,13 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-2-25.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-3-25.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/components/tables/TableAllDeliveryNotes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/components/tables/TableAllDeliveryNotes.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/CompletedOrders.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/IssuedOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/IssuedOrder.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderDetails.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -242,7 +247,7 @@
       <workItem from="1742355935460" duration="14618000" />
       <workItem from="1742374281838" duration="9331000" />
       <workItem from="1742463838506" duration="9620000" />
-      <workItem from="1742528525536" duration="21485000" />
+      <workItem from="1742528525536" duration="27242000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -587,7 +592,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="310" />
+    <option name="localTasksCounter" value="311" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -606,7 +611,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update payment" />
     <MESSAGE value="update dashboard" />
     <MESSAGE value="update delivery note" />
     <MESSAGE value="update final invoice scan" />
@@ -631,6 +635,7 @@
     <MESSAGE value="update" />
     <MESSAGE value="update add category" />
     <MESSAGE value="add &amp; update advance payment" />
-    <option name="LAST_COMMIT_MESSAGE" value="add &amp; update advance payment" />
+    <MESSAGE value="update order place" />
+    <option name="LAST_COMMIT_MESSAGE" value="update order place" />
   </component>
 </project>

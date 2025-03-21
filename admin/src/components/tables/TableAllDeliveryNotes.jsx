@@ -19,7 +19,7 @@ const TableAllDeliveryNotes= () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/alldeliverynotes");
             const data = await response.json();
-
+            console.log(data);
             if (data.length > 0) {
                 setDeliverynotes(data); // Store fetched items
             } else {
@@ -55,6 +55,7 @@ const TableAllDeliveryNotes= () => {
                         <th>Delivery Date</th>
                         <th>Driver Name</th>
                         <th>District</th>
+                        <th>Status</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -78,6 +79,7 @@ const TableAllDeliveryNotes= () => {
                                 <td>{formatDate(delivery.date)}</td>
                                 <td>{delivery.driverName}</td>
                                 <td>{delivery.district}</td>
+                                <td>{delivery.status}</td>
                                 <td className="action-buttons">
                                     <button
                                         className="view-btn"

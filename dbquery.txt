@@ -321,6 +321,7 @@ CREATE TABLE issued_items(
     orID VARCHAR(25),
     srd_Id INT,
     status VARCHAR(15),
+    date DATETIME,
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                                  ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (srd_Id) REFERENCES m_s_r_detail (srd_Id)

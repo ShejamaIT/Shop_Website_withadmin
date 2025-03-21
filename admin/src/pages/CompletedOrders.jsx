@@ -610,7 +610,7 @@ const CompleteOrderDetails = () => {
                                                 <p><strong>Item:</strong> {item.itemName}</p>
                                                 <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                <p><strong>Amount:</strong> Rs. {item.price}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
                                                 <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
                                                 {isEditing && (
