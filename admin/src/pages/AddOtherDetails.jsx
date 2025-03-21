@@ -65,14 +65,21 @@ const AddOtherDetails = () => {
     };
 
     const handleSubmitSubCategory = async () => {
-        if (!formData.Ca_Id || (!formData.sub_one && selectedSubcategory !== "New") || !formData.subcatone_img) {
-            toast.error("Category, Sub-category One, and Image are required.");
+        if (!formData.Ca_Id || (!formData.sub_one && selectedSubcategory !== "New")) {
+            toast.error("Category and Sub-category One are required.");
+            return;
+        }
+
+        // If "New" is selected, require an image
+        if (selectedSubcategory === "New" && !formData.subcatone_img) {
+            toast.error("Image is required for a new sub-category.");
             return;
         }
 
         const formDataToSend = new FormData();
         formDataToSend.append("Ca_Id", formData.Ca_Id);
         formDataToSend.append("sub_one", formData.sub_one || selectedSubcategory);
+        formDataToSend.append("isNewSubOne", selectedSubcategory === "New" ? "true" : "false");
 
         if (formData.sub_two && formData.sub_two !== "None") {
             formDataToSend.append("sub_two", formData.sub_two);
@@ -80,7 +87,11 @@ const AddOtherDetails = () => {
             formDataToSend.append("sub_two", "None");
         }
 
-        if (formData.subcatone_img) formDataToSend.append("subcatone_img", formData.subcatone_img);
+        // Append image file only if a new subcategory is being added
+        if (selectedSubcategory === "New" && formData.subcatone_img) {
+            formDataToSend.append("subcatone_img", formData.subcatone_img);
+        }
+
         if (formData.sub_two !== "None" && formData.subcattwo_img) {
             formDataToSend.append("subcattwo_img", formData.subcattwo_img);
         }
@@ -109,6 +120,8 @@ const AddOtherDetails = () => {
             toast.error("Failed to add sub-category.");
         }
     };
+
+
 
     return (
         <Container className="add-item-container">
