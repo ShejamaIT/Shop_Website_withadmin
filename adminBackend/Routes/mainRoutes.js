@@ -1793,6 +1793,30 @@ router.get("/suppliers", async (req, res) => {
     }
 });
 
+// Get all employees
+router.get("/employees", async (req, res) => {
+    try {
+        // Step 1: Fetch all suppliers
+        const employeesQuery = `SELECT E_Id, name, nic, job, basic FROM Employee`;
+
+        const [employeesResult] = await db.query(employeesQuery);
+        // Step 2: Check if suppliers were found
+        if (employeesResult.length === 0) {
+            return res.status(404).json({ success: false, message: "No employees found" });
+        }
+
+        // Step 3: Return the supplier details
+        return res.status(200).json({
+            success: true,
+            employees: employeesResult,
+        });
+
+    } catch (error) {
+        console.error("Error fetching employees:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
 // get item detail in item table only
 router.get("/item-detail", async (req, res) => {
     try {
@@ -3465,9 +3489,6 @@ router.post("/subcategory", upload.fields([{ name: "subcatone_img" }, { name: "s
     }
 });
 
-
-
-
 //Save new item to supplier
 router.post("/add-supplier-item", async (req, res) => {
     try {
@@ -4140,6 +4161,48 @@ router.post("/coupone", async (req, res) => {
         });
     } catch (err) {
         console.error("Error inserting coupone data:", err.message);
+
+        // Respond with error details
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
+// Save New Coupone
+router.post("/save-advance", async (req, res) => {
+    try {
+        const { id, name, advance } = req.body;
+        const amount = Number(advance) || 0;
+        const advancepay = Number(amount); // Make sure the advancepay is a positive amount (unless negative is needed)
+
+        // Generate unique Advance Payment ID
+        const ad_ID = await generateNewId("advance_payment", "ad_ID", "AP");
+
+        // Insert into advance_payment table
+        const sql = `INSERT INTO advance_payment (ad_ID, E_Id, amount, dateTime) VALUES (?, ?, ?, NOW())`;
+        const values = [ad_ID, id, amount];
+        const [result] = await db.query(sql, values);
+
+        // Insert into payment table with the negative advance amount (for payment record)
+        const sql1 = `INSERT INTO payment (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)`;
+        const values1 = ["Pay Advance", ad_ID, "advance", -advancepay];
+        const [result1] = await db.query(sql1, values1);
+
+        // Return success response with inserted data details
+        return res.status(201).json({
+            success: true,
+            message: "Advance added successfully",
+            data: {
+                ad_ID,               // The generated Advance Payment ID
+                amount,              // The amount of the advance
+                paymentAmount: -advancepay, // Payment amount as negative (if needed)
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting Advance data:", err.message);
 
         // Respond with error details
         return res.status(500).json({
