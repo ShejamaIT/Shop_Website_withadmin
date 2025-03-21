@@ -192,7 +192,7 @@ router.post("/orders", async (req, res) => {
     const {
         FtName, SrName, address, balance, c_ID, category,newAddress,isAddressChanged, couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice, totalItemPrice,dvtype,
-        type, workPlace, t_name
+        type, workPlace, t_name,orderType
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -260,11 +260,11 @@ router.post("/orders", async (req, res) => {
         // **Insert Order**
         const orderQuery = `
             INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
-            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?, ?, 'on-site', ?, ?, 'Pending')`;
+            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`;
 
         const orderParams = [
             orID, orderDate, Cust_id, dvStatus, parseFloat(deliveryPrice) || 0, parseFloat(discountAmount) || 0,
-            parseFloat(totalItemPrice) || 0, parseFloat(totalBillPrice) || 0, stID, expectedDate, specialNote, advance, balance
+            parseFloat(totalItemPrice) || 0, parseFloat(totalBillPrice) || 0, stID, expectedDate, specialNote,orderType, advance, balance
         ];
 
         await db.query(orderQuery, orderParams);
