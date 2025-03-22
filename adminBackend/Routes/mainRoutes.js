@@ -2135,7 +2135,7 @@ router.put("/update-invoice", async (req, res) => {
         // 💰 Insert a new entry into the Payment table
         if (addedAdvance > 0) {
             await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orID, addedAdvance]);
-            await db.query("INSERT INTO payment (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", addedAdvance]);
+            await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", addedAdvance]);
 
         }
 
@@ -2574,8 +2574,8 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 COALESCE(SUM(o.netTotal - o.discount), 0) AS totalOrderValue,
                 COALESCE(SUM(CASE WHEN o.orStatus = 'Issued' THEN o.netTotal - o.discount ELSE 0 END), 0) AS issuedOrderValue
             FROM sales_team st
-                     JOIN Employee e ON e.E_Id = st.E_Id
-                     LEFT JOIN Orders o ON o.stID = st.stID
+            JOIN Employee e ON e.E_Id = st.E_Id
+            LEFT JOIN Orders o ON o.stID = st.stID
             WHERE st.stID = ?
             GROUP BY st.stID, e.E_Id, e.name, e.contact, e.nic, e.dob, e.address, e.job, e.basic,
                      st.orderTarget, st.issuedTarget, st.totalOrder, st.totalIssued;
@@ -2587,32 +2587,24 @@ router.get("/orders/by-sales-team", async (req, res) => {
 
         const memberDetails = results[0];
 
-        // Get the current date and calculate the first day of the current month and last month
+        // Get date ranges
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth(); // Current month (0-11)
+        const currentMonth = currentDate.getMonth();
         const firstDayOfCurrentMonth = new Date(currentYear, currentMonth, 1);
         const firstDayOfLastMonth = new Date(currentYear, currentMonth - 1, 1);
-        const lastDayOfLastMonth = new Date(currentYear, currentMonth, 0); // Last day of the previous month
+        const lastDayOfLastMonth = new Date(currentYear, currentMonth, 0);
 
         // Fetch orders for the current month
         const [ordersThisMonth] = await db.query(`
-            SELECT
-                o.OrID AS orderId,
-                o.orDate AS orderDate,
-                o.netTotal - o.discount AS totalPrice,  
-                o.orStatus AS orderStatus
+            SELECT o.OrID AS orderId, o.orDate AS orderDate, o.netTotal - o.discount AS totalPrice, o.orStatus AS orderStatus
             FROM Orders o
             WHERE o.stID = ? AND o.orDate >= ? AND o.orDate <= ?
         `, [stID, firstDayOfCurrentMonth, currentDate]);
 
         // Fetch orders for the last month
         const [ordersLastMonth] = await db.query(`
-            SELECT
-                o.OrID AS orderId,
-                o.orDate AS orderDate,
-                o.netTotal - o.discount AS totalPrice, 
-                o.orStatus AS orderStatus
+            SELECT o.OrID AS orderId, o.orDate AS orderDate, o.netTotal - o.discount AS totalPrice, o.orStatus AS orderStatus
             FROM Orders o
             WHERE o.stID = ? AND o.orDate >= ? AND o.orDate <= ?
         `, [stID, firstDayOfLastMonth, lastDayOfLastMonth]);
@@ -2623,40 +2615,41 @@ router.get("/orders/by-sales-team", async (req, res) => {
         const ordersLastMonthIssued = ordersLastMonth.filter(order => order.orderStatus === 'Issued');
         const ordersLastMonthOther = ordersLastMonth.filter(order => order.orderStatus !== 'Issued');
 
-        // Fetch coupon separately (ensuring only one per sales team member)
+        // Fetch coupon separately
         const [coupons] = await db.query(`
-            SELECT
-                sc.cpID AS couponId,
-                sc.discount AS couponDiscount
+            SELECT sc.cpID AS couponId, sc.discount AS couponDiscount
             FROM sales_coupon sc
             WHERE sc.stID = ?;
         `, [stID]);
 
-        // Fetch total advance for the current month
-        const [advanceResults] = await db.query(`
-            SELECT SUM(amount) AS totalAdvance
-            FROM advance_payment
-            WHERE E_Id IN (SELECT E_Id FROM sales_team WHERE stID = ?) AND MONTH(dateTime) = MONTH(CURDATE()) AND YEAR(dateTime) = YEAR(CURDATE());
+        // Fetch detailed advance records for the current month
+        const [advanceDetails] = await db.query(`
+            SELECT ad_ID AS advanceId, E_Id AS employeeId, amount, dateTime
+            FROM salary_advance
+            WHERE E_Id IN (SELECT E_Id FROM sales_team WHERE stID = ?)
+            AND MONTH(dateTime) = MONTH(CURDATE())
+            AND YEAR(dateTime) = YEAR(CURDATE());
         `, [stID]);
 
-        const totalAdvance = advanceResults[0].totalAdvance || 0; // Total advance for the current month
+        // Calculate total advance amount
+        const totalAdvance = advanceDetails.reduce((sum, advance) => sum + advance.amount, 0);
 
         return res.status(200).json({
-            message: "Sales team details, orders for current and last month, coupons, and total advance fetched successfully.",
+            message: "Sales team details, orders for current and last month, coupons, and advance details fetched successfully.",
             data: {
                 memberDetails,
                 ordersThisMonthIssued: ordersThisMonthIssued.length > 0 ? ordersThisMonthIssued : [],
                 ordersThisMonthOther: ordersThisMonthOther.length > 0 ? ordersThisMonthOther : [],
                 ordersLastMonthIssued: ordersLastMonthIssued.length > 0 ? ordersLastMonthIssued : [],
                 ordersLastMonthOther: ordersLastMonthOther.length > 0 ? ordersLastMonthOther : [],
-                coupons: coupons.length > 0 ? [coupons[0]] : [], // ✅ Ensure only one coupon is included
-                totalAdvance // Add total advance for the current month
+                coupons: coupons.length > 0 ? [coupons[0]] : [],
+                advanceDetails: advanceDetails.length > 0 ? advanceDetails : [], // Pass detailed advances
+                totalAdvance // Pass total advance amount
             }
         });
-
     } catch (error) {
-        console.error("Error fetching orders, member details, and coupons:", error.message);
-        return res.status(500).json({ message: "Error fetching orders, member details, and coupons." });
+        console.error("Error fetching data:", error.message);
+        return res.status(500).json({ message: "Error fetching data." });
     }
 });
 
@@ -2673,7 +2666,7 @@ router.get("/drivers/details", async (req, res) => {
         const driverQuery = `
             SELECT d.devID, d.balance, e.E_Id, e.name, e.address, e.nic, e.dob, e.contact, e.job, e.basic
             FROM driver d
-            INNER JOIN Employee e ON d.E_ID = e.E_Id
+                     INNER JOIN Employee e ON d.E_ID = e.E_Id
             WHERE d.devID = ?;
         `;
         const [driverResults] = await db.execute(driverQuery, [devID]);
@@ -2682,54 +2675,62 @@ router.get("/drivers/details", async (req, res) => {
             return res.status(404).json({ message: "Driver not found." });
         }
 
-        // ✅ Fetch & Calculate Delivery Charges
+        // ✅ Fetch & Calculate Delivery Charges (Total & Detailed) with Non-Zero driverBalance
         const chargeQuery = `
-            SELECT 
-                SUM(CASE WHEN DATE(delivery_Date) = CURDATE() THEN driverBalance ELSE 0 END) AS dailyCharge,
-                SUM(CASE WHEN MONTH(delivery_Date) = MONTH(CURDATE()) AND YEAR(delivery_Date) = YEAR(CURDATE()) THEN driverBalance ELSE 0 END) AS monthlyCharge
+            SELECT dv_id AS deliveryId, delivery_Date AS date, driverBalance AS amount
             FROM delivery
-            WHERE devID = ?;
+            WHERE devID = ?
+              AND (DATE(delivery_Date) = CURDATE()
+               OR (MONTH(delivery_Date) = MONTH(CURDATE()) AND YEAR(delivery_Date) = YEAR(CURDATE())))
+              AND driverBalance > 0;  -- Only consider deliveries with a non-zero driverBalance
         `;
-        const [chargeResults] = await db.execute(chargeQuery, [devID]);
+        const [chargeDetails] = await db.execute(chargeQuery, [devID]);
 
-        const dailyCharge = chargeResults[0].dailyCharge || 0; // ✅ Only today's deliveries
-        const monthlyCharge = chargeResults[0].monthlyCharge || 0; // ✅ Current month's deliveries
+        const dailyCharges = chargeDetails.filter(delivery => new Date(delivery.date).toDateString() === new Date().toDateString());
+        const monthlyCharges = chargeDetails;
+
+        const dailyChargeTotal = dailyCharges.reduce((sum, charge) => sum + charge.amount, 0);
+        const monthlyChargeTotal = monthlyCharges.reduce((sum, charge) => sum + charge.amount, 0);
 
         // ✅ Fetch Delivery Notes for This Month & Last Month
         const deliveryNoteQuery = `
             SELECT delNoID, district, hire, MONTH(date) AS month, YEAR(date) AS year
             FROM delivery_note
             WHERE devID = ? AND status = 'complete'
-            AND (MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())
-                OR MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE()));
+              AND (MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())
+               OR MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE()));
         `;
         const [deliveryNotes] = await db.execute(deliveryNoteQuery, [devID]);
 
         const thisMonthNotes = deliveryNotes.filter(note => note.month === new Date().getMonth() + 1);
         const lastMonthNotes = deliveryNotes.filter(note => note.month === new Date().getMonth());
 
-        // ✅ Fetch Total Advance for Current Month
+        // ✅ Fetch Advance Details for Current Month
         const advanceQuery = `
-            SELECT SUM(amount) AS totalAdvance
-            FROM advance_payment
+            SELECT ad_ID AS advanceId, amount, dateTime
+            FROM salary_advance
             WHERE E_Id = ? AND MONTH(dateTime) = MONTH(CURDATE()) AND YEAR(dateTime) = YEAR(CURDATE());
         `;
-        const [advanceResults] = await db.execute(advanceQuery, [devID]);
+        const [advanceDetails] = await db.execute(advanceQuery, [devID]);
 
-        const totalAdvance = advanceResults[0].totalAdvance || 0; // Total advance for the current month
+        // ✅ Calculate Total Advance
+        const totalAdvance = advanceDetails.reduce((sum, advance) => sum + advance.amount, 0);
 
         // ✅ Prepare Final Response
         const responseData = {
             ...driverResults[0],
             deliveryCharges: {
-                dailyCharge,
-                monthlyCharge,
+                dailyChargeTotal,
+                dailyCharges: dailyCharges.length > 0 ? dailyCharges : [],
+                monthlyChargeTotal,
+                monthlyCharges: monthlyCharges.length > 0 ? monthlyCharges : []
             },
             deliveryNotes: {
                 thisMonth: thisMonthNotes,
                 lastMonth: lastMonthNotes,
             },
-            totalAdvance, // Add total advance amount to the response
+            advanceDetails: advanceDetails.length > 0 ? advanceDetails : [],
+            totalAdvance,
         };
 
         return res.status(200).json({ success: true, data: responseData });
@@ -3856,11 +3857,9 @@ router.post("/issued-order", async (req, res) => {
         await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
 
         // 7. Insert into Payment table
-        await db.query(
-            `INSERT INTO Payment (orID, amount, dateTime)
-             VALUES (?, ?, NOW())`,
-            [orID, paymentAmount]
-        );
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
+        await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orID, paymentAmount]);
+        await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", addedAdvance]);
 
         return res.status(200).json({ success: true, message: "Order updated successfully" });
 
@@ -4222,15 +4221,15 @@ router.post("/save-advance", async (req, res) => {
         const advancepay = Number(amount); // Make sure the advancepay is a positive amount (unless negative is needed)
 
         // Generate unique Advance Payment ID
-        const ad_ID = await generateNewId("advance_payment", "ad_ID", "AP");
+        const ad_ID = await generateNewId("salary_advance", "ad_ID", "AP");
 
         // Insert into advance_payment table
-        const sql = `INSERT INTO advance_payment (ad_ID, E_Id, amount, dateTime) VALUES (?, ?, ?, NOW())`;
+        const sql = `INSERT INTO salary_advance (ad_ID, E_Id, amount, dateTime) VALUES (?, ?, ?, NOW())`;
         const values = [ad_ID, id, amount];
         const [result] = await db.query(sql, values);
 
         // Insert into payment table with the negative advance amount (for payment record)
-        const sql1 = `INSERT INTO payment (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)`;
+        const sql1 = `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)`;
         const values1 = ["Pay Advance", ad_ID, "advance", -advancepay];
         const [result1] = await db.query(sql1, values1);
 
@@ -4451,7 +4450,7 @@ router.post("/delivery-payment", async (req, res) => {
 
         // Insert payment record
         await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
-        await db.query("INSERT INTO payment (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
+        await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
 
         // Update sales team records
         if (orderStatus !== "Returned" && orderStatus !== "Cancelled") {
@@ -4460,7 +4459,9 @@ router.post("/delivery-payment", async (req, res) => {
 
         // Insert loss profit if applicable
         if (Loss !== 0) {
-            await db.query("INSERT INTO profit (orID, amount) VALUES (?, ?)", [orderId, Loss]);
+            // Generate unique Advance Payment ID
+            const op_ID1 = await generateNewId("order_payment", "op_ID", "OP");
+            await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Ignore Balance",op_ID1,"Loss", -Loss]);
         }
 
         // Insert return or canceled orders only if necessary
