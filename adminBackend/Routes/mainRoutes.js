@@ -1792,6 +1792,51 @@ router.get("/supplier-items", async (req, res) => {
     }
 });
 
+// get all have to payment to supplier
+router.get("/unpaid-stock-details", async (req, res) => {
+    try {
+        const { s_Id } = req.query;
+
+        // Validate input
+        if (!s_Id) {
+            return res.status(400).json({ success: false, message: "Supplier ID is required" });
+        }
+
+        // Query to fetch unpaid stock details along with calculated total amount to be paid
+        const query = `
+            SELECT
+                sr_ID,
+                I_Id,
+                rDate,
+                rec_count,
+                unitPrice,
+                detail,
+                payment,
+                (rec_count * unitPrice) AS total_amount_to_be_paid
+            FROM main_stock_received
+            WHERE s_ID = ? AND payment = 'NotPaid';
+        `;
+
+        const [itemsResult] = await db.query(query, [s_Id]);
+
+        // If no unpaid items found, return a 404 response
+        if (itemsResult.length === 0) {
+            return res.status(404).json({ success: false, message: "No unpaid stock details found for the given supplier" });
+        }
+
+        // Return the unpaid stock details with the total amount to be paid
+        return res.status(200).json({
+            success: true,
+            unpaidStockDetails: itemsResult,
+        });
+
+    } catch (error) {
+        console.error("Error fetching unpaid stock details:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+
 // Get all suppliers
 router.get("/suppliers", async (req, res) => {
     try {
@@ -1996,9 +2041,9 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
 
         // Insert into main_stock_received
         const insertQuery = `
-            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail)
-            VALUES (?, ?, ?, ?, ?, ?)`;
-        const [result] = await db.query(insertQuery, [supId, itemId, rDate, receivedQty, cost, detail || ""]);
+            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail,payment)
+            VALUES (?, ?, ?, ?, ?, ?,?)`;
+        const [result] = await db.query(insertQuery, [supId, itemId, rDate, receivedQty, cost, detail || ""],'NotPaid');
         const receivedStockId = result.insertId;
 
         // Fetch last stock_Id for this item
@@ -2971,9 +3016,9 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
 
         // Insert into main_stock_received
         const insertQuery = `
-            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail)
-            VALUES (?, ?, ?, ?, ?, ?)`;
-        const [result] = await db.query(insertQuery, [supplierId, itemId, date, stockCount, cost, comment || ""]);
+            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail,payment)
+            VALUES (?, ?, ?, ?, ?, ?,?)`;
+        const [result] = await db.query(insertQuery, [supplierId, itemId, date, stockCount, cost, comment || ""],'NotPaid');
         const receivedStockId = result.insertId;
 
         // Update Item table stock
