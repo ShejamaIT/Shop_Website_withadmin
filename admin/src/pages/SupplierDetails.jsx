@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import {Row, Col, Button, Input, Table, Label} from 'reactstrap';
+import {Row, Col, Button, Input, Table, Label, Container} from 'reactstrap';
 import {toast} from "react-toastify";
+import Helmet from "../components/Helmet/Helmet";
 
 const SupplierDetails = ({ supplier }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedItem, setSelectedItem] = useState(null);
     const [itemsList, setItemsList] = useState([]);  // List to store items (existing + new)
+    const [paymentList, setPaymentList] = useState([]);  // List to store payment
     const [dropdownOpen, setDropdownOpen] = useState(false);  // To handle dropdown visibility
     const [amount, setAmount] = useState('');  // To store entered cost
     const [warrantyPeriod, setWarrantyPeriod] = useState('');  // Warranty period remains unchanged
@@ -30,7 +32,6 @@ const SupplierDetails = ({ supplier }) => {
                 console.error("Error fetching all items:", error);
             }
         };
-
         fetchAllItems();
     }, []); // Fetch once when component mounts
 
@@ -49,8 +50,24 @@ const SupplierDetails = ({ supplier }) => {
                 console.error("Error fetching supplier items:", error);
             }
         };
-
         fetchSupplierItems();
+    }, [supplier.s_ID]); // Re-fetch when supplier changes
+    // Fetch supplier-specific items
+    useEffect(() => {
+        const fetchSupplierPayments = async () => {
+            try {
+                const response = await fetch(`http://localhost:5001/api/admin/main/unpaid-stock-details?s_Id=${supplier.s_ID}`);
+                const data = await response.json();
+                if (response.ok) {
+                    setPaymentList(data.unpaidStockDetails); // Set existing items for supplier
+                } else {
+                    console.error("Failed to load supplier items:", data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching supplier items:", error);
+            }
+        };
+        fetchSupplierPayments();
     }, [supplier.s_ID]); // Re-fetch when supplier changes
 
     // Handle search term change
@@ -70,7 +87,6 @@ const SupplierDetails = ({ supplier }) => {
     // Handle selecting an item from the dropdown
     const handleSelectItem = (item) => {
         setSelectedItem(item);
-        console.log(item);
         setSearchTerm(item.I_Id);  // Set search box to selected item code
         setDropdownOpen(false);  // Close the dropdown after selection
         setWarrantyPeriod(item.warrantyPeriod);  // Set warranty period as is (it won't be changed)
@@ -93,9 +109,7 @@ const SupplierDetails = ({ supplier }) => {
             toast.error("This item has already been added.");
             return;
         }
-
         let imageBase64 = selectedItem.img; // Default to existing image if no new image is selected
-
         // Convert selected image to Base64 if a new image is uploaded
         if (selectedImage) {
             const reader = new FileReader();
@@ -105,7 +119,6 @@ const SupplierDetails = ({ supplier }) => {
                 reader.onerror = error => reject(error);
             });
         }
-
         // Create new item object
         const newItem = {
             I_Id: selectedItem.I_Id,
@@ -115,8 +128,6 @@ const SupplierDetails = ({ supplier }) => {
             unit_cost: amount,
             warrantyPeriod: selectedItem.warrantyPeriod
         };
-
-
         const itemDetail ={
             I_Id: selectedItem.I_Id,
             s_ID: supplier.s_ID,
@@ -154,87 +165,136 @@ const SupplierDetails = ({ supplier }) => {
             toast.error("Error adding item. Please try again.");
         }
     };
-
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : "N/A";
+    };
     return (
-        <Row>
-            <Col>
-                <Row>
-                    <h5 >Details for {supplier.name}</h5><hr/>
-                    <Col md={3}><Label><strong>Id:</strong> {supplier.s_ID}</Label></Col>
-                    <Col md={3}><Label><strong>Contact:</strong> {supplier.contact}</Label></Col>
-                    <Col md={3}><Label><strong>Contact :</strong> {supplier.contact2}</Label></Col>
-                    <Col md={3}><Label><strong>Address:</strong> {supplier.address}</Label></Col>
-                </Row>
-
-                {/* Search box */}
-                <Row>
-                    <Col md={6}>
-                        <Input
-                            type="text"
-                            value={searchTerm}
-                            onChange={handleSearchChange}  // Update search term and filter items
-                            placeholder="Search for item..."
-                        />
-                    </Col>
-
-                </Row>
-
-                {/* Dropdown to select items */}
-                {dropdownOpen && filteredItems.length > 0 && (
-                    <div className="dropdown" style={{ position: 'absolute', zIndex: 1000, backgroundColor: 'white', border: '1px solid #ddd' }}>
-                        {filteredItems.map((item) => (
-                            <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
-                                {item.I_Id} - {item.I_name}
+        <Helmet title={`Supplier Detail`}>
+            <section>
+                <Container>
+                    <Row>
+                        <Col lg="12">
+                            <div className="salesteam-details">
+                                <Table bordered className="member-table">
+                                    <tbody>
+                                    <tr><td><strong>Id</strong></td><td>{supplier.s_ID}</td></tr>
+                                    <tr><td><strong>Name</strong></td><td>{supplier.name}</td></tr>
+                                    <tr><td><strong>Contact 1</strong></td><td>{supplier.contact}</td></tr>
+                                    <tr><td><strong>Contact 2</strong></td><td>{supplier.contact2}</td></tr>
+                                    <tr><td><strong>Address</strong></td><td>{supplier.address}</td></tr>
+                                    </tbody>
+                                </Table>
                             </div>
-                        ))}
-                    </div>
-                )}
 
-                {/* Display selected item details */}
-                {selectedItem && (
-                    <Row className="mt-2">
-                        <Col md={4}>
-                            <label>Selected Item: {selectedItem.I_name}</label> {/* Display item name */}
-                        </Col>
-                        <Col md={4}>
-                            <Input
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                placeholder="Enter cost"
-                            />
-                        </Col>
-                        <Col md={2}>
-                            <Button color="primary" onClick={handleAddItem}>Add</Button>
+                            <div className="coupon-detail">
+                                {/* Search box */}
+                                <Row>
+                                    <Col md={6}>
+                                        <Input
+                                            type="text"
+                                            value={searchTerm}
+                                            onChange={handleSearchChange}  // Update search term and filter items
+                                            placeholder="Search for item..."
+                                        />
+                                    </Col>
+
+                                </Row>
+
+                                {/* Dropdown to select items */}
+                                {dropdownOpen && filteredItems.length > 0 && (
+                                    <div className="dropdown" style={{ position: 'absolute', zIndex: 1000, backgroundColor: 'white', border: '1px solid #ddd' }}>
+                                        {filteredItems.map((item) => (
+                                            <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
+                                                {item.I_Id} - {item.I_name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Display selected item details */}
+                                {selectedItem && (
+                                    <Row className="mt-2">
+                                        <Col md={4}>
+                                            <label>Selected Item: {selectedItem.I_name}</label> {/* Display item name */}
+                                        </Col>
+                                        <Col md={4}>
+                                            <Input
+                                                type="number"
+                                                value={amount}
+                                                onChange={(e) => setAmount(e.target.value)}
+                                                placeholder="Enter cost"
+                                            />
+                                        </Col>
+                                        <Col md={2}>
+                                            <Button color="primary" onClick={handleAddItem}>Add</Button>
+                                        </Col>
+                                    </Row>
+                                )}
+                            </div>
+                            <div className="coupon-detail">
+                                <h4 className="sub-title">Supply Items</h4>
+                                {/* Display existing and new items in the table */}
+                                <Table bordered className="coupon-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Item Image</th>
+                                        <th>Item Code</th>
+                                        <th>Item Name</th>
+                                        <th>Cost Amount</th>
+                                        <th>Warranty Period</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {itemsList.map((item, index) => (
+                                        <tr key={index}>
+                                            <td><img src={item.img} alt={item.I_name} className="product-image" /></td>
+                                            <td>{item.I_Id}</td>
+                                            <td>{item.I_name}</td>
+                                            <td>{item.amount || item.unit_cost}</td> {/* Display the inputted amount or the existing cost */}
+                                            <td>{item.warrantyPeriod}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+                            <div className="coupon-detail">
+                                <h4 className="sub-title">Payment Details</h4>
+                                <Table bordered className="coupon-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Stock Id</th>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th>Amount (Rs.)</th>
+                                        <th>Date</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {paymentList.length > 0 ? (
+                                        paymentList.map((payment, index) => (
+                                            <tr key={index}>
+                                                <td>{payment.sr_ID}</td>
+                                                <td>{payment.I_Id}</td>
+                                                <td>{payment.rec_count}</td>
+                                                <td>Rs. {payment.total_amount_to_be_paid}</td>
+                                                <td>{formatDate(payment.rDate)}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="5" className="no-coupon-text">No coupons available.</td>
+                                        </tr>
+                                    )}
+                                    </tbody>
+                                </Table>
+                            </div>
+
                         </Col>
                     </Row>
-                )}
-
-                {/* Display existing and new items in the table */}
-                <Table striped bordered hover className="mt-4">
-                    <thead>
-                    <tr>
-                        <th>Item Image</th>
-                        <th>Item Code</th>
-                        <th>Item Name</th>
-                        <th>Cost Amount</th>
-                        <th>Warranty Period</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {itemsList.map((item, index) => (
-                        <tr key={index}>
-                            <td><img src={item.img} alt={item.I_name} className="product-image" /></td>
-                            <td>{item.I_Id}</td>
-                            <td>{item.I_name}</td>
-                            <td>{item.amount || item.unit_cost}</td> {/* Display the inputted amount or the existing cost */}
-                            <td>{item.warrantyPeriod}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </Table>
-            </Col>
-        </Row>
+                </Container>
+            </section>
+        </Helmet>
     );
 };
 

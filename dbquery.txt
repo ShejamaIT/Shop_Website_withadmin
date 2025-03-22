@@ -274,6 +274,7 @@ CREATE TABLE main_stock_received (
     rec_count INT,
     unitPrice DOUBLE,
     detail TEXT,
+    payment ENUM('Paid','NotPaid') NOT NULL,
     CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
                     ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
