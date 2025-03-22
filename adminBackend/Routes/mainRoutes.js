@@ -1228,6 +1228,117 @@ router.get("/item-details", async (req, res) => {
     }
 });
 
+
+// router.get("/item-details", async (req, res) => {
+//     try {
+//         const { I_Id } = req.query;
+//
+//         if (!I_Id) {
+//             return res.status(400).json({ success: false, message: "Item ID is required" });
+//         }
+//
+//         // ✅ Fetch item details from Item table
+//         const itemQuery = `
+//             SELECT
+//                 I.I_Id, I.I_name, I.descrip, I.price, I.stockQty, I.bookedQty, I.availableQty, I.minQTY,
+//                 I.warrantyPeriod, I.img, I.img1, I.img2, I.img3, I.color, I.material, I.mn_Cat, I.sb_catOne, I.sb_catTwo
+//             FROM Item I
+//             WHERE I.I_Id = ?`;
+//
+//         const [itemResult] = await db.query(itemQuery, [I_Id]);
+//
+//         if (itemResult.length === 0) {
+//             return res.status(404).json({ success: false, message: "Item not found" });
+//         }
+//
+//         const itemData = itemResult[0];
+//
+//         // ✅ Convert images to Base64
+//         const mainImgBase64 = itemData.img ? Buffer.from(itemData.img).toString("base64") : null;
+//         const img1Base64 = itemData.img1 ? Buffer.from(itemData.img1).toString("base64") : null;
+//         const img2Base64 = itemData.img2 ? Buffer.from(itemData.img2).toString("base64") : null;
+//         const img3Base64 = itemData.img3 ? Buffer.from(itemData.img3).toString("base64") : null;
+//
+//         // ✅ Fetch suppliers providing this item
+//         const supplierQuery = `
+//             SELECT S.s_ID, S.name, S.contact, ISUP.unit_cost
+//             FROM Supplier S
+//                      JOIN item_supplier ISUP ON S.s_ID = ISUP.s_ID
+//             WHERE ISUP.I_Id = ?`;
+//
+//         const [suppliersResult] = await db.query(supplierQuery, [I_Id]);
+//
+//         const suppliers = suppliersResult.map(supplier => ({
+//             s_ID: supplier.s_ID,
+//             name: supplier.name,
+//             contact: supplier.contact,
+//             unit_cost: supplier.unit_cost
+//         }));
+//
+//         // ✅ Fetch stock details **excluding** 'Issued' status, only include 'Available', 'Damage', 'Reserved'
+//         const stockQuery = `
+//             SELECT srd_Id, stock_Id, sr_ID, status
+//             FROM m_s_r_detail
+//             WHERE I_Id = ?
+//               AND status IN ('Available', 'Damage', 'Reserved')
+//             ORDER BY FIELD(status, 'Available', 'Reserved', 'Damage')`;
+//
+//         const [stockResults] = await db.query(stockQuery, [I_Id]);
+//
+//         // ✅ Categorize stock into 3 separate arrays by status
+//         const availableStock = [];
+//         const reservedStock = [];
+//         const damageStock = [];
+//
+//         stockResults.forEach(stock => {
+//             if (stock.status === 'Available') {
+//                 availableStock.push(stock);
+//             } else if (stock.status === 'Reserved') {
+//                 reservedStock.push(stock);
+//             } else if (stock.status === 'Damage') {
+//                 damageStock.push(stock);
+//             }
+//         });
+//
+//         // ✅ Construct final response
+//         const responseData = {
+//             success: true,
+//             item: {
+//                 I_Id: itemData.I_Id,
+//                 I_name: itemData.I_name,
+//                 descrip: itemData.descrip,
+//                 color: itemData.color,
+//                 material: itemData.material,
+//                 price: itemData.price,
+//                 stockQty: itemData.stockQty,
+//                 availableQty: itemData.availableQty,
+//                 bookedQty: itemData.bookedQty,
+//                 warrantyPeriod: itemData.warrantyPeriod,
+//                 minQTY: itemData.minQTY,
+//                 maincategory: itemData.mn_Cat,
+//                 sub_one: itemData.sb_catOne,
+//                 sub_two: itemData.sb_catTwo,
+//                 img: mainImgBase64,
+//                 img1: img1Base64,
+//                 img2: img2Base64,
+//                 img3: img3Base64,
+//                 suppliers: suppliers,
+//                 stockDetails: {
+//                     available: availableStock, // Stocks with 'Available' status
+//                     reserved: reservedStock,   // Stocks with 'Reserved' status
+//                     damage: damageStock       // Stocks with 'Damage' status
+//                 }
+//             }
+//         };
+//
+//         return res.status(200).json(responseData);
+//
+//     } catch (error) {
+//         console.error("❌ Error fetching item details:", error.message);
+//         return res.status(500).json({ success: false, message: "Server error", error: error.message });
+//     }
+// });
+
 // Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
     try {
