@@ -250,7 +250,7 @@ CREATE TABLE order_payment(
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                          ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE advance_payment(
+CREATE TABLE salary_advance(
     ad_ID VARCHAR(25) PRIMARY KEY,
     E_Id VARCHAR(25),
     amount DOUBLE,
@@ -258,11 +258,11 @@ CREATE TABLE advance_payment(
     CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
                          ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE payment (
+CREATE TABLE cash_balance (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     reason VARCHAR(45),
     ref VARCHAR(25),
-    ref_type ENUM('order', 'advance','other') NOT NULL,
+    ref_type ENUM('order', 'advance','loss','other') NOT NULL,
     dateTime DATETIME,
     amount DOUBLE
 );
@@ -327,13 +327,7 @@ CREATE TABLE issued_items(
     CONSTRAINT FOREIGN KEY (srd_Id) REFERENCES m_s_r_detail (srd_Id)
                                      ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE profit(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    amount DOUBLE,
-    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                     ON DELETE CASCADE ON UPDATE CASCADE
-);
+
 CREATE TABLE ST_order_review(
     stID VARCHAR(25),
     year int,

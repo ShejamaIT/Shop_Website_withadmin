@@ -8,6 +8,9 @@ const DriverDetail = ({ driver }) => {
     const [deliveryCharges, setDeliveryCharges] = useState(null);
     const [thisMonthNotes, setThisMonthNotes] = useState([]);
     const [lastMonthNotes, setLastMonthNotes] = useState([]);
+    const [advancedetails , setAdanceDetails] = useState([]);
+    const [dailyditects , setDailyDitects] = useState([]);
+    const [monthlyditects , setMonthlyDitects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -35,6 +38,9 @@ const DriverDetail = ({ driver }) => {
             setDeliveryCharges(data.data.deliveryCharges || {});
             setThisMonthNotes(data.data.deliveryNotes.thisMonth || []);
             setLastMonthNotes(data.data.deliveryNotes.lastMonth || []);
+            setAdanceDetails(data.data.advanceDetails  || []);
+            setDailyDitects(data.data.deliveryCharges.dailyCharges || []);
+            setMonthlyDitects(data.data.deliveryCharges.monthlyCharges || []);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -44,6 +50,10 @@ const DriverDetail = ({ driver }) => {
             setLastMonthNotes([]);
             setLoading(false);
         }
+    };
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : "N/A";
     };
 
     return (
@@ -69,61 +79,144 @@ const DriverDetail = ({ driver }) => {
                                             <tr><td><strong>Employee ID</strong></td><td>{driverDetails.devID}</td></tr>
                                             <tr><td><strong>Phone</strong></td><td>{driverDetails.contact}</td></tr>
                                             <tr><td><strong>NIC</strong></td><td>{driverDetails.nic}</td></tr>
-                                            <tr><td><strong>Balance</strong></td><td>Rs. {driverDetails.balance}</td></tr>
+                                            <tr><td><strong>Ditect Balance</strong></td><td>Rs. {driverDetails.balance}</td></tr>
                                             <tr><td><strong>Advance</strong></td><td>Rs. {driverDetails.totalAdvance}</td></tr>
                                             </tbody>
                                         </Table>
                                     </div>
-                                    {/*<div className="delivery-charges">*/}
-                                    {/*    <h4 className="sub-title">Delivery Charges</h4>*/}
-                                    {/*    <Table bordered className="charges-table">*/}
-                                    {/*        <tbody>*/}
-                                    {/*        <tr><td><strong>Daily Charge</strong></td><td>Rs. {deliveryCharges.dailyCharge}</td></tr>*/}
-                                    {/*        <tr><td><strong>Monthly Charge</strong></td><td>Rs. {deliveryCharges.monthlyCharge}</td></tr>*/}
-                                    {/*        </tbody>*/}
-                                    {/*    </Table>*/}
-                                    {/*</div>*/}
-                                    <div className="delivery-notes">
-                                        <h4 className="sub-title">Delivery Notes - This Month</h4>
-                                        <Table striped bordered className="items-table">
-                                            <thead>
-                                            <tr>
-                                                <th>Delivery Note ID</th>
-                                                <th>District</th>
-                                                <th>Hire</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {thisMonthNotes.length > 0 ? thisMonthNotes.map(note => (
-                                                <tr key={note.delNoID}>
-                                                    <td>{note.delNoID}</td>
-                                                    <td>{note.district}</td>
-                                                    <td>Rs. {note.hire}</td>
-                                                </tr>
-                                            )) : <tr><td colSpan="3">No records found</td></tr>}
-                                            </tbody>
-                                        </Table>
+                                    <div className="coupon-detail">
+                                        <Row>
+                                            <Col lg={6}>
+                                                <h4 className="sub-title">Daily Ditects</h4>
+                                                <Table bordered className="coupon-table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Delivery ID</th>
+                                                        <th>Direct Amount (Rs.)</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {dailyditects.length > 0 ? (
+                                                        dailyditects.map((dd, index) => (
+                                                            <tr key={index}>
+                                                                <td>{dd.deliveryId}</td>
+                                                                <td>Rs. {dd.amount}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="2" className="no-coupon-text">No Direct Amount.</td>
+                                                        </tr>
+                                                    )}
+                                                    </tbody>
+                                                </Table>
+
+                                                <h4 className="sub-title">Monthly Ditects</h4>
+                                                <Table bordered className="coupon-table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Delivery ID</th>
+                                                        <th>Direct Amount (Rs.)</th>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {monthlyditects.length > 0 ? (
+                                                        monthlyditects.map((dd, index) => (
+                                                            <tr key={index}>
+                                                                <td>{dd.deliveryId}</td>
+                                                                <td>Rs. {dd.amount}</td>
+                                                                <td>{formatDate(dd.date)}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="3" className="no-coupon-text">No Direct Amount.</td>
+                                                        </tr>
+                                                    )}
+                                                    </tbody>
+                                                </Table>
+                                            </Col>
+                                            {/* Advance Details */}
+                                            <Col lg={6}>
+                                                <h4 className="sub-title">Advance</h4>
+                                                <Table bordered className="coupon-table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Advance ID</th>
+                                                        <th>Amount (Rs.)</th>
+                                                        <th>Date </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {advancedetails.length > 0 ? (
+                                                        advancedetails.map((advance, index) => (
+                                                            <tr key={index}>
+                                                                <td>{advance.advanceId}</td>
+                                                                <td>Rs. {advance.amount}</td>
+                                                                <td>{formatDate(advance.dateTime)}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="3" className="no-coupon-text">No Advance.</td>
+                                                        </tr>
+                                                    )}
+                                                    </tbody>
+                                                </Table>
+                                            </Col>
+                                        </Row>
+                                    </div>
+
+                                    <div className="coupon-detail">
+                                        <Row>
+                                            <Col lg={6}>
+                                                <h4 className="sub-title">Delivery Notes - This Month</h4>
+                                                <Table striped bordered className="items-table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Delivery Note ID</th>
+                                                        <th>District</th>
+                                                        <th>Hire</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {thisMonthNotes.length > 0 ? thisMonthNotes.map(note => (
+                                                        <tr key={note.delNoID}>
+                                                            <td>{note.delNoID}</td>
+                                                            <td>{note.district}</td>
+                                                            <td>Rs. {note.hire}</td>
+                                                        </tr>
+                                                    )) : <tr><td colSpan="3">No records found</td></tr>}
+                                                    </tbody>
+                                                </Table>
+                                            </Col>
+                                            <Col lg={6}>
+                                                <h4 className="sub-title">Delivery Notes - Last Month</h4>
+                                                <Table striped bordered className="items-table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Delivery Note ID</th>
+                                                        <th>District</th>
+                                                        <th>Hire</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {lastMonthNotes.length > 0 ? lastMonthNotes.map(note => (
+                                                        <tr key={note.delNoID}>
+                                                            <td>{note.delNoID}</td>
+                                                            <td>{note.district}</td>
+                                                            <td>Rs. {note.hire}</td>
+                                                        </tr>
+                                                    )) : <tr><td colSpan="3">No records found</td></tr>}
+                                                    </tbody>
+                                                </Table>
+                                            </Col>
+                                        </Row>
+
                                     </div>
                                     <div className="delivery-notes">
-                                        <h4 className="sub-title">Delivery Notes - Last Month</h4>
-                                        <Table striped bordered className="items-table">
-                                            <thead>
-                                            <tr>
-                                                <th>Delivery Note ID</th>
-                                                <th>District</th>
-                                                <th>Hire</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {lastMonthNotes.length > 0 ? lastMonthNotes.map(note => (
-                                                <tr key={note.delNoID}>
-                                                    <td>{note.delNoID}</td>
-                                                    <td>{note.district}</td>
-                                                    <td>Rs. {note.hire}</td>
-                                                </tr>
-                                            )) : <tr><td colSpan="3">No records found</td></tr>}
-                                            </tbody>
-                                        </Table>
+
                                     </div>
                                 </>
                             )}

@@ -10,6 +10,7 @@ const SaleteamDetail = ({ Saleteam }) => {
     const [ordersThisMonthOther, setOrdersThisMonthOther] = useState([]);
     const [ordersLastMonthIssued, setOrdersLastMonthIssued] = useState([]);
     const [ordersLastMonthOther, setOrdersLastMonthOther] = useState([]);
+    const [advancedetails , setAdanceDetails] = useState([]);
     const [coupones, setCoupones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -38,6 +39,7 @@ const SaleteamDetail = ({ Saleteam }) => {
             setOrdersThisMonthOther(data.data.ordersThisMonthOther || []);
             setOrdersLastMonthIssued(data.data.ordersLastMonthIssued || []);
             setOrdersLastMonthOther(data.data.ordersLastMonthOther || []);
+            setAdanceDetails(data.data.advanceDetails  || []);
             setCoupones(data.data.coupons || []);
             setMonthAdvance(data.data.totalAdvance);
             setLoading(false);
@@ -82,29 +84,65 @@ const SaleteamDetail = ({ Saleteam }) => {
                                 </Table>
                             </div>
 
-                            {/* Coupon Details */}
+
                             <div className="coupon-detail">
-                                <h4 className="sub-title">Coupon Details</h4>
-                                {coupones.length > 0 ? (
-                                    <Table bordered className="coupon-table">
-                                        <thead>
-                                        <tr>
-                                            <th>Coupon ID</th>
-                                            <th>Discount (Rs.)</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {coupones.map((coupon, index) => (
-                                            <tr key={index}>
-                                                <td>{coupon.couponId}</td>
-                                                <td>Rs. {coupon.couponDiscount}</td>
+                                <Row>
+                                    {/* Coupon Details */}
+                                    <Col lg={6}>
+                                        <h4 className="sub-title">Coupon Details</h4>
+                                        <Table bordered className="coupon-table">
+                                            <thead>
+                                            <tr>
+                                                <th>Coupon ID</th>
+                                                <th>Discount (Rs.)</th>
                                             </tr>
-                                        ))}
-                                        </tbody>
-                                    </Table>
-                                ) : (
-                                    <p className="no-coupon-text">No coupons available.</p>
-                                )}
+                                            </thead>
+                                            <tbody>
+                                            {coupones.length > 0 ? (
+                                                coupones.map((coupon, index) => (
+                                                    <tr key={index}>
+                                                        <td>{coupon.couponId}</td>
+                                                        <td>Rs. {coupon.couponDiscount}</td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="2" className="no-coupon-text">No coupons available.</td>
+                                                </tr>
+                                            )}
+                                            </tbody>
+                                        </Table>
+                                    </Col>
+                                    {/* Advance Details */}
+                                    <Col lg={6}>
+                                        <h4 className="sub-title">Advance</h4>
+                                        <Table bordered className="coupon-table">
+                                            <thead>
+                                            <tr>
+                                                <th>Advance ID</th>
+                                                <th>Amount (Rs.)</th>
+                                                <th>Date </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {advancedetails.length > 0 ? (
+                                                advancedetails.map((advance, index) => (
+                                                    <tr key={index}>
+                                                        <td>{advance.advanceId}</td>
+                                                        <td>Rs. {advance.amount}</td>
+                                                        <td>{formatDate(advance.dateTime)}</td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="3" className="no-coupon-text">No Advance.</td>
+                                                </tr>
+                                            )}
+                                            </tbody>
+                                        </Table>
+                                    </Col>
+                                </Row>
+
                             </div>
 
                             <div className="order-details">

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button } from "reactstrap";
@@ -41,9 +40,9 @@ const IssuedOrderDetails = () => {
         if (order.paymentHistory && order.paymentHistory.length > 0) {
             order.paymentHistory.forEach(payment => {
                 printWindow.document.write(`
-                    <p><strong>Payment ID:</strong> ${payment.op_ID}</p>
+                    <p><strong>Payment ID:</strong> ${payment.paymentId}</p>
                     <p><strong>Amount Paid:</strong> Rs. ${payment.amount}</p>
-                    <p><strong>Payment Date:</strong> ${new Date(payment.dateTime).toLocaleString()}</p>
+                    <p><strong>Payment Date:</strong> ${payment.paymentDate}</p>
                     <hr />
                 `);
             });
