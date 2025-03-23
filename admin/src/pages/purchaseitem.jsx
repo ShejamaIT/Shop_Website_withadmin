@@ -156,6 +156,7 @@ const PurchaseDetails = () => {
             if (response.ok) {
                 toast.success("Purchase saved successfully!");
                 setSelectedItems([]); // Clear selected items after successful submission
+                fetchPurchaseID();
                 setTimeout(() => {
                     window.location.reload(); // Auto-refresh the page
                 }, 1000);

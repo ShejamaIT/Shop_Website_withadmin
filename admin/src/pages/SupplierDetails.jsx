@@ -263,27 +263,27 @@ const SupplierDetails = ({ supplier }) => {
                                 <Table bordered className="coupon-table">
                                     <thead>
                                     <tr>
-                                        <th>Stock Id</th>
-                                        <th>Item</th>
-                                        <th>Qty</th>
-                                        <th>Amount (Rs.)</th>
+                                        <th>Purchase Note</th>
                                         <th>Date</th>
+                                        <th>Delivery (Rs.)</th>
+                                        <th>Amount (Rs.)</th>
+
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {paymentList.length > 0 ? (
                                         paymentList.map((payment, index) => (
                                             <tr key={index}>
-                                                <td>{payment.sr_ID}</td>
-                                                <td>{payment.I_Id}</td>
-                                                <td>{payment.rec_count}</td>
-                                                <td>Rs. {payment.total_amount_to_be_paid}</td>
+                                                <td>{payment.pc_Id}</td>
                                                 <td>{formatDate(payment.rDate)}</td>
+                                                <td>Rs. {payment.deliveryCharge}</td>
+                                                <td>Rs. {payment.total}</td>
+
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="5" className="no-coupon-text">No coupons available.</td>
+                                            <td colSpan="5" className="no-coupon-text">No payments available.</td>
                                         </tr>
                                     )}
                                     </tbody>

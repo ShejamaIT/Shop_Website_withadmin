@@ -10,9 +10,12 @@ import TableInProduction from "../components/tables/TableInProduction";
 import AddProduct from "./AddProducts";
 import AddOtherDetails from "./AddOtherDetails";
 import PurchaseDetails from "./purchaseitem";
+import classnames from "classnames";
+import TablePurchaseNote from "../components/tables/TablePurchaseNote";
 
 const AllProducts = () => {
-    const [activeTab, setActiveTab] = useState("Add Item"); // Manage active tab name
+    const [activeTab, setActiveTab] = useState("Add Item"); // Main tab state
+    const [nestedActiveTab, setNestedActiveTab] = useState("1"); // Nested tab state
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -26,7 +29,7 @@ const AllProducts = () => {
         "Item Purchase"
     ];
 
-    // Read the active tab from the URL query parameter (using `tab`)
+    // Read the active tab from the URL
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
         const tab = searchParams.get("tab");
@@ -38,7 +41,7 @@ const AllProducts = () => {
     // Update the URL when the active tab changes
     const handleTabChange = (tabName) => {
         setActiveTab(tabName);
-        navigate(`?tab=${tabName}`); // Update the URL with the tab query param
+        navigate(`?tab=${tabName}`);
     };
 
     return (
@@ -49,7 +52,7 @@ const AllProducts = () => {
                 </Row>
 
                 <Container className="all-products">
-                    {/* Tab Navigation */}
+                    {/* Main Tabs */}
                     <Nav tabs>
                         {tabNames.map((label, index) => (
                             <NavItem key={index}>
@@ -65,7 +68,6 @@ const AllProducts = () => {
 
                     {/* Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        {/* Add Item Tab */}
                         <TabPane tabId="Add Item">
                             <Row>
                                 <Col>
@@ -74,14 +76,12 @@ const AllProducts = () => {
                             </Row>
                         </TabPane>
 
-                        {/* All Products Tab */}
                         <TabPane tabId="All Products">
                             <Row>
                                 <TableAllItem />
                             </Row>
                         </TabPane>
 
-                        {/* For Production Tab */}
                         <TabPane tabId="For Production">
                             <Row>
                                 <Col>
@@ -90,7 +90,6 @@ const AllProducts = () => {
                             </Row>
                         </TabPane>
 
-                        {/* In Production Tab */}
                         <TabPane tabId="In Production">
                             <Row>
                                 <Col>
@@ -99,7 +98,6 @@ const AllProducts = () => {
                             </Row>
                         </TabPane>
 
-                        {/* Add Categories Tab */}
                         <TabPane tabId="Add Categories">
                             <Row>
                                 <Col>
@@ -108,13 +106,42 @@ const AllProducts = () => {
                             </Row>
                         </TabPane>
 
-                        {/* Purchase item Tab */}
+                        {/* Purchase Item Tab with Nested Tabs */}
                         <TabPane tabId="Item Purchase">
-                            <Row>
-                                <Col>
-                                    <PurchaseDetails />
-                                </Col>
-                            </Row>
+                            <Nav tabs className="mb-3">
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "1" })}
+                                        onClick={() => setNestedActiveTab("1")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        Create Purchase Note
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "2" })}
+                                        onClick={() => setNestedActiveTab("2")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        All Purchase Notes
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+
+                            {/* Nested Tab Content */}
+                            <TabContent activeTab={nestedActiveTab}>
+                                <TabPane tabId="1">
+                                    <Row>
+                                        <PurchaseDetails />
+                                    </Row>
+                                </TabPane>
+                                <TabPane tabId="2">
+                                    <Row>
+                                        <TablePurchaseNote />
+                                    </Row>
+                                </TabPane>
+                            </TabContent>
                         </TabPane>
                     </TabContent>
                 </Container>

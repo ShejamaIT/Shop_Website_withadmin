@@ -303,7 +303,6 @@ CREATE TABLE purchase(
     balance DOUBLE,
     deliveryCharge DOUBLE,
     invoiceId varchar(25),
-    detail TEXT,
     CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );

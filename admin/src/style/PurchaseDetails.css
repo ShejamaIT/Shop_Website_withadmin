@@ -61,24 +61,24 @@ select, input {
 }
 
 /* Button Styling */
-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    margin-top: 15px;
-    cursor: pointer;
-    transition: 0.3s ease-in-out;
-}
+/*button {*/
+/*    display: block;*/
+/*    width: 100%;*/
+/*    padding: 10px;*/
+/*    font-size: 16px;*/
+/*    font-weight: bold;*/
+/*    background: #007bff;*/
+/*    color: white;*/
+/*    border: none;*/
+/*    border-radius: 5px;*/
+/*    margin-top: 15px;*/
+/*    cursor: pointer;*/
+/*    transition: 0.3s ease-in-out;*/
+/*}*/
 
-button:hover {
-    background: #0056b3;
-}
+/*button:hover {*/
+/*    background: #0056b3;*/
+/*}*/
 
 /* Responsive Design */
 @media (max-width: 768px) {
