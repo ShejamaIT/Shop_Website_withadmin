@@ -1228,7 +1228,6 @@ router.get("/item-details", async (req, res) => {
     }
 });
 
-
 // router.get("/item-details", async (req, res) => {
 //     try {
 //         const { I_Id } = req.query;
@@ -1386,7 +1385,7 @@ router.get("/orders-accepting", async (req, res) => {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
             SELECT
-                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orwStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus
@@ -1870,6 +1869,7 @@ router.get("/supplier-items", async (req, res) => {
             SELECT
                 item_supplier.I_Id,
                 Item.I_name,
+                Item.color,
                 item_supplier.unit_cost,
                 Item.warrantyPeriod,
                 Item.img  -- Fetch the binary image (LONGBLOB)
@@ -1946,7 +1946,6 @@ router.get("/unpaid-stock-details", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
-
 
 // Get all suppliers
 router.get("/suppliers", async (req, res) => {
@@ -3186,6 +3185,127 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
             stockReceivedId: receivedStockId,
             imagePath,
         });
+    } catch (error) {
+        console.error("Error adding stock received:", error);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+// add purchase note and add stock
+router.post("/addStock", upload.single("image"), async (req, res) => {
+    try {
+        // Extracting data from request body and file
+        const { purchase_id, supplier_id, date, itemTotal, delivery, invoice, items } = req.body;
+        const imageFile = req.file;
+
+        // Ensure values are valid
+        const total = Number(itemTotal) || 0;
+        const deliveryPrice = Number(delivery) || 0;
+
+        if (!supplier_id || !itemTotal || !date || !delivery || !purchase_id || !items) {
+            return res.status(400).json({ success: false, message: "All fields are required!" });
+        }
+
+        // Handle image upload if any
+        let imagePath = null;
+        if (imageFile) {
+            const imageName = `item_${purchase_id}_${Date.now()}.${imageFile.mimetype.split("/")[1]}`;
+            const savePath = path.join("./uploads/images", imageName);
+            fs.writeFileSync(savePath, imageFile.buffer);
+            imagePath = `/uploads/images/${imageName}`;
+        }
+
+        // Insert into the purchase table
+        const insertQuery = `
+            INSERT INTO purchase (pc_Id, s_ID, rDate, total, pay, balance, deliveryCharge, invoiceId)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        const [result] = await db.query(insertQuery, [purchase_id, supplier_id, date, total, 0, total, deliveryPrice, invoice]);
+
+        // Now, for each item, insert into purchase_detail and handle stock
+        const stockDetails = []; // To collect details for later barcode generation
+        const stockCount = items.length; // Assuming items contains the details for each stock to add
+        let lastStockId = 0; // To keep track of last generated stock_id
+
+        // Loop through each item and insert it into the purchase_detail table
+        for (let item of items) {
+            const { I_Id, unit_price, quantity } = item;
+            const totalPrice = parseFloat(unit_price) * Number(quantity);
+
+            // Insert item details into purchase_detail table
+            const purchaseDetailQuery = `
+                INSERT INTO purchase_detail (pc_Id, I_Id, rec_count, unitPrice, total, stock_range)
+                VALUES (?, ?, ?, ?, ?, ?)`;
+            await db.query(purchaseDetailQuery, [purchase_id, I_Id, quantity, unit_price, totalPrice, ""]);
+
+            // Prepare to update stock
+            stockDetails.push({ I_Id, quantity });
+        }
+
+        // Insert barcode details into p_i_detail
+        const insertBarcodeQuery = `
+            INSERT INTO p_i_detail (pc_Id, I_Id, stock_Id, barcode_img, status, orID, datetime)
+            VALUES (?, ?, ?, ?, ?, ?,?)`;
+
+        // Ensure barcodes folder exists
+        const barcodeFolderPath = path.join("./uploads/barcodes");
+        if (!fs.existsSync(barcodeFolderPath)) {
+            fs.mkdirSync(barcodeFolderPath, { recursive: true });
+        }
+
+        // Array to track stock ranges for each item
+        const stockRanges = [];
+
+        // Generate barcodes for each stock
+        for (let i = 0; i < stockCount; i++) {
+            const { I_Id, quantity } = stockDetails[i];
+            let startStockId = lastStockId + 1; // Starting stock ID for this item
+
+            // Generate barcode and insert into p_i_detail
+            for (let j = 1; j <= quantity; j++) {
+                lastStockId++; // Increment stock ID for each new stock added
+                const barcodeData = `${I_Id}-${lastStockId}`;
+                const barcodeImageName = `barcode_${barcodeData}.png`;
+                const barcodeImagePath = path.join(barcodeFolderPath, barcodeImageName);
+
+                // Generate barcode image
+                const pngBuffer = await bwipjs.toBuffer({
+                    bcid: "code128",
+                    text: barcodeData,
+                    scale: 3,
+                    height: 10,
+                    includetext: true,
+                    textxalign: "center",
+                });
+
+                // Save the barcode image
+                fs.writeFileSync(barcodeImagePath, pngBuffer);
+
+                // Insert barcode into p_i_detail table
+                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", ""]);
+
+            }
+
+            // After inserting barcodes, store the stock range
+            const stockRange = `${startStockId}-${lastStockId}`;
+            stockRanges.push({ I_Id, stockRange });
+        }
+
+        // Now that all stock has been inserted, update the stock_range in purchase_detail table
+        for (let { I_Id, stockRange } of stockRanges) {
+            const updateStockRangeQuery = `
+                UPDATE purchase_detail
+                SET stock_range = ?
+                WHERE pc_Id = ? AND I_Id = ?`;
+            await db.query(updateStockRangeQuery, [stockRange, purchase_id, I_Id]);
+        }
+
+        // Send success response with the relevant data
+        return res.status(201).json({
+            success: true,
+            message: "Stock received successfully, image uploaded, and barcodes saved!",
+            imagePath,
+        });
+
     } catch (error) {
         console.error("Error adding stock received:", error);
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
@@ -4708,6 +4828,24 @@ router.get("/sales/count", async (req, res) => {
     } catch (error) {
         console.error("Error fetching sales total:", error.message);
         return res.status(500).json({ message: "Error fetching sales total." });
+    }
+});
+
+router.get("/newPurchasenoteID", async (req, res) => {
+    try {
+        const PurchaseID = await generateNewId("purchase", "pc_Id", "PC"); // Generate new Purchase ID
+        return res.status(200).json({
+            success: true,
+            message: "PurchaseID fetched successfully.",
+            PurchaseID
+        });
+    } catch (error) {
+        console.error("Error fetching pc_Id:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching Purchase ID.",
+            error: error.message
+        });
     }
 });
 
