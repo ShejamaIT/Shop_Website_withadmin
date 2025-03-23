@@ -320,7 +320,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 <Col lg="8" className="mx-auto">
                     <Form onSubmit={handleSubmit}>
                         <div className='order-details'>
-                            <h5 className='text-center underline'>Order Type</h5><hr/><Row>
+                            <h5 className='text-center underline'>Order Type</h5><hr/>
+                            <Row>
                             <Label className="fw-bold">Select Order Type</Label>
                             <div className="d-flex gap-3">
                                 <Label>

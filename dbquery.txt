@@ -294,6 +294,47 @@ CREATE TABLE m_s_r_detail(
     CONSTRAINT FOREIGN KEY (sr_ID) REFERENCES main_stock_received (sr_ID)
                         ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE purchase(
+    pc_Id varchar(25) PRIMARY KEY,
+    s_ID VARCHAR(25) NOT NULL,
+    rDate DATE NOT NULL,
+    total DOUBLE,
+    pay DOUBLE,
+    balance DOUBLE,
+    deliveryCharge DOUBLE,
+    invoiceId varchar(25),
+    detail TEXT,
+    CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
+                        ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE purchase_detail(
+    psd_ID INT AUTO_INCREMENT PRIMARY KEY,
+    pc_Id varchar(25) NOT NULL,
+    I_Id varchar(25) NOT NULL,
+    rec_count INT,
+    unitPrice DOUBLE,
+    total DOUBLE,
+    stock_range varchar(10),
+    CONSTRAINT FOREIGN KEY (pc_Id) REFERENCES purchase (pc_Id)
+                            ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                          ON DELETE CASCADE ON UPDATE CASCADE,
+);
+CREATE TABLE p_i_detail(
+    pid_Id INT AUTO_INCREMENT PRIMARY KEY,
+    pc_Id varchar(25) NOT NULL,
+    I_Id varchar(25) NOT NULL,
+    stock_Id varchar(25) NOT NULL,
+    barcode_img LONGBLOB NOT NULL,
+    status VARCHAR(15),
+    orID VARCHAR(25),
+    datetime DATETIME,
+    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
+                      ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (pc_Id) REFERENCES purchase (pc_Id)
+                                ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE delivery_note(
     delNoID INT AUTO_INCREMENT PRIMARY KEY,
     driverName VARCHAR(25),

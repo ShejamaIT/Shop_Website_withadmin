@@ -9,6 +9,7 @@ import Tableforproduction from "../components/tables/Tableforproduction";
 import TableInProduction from "../components/tables/TableInProduction";
 import AddProduct from "./AddProducts";
 import AddOtherDetails from "./AddOtherDetails";
+import PurchaseDetails from "./purchaseitem";
 
 const AllProducts = () => {
     const [activeTab, setActiveTab] = useState("Add Item"); // Manage active tab name
@@ -21,7 +22,8 @@ const AllProducts = () => {
         "All Products",
         "For Production",
         "In Production",
-        "Add Categories"
+        "Add Categories",
+        "Item Purchase"
     ];
 
     // Read the active tab from the URL query parameter (using `tab`)
@@ -102,6 +104,15 @@ const AllProducts = () => {
                             <Row>
                                 <Col>
                                     <AddOtherDetails />
+                                </Col>
+                            </Row>
+                        </TabPane>
+
+                        {/* Purchase item Tab */}
+                        <TabPane tabId="Item Purchase">
+                            <Row>
+                                <Col>
+                                    <PurchaseDetails />
                                 </Col>
                             </Row>
                         </TabPane>
