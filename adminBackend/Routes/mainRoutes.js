@@ -4902,6 +4902,7 @@ router.get("/sales/count", async (req, res) => {
     }
 });
 
+// Get new purchaseid
 router.get("/newPurchasenoteID", async (req, res) => {
     try {
         const PurchaseID = await generateNewId("purchase", "pc_Id", "PC"); // Generate new Purchase ID
@@ -4917,6 +4918,45 @@ router.get("/newPurchasenoteID", async (req, res) => {
             message: "Error fetching Purchase ID.",
             error: error.message
         });
+    }
+});
+
+//Get details of purchase id
+router.get("/purchase-details", async (req, res) => {
+    try {
+        const { pc_Id } = req.query;
+
+        if (!pc_Id) {
+            return res.status(400).json({ success: false, message: "pc_Id is required" });
+        }
+
+        // Query purchase table
+        const [purchase] = await db.query("SELECT * FROM purchase WHERE pc_Id = ?", [pc_Id]);
+        if (purchase.length === 0) {
+            return res.status(404).json({ success: false, message: "Purchase not found" });
+        }
+
+        // Query purchase_detail table
+        const [purchaseDetails] = await db.query(
+            "SELECT * FROM purchase_detail WHERE pc_Id = ?", [pc_Id]
+        );
+
+        // Query p_i_detail table
+        const [pIDetails] = await db.query(
+            "SELECT * FROM p_i_detail WHERE pc_Id = ?", [pc_Id]
+        );
+
+        // Send response
+        return res.status(200).json({
+            success: true,
+            purchase: purchase[0],   // Single record
+            purchaseDetails,         // Array of items in the purchase
+            pIDetails                // Array of stock details
+        });
+
+    } catch (error) {
+        console.error("Error fetching purchase details:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
 
