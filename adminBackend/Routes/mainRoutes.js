@@ -391,6 +391,37 @@ router.get("/allitems", async (req, res) => {
     }
 });
 
+// Get all purchase notes
+router.get("/allPurchasenote", async (req, res) => {
+    try {
+        // Query the database to fetch all purchase notes
+        const [notes] = await db.query("SELECT * FROM purchase");
+
+        // If no items found, return a 404 status
+        if (notes.length === 0) {
+            return res.status(404).json({ message: "No purchase notes found" });
+        }
+
+        // Format the purchase notes
+        const formattedNotes = notes.map(item => ({
+            noteId: item.pc_Id,
+            supId: item.s_ID,
+            date: item.rDate,
+            total: item.total,
+            pay: item.pay,
+            balance: item.balance,
+            deliveryCharge: item.deliveryCharge,
+            invoiceId: item.invoiceId,
+        }));
+
+        // Send the formatted items as a JSON response
+        return res.status(200).json(formattedNotes);
+    } catch (error) {
+        console.error("Error fetching purchase notes:", error.message);
+        return res.status(500).json({ message: "Error fetching purchase notes" });
+    }
+});
+
 // Get all customers with filters for balance conditions
 router.get("/allcustomers", async (req, res) => {
     try {
@@ -1913,29 +1944,29 @@ router.get("/unpaid-stock-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "Supplier ID is required" });
         }
 
-        // Query to fetch unpaid stock details along with calculated total amount to be paid
+        // Query to fetch unpaid stock details from the purchase table
         const query = `
             SELECT
-                sr_ID,
-                I_Id,
+                pc_Id,
                 rDate,
-                rec_count,
-                unitPrice,
-                detail,
-                payment,
-                (rec_count * unitPrice) AS total_amount_to_be_paid
-            FROM main_stock_received
-            WHERE s_ID = ? AND payment = 'NotPaid';
+                total,
+                pay,
+                balance,
+                deliveryCharge,
+                invoiceId
+            FROM purchase
+            WHERE s_ID = ? AND balance > 0;
         `;
 
         const [itemsResult] = await db.query(query, [s_Id]);
+        console.log(itemsResult);
 
         // If no unpaid items found, return a 404 response
         if (itemsResult.length === 0) {
             return res.status(404).json({ success: false, message: "No unpaid stock details found for the given supplier" });
         }
 
-        // Return the unpaid stock details with the total amount to be paid
+        // Return the unpaid stock details with the balance
         return res.status(200).json({
             success: true,
             unpaidStockDetails: itemsResult,
@@ -3192,6 +3223,7 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
 });
 
 // add purchase note and add stock
+// Generate barcodes for each stock
 router.post("/addStock", upload.single("image"), async (req, res) => {
     try {
         // Extracting data from request body and file
@@ -3215,21 +3247,48 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             imagePath = `/uploads/images/${imageName}`;
         }
 
+        // Convert date from 'DD/MM/YYYY' to 'YYYY-MM-DD'
+        const formattedDate = date.split('/').reverse().join('-');
+
         // Insert into the purchase table
         const insertQuery = `
             INSERT INTO purchase (pc_Id, s_ID, rDate, total, pay, balance, deliveryCharge, invoiceId)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-        const [result] = await db.query(insertQuery, [purchase_id, supplier_id, date, total, 0, total, deliveryPrice, invoice]);
+        const [result] = await db.query(insertQuery, [purchase_id, supplier_id, formattedDate, total, 0, total, deliveryPrice, invoice]);
 
-        // Now, for each item, insert into purchase_detail and handle stock
+        // Ensure stock count is properly defined
+        const stockCount = items.length; // Number of items being processed
+
+        // Prepare to collect stock details for barcode generation
         const stockDetails = []; // To collect details for later barcode generation
-        const stockCount = items.length; // Assuming items contains the details for each stock to add
-        let lastStockId = 0; // To keep track of last generated stock_id
+        let lastStockId = 0; // Initialize last stock ID
 
         // Loop through each item and insert it into the purchase_detail table
-        for (let item of items) {
-            const { I_Id, unit_price, quantity } = item;
+        for (let i = 0; i < stockCount; i++) {
+            const { I_Id, unit_price, quantity } = items[i];
             const totalPrice = parseFloat(unit_price) * Number(quantity);
+
+            // Check and update unit price in item_supplier table if it doesn't match
+            const checkUnitPriceQuery = `SELECT unit_cost FROM item_supplier WHERE I_Id = ? AND s_ID = ?`;
+            const [unitPriceResult] = await db.query(checkUnitPriceQuery, [I_Id, supplier_id]);
+
+            if (unitPriceResult && unitPriceResult.length > 0) {
+                // If unit price doesn't match, update it
+                const existingUnitPrice = unitPriceResult[0].unit_cost;
+                if (parseFloat(existingUnitPrice) !== parseFloat(unit_price)) {
+                    const updateUnitPriceQuery = `
+                        UPDATE item_supplier
+                        SET unit_cost = ?
+                        WHERE I_Id = ? AND s_ID = ?`;
+                    await db.query(updateUnitPriceQuery, [unit_price, I_Id, supplier_id]);
+                }
+            } else {
+                // If no record found, insert a new entry in item_supplier
+                const insertUnitPriceQuery = `
+                    INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
+                    VALUES (?, ?, ?)`;
+                await db.query(insertUnitPriceQuery, [I_Id, supplier_id, unit_price]);
+            }
 
             // Insert item details into purchase_detail table
             const purchaseDetailQuery = `
@@ -3258,7 +3317,16 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
         // Generate barcodes for each stock
         for (let i = 0; i < stockCount; i++) {
             const { I_Id, quantity } = stockDetails[i];
-            let startStockId = lastStockId + 1; // Starting stock ID for this item
+
+            // Get the last stock ID for this item
+            const [lastStockResult] = await db.query(
+                `SELECT MAX(stock_Id) AS lastStockId FROM p_i_detail WHERE I_Id = ?`,
+                [I_Id]
+            );
+            lastStockId = lastStockResult[0]?.lastStockId || 0;
+
+            // The starting stock ID for this item
+            let startStockId = lastStockId + 1;
 
             // Generate barcode and insert into p_i_detail
             for (let j = 1; j <= quantity; j++) {
@@ -3282,11 +3350,14 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
 
                 // Insert barcode into p_i_detail table
                 await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", ""]);
-
+                await db.query(
+                    `UPDATE Item SET stockQty = stockQty + ?, availableQty = availableQty + ? WHERE I_Id = ?`,
+                    [quantity, quantity, I_Id]
+                );
             }
 
-            // After inserting barcodes, store the stock range
-            const stockRange = `${startStockId}-${lastStockId}`;
+            // After inserting barcodes, store the stock range in the correct format
+            const stockRange = `${startStockId}-${lastStockId}`; // Ensure the range is in correct format
             stockRanges.push({ I_Id, stockRange });
         }
 
