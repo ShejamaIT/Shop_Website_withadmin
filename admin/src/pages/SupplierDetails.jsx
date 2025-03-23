@@ -267,6 +267,7 @@ const SupplierDetails = ({ supplier }) => {
                                         <th>Date</th>
                                         <th>Delivery (Rs.)</th>
                                         <th>Amount (Rs.)</th>
+                                        <th>Action</th>
 
                                     </tr>
                                     </thead>
@@ -278,7 +279,13 @@ const SupplierDetails = ({ supplier }) => {
                                                 <td>{formatDate(payment.rDate)}</td>
                                                 <td>Rs. {payment.deliveryCharge}</td>
                                                 <td>Rs. {payment.total}</td>
-
+                                                <td>
+                                                    <Button
+                                                        // onClick={() => handleViewOrder(note.noteId)}
+                                                    >
+                                                        👁️
+                                                    </Button>
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (

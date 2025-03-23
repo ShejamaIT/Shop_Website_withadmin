@@ -40,7 +40,7 @@ const TablePurchaseNote = () => {
     };
 
     const handleViewOrder = (noteId) => {
-        navigate(`/issued-order-detail/${noteId}`);
+        navigate(`/purchase-detail/${noteId}`);
     };
 
     // Search function to filter by Order ID

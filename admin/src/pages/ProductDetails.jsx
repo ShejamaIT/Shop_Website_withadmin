@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from "react";
 import Helmet from "../components/Helmet/Helmet";
-import { Container, Row, Col } from "reactstrap";
-import '../style/productDetails.css';
+import { Container, Row, Col, Table } from "reactstrap";
+import "../style/productDetails.css";
 import axios from "axios";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
+import NavBar from "../components/header/navBar";
 
-const ProductDetails = () => {
-    const { id } = useParams(); // Get id parameter from URL
+const PurchaseNoteDetails = () => {
+    const { id } = useParams(); // Get pc_Id from URL
 
-    const [product, setProduct] = useState(null);
+    const [purchaseData, setPurchaseData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
     useEffect(() => {
-        const fetchProduct = async () => {
+        const fetchPurchaseData = async () => {
             try {
-                const response = await axios.get(`http://localhost:4000/item/${id}/details`);
-                setProduct(response.data.data);
-                console.log(response.data.data.imgUrl); // Check if this logs the correct image URL
+                const response = await axios.get(`http://localhost:5001/api/admin/main/purchase-details?pc_Id=${id}`);
+                setPurchaseData(response.data);
                 setLoading(false);
             } catch (err) {
                 console.error(err);
@@ -25,42 +26,96 @@ const ProductDetails = () => {
             }
         };
 
-        fetchProduct();
+        fetchPurchaseData();
     }, [id]);
 
-    const imageUrl = product.imgUrl; // Assuming product.imgUrl is like "http://localhost:4000/uploads/images/1719478644510.png"
-    const relativeImagePath = imageUrl.split('http://localhost:4000')[1];
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
+    if (!purchaseData) return <p>No purchase details found.</p>;
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
+    const { purchase, purchaseDetails, pIDetails } = purchaseData;
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : "N/A";
+    };
 
-    if (error) {
-        return <p>Error: {error}</p>;
-    }
-
-    if (!product) {
-        return <p>Product not found</p>;
-    }
 
     return (
-        <Helmet title={`Product Details - ${product.productName}`}>
+        <Helmet title={`Purchase Details`}>
             <section>
+                <Row>
+                    <NavBar />
+                </Row>
                 <Container>
                     <Row>
-                        <Col lg='12'>
-                            <h4 className='mb-5'>{product.productName} Details</h4>
-                            <div className="product-details">
-                                <div className="product-image">
-                                    <img src={relativeImagePath} alt={product.productName} />
+                        <Col lg="12">
+                            <h4 className="mb-3 text-center topic">Purchase Details</h4>
+                            <h4 className="mb-3 text-center topic">#{purchase.pc_Id}</h4>
+                            {/* Purchase Summary */}
+                            <div className="order-details">
+                                <div className="order-header">
+                                    <h5 className="mt-4">General Details</h5>
+                                    <div className="order-general">
+                                        <p><strong>Supplier ID:</strong> {purchase.s_ID}</p>
+                                        <p><strong>Date:</strong> {formatDate(purchase.rDate)}</p>
+                                        <p><strong>Total Amount:</strong> Rs. {purchase.total}</p>
+                                        <p><strong>Paid Amount:</strong> Rs. {purchase.pay}</p>
+                                        <p><strong>Balance:</strong> Rs. {purchase.balance}</p>
+                                        <p><strong>Delivery Charge:</strong> Rs. {purchase.deliveryCharge}</p>
+                                        <p><strong>Invoice ID:</strong> {purchase.invoiceId}</p>
+                                    </div>
                                 </div>
-                                <div className="product-info">
-                                    <p><strong>Product Name:</strong> {product.productName}</p>
-                                    <p><strong>Category:</strong> {product.category}</p>
-                                    <p><strong>Price:</strong> {product.price}</p>
-                                    <p><strong>Short Description:</strong> {product.shortDesc}</p>
-                                    <p><strong>Description:</strong> {product.description}</p>
-                                </div>
+                            </div>
+
+
+                            <div className="order-details">
+                                {/* Purchase Item Details */}
+                                <h5 className="mt-4">Purchased Items</h5>
+                                <Table bordered className="coupon-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Item ID</th>
+                                        <th>Received Count</th>
+                                        <th>Unit Price</th>
+                                        <th>Total</th>
+                                        <th>Stock Range</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {purchaseDetails.map((item, index) => (
+                                        <tr key={index}>
+                                            <td>{item.I_Id}</td>
+                                            <td>{item.rec_count}</td>
+                                            <td>Rs. {item.unitPrice}</td>
+                                            <td>Rs. {item.total}</td>
+                                            <td>{item.stock_range}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+
+                            <div className="order-details">
+                                {/* Stock-Level Details */}
+                                <h5 className="mt-4">Stock Details</h5>
+                                <Table bordered className="coupon-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Stock ID</th>
+                                        <th>Item ID</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {pIDetails.map((stock, index) => (
+                                        <tr key={index}>
+                                            <td>{stock.stock_Id}</td>
+                                            <td>{stock.I_Id}</td>
+                                            <td>{stock.status}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </Table>
                             </div>
                         </Col>
                     </Row>
@@ -70,4 +125,4 @@ const ProductDetails = () => {
     );
 };
 
-export default ProductDetails;
+export default PurchaseNoteDetails;

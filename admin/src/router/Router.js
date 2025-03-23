@@ -24,6 +24,7 @@ import AllCustomer from "../pages/AllCustomers";
 import PlaceOrder from "../pages/Placeorder";
 import AllEmployees from "../pages/AllEmployees";
 import AdvancePayment from "../pages/AdancePayment";
+import PurchaseNoteDetails from "../pages/ProductDetails";
 const Router = () => {
     return(
         <Routes>
@@ -52,6 +53,7 @@ const Router = () => {
             <Route path="create-delivery-note" element={<DeliveryNotes />} />
             <Route path="place-order" element={<PlaceOrder />} />
             <Route path="advance" element={<AdvancePayment />} />
+            <Route path="purchase-detail/:id" element={<PurchaseNoteDetails />} />
         </Routes>
     ) ;
 };
