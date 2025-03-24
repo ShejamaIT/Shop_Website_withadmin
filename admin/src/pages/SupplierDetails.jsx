@@ -184,6 +184,12 @@ const SupplierDetails = ({ supplier }) => {
             console.error("Error fetching supplier items:", error);
         }
     };
+    const handleClearSelection = () => {
+        setSelectedItem(null);
+        setSearchTerm("");
+        setAmount("");
+    };
+
 
     const handlePaymentSettlement = async () => {
         if (!paymentAmount || paymentAmount <= 0) {
@@ -233,23 +239,45 @@ const SupplierDetails = ({ supplier }) => {
                 <Container>
                     <Row>
                         <Col lg="12">
-                            <div className="salesteam-details">
+                            <div className="coupon-detail">
+                                <h4 className="sub-title">Supplier Details</h4>
                                 <Table bordered className="member-table">
                                     <tbody>
-                                    <tr><td><strong>Id</strong></td><td>{supplier.s_ID}</td></tr><tr><td><strong>Name</strong></td><td>{supplier.name}</td></tr>
-                                    <tr><td><strong>Contact 1</strong></td><td>{supplier.contact}</td></tr><tr><td><strong>Contact 2</strong></td><td>{supplier.contact2}</td></tr><tr><td><strong>Address</strong></td><td>{supplier.address}</td></tr>
+                                    <tr>
+                                        <td><strong>Id</strong></td>
+                                        <td>{supplier.s_ID}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Name</strong></td>
+                                        <td>{supplier.name}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Contacts</strong></td>
+                                        <td>{supplier.contact} / {supplier.contact2}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Address</strong></td>
+                                        <td>{supplier.address}</td>
+                                    </tr>
                                     </tbody>
                                 </Table>
                             </div>
                             <div className="coupon-detail">
+                                <h4 className="sub-title">Add New Item<h5>(Add one by one)</h5></h4>
+
                                 {/* Search box */}
                                 <Row>
                                     <Col md={6}>
+                                        <label>Select Item:</label>
                                         <Input
-                                            type="text" value={searchTerm} onChange={handleSearchChange}  // Update search term and filter items placeholder="Search for item..."
+                                            type="text"
+                                            value={searchTerm}
+                                            onChange={handleSearchChange}
+                                            placeholder="Search for item..."
                                         />
                                     </Col>
                                 </Row>
+
                                 {/* Dropdown to select items */}
                                 {dropdownOpen && filteredItems.length > 0 && (
                                     <div className="dropdown" style={{ position: 'absolute', zIndex: 1000, backgroundColor: 'white', border: '1px solid #ddd' }}>
@@ -263,21 +291,26 @@ const SupplierDetails = ({ supplier }) => {
 
                                 {/* Display selected item details */}
                                 {selectedItem && (
-                                    <Row className="mt-2">
+                                    <Row className="mt-2 align-items-center">
                                         <Col md={4}>
-                                            <label>Selected Item: {selectedItem.I_name}</label> {/* Display item name */}
+                                            <label>Selected Item: <strong>{selectedItem.I_name}</strong></label>
                                         </Col>
                                         <Col md={4}>
                                             <Input
-                                                type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Enter cost"
+                                                type="number"
+                                                value={amount}
+                                                onChange={(e) => setAmount(e.target.value)}
+                                                placeholder="Enter cost"
                                             />
                                         </Col>
-                                        <Col md={2}>
-                                            <Button color="primary" onClick={handleAddItem}>Add</Button>
+                                        <Col >
+                                            <Button color="primary" className='mr-3 ml-3' onClick={handleAddItem}>Add</Button>
+                                            <Button color="danger" className='mr-3 ml-3' onClick={handleClearSelection}>Clear</Button>
                                         </Col>
                                     </Row>
                                 )}
                             </div>
+
                             <div className="coupon-detail">
                                 <h4 className="sub-title">Supply Items</h4>
                                 {/* Display existing and new items in the table */}
