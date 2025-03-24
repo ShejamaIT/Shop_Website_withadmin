@@ -18,10 +18,10 @@ const PurchaseNoteDetails = () => {
             try {
                 const response = await axios.get(`http://localhost:5001/api/admin/main/purchase-details?pc_Id=${id}`);
                 setPurchaseData(response.data);
-                setLoading(false);
             } catch (err) {
                 console.error(err);
                 setError(err.message);
+            } finally {
                 setLoading(false);
             }
         };
@@ -33,12 +33,11 @@ const PurchaseNoteDetails = () => {
     if (error) return <p>Error: {error}</p>;
     if (!purchaseData) return <p>No purchase details found.</p>;
 
-    const { purchase, purchaseDetails, pIDetails } = purchaseData;
+    const { purchase, purchaseDetails, pIDetails, paymentDetails } = purchaseData;
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : "N/A";
     };
-
 
     return (
         <Helmet title={`Purchase Details`}>
@@ -51,7 +50,8 @@ const PurchaseNoteDetails = () => {
                         <Col lg="12">
                             <h4 className="mb-3 text-center topic">Purchase Details</h4>
                             <h4 className="mb-3 text-center topic">#{purchase.pc_Id}</h4>
-                            {/* Purchase Summary */}
+
+                            {/* General Purchase Details */}
                             <div className="order-details">
                                 <div className="order-header">
                                     <h5 className="mt-4">General Details</h5>
@@ -67,9 +67,8 @@ const PurchaseNoteDetails = () => {
                                 </div>
                             </div>
 
-
+                            {/* Purchased Items Details */}
                             <div className="order-details">
-                                {/* Purchase Item Details */}
                                 <h5 className="mt-4">Purchased Items</h5>
                                 <Table bordered className="coupon-table">
                                     <thead>
@@ -95,8 +94,8 @@ const PurchaseNoteDetails = () => {
                                 </Table>
                             </div>
 
+                            {/* Stock-Level Details */}
                             <div className="order-details">
-                                {/* Stock-Level Details */}
                                 <h5 className="mt-4">Stock Details</h5>
                                 <Table bordered className="coupon-table">
                                     <thead>
@@ -117,6 +116,35 @@ const PurchaseNoteDetails = () => {
                                     </tbody>
                                 </Table>
                             </div>
+
+                            {/* Payment Details Section (if available) */}
+                            {paymentDetails && paymentDetails.length > 0 && (
+                                <div className="order-details">
+                                    <h5 className="mt-4">Payment Details</h5>
+                                    <Table bordered className="coupon-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Payment ID</th>
+                                            <th>Reason</th>
+                                            <th>Reference</th>
+                                            <th>Date & Time</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {paymentDetails.map((payment, index) => (
+                                            <tr key={index}>
+                                                <td>{payment.Id || "N/A"}</td>
+                                                <td>{payment.reason}</td>
+                                                <td>{payment.ref}</td>
+                                                <td>{formatDate(payment.dateTime)}</td>
+                                                <td>Rs. {Math.abs(payment.amount)}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            )}
                         </Col>
                     </Row>
                 </Container>

@@ -262,7 +262,7 @@ CREATE TABLE cash_balance (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     reason VARCHAR(45),
     ref VARCHAR(25),
-    ref_type ENUM('order', 'advance','loss','other') NOT NULL,
+    ref_type ENUM('order', 'advance','loss','other','supplier') NOT NULL,
     dateTime DATETIME,
     amount DOUBLE
 );

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {Row, Col, Button, Input, Table, Label, Container} from 'reactstrap';
+import {Row, Col, Button, Input, Table, Label, Container, ModalHeader, ModalBody, FormGroup, ModalFooter, Modal} from 'reactstrap';
 import {toast} from "react-toastify";
 import Helmet from "../components/Helmet/Helmet";
+import {FaArrowRight} from "react-icons/fa";
+import {useNavigate} from "react-router-dom";
 
 const SupplierDetails = ({ supplier }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +17,12 @@ const SupplierDetails = ({ supplier }) => {
     const [filteredItems, setFilteredItems] = useState([]); // List to store filtered items based on search term
     const [selectedImage, setSelectedImage] = useState(null);  // Store selected image file
     const [imagePreview, setImagePreview] = useState(null);  // Store image preview URL
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState(null);
+    const [paymentAmount, setPaymentAmount] = useState('');
+    const [balanceAmount, setBalanceAmount] = useState('');
+    const [fullPayAmount, setFullPayAmount] = useState('');
+    const navigate = useNavigate();
 
     // Fetch all items for search and filter
     useEffect(() => {
@@ -34,7 +42,6 @@ const SupplierDetails = ({ supplier }) => {
         };
         fetchAllItems();
     }, []); // Fetch once when component mounts
-
     // Fetch supplier-specific items
     useEffect(() => {
         const fetchSupplierItems = async () => {
@@ -54,19 +61,6 @@ const SupplierDetails = ({ supplier }) => {
     }, [supplier.s_ID]); // Re-fetch when supplier changes
     // Fetch supplier-specific items
     useEffect(() => {
-        const fetchSupplierPayments = async () => {
-            try {
-                const response = await fetch(`http://localhost:5001/api/admin/main/unpaid-stock-details?s_Id=${supplier.s_ID}`);
-                const data = await response.json();
-                if (response.ok) {
-                    setPaymentList(data.unpaidStockDetails); // Set existing items for supplier
-                } else {
-                    console.error("Failed to load supplier items:", data.message);
-                }
-            } catch (error) {
-                console.error("Error fetching supplier items:", error);
-            }
-        };
         fetchSupplierPayments();
     }, [supplier.s_ID]); // Re-fetch when supplier changes
 
@@ -83,7 +77,6 @@ const SupplierDetails = ({ supplier }) => {
         setFilteredItems(filtered);
         setDropdownOpen(filtered.length > 0);  // Open dropdown if matching items exist
     };
-
     // Handle selecting an item from the dropdown
     const handleSelectItem = (item) => {
         setSelectedItem(item);
@@ -91,7 +84,6 @@ const SupplierDetails = ({ supplier }) => {
         setDropdownOpen(false);  // Close the dropdown after selection
         setWarrantyPeriod(item.warrantyPeriod);  // Set warranty period as is (it won't be changed)
     };
-
     const handleAddItem = async () => {
         if (!amount) {
             toast.error("Add cost first.");
@@ -165,6 +157,72 @@ const SupplierDetails = ({ supplier }) => {
             toast.error("Error adding item. Please try again.");
         }
     };
+    const handleOpenPaymentModal = (payment) => {
+        setSelectedPayment(payment);
+        setBalanceAmount(payment.balance);
+        setShowPaymentModal(true);
+    };
+    const handlePaymentAmountChange = (e) => {
+        const enteredAmount = parseFloat(e.target.value) || 0;
+        const newBalance = selectedPayment.total - enteredAmount;
+
+        setPaymentAmount(enteredAmount);
+        setBalanceAmount(newBalance >= 0 ? newBalance : 0); // Prevent negative balance
+    };
+    const fetchSupplierPayments = async () => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/unpaid-stock-details?s_Id=${supplier.s_ID}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                setPaymentList(data.unpaidStockDetails); // Set unpaid stock items
+                setFullPayAmount(data.fullTotal || 0); // Ensure fullTotal exists
+            } else {
+                console.error("Failed to load supplier items:", data.message);
+            }
+        } catch (error) {
+            console.error("Error fetching supplier items:", error);
+        }
+    };
+
+    const handlePaymentSettlement = async () => {
+        if (!paymentAmount || paymentAmount <= 0) {
+            toast.error("Enter a valid payment amount.");
+            return;
+        }
+
+        const paymentData = {
+            pc_Id: selectedPayment.pc_Id,
+            amountPaid: paymentAmount, // Balance isn't needed if API recalculates it
+        };
+
+        console.log("Sending Payment Data:", paymentData);
+
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/settle-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(paymentData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast.success("Payment settled successfully!");
+                setShowPaymentModal(false);
+                fetchSupplierPayments(); // Refresh unpaid stock list
+            } else {
+                toast.error(data.message || "Failed to settle payment.");
+            }
+        } catch (error) {
+            console.error("Error settling payment:", error);
+            toast.error("Error processing payment.");
+        }
+    };
+
+    const handleViewOrder = (noteId) => {
+        navigate(`/purchase-detail/${noteId}`);
+    };
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date instanceof Date && !isNaN(date) ? date.toLocaleDateString() : "N/A";
@@ -178,29 +236,20 @@ const SupplierDetails = ({ supplier }) => {
                             <div className="salesteam-details">
                                 <Table bordered className="member-table">
                                     <tbody>
-                                    <tr><td><strong>Id</strong></td><td>{supplier.s_ID}</td></tr>
-                                    <tr><td><strong>Name</strong></td><td>{supplier.name}</td></tr>
-                                    <tr><td><strong>Contact 1</strong></td><td>{supplier.contact}</td></tr>
-                                    <tr><td><strong>Contact 2</strong></td><td>{supplier.contact2}</td></tr>
-                                    <tr><td><strong>Address</strong></td><td>{supplier.address}</td></tr>
+                                    <tr><td><strong>Id</strong></td><td>{supplier.s_ID}</td></tr><tr><td><strong>Name</strong></td><td>{supplier.name}</td></tr>
+                                    <tr><td><strong>Contact 1</strong></td><td>{supplier.contact}</td></tr><tr><td><strong>Contact 2</strong></td><td>{supplier.contact2}</td></tr><tr><td><strong>Address</strong></td><td>{supplier.address}</td></tr>
                                     </tbody>
                                 </Table>
                             </div>
-
                             <div className="coupon-detail">
                                 {/* Search box */}
                                 <Row>
                                     <Col md={6}>
                                         <Input
-                                            type="text"
-                                            value={searchTerm}
-                                            onChange={handleSearchChange}  // Update search term and filter items
-                                            placeholder="Search for item..."
+                                            type="text" value={searchTerm} onChange={handleSearchChange}  // Update search term and filter items placeholder="Search for item..."
                                         />
                                     </Col>
-
                                 </Row>
-
                                 {/* Dropdown to select items */}
                                 {dropdownOpen && filteredItems.length > 0 && (
                                     <div className="dropdown" style={{ position: 'absolute', zIndex: 1000, backgroundColor: 'white', border: '1px solid #ddd' }}>
@@ -220,10 +269,7 @@ const SupplierDetails = ({ supplier }) => {
                                         </Col>
                                         <Col md={4}>
                                             <Input
-                                                type="number"
-                                                value={amount}
-                                                onChange={(e) => setAmount(e.target.value)}
-                                                placeholder="Enter cost"
+                                                type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Enter cost"
                                             />
                                         </Col>
                                         <Col md={2}>
@@ -238,11 +284,7 @@ const SupplierDetails = ({ supplier }) => {
                                 <Table bordered className="coupon-table">
                                     <thead>
                                     <tr>
-                                        <th>Item Image</th>
-                                        <th>Item Code</th>
-                                        <th>Item Name</th>
-                                        <th>Cost Amount</th>
-                                        <th>Warranty Period</th>
+                                        <th>Item Image</th><th>Item Code</th><th>Item Name</th><th>Cost Amount</th><th>Warranty Period</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -260,6 +302,11 @@ const SupplierDetails = ({ supplier }) => {
                             </div>
                             <div className="coupon-detail">
                                 <h4 className="sub-title">Payment Details</h4>
+                                <Table bordered className="member-table">
+                                    <tbody>
+                                    <tr><td><strong>Full Payment Amount (Rs.)</strong></td><td>Rs. {fullPayAmount}</td></tr>
+                                    </tbody>
+                                </Table>
                                 <Table bordered className="coupon-table">
                                     <thead>
                                     <tr>
@@ -267,8 +314,8 @@ const SupplierDetails = ({ supplier }) => {
                                         <th>Date</th>
                                         <th>Delivery (Rs.)</th>
                                         <th>Amount (Rs.)</th>
+                                        <th>Balance (Rs.)</th>
                                         <th>Action</th>
-
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -279,24 +326,55 @@ const SupplierDetails = ({ supplier }) => {
                                                 <td>{formatDate(payment.rDate)}</td>
                                                 <td>Rs. {payment.deliveryCharge}</td>
                                                 <td>Rs. {payment.total}</td>
+                                                <td>Rs. {payment.balance}</td>
                                                 <td>
-                                                    <Button
-                                                        // onClick={() => handleViewOrder(note.noteId)}
-                                                    >
-                                                        👁️
-                                                    </Button>
+                                                    <Row className="justify-content-center" style={{ gap: "5px" }}>
+                                                        <Col>
+                                                            <Button className='buttons' onClick={() => handleViewOrder(payment.pc_Id)}>
+                                                                👁️
+                                                            </Button>
+                                                        </Col>
+                                                        <Col>
+                                                            <Button className='buttons' onClick={() => handleOpenPaymentModal(payment)}>
+                                                                💲
+                                                            </Button>
+                                                        </Col>
+                                                    </Row>
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="5" className="no-coupon-text">No payments available.</td>
+                                            <td colSpan="5">No payments available.</td>
                                         </tr>
                                     )}
                                     </tbody>
                                 </Table>
                             </div>
-
+                            <Modal isOpen={showPaymentModal} toggle={() => setShowPaymentModal(false)}>
+                                <ModalHeader toggle={() => setShowPaymentModal(false)}>Payment Details</ModalHeader>
+                                <ModalBody>
+                                    {selectedPayment && (
+                                        <>
+                                            <p><strong>Order ID:</strong> {selectedPayment.pc_Id}</p>
+                                            <p><strong>Total Amount:</strong> Rs.{selectedPayment.total}</p>
+                                            <FormGroup>
+                                                <Label>Enter Payment Amount</Label>
+                                                <Input
+                                                    type="number"
+                                                    value={paymentAmount}
+                                                    onChange={handlePaymentAmountChange}
+                                                />
+                                            </FormGroup>
+                                            <p><strong>Due Balance:</strong> Rs.{balanceAmount}</p>
+                                        </>
+                                    )}
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" onClick={handlePaymentSettlement}>Settle Payment</Button>
+                                    <Button color="secondary" onClick={() => setShowPaymentModal(false)}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
                         </Col>
                     </Row>
                 </Container>
@@ -304,5 +382,4 @@ const SupplierDetails = ({ supplier }) => {
         </Helmet>
     );
 };
-
 export default SupplierDetails;

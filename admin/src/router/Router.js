@@ -5,7 +5,7 @@ import AllProducts from "../pages/AllProducts";
 import Dashboard from "../pages/Dashboard";
 import AllOrders from "../pages/AllOrders";
 import Login from "../pages/Login";
-import ProductDetails from "../pages/ProductDetails";
+import ProductDetails from "../pages/PurchaseNoteDetails";
 import OrderDetails from "../pages/OrderDetails";
 import ItemDetails from "../pages/ItemDetails";
 import SupplierDetails from "../pages/Supplier";
@@ -24,7 +24,7 @@ import AllCustomer from "../pages/AllCustomers";
 import PlaceOrder from "../pages/Placeorder";
 import AllEmployees from "../pages/AllEmployees";
 import AdvancePayment from "../pages/AdancePayment";
-import PurchaseNoteDetails from "../pages/ProductDetails";
+import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
 const Router = () => {
     return(
         <Routes>
