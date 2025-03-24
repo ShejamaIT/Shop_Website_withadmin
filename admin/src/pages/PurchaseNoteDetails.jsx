@@ -125,8 +125,6 @@ const PurchaseNoteDetails = () => {
                                         <thead>
                                         <tr>
                                             <th>Payment ID</th>
-                                            <th>Reason</th>
-                                            <th>Reference</th>
                                             <th>Date & Time</th>
                                             <th>Amount</th>
                                         </tr>
@@ -135,8 +133,6 @@ const PurchaseNoteDetails = () => {
                                         {paymentDetails.map((payment, index) => (
                                             <tr key={index}>
                                                 <td>{payment.Id || "N/A"}</td>
-                                                <td>{payment.reason}</td>
-                                                <td>{payment.ref}</td>
                                                 <td>{formatDate(payment.dateTime)}</td>
                                                 <td>Rs. {Math.abs(payment.amount)}</td>
                                             </tr>

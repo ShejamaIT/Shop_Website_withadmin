@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EditOrderModal from "../../pages/EditOrderModal"; // Import the modal component
-import "../../style/inproduction.css"; // Import CSS
+import "../../style/inproduction.css";
+import {toast} from "react-toastify"; // Import CSS
 
 const TableInproduction = ({ refreshKey }) => {
     const [orders, setOrders] = useState([]);
+    const [item, setItem] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -40,12 +42,13 @@ const TableInproduction = ({ refreshKey }) => {
     // Open modal and set selected order
     const handleEditClick = (order) => {
         setSelectedOrder(order);
+        setItem(order.I_Id);
         setShowModal(true);
     };
 
     // Handle form submission (Update order status)
     const handleSubmit = async (formData) => {
-        const { newStatus, isOrderComplete, rDate, recCount, cost, detail } = formData;
+        const { newStatus, isOrderComplete, rDate, recCount, cost,delivery ,Invoice} = formData;
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/update-stock", {
                 method: "POST",
@@ -57,15 +60,15 @@ const TableInproduction = ({ refreshKey }) => {
                     rDate,
                     recCount,
                     cost,
-                    detail
+                    item: item,
+                     delivery,Invoice
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                alert("Stock updated successfully!");
-
+                toast.success("Stock updated successfully!");
                 // Update the order list to reflect changes
                 setOrders((prevOrders) =>
                     prevOrders.map((order) =>
@@ -76,6 +79,9 @@ const TableInproduction = ({ refreshKey }) => {
                 );
 
                 setShowModal(false); // Close the modal
+                setTimeout(() => {
+                    window.location.reload(); // Auto-refresh the page
+                }, 1000);
             } else {
                 alert(data.error || "Failed to update stock.");
             }
