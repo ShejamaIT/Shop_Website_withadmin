@@ -1599,10 +1599,10 @@ const ItemDetails = () => {
                                             </thead>
                                             <tbody>
                                             {stock.map((stockItem) => (
-                                                <tr key={stockItem.srd_Id}>
-                                                    <td>{stockItem.srd_Id}</td>
+                                                <tr key={stockItem.pid_Id}>
+                                                    <td>{stockItem.pid_Id}</td>
                                                     <td>{stockItem.stock_Id}</td>
-                                                    <td>{stockItem.sr_ID}</td>
+                                                    <td>{stockItem.pc_Id}</td>
                                                     <td>{stockItem.status}</td>
                                                 </tr>
                                             ))}
