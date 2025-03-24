@@ -1207,21 +1207,23 @@ router.get("/item-details", async (req, res) => {
             unit_cost: supplier.unit_cost
         }));
 
-        // ✅ Fetch stock details **excluding** 'Issued' status, only include 'Available', 'Damage', 'Reserved'
+        // ✅ Fetch stock details from `p_i_detail` table
         const stockQuery = `
-            SELECT srd_Id, stock_Id, sr_ID, status
-            FROM m_s_r_detail
+            SELECT pid_Id, stock_Id, pc_Id, status, orID, datetime
+            FROM p_i_detail
             WHERE I_Id = ?
               AND status IN ('Available', 'Damage', 'Reserved')
-            ORDER BY srd_Id ASC , FIELD(status, 'Available', 'Reserved', 'Damage')`;
+            ORDER BY pid_Id ASC, FIELD(status, 'Available', 'Reserved', 'Damage')`;
 
         const [stockResults] = await db.query(stockQuery, [I_Id]);
 
         const stockDetails = stockResults.map(stock => ({
-            srd_Id: stock.srd_Id,
+            pid_Id: stock.pid_Id,
             stock_Id: stock.stock_Id,
-            sr_ID: stock.sr_ID,
-            status: stock.status
+            pc_Id: stock.pc_Id,
+            status: stock.status,
+            orID: stock.orID,
+            datetime: stock.datetime
         }));
 
         // ✅ Construct final response
@@ -1258,6 +1260,7 @@ router.get("/item-details", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
 
 // router.get("/item-details", async (req, res) => {
 //     try {
