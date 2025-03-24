@@ -1946,30 +1946,30 @@ router.get("/unpaid-stock-details", async (req, res) => {
 
         // Query to fetch unpaid stock details from the purchase table
         const query = `
-            SELECT
-                pc_Id,
-                rDate,
-                total,
-                pay,
-                balance,
-                deliveryCharge,
-                invoiceId
-            FROM purchase
+            SELECT pc_Id, rDate, total, pay, balance, deliveryCharge, invoiceId 
+            FROM purchase 
+            WHERE s_ID = ? AND balance > 0;
+        `;
+
+        const totalQuery = `
+            SELECT SUM(total) AS fullTotal 
+            FROM purchase 
             WHERE s_ID = ? AND balance > 0;
         `;
 
         const [itemsResult] = await db.query(query, [s_Id]);
-        console.log(itemsResult);
+        const [[totalResult]] = await db.query(totalQuery, [s_Id]);
 
         // If no unpaid items found, return a 404 response
         if (itemsResult.length === 0) {
             return res.status(404).json({ success: false, message: "No unpaid stock details found for the given supplier" });
         }
 
-        // Return the unpaid stock details with the balance
+        // Return the unpaid stock details along with the full total
         return res.status(200).json({
             success: true,
             unpaidStockDetails: itemsResult,
+            fullTotal: totalResult.fullTotal || 0, // Ensure fullTotal is returned even if null
         });
 
     } catch (error) {
@@ -4560,7 +4560,7 @@ router.post("/coupone", async (req, res) => {
     }
 });
 
-// Save New Coupone
+// Salary-advance save
 router.post("/save-advance", async (req, res) => {
     try {
         const { id, name, advance } = req.body;
@@ -4930,33 +4930,96 @@ router.get("/purchase-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "pc_Id is required" });
         }
 
-        // Query purchase table
+        // Fetch purchase record
         const [purchase] = await db.query("SELECT * FROM purchase WHERE pc_Id = ?", [pc_Id]);
         if (purchase.length === 0) {
             return res.status(404).json({ success: false, message: "Purchase not found" });
         }
 
-        // Query purchase_detail table
+        // Fetch purchase details
         const [purchaseDetails] = await db.query(
             "SELECT * FROM purchase_detail WHERE pc_Id = ?", [pc_Id]
         );
 
-        // Query p_i_detail table
+        // Fetch stock details
         const [pIDetails] = await db.query(
             "SELECT * FROM p_i_detail WHERE pc_Id = ?", [pc_Id]
         );
 
-        // Send response
+        // Fetch payment details
+        const [paymentDetails] = await db.query(
+            "SELECT * FROM cash_balance WHERE ref = ?", [pc_Id]
+        );
+
         return res.status(200).json({
             success: true,
-            purchase: purchase[0],   // Single record
-            purchaseDetails,         // Array of items in the purchase
-            pIDetails                // Array of stock details
+            purchase: purchase[0],   // Single purchase record
+            purchaseDetails,         // Purchase item details
+            pIDetails,               // Stock-related details
+            paymentDetails           // Payment records
         });
 
     } catch (error) {
         console.error("Error fetching purchase details:", error.message);
-        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+// Settle supplier payment
+router.post("/settle-payment", async (req, res) => {
+    try {
+        const { pc_Id, amountPaid } = req.body;
+
+        if (!pc_Id || !amountPaid || amountPaid <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid payment details provided." });
+        }
+
+        const amount = Number(amountPaid);
+
+        // Fetch current pay & balance
+        const [purchaseResult] = await db.query("SELECT pay, balance FROM purchase WHERE pc_Id = ?", [pc_Id]);
+
+        if (purchaseResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Purchase record not found." });
+        }
+
+        const { pay, balance } = purchaseResult[0];
+
+        if (balance < amount) {
+            return res.status(400).json({ success: false, message: "Payment exceeds remaining balance." });
+        }
+
+        // Insert transaction into cash_balance (recording the payment)
+        const sql1 = `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)`;
+        const values1 = ["Supplier Payment", pc_Id, "supplier", -amount];
+        await db.query(sql1, values1);
+
+        // Update purchase table (pay & balance)
+        const sql2 = `UPDATE purchase SET pay = pay + ?, balance = balance - ? WHERE pc_Id = ?`;
+        await db.query(sql2, [amount, amount, pc_Id]);
+
+        // Fetch updated purchase details
+        const [updatedPurchase] = await db.query("SELECT s_ID,pay, balance FROM purchase WHERE pc_Id = ?", [pc_Id]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment settled successfully.",
+            data: {
+                pc_Id,
+                amountPaid: amount,
+                newPay: updatedPurchase[0].pay,
+                newBalance: updatedPurchase[0].balance,
+                supplier: updatedPurchase[0].s_ID,
+            },
+        });
+
+    } catch (err) {
+        console.error("Error processing payment:", err.message);
+        return res.status(500).json({ success: false, message: "Server error while processing payment.", error: err.message });
     }
 });
 
