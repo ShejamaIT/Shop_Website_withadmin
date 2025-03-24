@@ -1777,8 +1777,23 @@ router.get("/orders-canceled", async (req, res) => {
 // Get all orders by status= inproduction
 router.get("/orders-inproduction", async (req, res) => {
     try {
-        // Query the database to fetch all pending Orders
-        const [suporders] = await db.query("SELECT * FROM production WHERE status= 'Incomplete'");
+        // Query to fetch incomplete production orders along with unit cost
+        const query = `
+            SELECT 
+                p.p_ID,
+                p.I_Id,
+                p.qty,
+                p.s_ID,
+                p.expectedDate,
+                p.specialNote,
+                p.status,
+                isup.unit_cost
+            FROM production p
+            LEFT JOIN item_supplier isup ON p.I_Id = isup.I_Id AND p.s_ID = isup.s_ID
+            WHERE p.status = 'Incomplete'
+        `;
+
+        const [suporders] = await db.query(query);
 
         // If no orders found, return a 404 status
         if (suporders.length === 0) {
@@ -1787,13 +1802,14 @@ router.get("/orders-inproduction", async (req, res) => {
 
         // Format orders
         const formattedOrders = suporders.map(order => ({
-            p_ID : order.p_ID,
-            I_Id : order.I_Id,
-            qty : order.qty,
-            s_ID : order.s_ID,
-            expectedDate : order.expectedDate,
+            p_ID: order.p_ID,
+            I_Id: order.I_Id,
+            qty: order.qty,
+            s_ID: order.s_ID,
+            expectedDate: order.expectedDate,
             specialNote: order.specialNote,
-            status: order.status
+            status: order.status,
+            unit_cost: order.unit_cost !== null ? order.unit_cost : 0  // Handle missing unit cost
         }));
 
         // Send the formatted orders as a JSON response
@@ -2144,75 +2160,107 @@ router.get("/getcategory", async (req, res) => {
 
 //Update stock
 router.post("/update-stock", upload.single("image"), async (req, res) => {
-    const { p_ID, rDate, recCount, cost, detail } = req.body;
+    const { p_ID, rDate, recCount, cost, delivery, Invoice } = req.body;
     const imageFile = req.file;
 
-    if (!p_ID || !rDate || !recCount) {
+    if (!p_ID || !rDate || !recCount || !cost) {
         return res.status(400).json({ error: "All fields are required" });
     }
 
     try {
-        // Fetch current quantity and item details from production
-        const [rows] = await db.query("SELECT qty, I_Id, s_ID FROM production WHERE p_ID = ?", [p_ID]);
+        // Fetch production order details
+        const [rows] = await db.query(
+            "SELECT qty, I_Id, s_ID FROM production WHERE p_ID = ?", [p_ID]
+        );
 
         if (rows.length === 0) {
             return res.status(404).json({ error: "Production order not found" });
         }
 
-        const currentQty = rows[0].qty;
-        const itemId = rows[0].I_Id;
-        const supId = rows[0].s_ID;
-        const receivedQty = parseInt(recCount, 10);
+        const { qty: currentQty, I_Id: itemId, s_ID: supId } = rows[0];
+        const receivedQty = parseInt(recCount);
+        const deliveryPrice = parseFloat(delivery) || 0;
+        const total = parseFloat(cost) * receivedQty;
+        console.log(receivedQty,deliveryPrice,total);
 
-        // Validate that the item exists in the `item` table
+        // Validate that the item exists in `item` table
         const [itemExists] = await db.query("SELECT I_Id FROM item WHERE I_Id = ?", [itemId]);
-
         if (itemExists.length === 0) {
             return res.status(400).json({ error: "Item ID does not exist in item table" });
         }
 
-        // Handle image upload
+        // Generate new purchase ID
+        const purchase_id = await generateNewId("purchase", "pc_Id", "PC");
+
+        // Handle image upload if any
         let imagePath = null;
         if (imageFile) {
-            const imageName = `item_${itemId}_${Date.now()}.${imageFile.mimetype.split("/")[1]}`;
+            const imageName = `item_${purchase_id}_${Date.now()}.${imageFile.mimetype.split("/")[1]}`;
             const savePath = path.join("./uploads/images", imageName);
             fs.writeFileSync(savePath, imageFile.buffer);
             imagePath = `/uploads/images/${imageName}`;
         }
 
-        // Insert into main_stock_received
-        const insertQuery = `
-            INSERT INTO main_stock_received (s_ID, I_Id, rDate, rec_count, unitPrice, detail,payment)
-            VALUES (?, ?, ?, ?, ?, ?,?)`;
-        const [result] = await db.query(insertQuery, [supId, itemId, rDate, receivedQty, cost, detail || ""],'NotPaid');
-        const receivedStockId = result.insertId;
+        // Convert date format from 'DD/MM/YYYY' to 'YYYY-MM-DD'
+        const formattedDate = rDate.split('/').reverse().join('-');
 
-        // Fetch last stock_Id for this item
-        const [lastStockResult] = await db.query(
-            `SELECT MAX(stock_Id) AS lastStockId FROM m_s_r_detail WHERE I_Id = ?`,
-            [itemId]
-        );
+        // Insert into the purchase table
+        const insertPurchaseQuery = `
+            INSERT INTO purchase (pc_Id, s_ID, rDate, total, pay, balance, deliveryCharge, invoiceId)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        await db.query(insertPurchaseQuery, [purchase_id, supId, formattedDate, total, 0, total, deliveryPrice, Invoice]);
 
-        let lastStockId = lastStockResult[0]?.lastStockId || 0;
+        // Check if the item already exists in `item_supplier`
+        const checkUnitPriceQuery = `SELECT unit_cost FROM item_supplier WHERE I_Id = ? AND s_ID = ?`;
+        const [unitPriceResult] = await db.query(checkUnitPriceQuery, [itemId, supId]);
 
-        const insertDetailQuery = `
-            INSERT INTO m_s_r_detail (I_Id, stock_Id, sr_ID, barcode,status,orID,datetime)
-            VALUES (?, ?, ?, ?,'Available','','')`;
+        if (unitPriceResult.length > 0) {
+            const existingUnitPrice = unitPriceResult[0].unit_cost;
+            if (parseFloat(existingUnitPrice) !== parseFloat(cost)) {
+                // Update unit price if changed
+                const updateUnitPriceQuery = `
+                    UPDATE item_supplier SET unit_cost = ? WHERE I_Id = ? AND s_ID = ?
+                `;
+                await db.query(updateUnitPriceQuery, [cost, itemId, supId]);
+            }
+        } else {
+            // Insert new record if it doesn't exist
+            const insertUnitPriceQuery = `
+                INSERT INTO item_supplier (I_Id, s_ID, unit_cost) VALUES (?, ?, ?)
+            `;
+            await db.query(insertUnitPriceQuery, [itemId, supId, cost]);
+        }
 
-        // Ensure barcode folder exists
+        // Insert into purchase_detail
+        const purchaseDetailQuery = `
+            INSERT INTO purchase_detail (pc_Id, I_Id, rec_count, unitPrice, total, stock_range)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        await db.query(purchaseDetailQuery, [purchase_id, itemId, receivedQty, cost, total, ""]);
+
+        // Barcode Generation
         const barcodeFolderPath = path.join("./uploads/barcodes");
         if (!fs.existsSync(barcodeFolderPath)) {
             fs.mkdirSync(barcodeFolderPath, { recursive: true });
         }
 
-        // Ensure `stockCount` is properly defined
-        const stockCount = receivedQty;
+        const insertBarcodeQuery = `
+            INSERT INTO p_i_detail (pc_Id, I_Id, stock_Id, barcode_img, status, orID, datetime)
+            VALUES (?, ?, ?, ?, ?, ?,?)
+        `;
 
-        for (let i = 1; i <= stockCount; i++) {
+        // Get last stock ID for the item
+        const [lastStockResult] = await db.query(
+            `SELECT MAX(stock_Id) AS lastStockId FROM p_i_detail WHERE I_Id = ?`, [itemId]
+        );
+        let lastStockId = lastStockResult[0]?.lastStockId || 0;
+
+        // Generate barcodes
+        const startStockId = lastStockId + 1;
+        for (let j = 1; j <= receivedQty; j++) {
             lastStockId++;
-
-            // Generate barcode data
-            const barcodeData = `${itemId}-${lastStockId}-${receivedStockId}`;
+            const barcodeData = `${itemId}-${lastStockId}`;
             const barcodeImageName = `barcode_${barcodeData}.png`;
             const barcodeImagePath = path.join(barcodeFolderPath, barcodeImageName);
 
@@ -2226,14 +2274,28 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
                 textxalign: "center",
             });
 
-            // Save barcode image to folder
+            // Save barcode image
             fs.writeFileSync(barcodeImagePath, pngBuffer);
 
-            // Save barcode data in the database
-            const query = await db.query(insertDetailQuery, [itemId, lastStockId, receivedStockId, pngBuffer]);
+            // Insert barcode record
+            await db.query(insertBarcodeQuery, [purchase_id, itemId, lastStockId, barcodeImagePath, "Available", "", ""]);
         }
 
-        // Determine new stock status
+        // Update stock_range in purchase_detail
+        const stockRange = `${startStockId}-${lastStockId}`;
+        console.log(stockRange);
+        await db.query(
+            `UPDATE purchase_detail SET stock_range = ? WHERE pc_Id = ? AND I_Id = ?`,
+            [stockRange, purchase_id, itemId]
+        );
+
+        // Update stock in `Item` table
+        await db.query(
+            `UPDATE Item SET stockQty = stockQty + ?, availableQty = availableQty + ? WHERE I_Id = ?`,
+            [receivedQty, receivedQty, itemId]
+        );
+
+        // Determine new status
         let newStatus = "Incomplete";
         let newQty = currentQty - receivedQty;
 
@@ -2243,15 +2305,7 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
         }
 
         // Update production table
-        const sqlUpdate = `UPDATE production SET qty = ?, status = ? WHERE p_ID = ?`;
-        await db.query(sqlUpdate, [newQty, newStatus, p_ID]);
-
-        // Update stock quantity in Item table
-        const sqlUpdateItem = `UPDATE Item SET stockQty = stockQty + ? WHERE I_Id = ?`;
-        await db.query(sqlUpdateItem, [receivedQty, itemId]);
-
-        const sqlUpdateItem1 = `UPDATE Item SET availableQty = availableQty + ? WHERE I_Id = ?`;
-        await db.query(sqlUpdateItem1, [receivedQty, itemId]);
+        await db.query(`UPDATE production SET qty = ?, status = ? WHERE p_ID = ?`, [newQty, newStatus, p_ID]);
 
         return res.status(200).json({
             success: true,
