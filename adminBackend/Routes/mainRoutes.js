@@ -4162,7 +4162,7 @@ router.post("/get-stock-details", async (req, res) => {
         // Construct dynamic SQL query with placeholders
         const placeholders = itemIds.map(() => "?").join(", ");
         const sql = `
-            SELECT * FROM m_s_r_detail
+            SELECT * FROM p_i_detail
             WHERE I_Id IN (${placeholders})
               AND status = 'Available'
         `;
@@ -4207,18 +4207,18 @@ router.post("/issued-order", async (req, res) => {
             [delStatus, delPrice, discount, total, advance, balance, payStatus, stID, orID]
         );
 
-        // 2.Update m_s_r_detail table (Mark selected items as issued)
+        // 2. Update p_i_detail table (Mark selected items as issued)
         const updateItemPromises = selectedItems.map(async (item) => {
             await db.query(
-                `UPDATE m_s_r_detail
-         SET status = 'Issued', orID = ?, datetime = NOW()
-         WHERE srd_Id = ?`,
-                [orID, item.srd_Id]
+                `UPDATE p_i_detail
+                 SET status = 'Issued', orID = ?, datetime = NOW()
+                 WHERE pid_Id = ?`,
+                [orID, item.pid_Id]
             );
 
             await db.query(
-                `INSERT INTO issued_items (orID, srd_Id, status,date) VALUES (?, ?, 'Issued',NOW())`,
-                [orID, item.srd_Id]
+                `INSERT INTO issued_items (orID, pid_Id, status, date) VALUES (?, ?, 'Issued', NOW())`,
+                [orID, item.pid_Id]
             );
         });
 
@@ -4262,8 +4262,8 @@ router.post("/issued-order", async (req, res) => {
 
         // 7. Insert into Payment table
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
-        await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orID, paymentAmount]);
-        await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", addedAdvance]);
+        await db.query("INSERT INTO order_payment (op_ID, orID, amount, dateTime) VALUES (?, ?, ?, NOW())", [op_ID, orID, paymentAmount]);
+        await db.query("INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)", ["Order payment", op_ID, "order", paymentAmount]);
 
         return res.status(200).json({ success: true, message: "Order updated successfully" });
 
@@ -4273,9 +4273,11 @@ router.post("/issued-order", async (req, res) => {
     }
 });
 
+
 // Issued Orders items
-router.post("/isssued-items", async (req, res) => {
+router.post("/issued-items", async (req, res) => {
     const { orID, payStatus, selectedItems } = req.body;
+    console.log(selectedItems);
 
     if (!orID || !payStatus || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -4284,25 +4286,25 @@ router.post("/isssued-items", async (req, res) => {
     try {
         // 1. Update Orders table
         await db.query(
-            `UPDATE Orders SET  orStatus = 'Issued', payStatus = ? WHERE OrID = ?`,
-            [ payStatus, orID]
+            `UPDATE Orders SET orStatus = 'Delivered', payStatus = ? WHERE OrID = ?`,
+            [payStatus, orID]
         );
 
-        // 2. Update m_s_r_detail table (Mark selected items as issued)
+        // 2. Update p_i_detail table (Mark selected items as issued)
         for (const item of selectedItems) {
             await db.query(
-                `UPDATE m_s_r_detail
+                `UPDATE p_i_detail
                  SET status = 'Issued', orID = ?, datetime = NOW()
-                 WHERE srd_Id = ?`,
-                [orID, item.srd_Id]
+                 WHERE pid_Id = ?`,
+                [orID, item.pid_Id]
             );
             await db.query(
-                `INSERT INTO issued_items (orID,srd_Id,status,date) VALUES (?,?,'Issued',NOW())`,
-                [orID, item.srd_Id]
+                `INSERT INTO issued_items (orID, pid_Id, status, date) VALUES (?, ?, 'Issued', NOW())`,
+                [orID, item.pid_Id]
             );
         }
 
-        // 4. Update Item stock quantities using Order_Detail table
+        // 3. Update Item stock quantities using Order_Detail table
         const [orderItems] = await db.query(
             `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
             [orID]
@@ -4317,7 +4319,7 @@ router.post("/isssued-items", async (req, res) => {
             );
         }
 
-        // 5. Delete from booked_item & accept_orders
+        // 4. Delete from booked_item & accept_orders
         await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
         await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
 
@@ -4550,10 +4552,10 @@ router.get("/delivery-note", async (req, res) => {
 
         if (orderIds.length > 0) {
             [issuedItems] = await db.query(
-                `SELECT ii.orID, ii.srd_Id, ii.status AS itemStatus,
-                        msrd.stock_Id, msrd.barcode, msrd.datetime, msrd.I_Id
+                `SELECT ii.orID, ii.pid_Id, ii.status AS itemStatus,
+                        pi.stock_Id, pi.barcode_img, pi.datetime, pi.I_Id
                  FROM issued_items ii
-                          JOIN m_s_r_detail msrd ON ii.srd_Id = msrd.srd_Id
+                          JOIN p_i_detail pi ON ii.pid_Id = pi.pid_Id
                  WHERE ii.orID IN (?)`,
                 [orderIds]
             );
@@ -4582,6 +4584,7 @@ router.get("/delivery-note", async (req, res) => {
         });
     }
 });
+
 
 // Save New Coupone
 router.post("/coupone", async (req, res) => {
@@ -4822,7 +4825,7 @@ router.post("/delivery-payment", async (req, res) => {
 
         await db.query(
             "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
-            [balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
+            [balance1, advance1,"Issued", newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
         );
 
         // Update delivery details
