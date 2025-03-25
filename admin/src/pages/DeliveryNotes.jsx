@@ -211,9 +211,10 @@ const DeliveryNotes = () => {
             salesperson: selectedOrder.salesTeam.employeeName,
             items: selectedOrder.items,
         };
+        console.log(updatedData);
         try {
             // Make API request to the /isssued-order endpoint
-            const response = await fetch('http://localhost:5001/api/admin/main/isssued-items', {
+            const response = await fetch('http://localhost:5001/api/admin/main/issued-items', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

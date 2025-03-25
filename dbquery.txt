@@ -266,34 +266,6 @@ CREATE TABLE cash_balance (
     dateTime DATETIME,
     amount DOUBLE
 );
-CREATE TABLE main_stock_received (
-    sr_ID INT AUTO_INCREMENT PRIMARY KEY,
-    s_ID VARCHAR(25) NOT NULL,
-    I_Id varchar(25) NOT NULL,
-    rDate DATE NOT NULL,
-    rec_count INT,
-    unitPrice DOUBLE,
-    detail TEXT,
-    payment ENUM('Paid','NotPaid') NOT NULL,
-    CONSTRAINT FOREIGN KEY (s_ID) REFERENCES Supplier (s_ID)
-                    ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                  ON DELETE CASCADE ON UPDATE CASCADE
-);
-CREATE TABLE m_s_r_detail(
-    srd_Id INT AUTO_INCREMENT PRIMARY KEY,
-    I_Id varchar(25) NOT NULL,
-    stock_Id varchar(25) NOT NULL,
-    sr_ID INT NOT NULL,
-    barcode LONGBLOB NOT NULL,
-    status VARCHAR(15),
-    orID VARCHAR(25),
-    datetime DATETIME,
-    CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
-                      ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (sr_ID) REFERENCES main_stock_received (sr_ID)
-                        ON DELETE CASCADE ON UPDATE CASCADE
-);
 CREATE TABLE purchase(
     pc_Id varchar(25) PRIMARY KEY,
     s_ID VARCHAR(25) NOT NULL,
@@ -360,12 +332,12 @@ CREATE TABLE delivery_note_orders(
 CREATE TABLE issued_items(
     delNoID INT AUTO_INCREMENT PRIMARY KEY,
     orID VARCHAR(25),
-    srd_Id INT,
+    pid_Id INT,
     status VARCHAR(15),
     date DATETIME,
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                                  ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (srd_Id) REFERENCES m_s_r_detail (srd_Id)
+    CONSTRAINT FOREIGN KEY (pid_Id) REFERENCES p_i_detail (pid_Id)
                                      ON DELETE CASCADE ON UPDATE CASCADE
 );
 

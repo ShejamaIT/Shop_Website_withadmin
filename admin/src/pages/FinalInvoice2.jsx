@@ -38,6 +38,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
     }, [advance]);
 
     const handlePrintAndSubmit = () => {
+        console.log(selectedItems)
         // Ensure balance is 0 or paymentType is either 'COD' or 'Credit'
         if (balance !== 0 && (paymentType !== 'COD' && paymentType !== 'Credit')) {
             toast.error("If balance is not settled, the payment type must be either 'COD' or 'Credit'.");
@@ -79,6 +80,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                 }
 
                 const data = await response.json();
+                console.log(data.stockDetails);
                 if (data.stockDetails && data.stockDetails.length > 0) {
                     setItems(data.stockDetails);
                 } else {
@@ -227,7 +229,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                         {selectedItem.map((item, index) => (
                             <tr key={index}>
                                 <td>{item.I_Id}</td>
-                                <td>{item.sr_ID}</td>
+                                <td>{item.pc_Id}</td>
                                 <td>{item.stock_Id}</td>
                             </tr>
                         ))}
@@ -264,7 +266,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                             <div className="dropdown" style={{ position: "absolute", zIndex: 100, backgroundColor: "white", border: "1px solid #ddd", width: "100%" }}>
                                 {filteredItems.map((item) => (
                                     <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item" style={{ padding: "8px", cursor: "pointer" }}>
-                                        {item.I_Id} - {item.stock_Id} - {item.srd_Id} - {item.sr_ID}
+                                        {item.I_Id} - {item.stock_Id} - {item.pc_Id}
                                     </div>
                                 ))}
                             </div>
@@ -284,7 +286,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                         {selectedItems.map((item, index) => (
                             <tr key={index}>
                                 <td>{item.I_Id}</td>
-                                <td>{item.sr_ID}</td>
+                                <td>{item.pc_Id}</td>
                                 <td>{item.stock_Id}</td>
                             </tr>
                         ))}
