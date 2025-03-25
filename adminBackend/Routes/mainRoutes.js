@@ -4864,11 +4864,10 @@ router.post("/delivery-payment", async (req, res) => {
 
                 await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
 
-                const [srdData] = await db.query("SELECT srd_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
-                const srdId = srdData?.[0]?.srd_Id || null;
-
+                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
+                const srdId = srdData?.[0]?.pid_Id || null;
                 if (srdId) {
-                    await db.query("UPDATE issued_items SET status = ? WHERE srd_Id = ? AND orID = ?", [item.status, srdId, orderId]);
+                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?", [item.status, srdId, orderId]);
                 }
             }
         }
@@ -4877,8 +4876,10 @@ router.post("/delivery-payment", async (req, res) => {
         await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
 
         // Insert payment record
-        await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
-        await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
+        if (receivedPayment !== 0){
+            await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
+            await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
+        }
 
         // Update sales team records only when order status is "Issued"
         if (orderStatus === "Issued") {
@@ -4897,9 +4898,11 @@ router.post("/delivery-payment", async (req, res) => {
             const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
             await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [orID, reason]);
         }
-
+        if (rescheduledDate !== null){
+            await db.query("UPDATE Orders SET expectedDate = ? WHERE orID = ?", [rescheduledDate, orderId]);
+            await db.query("UPDATE delivery SET schedule_Date = ? WHERE orID = ?", [rescheduledDate, orderId]);
+        }
         res.json({ success: true, message: "Payment processed successfully." });
-
     } catch (error) {
         console.error("Error processing delivery payment:", error);
         res.status(500).json({ error: "Internal server error" });
