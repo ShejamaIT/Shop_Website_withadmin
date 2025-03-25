@@ -2054,6 +2054,30 @@ router.get("/employees", async (req, res) => {
     }
 });
 
+// get Permanent employees
+router.get("/Permanent-employees", async (req, res) => {
+    try {
+        // Step 1: Fetch all suppliers
+        const employeesQuery = `SELECT E_Id, name, nic, job, basic FROM Employee WHERE type='Permanent'`;
+
+        const [employeesResult] = await db.query(employeesQuery);
+        // Step 2: Check if suppliers were found
+        if (employeesResult.length === 0) {
+            return res.status(404).json({ success: false, message: "No employees found" });
+        }
+
+        // Step 3: Return the supplier details
+        return res.status(200).json({
+            success: true,
+            employees: employeesResult,
+        });
+
+    } catch (error) {
+        console.error("Error fetching employees:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
 // get item detail in item table only
 router.get("/item-detail", async (req, res) => {
     try {
@@ -2500,6 +2524,13 @@ router.put("/update-order-details", async (req, res) => {
         if (advance === 0 && payStatus === 'Advanced'){
 
             return res.status(404).json({ success: false, message: "payement status cannot change to advance when advance is 0" });
+        }
+        if (advance === null){
+            const orderUpdateQuery = `
+            UPDATE orders SET orStatus = ?,delStatus = ? WHERE OrID = ?`;
+            await db.query(orderUpdateQuery, [
+                 orderStatus, deliveryStatus, orderId
+            ]);
         }
 
         //Update order details
@@ -3524,7 +3555,7 @@ router.get("/find-subcategory", async (req, res) => {
     }
 });
 
-//find issuded orders by district & date
+//Find issuded orders by district & date
 router.get("/find-completed-orders", async (req, res) => {
     try {
         const { district, date } = req.query;
@@ -3659,7 +3690,108 @@ router.get("/find-completed-orders", async (req, res) => {
     }
 });
 
-//find issuded orders by  date
+// Find Return Orders by district & date
+router.get("/find-returned-orders", async (req, res) => {
+    try {
+        const { district, date } = req.query;
+
+        if (!district) {
+            return res.status(400).json({ success: false, message: "District is required." });
+        }
+
+        if (!date) {
+            return res.status(400).json({ success: false, message: "Date is required." });
+        }
+
+        // Parse date in YYYY-MM-DD format
+        const parsedDate = parseDate(date);
+
+        // Fetch Return Orders (Only Orders with Returned Items)
+        const orderQuery = `
+            SELECT
+                o.orId, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount,
+                o.total, o.ordertype, o.stID, o.expectedDate, o.specialNote, o.advance, o.balance,
+                o.payStatus, d.address, d.district, d.schedule_Date, d.type,
+                s.stID, e.name AS salesEmployeeName,
+                c.FtName, c.SrName, c.contact1, c.contact2
+            FROM Orders o
+            JOIN delivery d ON o.orID = d.orID
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID
+            WHERE d.district = ? AND o.orStatus = 'Returned' AND o.expectedDate = ?;
+        `;
+
+        const [orders] = await db.query(orderQuery, [district, parsedDate]);
+
+        if (orders.length === 0) {
+            return res.status(404).json({ success: false, message: "No return orders found for this district and date." });
+        }
+
+        // Process return orders
+        const orderDetails = await Promise.all(orders.map(async (order) => {
+            // Fetch only return items from the issued_item table
+            const returnItemsQuery = `
+                SELECT ii.I_Id, i.I_name, ii.qty, i.color, ii.status
+                FROM issued_item ii
+                JOIN Item i ON ii.I_Id = i.I_Id
+                WHERE ii.orID = ? AND ii.status IN ('Reserved', 'Available');`;
+
+            const [returnItems] = await db.query(returnItemsQuery, [order.orId]);
+
+            return {
+                orderId: order.orId,
+                orderDate: formatDate(order.orDate),
+                expectedDeliveryDate: formatDate(order.expectedDate),
+                customerId: order.c_ID,
+                customerName: `${order.FtName} ${order.SrName}`,
+                phoneNumber: order.contact1,
+                optionalNumber: order.contact2,
+                orderStatus: order.orStatus,
+                deliveryStatus: order.delStatus,
+                totalPrice: order.total,
+                deliveryCharge: order.delPrice,
+                discount: order.discount,
+                advance: order.advance,
+                balance: order.balance,
+                payStatus: order.payStatus,
+                deliveryInfo: {
+                    address: order.address,
+                    district: order.district,
+                    scheduleDate: formatDate(order.schedule_Date),
+                    type: order.type,
+                },
+                salesTeam: {
+                    stID: order.stID,
+                    employeeName: order.salesEmployeeName,
+                },
+                returnItems: returnItems.map(item => ({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    quantity: item.qty,
+                    color: item.color,
+                    status: item.status, // Reserved or Available
+                }))
+            };
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Return orders fetched successfully.",
+            orders: orderDetails
+        });
+
+    } catch (error) {
+        console.error("Error fetching return orders:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching return orders.",
+            details: error.message
+        });
+    }
+});
+
+//Find issuded orders by  date
 router.get("/find-completed-orders-by-date", async (req, res) => {
     try {
         const { date } = req.query;
@@ -3756,6 +3888,105 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Error fetching completed orders.",
+            details: error.message,
+        });
+    }
+});
+
+//Find Return orders by  date
+router.get("/find-returned-orders-by-date", async (req, res) => {
+    try {
+        const { date } = req.query;
+        if (!date) {
+            return res.status(400).json({ success: false, message: "Date is required." });
+        }
+
+        // Convert DD/MM/YYYY to YYYY-MM-DD
+        const parsedDate = parseDate(date);
+        if (!parsedDate) {
+            return res.status(400).json({ success: false, message: "Invalid date format. Use DD/MM/YYYY or YYYY-MM-DD." });
+        }
+
+        // Fetch Return Orders (Only Orders with Returned Items)
+        const orderQuery = `
+            SELECT
+                o.orId, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount,
+                o.total, o.ordertype, o.stID, o.expectedDate, o.specialNote, o.advance, o.balance,
+                o.payStatus, d.address, d.district, d.type, d.status AS deliveryStatus, d.schedule_Date,
+                s.stID, e.name AS salesEmployeeName,
+                c.FtName, c.SrName, c.contact1, c.contact2
+            FROM Orders o
+            JOIN delivery d ON o.orID = d.orID
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID
+            WHERE o.orStatus = 'Return' AND o.expectedDate = ?;
+        `;
+
+        const [orders] = await db.query(orderQuery, [parsedDate]);
+
+        if (orders.length === 0) {
+            return res.status(404).json({ success: false, message: "No return orders found for this date." });
+        }
+
+        // Process return orders
+        const orderDetails = await Promise.all(orders.map(async (order) => {
+            // Fetch only return items from the issued_item table
+            const returnItemsQuery = `
+                SELECT ii.I_Id, i.I_name, ii.qty, i.color, ii.status
+                FROM issued_item ii
+                JOIN Item i ON ii.I_Id = i.I_Id
+                WHERE ii.orID = ? AND ii.status IN ('Reserved', 'Available');`;
+
+            const [returnItems] = await db.query(returnItemsQuery, [order.orId]);
+
+            return {
+                orderId: order.orId,
+                orderDate: formatDate(order.orDate),
+                expectedDeliveryDate: formatDate(order.expectedDate),
+                customerId: order.c_ID,
+                customerName: `${order.FtName} ${order.SrName}`,
+                phoneNumber: order.contact1,
+                optionalNumber: order.contact2,
+                orderStatus: order.orStatus,
+                deliveryStatus: order.delStatus,
+                totalPrice: order.total,
+                deliveryCharge: order.delPrice,
+                discount: order.discount,
+                advance: order.advance,
+                balance: order.balance,
+                payStatus: order.payStatus,
+                deliveryInfo: {
+                    address: order.address,
+                    district: order.district,
+                    scheduleDate: formatDate(order.schedule_Date),
+                    type: order.type,
+                },
+                salesTeam: {
+                    stID: order.stID,
+                    employeeName: order.salesEmployeeName,
+                },
+                returnItems: returnItems.map(item => ({
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    quantity: item.qty,
+                    color: item.color,
+                    status: item.status, // Reserved or Available
+                }))
+            };
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Return orders fetched successfully.",
+            orders: orderDetails,
+        });
+
+    } catch (error) {
+        console.error("Error fetching return orders:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching return orders.",
             details: error.message,
         });
     }
@@ -4677,6 +4908,59 @@ router.post("/save-advance", async (req, res) => {
     }
 });
 
+// Salary-advance save
+router.post("/save-loan", async (req, res) => {
+    try {
+        const { id, name, loan,months,installment } = req.body;
+        const amount = Number(loan) || 0;
+        const installment1 = Number(installment) || 0;
+        const count = Number(months) || 0;
+
+        // Generate unique Advance Payment ID
+        const sl_ID = await generateNewId("salary_loan", "sl_ID", "LP");
+
+        // Insert into advance_payment table
+        const sql = `INSERT INTO salary_loan (sl_ID, E_Id, amount, dateTime,installment,months,skip) VALUES (?, ?, ?, NOW(),?,?,0)`;
+        const values = [sl_ID, id, amount,installment1,count];
+         const [result] = await db.query(sql, values);
+
+        // Insert installment details into sal_loan_detail
+        let currentDate = new Date();
+        for (let i = 0; i < count; i++) {
+            currentDate.setMonth(currentDate.getMonth() + 1); // Move to next month
+            let formattedDate = currentDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+
+            const sql2 = `INSERT INTO sal_loan_detail (sl_ID, date, installment) VALUES (?, ?, ?)`;
+            const values2 = [sl_ID, formattedDate, installment1];
+            await db.query(sql2, values2);
+        }
+
+        // Insert into payment table with the negative advance amount (for payment record)
+        const sql1 = `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)`;
+        const values1 = ["Pay Loan", sl_ID, "Loan", -amount];
+         const [result1] = await db.query(sql1, values1);
+
+        // Return success response with inserted data details
+        return res.status(201).json({
+            success: true,
+            message: "Loan added successfully",
+            data: {
+                sl_ID,               // The generated Advance Payment ID
+                amount,              // The amount of the advance
+            },
+        });
+    } catch (err) {
+        console.error("Error inserting Advance data:", err.message);
+
+        // Respond with error details
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: err.message,
+        });
+    }
+});
+
 // Save New Promotion
 router.post("/promotion", upload.single('img'), async (req, res) => {
     const sql = `INSERT INTO Promotion (img, date ) VALUES (?, ?)`;
@@ -4755,7 +5039,7 @@ router.post("/delivery-return", async (req, res) => {
 
 // update payment in delivery note
 router.post("/delivery-payment", async (req, res) => {
-    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems,cancelledItems } = req.body;
+    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems, cancelledItems } = req.body;
     const { RPayment, customerbalance, driverbalance, profitOrLoss } = paymentDetails || {};
 
     const receivedPayment = Number(RPayment) || 0;
@@ -4775,13 +5059,15 @@ router.post("/delivery-payment", async (req, res) => {
             return res.status(404).json({ error: "Order not found." });
         }
 
-        // Ensure all values are numeric
+        // Extract order details
         const { orID, c_ID, balance, advance, total, netTotal, discount, delPrice, stID } = Orderpayment[0];
 
+        // Ensure valid numbers
         let NetTotal1 = Math.max(0, Number(netTotal) || 0);
         let totalAmount = Math.max(0, Number(total) || 0);
         let discountAmount = Number(discount) || 0;
         let deliveryCharge = Number(delPrice) || 0;
+        let previousAdvance = Number(advance) || 0;
 
         // Fetch delivery details
         const [deliveryData] = await db.query("SELECT dv_id FROM delivery WHERE orID = ?", [orderId]);
@@ -4795,9 +5081,11 @@ router.post("/delivery-payment", async (req, res) => {
         const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driverId]);
         let driverNewBalance = Number(driverData?.[0]?.balance || 0) + DrivBalance;
 
-        // Update order advance & balance
-        let advance1 = Loss !== 0 ? Number(advance) + (receivedPayment + Loss) : Number(advance) + receivedPayment;
+        // Calculate advance and balance
+        let advance1 = Loss !== 0 ? previousAdvance + (receivedPayment + Loss) : previousAdvance + receivedPayment;
         let balance1 = Math.max(0, totalAmount - advance1);
+
+        console.log(`NetTotal1: ${NetTotal1}, Balance1: ${balance1}, Previous Advance: ${previousAdvance}, Advance1: ${advance1}`);
 
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
@@ -4810,7 +5098,8 @@ router.post("/delivery-payment", async (req, res) => {
                 }
             }
         }
-        // Process returned items
+
+        // Process cancelled items
         if (cancelledItems && Array.isArray(cancelledItems)) {
             for (const item of cancelledItems) {
                 if (!item.itemId || !item.stockId) continue;
@@ -4822,14 +5111,18 @@ router.post("/delivery-payment", async (req, res) => {
             }
         }
 
-        NetTotal1 = Math.max(0, NetTotal1); // Ensure NetTotal1 is valid
+        // Ensure NetTotal1 is valid
+        NetTotal1 = Math.max(0, NetTotal1);
 
-        // Update order details
-        const payStatus = (NetTotal1 === 0 || balance1 === 0) ? "Settled" : "N-Settled";
+        // Determine payment status (Only Settled if Balance1 is 0)
+        const payStatus = (balance1 === 0) ? "Settled" : "N-Settled";
+        console.log(`Payment Status: ${payStatus}`);
 
+        // Update customer balance
         let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
         let reducePrice = newTotal - totalAmount;
-        customerBalance += NetTotal1 === 0 ? receivedPayment : reducePrice;
+        customerBalance += (NetTotal1 === 0 ? receivedPayment : reducePrice);
+
         // Generate unique Advance Payment ID
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
@@ -4902,7 +5195,8 @@ router.post("/delivery-payment", async (req, res) => {
             await db.query("UPDATE Orders SET expectedDate = ? WHERE orID = ?", [rescheduledDate, orderId]);
             await db.query("UPDATE delivery SET schedule_Date = ? WHERE orID = ?", [rescheduledDate, orderId]);
         }
-        res.json({ success: true, message: "Payment processed successfully." });
+
+        res.json({ success: true, message: "Payment processed successfully.", paymentStatus: payStatus });
     } catch (error) {
         console.error("Error processing delivery payment:", error);
         res.status(500).json({ error: "Internal server error" });
