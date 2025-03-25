@@ -186,9 +186,8 @@ const DeliveryNoteDetails = () => {
     const handlePayment = async () => {
         let CustBalance = parseFloat(CustomerBalance);
         let DrivBalance = parseFloat(DriverBalance);
-        const orderId = selectedOrderId; // Assuming selectedOrderId is set correctly in the state
+        const orderId = selectedOrderId;
 
-        // Handle Customer Balance Alert
         const customerPromise = CustBalance !== 0
             ? Swal.fire({
                 title: "<strong>Customer <u>Balance</u></strong>",
@@ -207,9 +206,8 @@ const DeliveryNoteDetails = () => {
             })
             : Promise.resolve({ newCustBalance: 0, profitOrLoss: 0 });
 
-        // Handle Driver Balance Alert (Chained After Customer Alert)
         customerPromise.then(({ newCustBalance, profitOrLoss }) => {
-            CustBalance = newCustBalance; // Update customer balance after alert
+            CustBalance = newCustBalance;
             const driverPromise = DrivBalance !== 0
                 ? Swal.fire({
                     title: "<strong>Driver <u>Balance</u></strong>",
@@ -223,36 +221,44 @@ const DeliveryNoteDetails = () => {
                 })
                 : Promise.resolve();
 
-            // Once all alerts are resolved, store the values locally
             driverPromise.then(() => {
-                // Store the payment data in state
                 const paymentData = {
                     orderid: orderId,
-                    payment: selectedBalance, // The amount to be paid
-                    driver: deliveryNote.driverName, // Driver name for the payment
-                    driverId: deliveryNote.devID, // Driver ID for the payment
-                    RPayment: Rpayment, // The amount received from the customer
-                    driverbalance: DrivBalance, // Driver's current balance
-                    customerbalance: CustBalance, // Updated customer's current balance
-                    profitOrLoss: profitOrLoss, // Stores original balance if canceled
+                    payment: selectedBalance,
+                    driver: deliveryNote.driverName,
+                    driverId: deliveryNote.devID,
+                    RPayment: Rpayment,
+                    driverbalance: DrivBalance,
+                    customerbalance: CustBalance,
+                    profitOrLoss: profitOrLoss,
                 };
 
-                // Store the payment data using setPayment
-                setPayment(paymentData); // This will store the values in the state
-                setShowStockModal1(false); // Close modal after storing the values
+                setPayment(paymentData);
+
+                // 🛑 Reset the modal fields after successful payment
+                resetModal();
             });
         });
     };
 
+    // Function to reset modal fields
+    const resetModal = () => {
+        setCustomerBalance(0);
+        setDriverBalance(0);
+        setAmountRecevice(0);
+        setPayment(null);
+        setSelectedOrderId(null);
+        setShowStockModal1(false); // Close modal
+    };
+
+
     const updateOrder = async (orderId, index) => {
         try {
-            // Get the selected order details
             const order = orders[index];
 
-            // Extract payment info for the current order
             const orderPayment = {
                 orderid: order.OrID,
-                payment: payment?.payment || 0,  // Set to 0 if no payment is available
+                payment: payment?.payment || 0,
                 driver: payment?.driver || "",
                 RPayment: payment?.RPayment || 0,
                 driverbalance: payment?.driverbalance || 0,
@@ -260,35 +266,33 @@ const DeliveryNoteDetails = () => {
                 profitOrLoss: payment?.profitOrLoss,
             };
 
-            // Construct updated order details
             const updatedOrder = {
                 orderId: order.OrID,
-                driver: deliveryNote.driverName, // driver name for the payment
-                driverId: deliveryNote.devID, // driver name for the payment
-                deliveryDate:deliveryNote.date,
+                driver: deliveryNote.driverName,
+                driverId: deliveryNote.devID,
+                deliveryDate: deliveryNote.date,
                 orderStatus: order.orderStatus,
                 deliveryStatus: order.deliveryStatus,
                 reason: reasons[order.OrID]?.reason || "N/A",
                 customReason: reasons[order.OrID]?.customReason || null,
                 rescheduledDate: selectedDeliveryDate || null,
-                returnedItems: (order.orderStatus === "Returned")
+                returnedItems: order.orderStatus === "Returned"
                     ? (selectedItems[order.OrID]?.map(itemKey => {
                         const [itemId, stockId] = itemKey.split("-");
                         const itemStatus = selectedItemStatus[itemKey] || "Available";
                         return { itemId, stockId, status: itemStatus };
                     }) || [])
                     : [],
-                cancelledItems: (order.orderStatus === "Cancelled")
+                cancelledItems: order.orderStatus === "Cancelled"
                     ? (selectedItems[order.OrID]?.map(itemKey => {
                         const [itemId, stockId] = itemKey.split("-");
                         const itemStatus = selectedItemStatus[itemKey] || "Available";
                         return { itemId, stockId, status: itemStatus };
                     }) || [])
                     : [],
-                paymentDetails: orderPayment, // Include payment data
+                paymentDetails: orderPayment,
             };
 
-            // API call to update the order
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-payment`, {
                 method: "POST",
                 headers: {
@@ -300,9 +304,8 @@ const DeliveryNoteDetails = () => {
             const data = await response.json();
 
             if (response.ok) {
-                setPayment(null);
                 toast.success("Order updated successfully!");
-                // setIsEditing(false);  // Exit edit mode after successful update
+                resetModal(); // 🛑 Clear modal after successful update
             } else {
                 toast.error(data.message || "Error updating order.");
             }
@@ -311,6 +314,7 @@ const DeliveryNoteDetails = () => {
             console.error("Update Order Error:", error);
         }
     };
+
 
     const setDate = (e) => {
         const routedate = e.target.value;
