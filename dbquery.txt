@@ -63,7 +63,8 @@ CREATE TABLE Employee(
       dob DATE,
       contact VARCHAR(15),
       job VARCHAR(15),
-      basic DOUBLE
+      basic DOUBLE,
+      type VARCHAR(20)
 );
 CREATE TABLE driver(
     devID VARCHAR(25) PRIMARY KEY,
@@ -305,6 +306,17 @@ CREATE TABLE p_i_detail(
     CONSTRAINT FOREIGN KEY (pc_Id) REFERENCES purchase (pc_Id)
                                 ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE issued_items(
+    delNoID INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    pid_Id INT,
+    status VARCHAR(15),
+    date DATETIME,
+    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                 ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (pid_Id) REFERENCES p_i_detail (pid_Id)
+                                     ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 CREATE TABLE delivery_note(
     delNoID INT AUTO_INCREMENT PRIMARY KEY,
@@ -329,17 +341,7 @@ CREATE TABLE delivery_note_orders(
     CONSTRAINT FOREIGN KEY (delNoID) REFERENCES delivery_note (delNoID)
                                  ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE issued_items(
-    delNoID INT AUTO_INCREMENT PRIMARY KEY,
-    orID VARCHAR(25),
-    pid_Id INT,
-    status VARCHAR(15),
-    date DATETIME,
-    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
-                                 ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (pid_Id) REFERENCES p_i_detail (pid_Id)
-                                     ON DELETE CASCADE ON UPDATE CASCADE
-);
+
 
 CREATE TABLE ST_order_review(
     stID VARCHAR(25),

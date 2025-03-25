@@ -12,6 +12,7 @@ const AddEmployee = ({ onAddEmployee }) => {
         contact: "",
         job: "",
         basic: "",
+        type: "",
         orderTarget: "",
         issuedTarget: "",
     });
@@ -41,6 +42,7 @@ const AddEmployee = ({ onAddEmployee }) => {
                 contact: formData.contact,
                 job: formData.job,
                 basic: formData.basic,
+                type : formData.type,
                 orderTarget: formData.orderTarget,
                 issuedTarget: formData.issuedTarget,
             };
@@ -84,6 +86,7 @@ const AddEmployee = ({ onAddEmployee }) => {
             job: "",
             basic: "",
             target: "",
+            type: "",
         });
     };
 
@@ -121,6 +124,16 @@ const AddEmployee = ({ onAddEmployee }) => {
                                 <option value="Sales">Sales</option>
                                 <option value="HR">HR</option>
                                 <option value="Driver">Driver</option>
+                                <option value="It">It</option>
+                            </Input>
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="type">Job Type</Label>
+                            <Input type="select" name="type" id="type" value={formData.type} onChange={handleChange} required>
+                                <option value="">Select Job Type</option>
+                                <option value="Permanent">Permanent</option>
+                                <option value="Intern">Intern</option>
+                                <option value="Temporary">Temporary</option>
                             </Input>
                         </FormGroup>
                         <FormGroup>

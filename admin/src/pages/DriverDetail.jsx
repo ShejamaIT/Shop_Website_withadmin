@@ -79,7 +79,7 @@ const DriverDetail = ({ driver }) => {
                                             <tr><td><strong>Employee ID</strong></td><td>{driverDetails.devID}</td></tr>
                                             <tr><td><strong>Phone</strong></td><td>{driverDetails.contact}</td></tr>
                                             <tr><td><strong>NIC</strong></td><td>{driverDetails.nic}</td></tr>
-                                            <tr><td><strong>Ditect Balance</strong></td><td>Rs. {driverDetails.balance}</td></tr>
+                                            <tr><td><strong>Dept Balance</strong></td><td>Rs. {driverDetails.balance}</td></tr>
                                             <tr><td><strong>Advance</strong></td><td>Rs. {driverDetails.totalAdvance}</td></tr>
                                             </tbody>
                                         </Table>
@@ -87,31 +87,31 @@ const DriverDetail = ({ driver }) => {
                                     <div className="coupon-detail">
                                         <Row>
                                             <Col lg={6}>
-                                                <h4 className="sub-title">Daily Ditects</h4>
-                                                <Table bordered className="coupon-table">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Delivery ID</th>
-                                                        <th>Direct Amount (Rs.)</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {dailyditects.length > 0 ? (
-                                                        dailyditects.map((dd, index) => (
-                                                            <tr key={index}>
-                                                                <td>{dd.deliveryId}</td>
-                                                                <td>Rs. {dd.amount}</td>
-                                                            </tr>
-                                                        ))
-                                                    ) : (
-                                                        <tr>
-                                                            <td colSpan="2" className="no-coupon-text">No Direct Amount.</td>
-                                                        </tr>
-                                                    )}
-                                                    </tbody>
-                                                </Table>
+                                                {/*<h4 className="sub-title">Daily Dept</h4>*/}
+                                                {/*<Table bordered className="coupon-table">*/}
+                                                {/*    <thead>*/}
+                                                {/*    <tr>*/}
+                                                {/*        <th>Delivery ID</th>*/}
+                                                {/*        <th>Direct Amount (Rs.)</th>*/}
+                                                {/*    </tr>*/}
+                                                {/*    </thead>*/}
+                                                {/*    <tbody>*/}
+                                                {/*    {dailyditects.length > 0 ? (*/}
+                                                {/*        dailyditects.map((dd, index) => (*/}
+                                                {/*            <tr key={index}>*/}
+                                                {/*                <td>{dd.deliveryId}</td>*/}
+                                                {/*                <td>Rs. {dd.amount}</td>*/}
+                                                {/*            </tr>*/}
+                                                {/*        ))*/}
+                                                {/*    ) : (*/}
+                                                {/*        <tr>*/}
+                                                {/*            <td colSpan="2" className="no-coupon-text">No Direct Amount.</td>*/}
+                                                {/*        </tr>*/}
+                                                {/*    )}*/}
+                                                {/*    </tbody>*/}
+                                                {/*</Table>*/}
 
-                                                <h4 className="sub-title">Monthly Ditects</h4>
+                                                <h4 className="sub-title">Monthly Dept</h4>
                                                 <Table bordered className="coupon-table">
                                                     <thead>
                                                     <tr>

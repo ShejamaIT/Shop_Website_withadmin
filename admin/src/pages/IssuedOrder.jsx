@@ -65,6 +65,7 @@ const IssuedOrderDetails = () => {
                     <NavBar />
                 </Row>
                 <Container>
+                    {/* General Details */}
                     <Row>
                         <Col lg="12">
                             <h4 className="mb-3 text-center topic">Issued Order Details</h4>
@@ -73,79 +74,98 @@ const IssuedOrderDetails = () => {
                                 <div className="order-header">
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="order-general">
-                                        <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
-                                        <p><strong>Customer Email:</strong> {order.customerEmail}</p>
+                                        <p><strong>Order Date:</strong> {order.orderDate}</p>
+                                        <p><strong>Customer Name:</strong> {order.customerName}</p>
                                         <p><strong>Order Status:</strong> {order.orderStatus}</p>
                                         <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
                                         <p><strong>Payment Status:</strong> {order.payStatus}</p>
-                                        <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
-                                        <p><strong>Contact:</strong> {order.phoneNumber}</p>
-                                        <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
+                                        <p><strong>Expected Delivery Date:</strong> {order.expectedDeliveryDate}</p>
+                                        <p><strong>Contact:</strong> {order.customerPhone}</p>
+                                        <p><strong>Optional Contact:</strong> {order.customerOptionalPhone}</p>
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
-                                        {/*<p><strong>Sale By:</strong> {order.salesTeam.employeeName}</p>*/}
                                     </div>
-
-                                    {/* Ordered Items */}
-                                    <div>
-                                        <h5 className="mt-4">Ordered Items</h5>
-                                        <ul className="order-items">
-                                            <div className="order-general">
-                                                {order.items.map((item, index) => (
-                                                    <li key={index}>
-                                                        <p><strong>Item:</strong> {item.itemName}</p>
-                                                        <p><strong>Color:</strong> {item.color}</p>
-                                                        <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                        <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
-                                                    </li>
-                                                ))}
-                                            </div>
-                                        </ul>
+                                    <h5 className="mt-4">Payment Details</h5>
+                                    <div className="order-general">
+                                        <p><strong>Net Item Amount:</strong>Rs. {order.netTotal}</p>
+                                        <p><strong>Delivery Amount:</strong>Rs. {order.deliveryCharge}</p>
+                                        <p><strong>Discount Amount:</strong>Rs. {order.discount}</p>
+                                        <p><strong>Total Amount:</strong>Rs. {order.totalPrice}</p>
+                                        <p><strong>Payment Amount:</strong>Rs. {order.advance}</p>
+                                        <p><strong>Balance Amount:</strong>Rs. {order.balance}</p>
                                     </div>
-
-                                    {/* Issued Items */}
-                                    <div className="mt-4">
-                                        <h5 className="mt-4">Issued Items</h5>
-                                        <ul className="order-items">
-                                            <div className="order-general">
-                                                {order.issuedItems.map((item, index) => (
-                                                    <li key={index}>
-                                                        <p><strong>Stock ID:</strong> {item.srdId}</p>
-                                                        <p><strong>Status:</strong> {item.status}</p>
-                                                        <p><strong>Issued On:</strong> {item.issuedDate}</p>
-                                                    </li>
-                                                ))}
-                                            </div>
-                                        </ul>
-                                    </div>
-
-                                    {/* Payment History */}
-                                    <div className="mt-4">
-                                        <h5 className="mt-4">Payment History</h5>
-                                        <ul className="order-items">
-                                            <div className="order-general">
-                                                {order.paymentHistory && order.paymentHistory.length > 0 ? (
-                                                    order.paymentHistory.map((payment, index) => (
-                                                        <li key={index}>
-                                                            <p><strong>Payment ID:</strong> {payment.paymentId}</p>
-                                                            <p><strong>Amount Paid:</strong> Rs. {payment.amount}</p>
-                                                            <p><strong>Payment Date:</strong> {payment.paymentDate}</p>
-                                                        </li>
-                                                    ))
-                                                ) : (
-                                                    <p>No payments made yet.</p>
-                                                )}
-                                            </div>
-                                        </ul>
-                                    </div>
-
-                                    {/* Print Button for Payment History */}
-                                    <div className="text-center mt-4">
-                                        <Button color="primary" onClick={handlePrintPaymentHistory}>
-                                            Print Payment History
-                                        </Button>
-                                    </div>
-
                                 </div>
+                            </div>
+                        </Col>
+                    </Row>
+
+                    {/* Ordered Items */}
+                    <Row>
+                        <Col lg="12">
+                            <div className="mt-4">
+                                <h5 className="mt-4">Ordered Items</h5>
+                                <ul className="order-items">
+                                    <div className="order-general">
+                                        {order.items.map((item, index) => (
+                                            <li key={index}>
+                                                <p><strong>Item:</strong> {item.itemName}</p>
+                                                <p><strong>Color:</strong> {item.color}</p>
+                                                <p><strong>Requested Quantity:</strong> {item.quantity}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
+                                            </li>
+                                        ))}
+                                    </div>
+                                </ul>
+                            </div>
+                        </Col>
+                    </Row>
+
+                    {/* Issued Items */}
+                    <Row>
+                        <Col lg="12">
+                            <div className="mt-4">
+                                <h5 className="mt-4">Issued Items</h5>
+                                <ul className="order-items">
+                                    <div className="order-general">
+                                        {order.issuedItems.map((item, index) => (
+                                            <li key={index}>
+                                                <p><strong>Batch ID:</strong> {item.BatchId}</p>
+                                                <p><strong>Stock ID:</strong> {item.stockId}</p>
+                                                <p><strong>Issued On:</strong> {item.issuedDate}</p>
+                                            </li>
+                                        ))}
+                                    </div>
+                                </ul>
+                            </div>
+                        </Col>
+                    </Row>
+
+                    {/* Payment History */}
+                    <Row>
+                        <Col lg="12">
+                            <div className="mt-4">
+                                <h5 className="mt-4">Payment History</h5>
+                                <ul className="order-items">
+                                    <div className="order-general">
+                                        {order.paymentHistory && order.paymentHistory.length > 0 ? (
+                                            order.paymentHistory.map((payment, index) => (
+                                                <li key={index}>
+                                                    <p><strong>Payment ID:</strong> {payment.paymentId}</p>
+                                                    <p><strong>Amount Paid:</strong> Rs. {payment.amount}</p>
+                                                    <p><strong>Payment Date:</strong> {payment.paymentDate}</p>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <p>No payments made yet.</p>
+                                        )}
+                                    </div>
+                                </ul>
+                            </div>
+
+                            {/* Print Button for Payment History */}
+                            <div className="text-center mt-4">
+                                <Button color="primary" onClick={handlePrintPaymentHistory}>
+                                    Print Payment History
+                                </Button>
                             </div>
                         </Col>
                     </Row>
