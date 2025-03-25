@@ -8,6 +8,7 @@ import AddEmployee from "./AddEmployee";
 import SaleteamDetail from "./SaleteamDetail";
 import DriverDetail from "./DriverDetail";
 import AdancePayment from "./AdancePayment";
+import LoanPayment from "./LoanPayment";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -239,8 +240,13 @@ const AllEmployees = () => {
                                     </NavLink>
                                 </NavItem>
                                 <NavItem>
-                                    <NavLink className={paymentSubTab === "monthlySalary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("monthlySalary")}>
-                                        Monthly Salary
+                                    <NavLink className={paymentSubTab === "loan" ? "active" : ""} onClick={() => handlePaymentSubTabChange("loan")}>
+                                        Loan
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className={paymentSubTab === "salary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("salary")}>
+                                        Month Salary
                                     </NavLink>
                                 </NavItem>
                             </Nav>
@@ -248,7 +254,10 @@ const AllEmployees = () => {
                                 <TabPane tabId="advance">
                                     <AdancePayment />
                                 </TabPane>
-                                <TabPane tabId="monthlySalary">
+                                <TabPane tabId="loan">
+                                    <LoanPayment />
+                                </TabPane>
+                                <TabPane tabId="salary">
                                     <p>Monthly Salary Details...</p>
                                 </TabPane>
                             </TabContent>

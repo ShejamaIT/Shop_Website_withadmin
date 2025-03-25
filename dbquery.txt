@@ -259,6 +259,25 @@ CREATE TABLE salary_advance(
     CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
                          ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE salary_loan(
+    sl_ID VARCHAR(25) PRIMARY KEY,
+    E_Id VARCHAR(25),
+    amount DOUBLE,
+    installment DOUBLE,
+    months INT,
+    skip INT,
+    dateTime DATETIME ,
+    CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
+                         ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE sal_loan_detail(
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    sl_ID VARCHAR(25),
+    date DATE,
+    installment DOUBLE,
+    CONSTRAINT FOREIGN KEY (sl_ID) REFERENCES salary_loan (sl_ID)
+                             ON DELETE CASCADE ON UPDATE CASCADE
+);
 CREATE TABLE cash_balance (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     reason VARCHAR(45),
@@ -341,8 +360,6 @@ CREATE TABLE delivery_note_orders(
     CONSTRAINT FOREIGN KEY (delNoID) REFERENCES delivery_note (delNoID)
                                  ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-
 CREATE TABLE ST_order_review(
     stID VARCHAR(25),
     year int,

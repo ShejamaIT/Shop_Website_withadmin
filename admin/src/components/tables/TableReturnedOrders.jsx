@@ -40,7 +40,7 @@ const TableReturned = ({ refreshKey }) => {
     };
 
     const handleViewOrder = (orderId) => {
-        navigate(`/returned-order-detail/${orderId}`);
+        navigate(`/retruned-order-detail/${orderId}`);
     };
 
     // Search function to filter by Order ID

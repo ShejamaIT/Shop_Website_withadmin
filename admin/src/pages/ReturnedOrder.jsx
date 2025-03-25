@@ -23,11 +23,13 @@ const ReturnedOrderDetails = () => {
     }, [id]);
 
     const fetchOrder = async () => {
+        console.log(id);
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/returned-order-details?orID=${id}`);
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
+            console.log(data);
             setOrder(data.order);
             setFormData({
                 orderStatus: data.order.orderStatus,
@@ -56,8 +58,8 @@ const ReturnedOrderDetails = () => {
                 orderStatus: formData.orderStatus,
                 deliveryStatus: formData.deliveryStatus
             };
-
-            const response = await fetch(`http://localhost:5001/api/admin/main/update-order-status`, {
+            console.log(updatedData);
+            const response = await fetch(`http://localhost:5001/api/admin/main/update-order-details`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(updatedData),
@@ -102,7 +104,7 @@ const ReturnedOrderDetails = () => {
                                 <div className="order-header">
                                     <h5 className="mt-4">General Details</h5>
                                     <div className="order-general">
-                                        <p><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
+                                        <p><strong>Order Date:</strong> {order.orderDate}</p>
                                         <p><strong>Customer Email:</strong> {order.customerEmail}</p>
 
                                         {/* Order Status - Editable */}
@@ -149,7 +151,7 @@ const ReturnedOrderDetails = () => {
                                         )}
 
                                         <p><strong>Payment Status:</strong> {order.payStatus}</p>
-                                        <p><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</p>
+                                        <p><strong>Expected Delivery Date:</strong> {order.expectedDeliveryDate}</p>
                                         <p><strong>Contact:</strong> {order.phoneNumber}</p>
                                         <p><strong>Optional Contact:</strong> {order.optionalNumber}</p>
                                         <p><strong>Special Note:</strong> {order.specialNote}</p>
@@ -167,7 +169,7 @@ const ReturnedOrderDetails = () => {
                                                         <p><strong>Item:</strong> {item.itemName}</p>
                                                         <p><strong>Color:</strong> {item.color}</p>
                                                         <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                        <p><strong>Amount:</strong> Rs. {item.price}</p>
+                                                        <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
                                                         <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
                                                     </li>
                                                 ))}
@@ -184,9 +186,9 @@ const ReturnedOrderDetails = () => {
                                                 {order.issuedItems.map((item, index) => (
                                                     <li key={index}>
                                                         <p><strong>Stock ID:</strong> {item.stockId}</p>
-                                                        <p><strong>Stock Receive ID:</strong> {item.srID}</p>
+                                                        <p><strong>Batch ID:</strong> {item.BatchId}</p>
                                                         <p><strong>Status:</strong> {item.status}</p>
-                                                        <p><strong>Issued On:</strong> {new Date(item.datetime).toLocaleString()}</p>
+                                                        <p><strong>Issued On:</strong> {item.issuedDate}</p>
                                                     </li>
                                                 ))}
                                             </div>

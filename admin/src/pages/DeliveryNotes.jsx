@@ -12,6 +12,7 @@ const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);
     const [selectedRoute, setSelectedRoute] = useState("");
     const [orders, setOrders] = useState([]);
+    const [Returnorders, setReturnOrders] = useState([]);
     const [selectedOrders, setSelectedOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [deliveryDates, setDeliveryDates] = useState([]);
@@ -131,9 +132,19 @@ const DeliveryNotes = () => {
             } else {
                 url = `http://localhost:5001/api/admin/main/find-completed-orders?district=${selectedRoute}&date=${date}`;
             }
+            let url1;
+            if (selectedRoute === "All") {
+                url1 = `http://localhost:5001/api/admin/main/find-returned-orders-by-date?date=${date}`;
+            } else {
+                url1 = `http://localhost:5001/api/admin/main/find-returned-orders?district=${selectedRoute}&date=${date}`;
+            }
+
             const response = await fetch(url);
+            const response1 = await fetch(url1);
             const data = await response.json();
+            const data1 = await response1.json();
             setOrders(data.orders || []);
+            setReturnOrders(data1.orders || []);
         } catch (error) {
             toast.error("Error fetching orders.");
         }
@@ -234,7 +245,6 @@ const DeliveryNotes = () => {
             console.error("Error making API request:", error.message);
         }
     };
-
     const handleEditClick3 = (selectedOrders) => {
         if (!selectedOrders) return;
         setSelectedOrders(selectedOrders);
@@ -287,38 +297,78 @@ const DeliveryNotes = () => {
                                 </Input>
                             </FormGroup>
                         )}
+
                         {/* Orders Table */}
                         {orders.length > 0 && (
-                            <Table bordered responsive className="order-table">
-                                <thead>
-                                <tr>
-                                    <th>Select</th>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Total</th>
-                                    <th>Advance</th>
-                                    <th>Balance</th>
-                                    <th>District</th>
-                                    <th>Type</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {orders.map(order => (
-                                    <tr key={order.id}>
-                                        <td>
-                                            <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
-                                        </td>
-                                        <td>{order.orderId}</td>
-                                        <td>{order.customerName}</td>
-                                        <td>Rs.{order.totalPrice}</td>
-                                        <td>Rs.{order.advance}</td>
-                                        <td>Rs.{order.balance}</td>
-                                        <td>{order.deliveryInfo.district}</td>
-                                        <td>{order.deliveryInfo.type}</td>
+                            <>
+                                <h5>Completed Orders</h5>
+                                <Table bordered responsive className="order-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Total</th>
+                                        <th>Advance</th>
+                                        <th>Balance</th>
+                                        <th>District</th>
+                                        <th>Type</th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </Table>
+                                    </thead>
+                                    <tbody>
+                                    {orders.map(order => (
+                                        <tr key={order.id}>
+                                            <td>
+                                                <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
+                                            </td>
+                                            <td>{order.orderId}</td>
+                                            <td>{order.customerName}</td>
+                                            <td>Rs.{order.totalPrice}</td>
+                                            <td>Rs.{order.advance}</td>
+                                            <td>Rs.{order.balance}</td>
+                                            <td>{order.deliveryInfo.district}</td>
+                                            <td>{order.deliveryInfo.type}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </Table>
+                            </>
+
+                        )}
+                        {Returnorders.length > 0 && (
+                            <>
+                                <h5>Return Orders</h5>
+                                <Table bordered responsive className="order-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Total</th>
+                                        <th>Advance</th>
+                                        <th>Balance</th>
+                                        <th>District</th>
+                                        <th>Type</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {Returnorders.map(order => (
+                                        <tr key={order.id}>
+                                            <td>
+                                                <Input type="checkbox" onChange={() => handleOrderSelection(order)} />
+                                            </td>
+                                            <td>{order.orderId}</td>
+                                            <td>{order.customerName}</td>
+                                            <td>Rs.{order.totalPrice}</td>
+                                            <td>Rs.{order.advance}</td>
+                                            <td>Rs.{order.balance}</td>
+                                            <td>{order.deliveryInfo.district}</td>
+                                            <td>{order.deliveryInfo.type}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </Table>
+                            </>
                         )}
                         <h5 className="text-end mt-3">Total Balance: Rs.{totalAmount}</h5>
                     </Form>
