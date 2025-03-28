@@ -2217,7 +2217,6 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
         const receivedQty = parseInt(recCount);
         const deliveryPrice = parseFloat(delivery) || 0;
         const total = parseFloat(cost) * receivedQty;
-        console.log(receivedQty,deliveryPrice,total);
 
         // Validate that the item exists in `item` table
         const [itemExists] = await db.query("SELECT I_Id FROM item WHERE I_Id = ?", [itemId]);
@@ -2319,7 +2318,6 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
 
         // Update stock_range in purchase_detail
         const stockRange = `${startStockId}-${lastStockId}`;
-        console.log(stockRange);
         await db.query(
             `UPDATE purchase_detail SET stock_range = ? WHERE pc_Id = ? AND I_Id = ?`,
             [stockRange, purchase_id, itemId]
@@ -2508,6 +2506,41 @@ router.get("/orders-accept", async (req, res) => {
     }
 });
 
+// update return order status to other status
+router.put("/updateReturnOrder", async (req, res) => {
+    try {
+        const { orderId,  orderStatus,deliveryStatus,  } = req.body;
+        // Check if the order exists
+        const orderCheckQuery = `SELECT * FROM orders WHERE OrID = ?`;
+        const [orderResult] = await db.query(orderCheckQuery, [orderId]);
+
+        if (orderResult.length === 0) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        const orderUpdateQuery = `UPDATE orders SET orStatus = ?,delStatus = ? WHERE OrID = ?`;
+        await db.query(orderUpdateQuery, [
+            orderStatus, deliveryStatus, orderId
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Order updated successfully",
+            data: {
+                orderId: orderId
+            },
+        });
+
+    } catch (error) {
+        console.error("Error updating order data:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error updating data in database",
+            details: error.message,
+        });
+    }
+});
+
 // Update order
 router.put("/update-order-details", async (req, res) => {
     try {
@@ -2525,13 +2558,13 @@ router.put("/update-order-details", async (req, res) => {
 
             return res.status(404).json({ success: false, message: "payement status cannot change to advance when advance is 0" });
         }
-        if (advance === null){
-            const orderUpdateQuery = `
-            UPDATE orders SET orStatus = ?,delStatus = ? WHERE OrID = ?`;
-            await db.query(orderUpdateQuery, [
-                 orderStatus, deliveryStatus, orderId
-            ]);
-        }
+        // if (advance === null){
+        //     const orderUpdateQuery = `
+        //     UPDATE orders SET orStatus = ?,delStatus = ? WHERE OrID = ?`;
+        //     await db.query(orderUpdateQuery, [
+        //          orderStatus, deliveryStatus, orderId
+        //     ]);
+        // }
 
         //Update order details
         const orderUpdateQuery = `
@@ -4286,7 +4319,6 @@ router.get("/delivery-schedule", async (req, res) => {
             "SELECT ds_date FROM delivery_schedule WHERE district = ?",
             [district]
         );
-        console.log(result);
 
         if (result.length === 0) {
             return res.status(404).json({ message: "District not found" });
@@ -4524,7 +4556,6 @@ router.post("/issued-order", async (req, res) => {
 // Issued Orders items
 router.post("/issued-items", async (req, res) => {
     const { orID, payStatus, selectedItems } = req.body;
-    console.log(selectedItems);
 
     if (!orID || !payStatus || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -4541,12 +4572,12 @@ router.post("/issued-items", async (req, res) => {
         for (const item of selectedItems) {
             await db.query(
                 `UPDATE p_i_detail
-                 SET status = 'Issued', orID = ?, datetime = NOW()
+                 SET status = 'Dispatched', orID = ?, datetime = NOW()
                  WHERE pid_Id = ?`,
                 [orID, item.pid_Id]
             );
             await db.query(
-                `INSERT INTO issued_items (orID, pid_Id, status, date) VALUES (?, ?, 'Issued', NOW())`,
+                `INSERT INTO issued_items (orID, pid_Id, status, date) VALUES (?, ?, 'Dispatched', NOW())`,
                 [orID, item.pid_Id]
             );
         }
@@ -4560,7 +4591,7 @@ router.post("/issued-items", async (req, res) => {
         for (const item of orderItems) {
             await db.query(
                 `UPDATE Item
-                 SET stockQty = stockQty - ?, bookedQty = bookedQty - ?
+                 SET stockQty = stockQty - ?, availableQty = availableQty - ?
                  WHERE I_Id = ?`,
                 [item.qty, item.qty, item.I_Id]
             );
@@ -5039,8 +5070,9 @@ router.post("/delivery-return", async (req, res) => {
 
 // update payment in delivery note
 router.post("/delivery-payment", async (req, res) => {
-    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, returnedItems, cancelledItems } = req.body;
+    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate,issuedItems, returnedItems, cancelledItems } = req.body;
     const { RPayment, customerbalance, driverbalance, profitOrLoss } = paymentDetails || {};
+
 
     const receivedPayment = Number(RPayment) || 0;
     const DrivBalance = Number(driverbalance) || 0;
@@ -5085,8 +5117,6 @@ router.post("/delivery-payment", async (req, res) => {
         let advance1 = Loss !== 0 ? previousAdvance + (receivedPayment + Loss) : previousAdvance + receivedPayment;
         let balance1 = Math.max(0, totalAmount - advance1);
 
-        console.log(`NetTotal1: ${NetTotal1}, Balance1: ${balance1}, Previous Advance: ${previousAdvance}, Advance1: ${advance1}`);
-
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
             for (const item of returnedItems) {
@@ -5113,10 +5143,8 @@ router.post("/delivery-payment", async (req, res) => {
 
         // Ensure NetTotal1 is valid
         NetTotal1 = Math.max(0, NetTotal1);
-
         // Determine payment status (Only Settled if Balance1 is 0)
         const payStatus = (balance1 === 0) ? "Settled" : "N-Settled";
-        console.log(`Payment Status: ${payStatus}`);
 
         // Update customer balance
         let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
@@ -5130,7 +5158,7 @@ router.post("/delivery-payment", async (req, res) => {
         await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
         await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
 
-        if (orderStatus === "Issued" ) {
+        if (orderStatus === "Delivered" ) {
             await db.query(
                 "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
                 [balance1, advance1,"Issued", newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
@@ -5153,14 +5181,84 @@ router.post("/delivery-payment", async (req, res) => {
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
             for (const item of returnedItems) {
+                if (!item.itemId || !item.stockId) continue;  // Use itemId and stockId
+
+                console.log(item.itemId, item.stockId,item.status);
+
+                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
+                    [item.status, item.itemId, item.stockId]);  // Use correct keys
+
+                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
+                    [item.itemId, item.stockId]);
+
+                const srdId = srdData?.[0]?.pid_Id || null;
+                if (srdId !== null) {
+                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
+                        [item.status, srdId, orderId]);  // Use item.status
+                }
+
+                // Update stock based on status
+                if (item.status === "Available") {
+                    await db.query("UPDATE Item SET stockQty = stockQty + 1, availableQty = availableQty + 1 WHERE I_Id = ?",
+                        [item.itemId]);
+                } else if (item.status === "Reserved") {
+                    if (srdId !== null) {
+                        await db.query("INSERT INTO Special_Reservation (orID, pid_Id) VALUES (?, ?)", [orderId, srdId]);
+                    }
+                    await db.query("UPDATE Item SET stockQty = stockQty + 1, reservedQty = reservedQty + 1, availableQty = availableQty - 1 WHERE I_Id = ?",
+                        [item.itemId]);
+                } else if (item.status === "Damaged") {
+                    await db.query("UPDATE Item SET stockQty = stockQty + 1, damageQty = damageQty + 1, availableQty = availableQty - 1 WHERE I_Id = ?",
+                        [item.itemId]);
+                }
+            }
+        }
+
+        // Process cancelled items
+        if (cancelledItems && Array.isArray(cancelledItems)) {
+            for (const item of cancelledItems) {
                 if (!item.itemId || !item.stockId) continue;
 
-                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
+                console.log(item.itemId, item.stockId);
 
-                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
+                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
+                    [item.status, item.itemId, item.stockId]);
+
+                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
+                    [item.itemId, item.stockId]);
+
                 const srdId = srdData?.[0]?.pid_Id || null;
-                if (srdId) {
-                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?", [item.status, srdId, orderId]);
+                if (srdId !== null) {
+                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
+                        [item.status, srdId, orderId]);
+                }
+
+                // Update stock based on status
+                if (item.status === "Available") {
+                    await db.query("UPDATE Item SET stockQty = stockQty + 1, availableQty = availableQty + 1 WHERE I_Id = ?",
+                        [item.itemId]);
+                } else if (item.status === "Damaged") {
+                    await db.query("UPDATE Item SET stockQty = stockQty + 1, damageQty = damageQty + 1, availableQty = availableQty - 1 WHERE I_Id = ?",
+                        [item.itemId]);
+                }
+            }
+        }
+
+        // Process issued items (dispatched => issued)
+        if (issuedItems && Array.isArray(issuedItems)) {
+            for (const item of issuedItems) {
+                if (!item.I_Id || !item.stock_Id) continue;
+
+                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
+                    ["Issued", item.I_Id, item.stock_Id]);
+
+                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
+                    [item.I_Id, item.stock_Id]);
+
+                const srdId = srdData?.[0]?.pid_Id || null;
+                if (srdId !== null) {
+                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
+                        ["Issued", srdId, orderId]);
                 }
             }
         }
@@ -5206,7 +5304,6 @@ router.post("/delivery-payment", async (req, res) => {
 // get delivery schdule by date
 router.get("/check-delivery", async (req, res) => {
     const { date } = req.query; // Get date from query parameter
-    console.log(date);
     if (!date) {
         return res.status(400).json({ message: "Date is required" });
     }
@@ -5239,28 +5336,30 @@ router.get("/sales/count", async (req, res) => {
         const formattedDate = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
         const firstDayOfMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-01`;
 
-        // Query to get daily sales total per sales team member with their names, sale price (netTotal - discount),
-        // categorized by 'issued' orders and 'other' statuses (pending, accepted, completed)
+        // Query to get daily sales categorized into issued, returned, canceled, and other
         const [dailySales] = await db.query(`
             SELECT 
                 sales_team.stID, 
                 Employee.name AS salesperson_name, 
                 COALESCE(SUM(CASE WHEN Orders.orStatus = 'issued' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS issued_sales,
-                COALESCE(SUM(CASE WHEN Orders.orStatus NOT IN ('issued') THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS other_sales
+                COALESCE(SUM(CASE WHEN Orders.orStatus = 'returned' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS returned_sales,
+                COALESCE(SUM(CASE WHEN Orders.orStatus = 'canceled' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS canceled_sales,
+                COALESCE(SUM(CASE WHEN Orders.orStatus NOT IN ('issued', 'returned', 'canceled') THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS other_sales
             FROM sales_team
             LEFT JOIN Orders ON sales_team.stID = Orders.stID AND Orders.orDate = ?
             LEFT JOIN Employee ON sales_team.E_Id = Employee.E_Id
             GROUP BY sales_team.stID, Employee.name;
         `, [formattedDate]);
 
-        // Query to get monthly sales total per sales team member with their names, sale price (netTotal - discount),
-        // categorized by 'issued' orders and 'other' statuses (pending, accepted, completed)
+        // Query to get monthly sales categorized into issued, returned, canceled, and other
         const [monthlySales] = await db.query(`
             SELECT 
                 sales_team.stID, 
                 Employee.name AS salesperson_name, 
                 COALESCE(SUM(CASE WHEN Orders.orStatus = 'issued' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS issued_sales,
-                COALESCE(SUM(CASE WHEN Orders.orStatus NOT IN ('issued') THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS other_sales
+                COALESCE(SUM(CASE WHEN Orders.orStatus = 'returned' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS returned_sales,
+                COALESCE(SUM(CASE WHEN Orders.orStatus = 'canceled' THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS canceled_sales,
+                COALESCE(SUM(CASE WHEN Orders.orStatus NOT IN ('issued', 'returned', 'canceled') THEN Orders.netTotal - Orders.discount ELSE 0 END), 0) AS other_sales
             FROM sales_team
             LEFT JOIN Orders ON sales_team.stID = Orders.stID AND Orders.orDate BETWEEN ? AND ?
             LEFT JOIN Employee ON sales_team.E_Id = Employee.E_Id
@@ -5415,8 +5514,6 @@ const generateNewId = async (table, column, prefix) => {
 // Helper function to parse date from DD/MM/YYYY format to YYYY-MM-DD format
 const parseDate = (dateStr) => {
     if (!dateStr) return null;
-    console.log(dateStr);
-
     let year, month, day;
 
     // Check if the date is in `YYYY-MM-DD` format
