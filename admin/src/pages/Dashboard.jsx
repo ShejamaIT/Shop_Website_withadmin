@@ -13,17 +13,18 @@ const Dashboard = () => {
     const [discount, setDiscount] = useState("");
     const [date, setDate] = useState("");
     const [promoImage, setPromoImage] = useState(null);
-
-    // State variables for sales data
     const [dailySales, setDailySales] = useState([]);
     const [monthlySales, setMonthlySales] = useState([]);
 
-    // Fetch sales team members and sales data
+    useEffect(() => {
+        fetchSalesTeamMembersOrders();
+        fetchSalesTeamMembers();
+    }, []);
+
     const fetchSalesTeamMembersOrders = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/sales/count");
             const data = await response.json();
-
             if (data.data) {
                 setDailySales(data.data.dailySales ?? []);
                 setMonthlySales(data.data.monthlySales ?? []);
@@ -45,27 +46,24 @@ const Dashboard = () => {
         }
     };
 
-    useEffect(() => {
-        fetchSalesTeamMembersOrders();
-        fetchSalesTeamMembers();
-    }, []);
-
-    // Calculate total sales for issued and other sales
+    // Calculate totals
     const dailyIssuedTotal = dailySales.reduce((acc, sale) => acc + (sale.issued_sales ?? 0), 0);
     const dailyOtherTotal = dailySales.reduce((acc, sale) => acc + (sale.other_sales ?? 0), 0);
+    const dailyReturnedTotal = dailySales.reduce((acc, sale) => acc + (sale.returned_sales ?? 0), 0);
+    const dailyCanceledTotal = dailySales.reduce((acc, sale) => acc + (sale.canceled_sales ?? 0), 0);
 
     const monthlyIssuedTotal = monthlySales.reduce((acc, sale) => acc + (sale.issued_sales ?? 0), 0);
     const monthlyOtherTotal = monthlySales.reduce((acc, sale) => acc + (sale.other_sales ?? 0), 0);
+    const monthlyReturnedTotal = monthlySales.reduce((acc, sale) => acc + (sale.returned_sales ?? 0), 0);
+    const monthlyCanceledTotal = monthlySales.reduce((acc, sale) => acc + (sale.canceled_sales ?? 0), 0);
 
-// Create an array with the four total values
+    // New formatted data for the charts
     const DailysalesData = [
-        { name: "Daily Issued Sales", value: dailyIssuedTotal },
-        { name: "Daily Other Sales", value: dailyOtherTotal }
+        { name: "Daily Sales", issued: dailyIssuedTotal, other: dailyOtherTotal, returned: dailyReturnedTotal, canceled: dailyCanceledTotal }
     ];
 
     const MonthlysalesData = [
-        { name: "Monthly Issued Sales", value: monthlyIssuedTotal },
-        { name: "Monthly Other Sales", value: monthlyOtherTotal }
+        { name: "Monthly Sales", issued: monthlyIssuedTotal, other: monthlyOtherTotal, returned: monthlyReturnedTotal, canceled: monthlyCanceledTotal }
     ];
 
     // Handle coupon submission
@@ -93,7 +91,7 @@ const Dashboard = () => {
                 alert(`Error: ${data.message}`);
             }
         } catch (error) {
-            console.error("Error submitting coupon:", error);
+            console.error('Error submitting coupon:", error');
             alert("Failed to add coupon. Please try again.");
         }
     };
@@ -105,7 +103,7 @@ const Dashboard = () => {
             alert("Please fill in all fields.");
             return;
         }
-        toast.success(`Promotion added for ${date}!`);
+        toast.success(`Promotion added for ${date}`);
         setDate("");
         setPromoImage(null);
     };
@@ -121,9 +119,11 @@ const Dashboard = () => {
                 <Row>
                     <NavBar />
                 </Row>
-                <Container className='dashboard'>
+                <Container className="dashboard">
                     <h2>Sales Overview</h2>
-                    <Row >
+
+                    {/* Sales Data Tables */}
+                    <Row>
                         <Col md={6}>
                             <h4>Daily Sales</h4>
                             <Table striped bordered className="items-table">
@@ -131,8 +131,10 @@ const Dashboard = () => {
                                 <tr>
                                     <th>ID</th>
                                     <th>Salesperson</th>
-                                    <th>Other Sales (Rs.)</th>
+                                    <th>Total Sales (Rs.)</th>
                                     <th>Issued Sales (Rs.)</th>
+                                    <th>Returned Sales (Rs.)</th>
+                                    <th>Canceled Sales (Rs.)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -140,17 +142,16 @@ const Dashboard = () => {
                                     <tr key={sale.stID}>
                                         <td>{sale.stID}</td>
                                         <td>{sale.salesperson_name}</td>
-                                        <td>{sale.other_sales?? 0}</td>
-                                        <td>{sale.issued_sales?? 0}</td>
+                                        <td>{sale.other_sales ?? 0}</td>
+                                        <td>{sale.issued_sales ?? 0}</td>
+                                        <td>{sale.returned_sales ?? 0}</td>
+                                        <td>{sale.canceled_sales ?? 0}</td>
                                     </tr>
                                 ))}
                                 </tbody>
                             </Table>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h5>Total Daily Orders: Rs.{dailyOtherTotal}</h5>
-                                <h5>Total Daily Issued: Rs.{dailyIssuedTotal}</h5>
-                            </div>
                         </Col>
+
                         <Col md={6}>
                             <h4>Monthly Sales</h4>
                             <Table striped bordered className="items-table">
@@ -158,8 +159,10 @@ const Dashboard = () => {
                                 <tr>
                                     <th>ID</th>
                                     <th>Salesperson</th>
-                                    <th>Other Sales (Rs.)</th>
+                                    <th>Total Sales (Rs.)</th>
                                     <th>Issued Sales (Rs.)</th>
+                                    <th>Returned Sales (Rs.)</th>
+                                    <th>Canceled Sales (Rs.)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -167,20 +170,18 @@ const Dashboard = () => {
                                     <tr key={sale.stID}>
                                         <td>{sale.stID}</td>
                                         <td>{sale.salesperson_name}</td>
-                                        <td>{sale.other_sales?? 0}</td>
-                                        <td>{sale.issued_sales?? 0}</td>
+                                        <td>{sale.other_sales ?? 0}</td>
+                                        <td>{sale.issued_sales ?? 0}</td>
+                                        <td>{sale.returned_sales ?? 0}</td>
+                                        <td>{sale.canceled_sales ?? 0}</td>
                                     </tr>
                                 ))}
                                 </tbody>
                             </Table>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h5>Total Monthly Orders: Rs.{monthlyOtherTotal}</h5>
-                                <h5>Total Monthly Issued: Rs.{monthlyIssuedTotal}</h5>
-                            </div>
-
                         </Col>
                     </Row>
 
+                    {/* Sales Charts */}
                     <Row>
                         <Col md={6}>
                             <h2>Daily Sales Chart</h2>
@@ -191,7 +192,10 @@ const Dashboard = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="value" fill="#4CAF50" />
+                                    <Bar dataKey="issued" fill="#4CAF50" name="Issued Sales" />
+                                    <Bar dataKey="other" fill="#FF9800" name="Other Sales" />
+                                    <Bar dataKey="returned" fill="#F44336" name="Returned Sales" />
+                                    <Bar dataKey="canceled" fill="#9C27B0" name="Canceled Sales" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </Col>
@@ -205,12 +209,14 @@ const Dashboard = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="value" fill="#2196F3" />
+                                    <Bar dataKey="issued" fill="#2196F3" name="Issued Sales" />
+                                    <Bar dataKey="other" fill="#FFEB3B" name="Other Sales" />
+                                    <Bar dataKey="returned" fill="#E91E63" name="Returned Sales" />
+                                    <Bar dataKey="canceled" fill="#795548" name="Canceled Sales" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </Col>
                     </Row>
-
                     <Row>
                         <Col md={6}>
                             <h4>Manage Coupons</h4>
@@ -255,6 +261,7 @@ const Dashboard = () => {
                             </div>
                         </Col>
                     </Row>
+
                 </Container>
             </section>
         </Helmet>

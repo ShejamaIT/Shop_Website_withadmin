@@ -7,8 +7,6 @@ import { useParams } from "react-router-dom";
 import NavBar from "../components/header/navBar";
 import "../style/orderDetails.css";
 
-
-
 const ReturnedOrderDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -59,7 +57,7 @@ const ReturnedOrderDetails = () => {
                 deliveryStatus: formData.deliveryStatus
             };
             console.log(updatedData);
-            const response = await fetch(`http://localhost:5001/api/admin/main/update-order-details`, {
+            const response = await fetch(`http://localhost:5001/api/admin/main/updateReturnOrder`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(updatedData),

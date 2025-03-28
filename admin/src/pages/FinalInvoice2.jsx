@@ -38,7 +38,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
     }, [advance]);
 
     const handlePrintAndSubmit = () => {
-        console.log(selectedItems)
         // Ensure balance is 0 or paymentType is either 'COD' or 'Credit'
         if (balance !== 0 && (paymentType !== 'COD' && paymentType !== 'Credit')) {
             toast.error("If balance is not settled, the payment type must be either 'COD' or 'Credit'.");

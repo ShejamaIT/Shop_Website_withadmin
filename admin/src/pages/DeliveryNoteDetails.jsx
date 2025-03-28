@@ -23,7 +23,7 @@ const DeliveryNoteDetails = () => {
     const [selectedOrderId, setSelectedOrderId] = useState(null);
     const [selectedBalance, setSelectedBalance] = useState(0);
     const [selectedAction, setSelectedAction] = useState("Available");
-    const [payment, setPayment] = useState();
+    const [payment, setPayment] = useState(null); // Start with null instead of an empty object
     const [Rpayment, setRPayment] = useState(0);
     const [CustomerBalance, setCustomerBalance] = useState(0);
     const [AmountRecevice, setAmountRecevice] = useState(0);
@@ -183,64 +183,6 @@ const DeliveryNoteDetails = () => {
             alert(`An error occurred: ${error.message}`);
         }
     };
-    const handlePayment = async () => {
-        let CustBalance = parseFloat(CustomerBalance);
-        let DrivBalance = parseFloat(DriverBalance);
-        const orderId = selectedOrderId;
-
-        const customerPromise = CustBalance !== 0
-            ? Swal.fire({
-                title: "<strong>Customer <u>Balance</u></strong>",
-                icon: "info",
-                html: `There is <b>Rs.${CustBalance}</b> balance by customer.`,
-                showCloseButton: true,
-                showCancelButton: true,
-                focusConfirm: false,
-                confirmButtonText: "👍 Pass!",
-                cancelButtonText: "👎",
-            }).then((result) => {
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    return { newCustBalance: 0, profitOrLoss: CustBalance };
-                }
-                return { newCustBalance: CustBalance, profitOrLoss: 0 };
-            })
-            : Promise.resolve({ newCustBalance: 0, profitOrLoss: 0 });
-
-        customerPromise.then(({ newCustBalance, profitOrLoss }) => {
-            CustBalance = newCustBalance;
-            const driverPromise = DrivBalance !== 0
-                ? Swal.fire({
-                    title: "<strong>Driver <u>Balance</u></strong>",
-                    icon: "info",
-                    html: `There is <b>Rs.${DrivBalance}</b> balance by driver.`,
-                    showCloseButton: true,
-                    showCancelButton: true,
-                    focusConfirm: false,
-                    confirmButtonText: "👍 Pass!",
-                    cancelButtonText: "👎",
-                })
-                : Promise.resolve();
-
-            driverPromise.then(() => {
-                const paymentData = {
-                    orderid: orderId,
-                    payment: selectedBalance,
-                    driver: deliveryNote.driverName,
-                    driverId: deliveryNote.devID,
-                    RPayment: Rpayment,
-                    driverbalance: DrivBalance,
-                    customerbalance: CustBalance,
-                    profitOrLoss: profitOrLoss,
-                };
-
-                setPayment(paymentData);
-
-                // 🛑 Reset the modal fields after successful payment
-                resetModal();
-            });
-        });
-    };
-
     // Function to reset modal fields
     const resetModal = () => {
         setCustomerBalance(0);
@@ -250,71 +192,159 @@ const DeliveryNoteDetails = () => {
         setSelectedOrderId(null);
         setShowStockModal1(false); // Close modal
     };
+    const handlePayment = async () => {
+        try {
+            let CustBalance = parseFloat(CustomerBalance) || 0;
+            let DrivBalance = parseFloat(DriverBalance) || 0;
+            const orderId = selectedOrderId;
 
+            // Customer balance confirmation
+            if (CustBalance !== 0) {
+                const result = await Swal.fire({
+                    title: "<strong>Customer <u>Balance</u></strong>",
+                    icon: "info",
+                    html: `There is <b>Rs.${CustBalance}</b> balance by customer.`,
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: "👍 Pass!",
+                    cancelButtonText: "👎",
+                });
+
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    CustBalance = 0;
+                }
+            }
+
+            // Driver balance confirmation
+            if (DrivBalance !== 0) {
+                const result = await Swal.fire({
+                    title: "<strong>Driver <u>Balance</u></strong>",
+                    icon: "info",
+                    html: `There is <b>Rs.${DrivBalance}</b> balance by driver.`,
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: "👍 Pass!",
+                    cancelButtonText: "👎",
+                });
+
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    DrivBalance = 0;
+                }
+            }
+
+            // ✅ Construct payment data
+            const paymentData = {
+                orderid: orderId,
+                payment: parseFloat(selectedBalance) || 0,
+                driver: deliveryNote?.driverName || "",
+                driverId: deliveryNote?.devID || "",
+                RPayment: parseFloat(Rpayment) || 0,
+                driverbalance: DrivBalance,
+                customerbalance: CustBalance,
+                profitOrLoss: CustomerBalance - CustBalance,
+            };
+
+            console.log("✅ Payment Data Saved in State:", paymentData);
+
+            // ✅ Save payment data to state (triggers useEffect)
+            setPayment(paymentData);
+
+        } catch (error) {
+            console.error("❌ Payment Handling Error:", error);
+            toast.error("An error occurred while processing payment.");
+        }
+    };
+    useEffect(() => {
+        if (payment && payment.orderid) {
+            const index = orders.findIndex(o => o.OrID === payment.orderid);
+            if (index !== -1) {
+                updateOrder(payment.orderid, index);
+            }
+        }
+    }, [payment]); // ✅ Runs when `payment` updates
 
     const updateOrder = async (orderId, index) => {
         try {
-            const order = orders[index];
+            const order = orders?.[index];
+
+            if (!order) {
+                toast.error("Order not found!");
+                return;
+            }
+
+            if (!payment) {
+                toast.error("Payment details are missing!");
+                console.error("❌ No payment data found in state.");
+                return;
+            }
 
             const orderPayment = {
                 orderid: order.OrID,
-                payment: payment?.payment || 0,
-                driver: payment?.driver || "",
-                RPayment: payment?.RPayment || 0,
-                driverbalance: payment?.driverbalance || 0,
-                customerbalance: payment?.customerbalance || 0,
-                profitOrLoss: payment?.profitOrLoss,
+                payment: payment.payment ?? 0,
+                driver: payment.driver ?? "",
+                driverId: payment.driverId ?? "",
+                RPayment: payment.RPayment ?? 0,
+                driverbalance: payment.driverbalance ?? 0,
+                customerbalance: payment.customerbalance ?? 0,
+                profitOrLoss: payment.profitOrLoss ?? 0,
             };
+
+            console.log("🚀 Order Payment Data:", orderPayment);
 
             const updatedOrder = {
                 orderId: order.OrID,
-                driver: deliveryNote.driverName,
-                driverId: deliveryNote.devID,
-                deliveryDate: deliveryNote.date,
-                orderStatus: order.orderStatus,
-                deliveryStatus: order.deliveryStatus,
-                reason: reasons[order.OrID]?.reason || "N/A",
-                customReason: reasons[order.OrID]?.customReason || null,
+                driver: deliveryNote?.driverName || "",
+                driverId: deliveryNote?.devID || "",
+                deliveryDate: deliveryNote?.date || "",
+                orderStatus: order?.orderStatus || "",
+                deliveryStatus: order?.deliveryStatus || "",
+                reason: reasons?.[order.OrID]?.reason || "N/A",
+                customReason: reasons?.[order.OrID]?.customReason || null,
                 rescheduledDate: selectedDeliveryDate || null,
-                returnedItems: order.orderStatus === "Returned"
-                    ? (selectedItems[order.OrID]?.map(itemKey => {
+                issuedItems: Array.isArray(order?.issuedItems) ? order.issuedItems : [],
+
+                returnedItems:
+                    order?.orderStatus === "Returned"
+                        ? selectedItems?.[order.OrID]?.map(itemKey => {
                         const [itemId, stockId] = itemKey.split("-");
-                        const itemStatus = selectedItemStatus[itemKey] || "Available";
-                        return { itemId, stockId, status: itemStatus };
-                    }) || [])
-                    : [],
-                cancelledItems: order.orderStatus === "Cancelled"
-                    ? (selectedItems[order.OrID]?.map(itemKey => {
+                        return { itemId, stockId, status: selectedItemStatus?.[itemKey] || "Available" };
+                    }) || []
+                        : [],
+
+                cancelledItems:
+                    order?.orderStatus === "Cancelled"
+                        ? selectedItems?.[order.OrID]?.map(itemKey => {
                         const [itemId, stockId] = itemKey.split("-");
-                        const itemStatus = selectedItemStatus[itemKey] || "Available";
-                        return { itemId, stockId, status: itemStatus };
-                    }) || [])
-                    : [],
+                        return { itemId, stockId, status: selectedItemStatus?.[itemKey] || "Available" };
+                    }) || []
+                        : [],
+
                 paymentDetails: orderPayment,
             };
 
+            console.log("📦 Updated Order Data:", updatedOrder);
+
+            // ✅ Send request to update order
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-payment`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(updatedOrder),
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
-                toast.success("Order updated successfully!");
-                resetModal(); // 🛑 Clear modal after successful update
-            } else {
-                toast.error(data.message || "Error updating order.");
+            if (!response.ok) {
+                throw new Error(`HTTP Error! Status: ${response.status}`);
             }
+
+            await response.json();
+            toast.success("Order updated successfully!");
+            resetModal();
+            fetchDeliveryNote();
+
         } catch (error) {
+            console.error("❌ Update Order Error:", error);
             toast.error("An unexpected error occurred while updating the order.");
-            console.error("Update Order Error:", error);
         }
     };
-
 
     const setDate = (e) => {
         const routedate = e.target.value;
@@ -491,13 +521,13 @@ const DeliveryNoteDetails = () => {
                                                         )}
 
                                                         {/* Update Order Button */}
-                                                        {isEditing && (
-                                                            <div className="text-center mt-3">
-                                                                <Button color="primary" onClick={() => updateOrder(order.OrID, index)}>
-                                                                    Update Order
-                                                                </Button>
-                                                            </div>
-                                                        )}
+                                                        {/*{isEditing && (*/}
+                                                        {/*    <div className="text-center mt-3">*/}
+                                                        {/*        <Button color="primary" onClick={() => updateOrder(order.OrID, index)}>*/}
+                                                        {/*            Update Order*/}
+                                                        {/*        </Button>*/}
+                                                        {/*    </div>*/}
+                                                        {/*)}*/}
                                                     </div>
                                                 ))}
                                             </div>
