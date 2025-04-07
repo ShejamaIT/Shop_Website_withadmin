@@ -564,7 +564,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 <Label className="fw-bold">Special Note</Label><Input type="textarea" name="specialNote" onChange={handleChange}></Input>
                             </FormGroup>
                         </div>
-
                         <div className="order-details">
                             <h5 className="text-center underline">Delivery Details</h5>
                             <hr />
