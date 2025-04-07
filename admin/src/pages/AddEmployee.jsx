@@ -10,6 +10,7 @@ const AddEmployee = ({ onAddEmployee }) => {
         nic: "",
         dob: "",
         contact: "",
+        recruitmentDate: "",
         job: "",
         basic: "",
         type: "",
@@ -40,6 +41,7 @@ const AddEmployee = ({ onAddEmployee }) => {
                 nic: formData.nic,
                 dob: formData.dob,
                 contact: formData.contact,
+                recruitmentDate : formData.recruitmentDate,
                 job: formData.job,
                 basic: formData.basic,
                 type : formData.type,
@@ -83,6 +85,7 @@ const AddEmployee = ({ onAddEmployee }) => {
             nic: "",
             dob: "",
             contact: "",
+            recruitmentDate :"",
             job: "",
             basic: "",
             target: "",
@@ -115,6 +118,10 @@ const AddEmployee = ({ onAddEmployee }) => {
                         <FormGroup>
                             <Label for="contact">Contact</Label>
                             <Input type="text" name="contact" id="contact" value={formData.contact} onChange={handleChange} required />
+                        </FormGroup>
+                        <FormGroup>
+                            <Label for="recruitmentDate">Recruitment Date</Label>
+                            <Input type="date" name="recruitmentDate" id="recruitmentDate" value={formData.recruitmentDate} onChange={handleChange} required />
                         </FormGroup>
                         <FormGroup>
                             <Label for="job">Job Role</Label>

@@ -55,25 +55,11 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 
         // ✅ Insert into `Item` table
         const itemSql = `
-            INSERT INTO Item (I_Id, I_name, descrip, color, material, price, stockQty, bookedQty, availableQty, minQTY, img, img1, img2, img3, warrantyPeriod, mn_Cat, sb_catOne, sb_catTwo)
-            VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        `;
+            INSERT INTO Item (I_Id, I_name, descrip, color, material, price, stockQty, bookedQty,damageQty,reservedQty, availableQty,dispatchedQty, minQTY, img, img1, img2, img3, warrantyPeriod, mn_Cat, sb_catOne, sb_catTwo)
+            VALUES (?, ?, ?, ?, ?, ?, 0, 0,0,0, 0,0, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
         await db.query(itemSql, [
-            I_Id,
-            I_name,
-            descrip,
-            color,
-            material,
-            parsedPrice,
-            minQty,
-            imgBuffer,
-            img1Buffer,
-            img2Buffer,
-            img3Buffer,
-            warrantyPeriod,
-            mainCategoryName,
-            subCatOneName,
-            subCatTwoName
+            I_Id, I_name, descrip, color, material, parsedPrice, minQty, imgBuffer, img1Buffer, img2Buffer, img3Buffer,
+            warrantyPeriod, mainCategoryName, subCatOneName, subCatTwoName
         ]);
 
         // ✅ Insert into `Item_supplier` table
@@ -84,17 +70,8 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
             success: true,
             message: "✅ Item added successfully!",
             data: {
-                I_Id,
-                I_name,
-                descrip,
-                color,
-                material,
-                price: parsedPrice,
-                warrantyPeriod,
-                cost: parsedCost,
-                mn_Cat: mainCategoryName,
-                sb_catOne: subCatOneName,
-                sb_catTwo: subCatTwoName
+                I_Id, I_name, descrip, color, material, price: parsedPrice, warrantyPeriod,
+                cost: parsedCost, mn_Cat: mainCategoryName, sb_catOne: subCatOneName, sb_catTwo: subCatTwoName
             }
         });
     } catch (err) {
@@ -3405,6 +3382,7 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
         for (let i = 0; i < stockCount; i++) {
             const { I_Id, unit_price, quantity } = items[i];
             const totalPrice = parseFloat(unit_price) * Number(quantity);
+            console.log(quantity);
 
             // Check and update unit price in item_supplier table if it doesn't match
             const checkUnitPriceQuery = `SELECT unit_cost FROM item_supplier WHERE I_Id = ? AND s_ID = ?`;
@@ -3455,12 +3433,11 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
         // Generate barcodes for each stock
         for (let i = 0; i < stockCount; i++) {
             const { I_Id, quantity } = stockDetails[i];
+            console.log(quantity);
 
             // Get the last stock ID for this item
             const [lastStockResult] = await db.query(
-                `SELECT MAX(stock_Id) AS lastStockId FROM p_i_detail WHERE I_Id = ?`,
-                [I_Id]
-            );
+                `SELECT MAX(stock_Id) AS lastStockId FROM p_i_detail WHERE I_Id = ?`, [I_Id]);
             lastStockId = lastStockResult[0]?.lastStockId || 0;
 
             // The starting stock ID for this item
@@ -3488,11 +3465,13 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
 
                 // Insert barcode into p_i_detail table
                 await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", ""]);
-                await db.query(
-                    `UPDATE Item SET stockQty = stockQty + ?, availableQty = availableQty + ? WHERE I_Id = ?`,
-                    [quantity, quantity, I_Id]
-                );
             }
+
+            // Update stockQty and availableQty correctly (only once per item)
+            await db.query(
+                `UPDATE Item SET stockQty = stockQty + ?, availableQty = availableQty + ? WHERE I_Id = ?`,
+                [quantity, quantity, I_Id]
+            );
 
             // After inserting barcodes, store the stock range in the correct format
             const stockRange = `${startStockId}-${lastStockId}`; // Ensure the range is in correct format
@@ -4429,38 +4408,80 @@ router.put("/change-quantity", async (req, res) => {
     }
 });
 
-// save new stock in item update stock
+//Get stock details by sending itemids
 router.post("/get-stock-details", async (req, res) => {
     try {
-        // Ensure req.body is an array
         if (!Array.isArray(req.body) || req.body.length === 0) {
             return res.status(400).json({ error: "Invalid request. Provide an array of item IDs." });
         }
 
-        const itemIds = req.body.map(id => id.trim()); // Trim whitespace
+        const itemIds = req.body
+            .map(id => String(id).trim())
+            .filter(id => id !== "" && id !== "null" && id !== "undefined");
 
-        // Construct dynamic SQL query with placeholders
+        if (itemIds.length === 0) {
+            return res.status(400).json({ error: "No valid item IDs after trimming." });
+        }
+
+        console.log("Fetching stock details for:", itemIds);
+
         const placeholders = itemIds.map(() => "?").join(", ");
         const sql = `
-            SELECT * FROM p_i_detail
+            SELECT pid_Id, pc_Id, I_Id, stock_Id
+            FROM p_i_detail
             WHERE I_Id IN (${placeholders})
               AND status = 'Available'
         `;
 
-        // Execute query
         const [results] = await db.query(sql, itemIds);
+        console.log("Results:", results);
 
         if (results.length === 0) {
             return res.status(404).json({
-                message: "No stock details found for the provided item IDs",
-                itemIds: itemIds,
+                message: "No stock details found for the provided item IDs.",
                 stockDetails: []
             });
         }
 
         return res.status(200).json({
-            message: "Stock details retrieved successfully",
-            itemIds: itemIds,
+            message: "Stock details retrieved successfully.",
+            stockDetails: results
+        });
+
+    } catch (error) {
+        console.error("Error fetching stock details:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// get stock details by sending item id
+router.post("/get-stock-details-one", async (req, res) => {
+    try {
+        const { itemId } = req.body;
+
+        // 🛑 Validate input
+        if (!itemId || typeof itemId !== "string" || itemId.trim() === "") {
+            return res.status(400).json({ error: "Invalid request. 'itemId' is required and must be a non-empty string." });
+        }
+
+        const trimmedId = itemId.trim();
+        const sql = `
+            SELECT pid_Id, pc_Id, I_Id, stock_Id
+            FROM p_i_detail
+            WHERE I_Id = ?
+              AND status = 'Available'
+        `;
+
+        const [results] = await db.query(sql, [trimmedId]);
+        if (results.length === 0) {
+            return res.status(404).json({
+                message: "No stock details found for the provided item ID.",
+                stockDetails: []
+            });
+        }
+
+        return res.status(200).json({
+            message: "Stock details retrieved successfully.",
             stockDetails: results
         });
 
@@ -4589,10 +4610,9 @@ router.post("/issued-items", async (req, res) => {
         );
 
         for (const item of orderItems) {
+            console.log(item.qty, item.qty, item.I_Id);
             await db.query(
-                `UPDATE Item
-                 SET stockQty = stockQty - ?, availableQty = availableQty - ?
-                 WHERE I_Id = ?`,
+                `UPDATE Item SET bookedQty = bookedQty - ?, dispatchedQty = dispatchedQty + ? WHERE I_Id = ?`,
                 [item.qty, item.qty, item.I_Id]
             );
         }
@@ -4602,6 +4622,38 @@ router.post("/issued-items", async (req, res) => {
         await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
 
         return res.status(200).json({ success: true, message: "Order updated successfully" });
+
+    } catch (error) {
+        console.error("Error updating order:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
+// Special Reserved
+router.post("/special-reserved", async (req, res) => {
+    const { orID, selectedItems } = req.body;
+
+    if (!orID || !selectedItems || selectedItems.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    try {
+
+        // 1. Update p_i_detail table (Mark selected items as issued)
+        for (const item of selectedItems) {
+            await db.query(
+                `UPDATE p_i_detail
+                 SET status = 'Reserved', orID = ?, datetime = NOW()
+                 WHERE pid_Id = ?`,
+                [orID, item.pid_Id]
+            );
+            await db.query(
+                `UPDATE Item SET bookedQty = bookedQty - 1, reservedQty = reservedQty + 1 WHERE I_Id = ?`,
+                [item.I_Id]
+            );
+        }
+
+        return res.status(200).json({ success: true, message: "Updated successfully" });
 
     } catch (error) {
         console.error("Error updating order:", error.message);
@@ -4681,9 +4733,9 @@ router.post("/delivery-dates", async (req, res) => {
 // Save new employee and saleteam
 router.post("/employees", async (req, res) => {
     try {
-        const { name, address, nic, dob, contact, job, basic, orderTarget , issuedTarget ,type } = req.body;
+        const { name, address, nic, dob, contact, recruitmentDate, job, basic, orderTarget , issuedTarget ,type } = req.body;
 
-        if (!name || !address || !nic || !dob || !contact || !job || !basic ) {
+        if (!name || !address || !nic || !dob || !contact || !job || !basic || !recruitmentDate ) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required except target and currentRate (only for Sales)."
@@ -4692,8 +4744,8 @@ router.post("/employees", async (req, res) => {
 
         const E_Id = await generateNewId("Employee", "E_Id", "E"); // Generate new Employee ID
 
-        const sql = `INSERT INTO Employee (E_Id, name, address, nic, dob, contact, job, basic,type) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)`;
-        await db.query(sql, [E_Id, name, address, nic, dob, contact, job, basic,type]);
+        const sql = `INSERT INTO Employee (E_Id, name, address, nic, dob, contact,recruitmentDate, job, basic,type) VALUES (?, ?,?, ?, ?, ?, ?, ?, ?,?)`;
+        await db.query(sql, [E_Id, name, address, nic, dob, contact,recruitmentDate, job, basic,type]);
 
         // If job is Sales, insert into sales_team table
         let Data = null;
@@ -5116,6 +5168,8 @@ router.post("/delivery-payment", async (req, res) => {
         // Calculate advance and balance
         let advance1 = Loss !== 0 ? previousAdvance + (receivedPayment + Loss) : previousAdvance + receivedPayment;
         let balance1 = Math.max(0, totalAmount - advance1);
+        let saleOut = Number(advance1) - Number(deliveryCharge);
+        console.log(advance1,deliveryCharge,saleOut);
 
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
@@ -5176,6 +5230,31 @@ router.post("/delivery-payment", async (req, res) => {
                 "UPDATE delivery SET delivery_Date = ?, status = ? ,driverBalance =?, devID=? WHERE dv_id = ?",
                 [deliveryDate, deliveryStatus,DrivBalance,driverId, dv_id]
             );
+        }
+
+        // Process issued items (dispatched => issued)
+        if (issuedItems && Array.isArray(issuedItems)) {
+            for (const item of issuedItems) {
+                if (!item.I_Id || !item.stock_Id) continue;
+                console.log(item);
+                console.log(item.itemId);
+
+                const [save1] =  await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
+                    ["Issued", item.I_Id, item.stock_Id]);
+
+                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
+                    [item.I_Id, item.stock_Id]);
+
+                const [save] =  await db.query("UPDATE Item SET stockQty = stockQty - 1, dispatchedQty = dispatchedQty - 1 WHERE I_Id = ?",
+                    [item.itemId]);
+                console.log(save);
+
+                const srdId = srdData?.[0]?.pid_Id || null;
+                if (srdId !== null) {
+                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
+                        ["Issued", srdId, orderId]);
+                }
+            }
         }
 
         // Process returned items
@@ -5244,25 +5323,6 @@ router.post("/delivery-payment", async (req, res) => {
             }
         }
 
-        // Process issued items (dispatched => issued)
-        if (issuedItems && Array.isArray(issuedItems)) {
-            for (const item of issuedItems) {
-                if (!item.I_Id || !item.stock_Id) continue;
-
-                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
-                    ["Issued", item.I_Id, item.stock_Id]);
-
-                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
-                    [item.I_Id, item.stock_Id]);
-
-                const srdId = srdData?.[0]?.pid_Id || null;
-                if (srdId !== null) {
-                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
-                        ["Issued", srdId, orderId]);
-                }
-            }
-        }
-
         // Update balance in delivery note orders
         await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
 
@@ -5271,10 +5331,15 @@ router.post("/delivery-payment", async (req, res) => {
             await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
             await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
         }
+        // Fetch delivery details
+        const [orStatus] = await db.query("SELECT orStatus FROM Orders WHERE OrID = ?", [orderId]);
+        const o_Status = orStatus?.[0]?.orStatus || null;
 
         // Update sales team records only when order status is "Issued"
-        if (orderStatus === "Issued") {
-            await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
+        if (o_Status === "Issued") {
+            console.log("pass");
+            console.log(saleOut , stID);
+            await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [saleOut , stID]);
         }
 
         // Insert loss profit if applicable

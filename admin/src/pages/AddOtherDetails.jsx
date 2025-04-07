@@ -46,6 +46,36 @@ const AddOtherDetails = () => {
         }
     };
 
+    const handleAddCategory = async () => {
+        if (!catname.Catname.trim()) {
+            toast.error("Category name is required.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/category", {  // Ensure this matches your API route
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ Catname: catname.Catname }),  // Ensure the key matches req.body.Catname
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                toast.success("Category added successfully!");
+                setCatname({ Catname: "" });
+                fetchCategories(); // Refresh the category dropdown
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            toast.error("Failed to add category.");
+        }
+    };
+
+
     const handleSubcategoryChange = (e) => {
         const value = e.target.value;
         console.log(value);
@@ -130,14 +160,9 @@ const AddOtherDetails = () => {
                     <div className="p-3 border rounded shadow-sm">
                         <Label className="fw-bold">Add Category</Label>
                         <Input
-                            type="text"
-                            placeholder="Enter category name"
-                            className="mb-2"
-                            name="Catname"
-                            value={catname.Catname}
-                            onChange={(e) => setCatname({ Catname: e.target.value })}
+                            type="text" placeholder="Enter category name" className="mb-2" name="Catname" value={catname.Catname} onChange={(e) => setCatname({ Catname: e.target.value })}
                         />
-                        <Button color="primary" onClick={() => toast.success("Category added!")}>
+                        <Button color="primary" onClick={handleAddCategory}>
                             Add Category
                         </Button>
                     </div>
@@ -146,13 +171,7 @@ const AddOtherDetails = () => {
                     <div className="p-3 border rounded shadow-sm">
                         <Label className="fw-bold">Select Category</Label>
                         <Input
-                            type="select"
-                            className="mb-2"
-                            name="Ca_Id"
-                            id="Ca_Id"
-                            value={formData.Ca_Id}
-                            onChange={handleCategoryChange}
-                            required
+                            type="select" className="mb-2" name="Ca_Id" id="Ca_Id" value={formData.Ca_Id} onChange={handleCategoryChange} required
                         >
                             <option value="">Select Category</option>
                             {categories.map((cat) => (
@@ -164,11 +183,7 @@ const AddOtherDetails = () => {
 
                         <Label className="fw-bold">Add Sub-Category One</Label>
                         <Input
-                            type="select"
-                            className="mb-2"
-                            name="sub_one"
-                            value={selectedSubcategory}
-                            onChange={handleSubcategoryChange}
+                            type="select" className="mb-2" name="sub_one" value={selectedSubcategory} onChange={handleSubcategoryChange}
                         >
                             <option value="">Select Subcategory</option>
                             {subcategories.map((sub) => (
@@ -180,39 +195,20 @@ const AddOtherDetails = () => {
 
                         {/* Show input field if "New" is selected */}
                         {selectedSubcategory === "New" && (
-                            <Input
-                                type="text"
-                                placeholder="Enter new sub-category"
-                                className="mb-2"
-                                name="sub_one"
-                                value={formData.sub_one}
-                                onChange={handleChange}
+                            <Input type="text" placeholder="Enter new sub-category" className="mb-2" name="sub_one" value={formData.sub_one} onChange={handleChange}
                             />
                         )}
 
                         <Input
-                            type="file"
-                            accept="image/*"
-                            className="mb-2"
-                            name="subcatone_img"
-                            onChange={handleFileChange}
+                            type="file" accept="image/*" className="mb-2" name="subcatone_img" onChange={handleFileChange}
                         />
 
                         <Label className="fw-bold">Add Sub-Category Two</Label>
                         <Input
-                            type="text"
-                            placeholder="Enter second sub-category"
-                            className="mb-2"
-                            name="sub_two"
-                            value={formData.sub_two}
-                            onChange={handleChange}
+                            type="text" placeholder="Enter second sub-category" className="mb-2" name="sub_two" value={formData.sub_two} onChange={handleChange}
                         />
                         <Input
-                            type="file"
-                            accept="image/*"
-                            className="mb-2"
-                            name="subcattwo_img"
-                            onChange={handleFileChange}
+                            type="file" accept="image/*" className="mb-2" name="subcattwo_img" onChange={handleFileChange}
                         />
 
                         <Button color="success" onClick={handleSubmitSubCategory}>

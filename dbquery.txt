@@ -37,6 +37,7 @@ CREATE TABLE Item(
       bookedQty INT,
       damageQty INT,
       reservedQty INT,
+      dispatchedQty INT,
       availableQty INT,
       minQTY INT,
       img LONGBLOB NOT NULL,
@@ -64,6 +65,7 @@ CREATE TABLE Employee(
       nic VARCHAR(12),
       dob DATE,
       contact VARCHAR(15),
+      recruitmentDate DATE,
       job VARCHAR(15),
       basic DOUBLE,
       type VARCHAR(20)
@@ -361,16 +363,7 @@ CREATE TABLE delivery_note_orders(
     CONSTRAINT FOREIGN KEY (delNoID) REFERENCES delivery_note (delNoID)
                                  ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE ST_order_review(
-    stID VARCHAR(25),
-    year int,
-    month VARCHAR(15),
-    totalOrder DOUBLE,
-    totalIssued DOUBLE,
-        PRIMARY KEY (stID, year,month),
-        CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
-                                ON DELETE CASCADE ON UPDATE CASCADE
-);
+
 CREATE TABLE Special_Reservation(
     srID INT AUTO_INCREMENT PRIMARY KEY,
     orID VARCHAR(25),
@@ -391,3 +384,16 @@ CREATE TABLE Damage_item(
 );
 
 
+
+
+
+CREATE TABLE ST_order_review(
+    stID VARCHAR(25),
+    year int,
+    month VARCHAR(15),
+    totalOrder DOUBLE,
+    totalIssued DOUBLE,
+        PRIMARY KEY (stID, year,month),
+        CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
+                                ON DELETE CASCADE ON UPDATE CASCADE
+);
