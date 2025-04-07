@@ -248,7 +248,7 @@ router.post("/orders", async (req, res) => {
 
         // **Insert Order Details (Bulk Insert)**
         const orderDetailValues = items.map(item => [
-            orID, item.I_Id, item.qty, parseFloat(item.price)
+            orID, item.I_Id, item.qty, parseFloat(item.price * item.qty)
         ]);
 
         const orderDetailQuery = `
@@ -4638,8 +4638,45 @@ router.post("/special-reserved", async (req, res) => {
     }
 
     try {
+        // Group items by I_Id and count how many times each appears in selectedItems
+        const itemCounts = {};
+        for (const item of selectedItems) {
+            itemCounts[item.I_Id] = (itemCounts[item.I_Id] || 0) + 1;
+        }
 
-        // 1. Update p_i_detail table (Mark selected items as issued)
+        for (const [I_Id, newReserveCount] of Object.entries(itemCounts)) {
+            // Get total qty allowed from Order_Detail
+            const [orderDetails] = await db.query(
+                `SELECT qty FROM Order_Detail WHERE orID = ? AND I_Id = ?`,
+                [orID, I_Id]
+            );
+
+            if (orderDetails.length === 0) {
+                return res.status(400).json({ success: false, message: `Item ${I_Id} not found in order` });
+            }
+
+            const allowedQty = orderDetails[0].qty;
+
+            // Get current reserved count in p_i_detail for this orID and I_Id
+            const [reservedCountData] = await db.query(
+                `SELECT COUNT(*) AS reservedCount
+                 FROM p_i_detail
+                 WHERE orID = ? AND I_Id = ? AND status = 'Reserved'`,
+                [orID, I_Id]
+            );
+
+            const reservedCount = reservedCountData[0].reservedCount || 0;
+            const totalAfterReserve = reservedCount + newReserveCount;
+
+            if (totalAfterReserve > allowedQty) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Cannot reserve more than ordered for Item ${I_Id}. Ordered: ${allowedQty}, Already Reserved: ${reservedCount}, Trying to Reserve: ${newReserveCount}`
+                });
+            }
+        }
+
+        // Passed checks - now reserve items
         for (const item of selectedItems) {
             await db.query(
                 `UPDATE p_i_detail
@@ -4648,18 +4685,22 @@ router.post("/special-reserved", async (req, res) => {
                 [orID, item.pid_Id]
             );
             await db.query(
-                `UPDATE Item SET bookedQty = bookedQty - 1, reservedQty = reservedQty + 1 WHERE I_Id = ?`,
+                `UPDATE Item
+                 SET bookedQty = bookedQty - 1,
+                     reservedQty = reservedQty + 1
+                 WHERE I_Id = ?`,
                 [item.I_Id]
             );
         }
 
-        return res.status(200).json({ success: true, message: "Updated successfully" });
+        return res.status(200).json({ success: true, message: "Items reserved successfully" });
 
     } catch (error) {
-        console.error("Error updating order:", error.message);
+        console.error("Error updating reservation:", error.message);
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
 
 // Save new Delivery Rate
 router.post("/delivery-rates", async (req, res) => {

@@ -12,7 +12,7 @@ import FinalInvoice from "./FinalInvoice";
 import ReceiptView from "./ReceiptView";
 const CompleteOrderDetails = () => {
     const { id } = useParams();
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
@@ -26,10 +26,14 @@ const CompleteOrderDetails = () => {
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
     const [showStockModal, setShowStockModal] = useState(false);
+    const [showStockModal1, setShowStockModal1] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [items, setItems] = useState([]); // State to store supplier data
     const [filteredItems, setFilteredItems] = useState([]);
     const [selectedItems, setSelectedItems] = useState([]);
+    const [selectedItem1, setSelectedItem1] = useState(null);
+    const [isLoading, setIsLoading] = useState(false); 
 
     useEffect(() => {
         fetchOrder();
@@ -47,6 +51,40 @@ const CompleteOrderDetails = () => {
         };
         fetchItems();
     }, []);
+
+    useEffect(() => {
+            const fetchItemStockDetails = async () => {
+                if (!selectedItem1 || !showStockModal1) return;
+                try {
+                    setIsLoading(true);
+                    const response = await fetch("http://localhost:5001/api/admin/main/get-stock-details-one", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ itemId: selectedItem1.itemId }) // 👈 only one ID now
+                    });
+        
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || "Failed to fetch stock details");
+                    }
+        
+                    const data = await response.json();
+                    if (data.stockDetails && data.stockDetails.length > 0) {
+                        setItems(data.stockDetails);
+                    } else {
+                        setItems([]);
+                        toast.error("No stock details found for this item.");
+                    }
+                } catch (error) {
+                    toast.error("Error loading stock details: " + error.message);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+        
+            fetchItemStockDetails();
+    }, [selectedItem1, showStockModal1]);
+
     const calculateBalance = (total,advance) => {
         return Number(total) - Number(advance);
     }
@@ -55,14 +93,12 @@ const CompleteOrderDetails = () => {
             ? formData.items.reduce((total, item) => total + (item.quantity * item.unitPrice || 0), 0)
             : 0;
     };
-
     const handleRemoveItem = (index) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
             items: prevFormData.items.filter((_, i) => i !== index),
         }));
     };
-
     const fetchOrder = async () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`);
@@ -87,14 +123,12 @@ const CompleteOrderDetails = () => {
             setLoading(false);
         }
     };
-
     const calculateTotal = () => {
         const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
         const delivery = Number(formData.deliveryCharge || 0);
         const discount = Number(formData.discount || 0);
         return itemTotal + delivery - discount;
     };
-
     const handleChange = (e, index) => {
         const { name, value, type, checked } = e.target;
 
@@ -136,7 +170,50 @@ const CompleteOrderDetails = () => {
             return updatedFormData;
         });
     };
-
+    const passReservedItem = async (selectedItems) => {
+            if (!selectedItems || selectedItems.length === 0) {
+                toast.error("No items selected to reserve.");
+                return;
+            }
+            
+            try {
+                const payload = {
+                    orID: formData?.orderId || order?.orderId || "", // or however you store order ID
+                    selectedItems
+                };
+        
+                const response = await fetch("http://localhost:5001/api/admin/main/special-reserved", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+        
+                const result = await response.json();
+        
+                if (!response.ok) {
+                    throw new Error(result.message || "Failed to reserve items.");
+                }
+        
+                toast.success("Items reserved successfully.");
+                setSelectedItem(selectedItems);  // still keeping your state update if needed
+                setShowStockModal(false);
+        
+            } catch (error) {
+                console.error("Reserve error:", error);
+                toast.error("Error reserving items: " + error.message);
+            }
+    };
+    const handleSearchChange1 = (e) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+    
+        const filtered = items.filter((item) =>
+            item.I_Id.toLowerCase().includes(term.toLowerCase())
+        );
+    
+        setFilteredItems(filtered);
+        setDropdownOpen(term.trim() !== "" && filtered.length > 0);
+    };
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
         const updatedItemTotal = calculateItemTotal();
@@ -209,7 +286,6 @@ const CompleteOrderDetails = () => {
             toast.error(`Error: ${err.message}`);
         }
     };
-
     // ✅ Improved change detection functions
     const hasGeneralDetailsChanged = (updatedData) => {
         return updatedData.phoneNumber !== order.phoneNumber ||
@@ -256,7 +332,6 @@ const CompleteOrderDetails = () => {
         setSelectedOrder(order);
         setShowModal2(true);
     };
-
     const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
         const updatedItem = {
@@ -266,7 +341,6 @@ const CompleteOrderDetails = () => {
         setSelectedItem(updatedItem);
         setShowModal(true);
     };
-
     const handleSubmit2 = async (formData) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
@@ -297,7 +371,6 @@ const CompleteOrderDetails = () => {
             alert(`Error updating quantity: ${error.message}`);
         }
     }
-
     const handleSubmit3 = async (formData) => {
         setShowModal2(false);
         const updatedData = {
@@ -344,7 +417,6 @@ const CompleteOrderDetails = () => {
             // Handle network error, show error message to the user
         }
     };
-
     const handleSubmit = async (formData) => {
         // Destructure the necessary fields from formData
         const { orID,
@@ -420,12 +492,11 @@ const CompleteOrderDetails = () => {
     const handleRemoveItem1 = (itemId) => {
         setSelectedItems((prevItems) => prevItems.filter((item) => item.I_Id !== itemId));
     };
-    const passReservedItem = (selectedItems) => {
+    const passAddedItem = (selectedItems) => {
         setSelectedItem(selectedItems);
         handleAddItem(selectedItems);
         setShowStockModal(false);
     };
-
     const handleAddItem = (selectedItems) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -446,7 +517,6 @@ const CompleteOrderDetails = () => {
             ],
         }));
     };
-
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
@@ -626,6 +696,7 @@ const CompleteOrderDetails = () => {
                                                         </Label>
                                                         <Button color="danger" className="ms-2" onClick={() => handleRemoveItem(index, item)}>Remove</Button>
                                                         <Button color="secondary" className="ms-2" onClick={() => handleEditClick2(item, order)}>Change Qty</Button>
+                                                        <Button color="primary" className="ms-2" onClick={() => {setSelectedItem1(item);  setShowStockModal1(true);}}>Reserved</Button>
                                                     </FormGroup>
 
                                                 )}
@@ -726,10 +797,53 @@ const CompleteOrderDetails = () => {
                                     ))}
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button color="primary" onClick={() => passReservedItem(selectedItems)}>Pass</Button>
+                                    <Button color="primary" onClick={() => passAddedItem(selectedItems)}>Pass</Button>
                                     <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
                                 </ModalFooter>
                             </Modal>
+                            {/* Stock Modal */}
+                                <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>
+                                    <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Scan Stock</ModalHeader>
+                                        <ModalBody>
+                                            <FormGroup style={{ position: "relative" }}>
+                                                <Label>Items ID</Label>
+                                                <Input type="text" value={searchTerm} onChange={handleSearchChange1} placeholder="Search for item..." />
+                                                    {dropdownOpen && (
+                                                        <div className="dropdown" style={{ position: "absolute", zIndex: 100, backgroundColor: "white", border: "1px solid #ddd", width: "100%" }}>
+                                                            {filteredItems.map((item) => (
+                                                                <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item" style={{ padding: "8px", cursor: "pointer" }}>
+                                                                    {item.I_Id} - {item.stock_Id} - {item.pc_Id}
+                                                                </div>
+                                                            ))}
+                                                         </div>
+                                                    )}
+                                            </FormGroup>
+                                                        
+                                            <Label>Issued Items</Label>
+                                            <table className="selected-items-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Item ID</th>
+                                                        <th>Batch ID</th>
+                                                        <th>Stock ID</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {selectedItems.map((item, index) => (
+                                                        <tr key={index}>
+                                                            <td>{item.I_Id}</td>
+                                                            <td>{item.pc_Id}</td>
+                                                            <td>{item.stock_Id}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </ModalBody>
+                                        <ModalFooter>
+                                            <Button color="primary" onClick={() => passReservedItem(selectedItems)}>Pass</Button>
+                                            <Button color="secondary" onClick={() => setShowStockModal1(false)}>Cancel</Button>
+                                        </ModalFooter>
+                                    </Modal>
 
                             {showModal1 && selectedOrder && (
                                 <BillInvoice

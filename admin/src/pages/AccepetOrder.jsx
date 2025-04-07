@@ -439,8 +439,7 @@ const OrderDetails = () => {
             toast.error("No items selected to reserve.");
             return;
         }
-        console.log(order.orderId, order.orID, order.orId , formData.orID , formData.orId , formData.orderId);
-    
+        
         try {
             const payload = {
                 orID: formData?.orderId || order?.orderId || "", // or however you store order ID
@@ -461,7 +460,7 @@ const OrderDetails = () => {
     
             toast.success("Items reserved successfully.");
             setSelectedItem(selectedItems);  // still keeping your state update if needed
-            setShowStockModal(false);
+            setShowStockModal1(false);
     
         } catch (error) {
             console.error("Reserve error:", error);
@@ -752,36 +751,7 @@ const OrderDetails = () => {
                                     <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
                                 </ModalFooter>
                             </Modal>
-                            {/* <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>
-                                <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Reserved Item</ModalHeader>
-                                <ModalBody>
-                                    <FormGroup style={{ position: "relative" }}>
-                                        <Label>Items ID</Label>
-                                        <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
-                                        {searchTerm && filteredItems.length > 0 && (
-                                            <div className="dropdown">
-                                                {filteredItems.map((item) => (
-                                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
-                                                        {item.I_name} - Rs.{item.price}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </FormGroup>
-                                    <Label>Selected Items</Label>
-                                    {selectedItems.map((item) => (
-                                        <Row key={item.I_Id} className="mt-2">
-                                            <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
-                                            <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
-                                            <Col md={2}><Button color="danger" onClick={() => handleRemoveItem1(item.I_Id)}>Remove</Button></Col>
-                                        </Row>
-                                    ))}
-                                </ModalBody>
-                                <ModalFooter>
-                                    <Button color="primary" onClick={() => passReservedItem(selectedItems)}>Pass</Button>
-                                    <Button color="secondary" onClick={() => setShowStockModal1(false)}>Cancel</Button>
-                                </ModalFooter>
-                            </Modal> */}
+                        
                             {/* Stock Modal */}
                                         <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>
                                             <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Scan Stock</ModalHeader>
