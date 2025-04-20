@@ -4518,19 +4518,6 @@ router.post("/special-reserved", async (req, res) => {
     }
 
     try {
-        // ❗ Check if this order already has any reserved items
-        const [existingReserved] = await db.query(
-            `SELECT COUNT(*) AS count FROM p_i_detail WHERE orID = ? AND status = 'Reserved'`,
-            [orID]
-        );
-
-        if (existingReserved[0].count > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `Reservation already exists for order ${orID}. Multiple reservations are not allowed.`
-            });
-        }
-
         // Group items by I_Id and count how many times each appears in selectedItems
         const itemCounts = {};
         for (const item of selectedItems) {
@@ -4569,8 +4556,9 @@ router.post("/special-reserved", async (req, res) => {
             }
         }
 
-        // ✅ Passed checks - now reserve items
+        // Passed checks - now reserve items and insert into Special_Reservation table
         for (const item of selectedItems) {
+            // Update p_i_detail status to 'Reserved'
             await db.query(
                 `UPDATE p_i_detail
                  SET status = 'Reserved', orID = ?, datetime = NOW()
@@ -4578,6 +4566,7 @@ router.post("/special-reserved", async (req, res) => {
                 [orID, item.pid_Id]
             );
 
+            // Update the Item table to adjust reservedQty and bookedQty
             await db.query(
                 `UPDATE Item
                  SET bookedQty = bookedQty - 1,
@@ -4585,15 +4574,23 @@ router.post("/special-reserved", async (req, res) => {
                  WHERE I_Id = ?`,
                 [item.I_Id]
             );
+
+            // Insert into Special_Reservation table
+            await db.query(
+                `INSERT INTO Special_Reservation (orID, pid_Id)
+                 VALUES (?, ?)`,
+                [orID, item.pid_Id]
+            );
         }
 
-        return res.status(200).json({ success: true, message: "Items reserved successfully" });
+        return res.status(200).json({ success: true, message: "Items reserved and Special_Reservation updated successfully" });
 
     } catch (error) {
         console.error("Error updating reservation:", error.message);
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
 
 // Issued order
 router.post("/issued-order", async (req, res) => {
