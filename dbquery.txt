@@ -37,6 +37,7 @@ CREATE TABLE Item(
       bookedQty INT,
       damageQty INT,
       reservedQty INT,
+      dispatchedQty INT,
       availableQty INT,
       minQTY INT,
       img LONGBLOB NOT NULL,
