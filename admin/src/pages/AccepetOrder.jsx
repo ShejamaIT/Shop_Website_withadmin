@@ -413,7 +413,7 @@ const OrderDetails = () => {
                 toast.success("Items reserved successfully", result);
                 setShowStockModal1(false);
             } else {
-                toast.error("Error reserving items:", result.message);
+                toast.error( result.message);
             }
 
         } catch (error) {
