@@ -4429,7 +4429,7 @@ router.put("/change-quantity", async (req, res) => {
     }
 });
 
-// save new stock in item update stock
+// get stock detail by item ids
 router.post("/get-stock-details", async (req, res) => {
     try {
         // Ensure req.body is an array
@@ -4467,6 +4467,131 @@ router.post("/get-stock-details", async (req, res) => {
     } catch (error) {
         console.error("Error fetching stock details:", error);
         return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// get stock detail by item id
+router.post("/get-stock-detail", async (req, res) => {
+    try {
+        const { itemId } = req.body;
+
+        if (!itemId || typeof itemId !== "string") {
+            return res.status(400).json({ error: "Invalid request. 'itemId' must be a non-empty string." });
+        }
+
+        const trimmedItemId = itemId.trim();
+
+        const sql = `
+            SELECT * FROM p_i_detail
+            WHERE I_Id = ?
+              AND status = 'Available'
+        `;
+
+        const [results] = await db.query(sql, [trimmedItemId]);
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                message: "No stock details found for the provided item ID",
+                itemId: trimmedItemId,
+                stockDetails: []
+            });
+        }
+
+        return res.status(200).json({
+            message: "Stock details retrieved successfully",
+            itemId: trimmedItemId,
+            stockDetails: results
+        });
+
+    } catch (error) {
+        console.error("Error fetching stock details:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// Special Reserved
+router.post("/special-reserved", async (req, res) => {
+    const { orID, selectedItems } = req.body;
+
+    if (!orID || !selectedItems || selectedItems.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    try {
+        // ❗ Check if this order already has any reserved items
+        const [existingReserved] = await db.query(
+            `SELECT COUNT(*) AS count FROM p_i_detail WHERE orID = ? AND status = 'Reserved'`,
+            [orID]
+        );
+
+        if (existingReserved[0].count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Reservation already exists for order ${orID}. Multiple reservations are not allowed.`
+            });
+        }
+
+        // Group items by I_Id and count how many times each appears in selectedItems
+        const itemCounts = {};
+        for (const item of selectedItems) {
+            itemCounts[item.I_Id] = (itemCounts[item.I_Id] || 0) + 1;
+        }
+
+        for (const [I_Id, newReserveCount] of Object.entries(itemCounts)) {
+            // Get total qty allowed from Order_Detail
+            const [orderDetails] = await db.query(
+                `SELECT qty FROM Order_Detail WHERE orID = ? AND I_Id = ?`,
+                [orID, I_Id]
+            );
+
+            if (orderDetails.length === 0) {
+                return res.status(400).json({ success: false, message: `Item ${I_Id} not found in order` });
+            }
+
+            const allowedQty = orderDetails[0].qty;
+
+            // Get current reserved count in p_i_detail for this orID and I_Id
+            const [reservedCountData] = await db.query(
+                `SELECT COUNT(*) AS reservedCount
+                 FROM p_i_detail
+                 WHERE orID = ? AND I_Id = ? AND status = 'Reserved'`,
+                [orID, I_Id]
+            );
+
+            const reservedCount = reservedCountData[0].reservedCount || 0;
+            const totalAfterReserve = reservedCount + newReserveCount;
+
+            if (totalAfterReserve > allowedQty) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Cannot reserve more than ordered for Item ${I_Id}. Ordered: ${allowedQty}, Already Reserved: ${reservedCount}, Trying to Reserve: ${newReserveCount}`
+                });
+            }
+        }
+
+        // ✅ Passed checks - now reserve items
+        for (const item of selectedItems) {
+            await db.query(
+                `UPDATE p_i_detail
+                 SET status = 'Reserved', orID = ?, datetime = NOW()
+                 WHERE pid_Id = ?`,
+                [orID, item.pid_Id]
+            );
+
+            await db.query(
+                `UPDATE Item
+                 SET bookedQty = bookedQty - 1,
+                     reservedQty = reservedQty + 1
+                 WHERE I_Id = ?`,
+                [item.I_Id]
+            );
+        }
+
+        return res.status(200).json({ success: true, message: "Items reserved successfully" });
+
+    } catch (error) {
+        console.error("Error updating reservation:", error.message);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
 
