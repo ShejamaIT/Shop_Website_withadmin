@@ -76,52 +76,117 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     useEffect(() => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change
+    // const handleChange = (e) => {
+    //     const { name, value, type, checked } = e.target;
+    //
+    //     setFormData((prev) => ({
+    //         ...prev,
+    //         [name]: type === "checkbox" ? checked : value, // Handle checkbox separately
+    //     }));
+    //
+    //     // Clear delivery price when changing status
+    //     if (name === "dvtype" || name === "dvStatus") {
+    //         setDeliveryPrice(0);
+    //     }
+    //
+    //     if (name === "district") {
+    //         setDeliveryPrice(deliveryRates[value] || 0);
+    //         fetchDeliveryDates(value);
+    //     }
+    //
+    //     if (name === "couponCode") {
+    //         const selectedCoupon = coupons.find((c) => c.coupon_code === value);
+    //         setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
+    //     }
+    //
+    //     // If switching to Direct Delivery, reset district & expectedDate
+    //     if (name === "dvtype" && value === "Direct") {
+    //         setFormData((prev) => ({ ...prev, district: "", expectedDate: "", deliveryCharge: "" }));
+    //     }
+    //
+    //     // If Direct Delivery, use input field value as delivery charge instead of district rates
+    //     if (name === "deliveryCharge" && formData.dvtype === "Direct") {
+    //         setDeliveryPrice(value);
+    //     }
+    //
+    //     // If Expected Date is selected for Direct, check delivery availability
+    //     if (name === "expectedDate" && formData.dvtype === "Direct") {
+    //         checkDeliveryAvailability(value);
+    //     }
+    //
+    //     // If the address change checkbox is unchecked, remove the newAddress field
+    //     if (name === "isAddressChanged" && !checked) {
+    //         setFormData((prev) => ({
+    //             ...prev,
+    //             newAddress: "", // Reset new address
+    //         }));
+    //     }
+    // };
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: type === "checkbox" ? checked : value, // Handle checkbox separately
-        }));
+        setFormData((prev) => {
+            let updatedForm = {
+                ...prev,
+                [name]: type === "checkbox" ? checked : value,
+            };
 
-        // Clear delivery price when changing status
-        if (name === "dvtype" || name === "dvStatus") {
-            setDeliveryPrice(0);
-        }
+            // If switching to Pickup, reset all Delivery-related fields
+            if (name === "dvStatus" && value === "Pickup") {
+                updatedForm = {
+                    ...updatedForm,
+                    dvtype: "",
+                    district: "",
+                    address: "",
+                    isAddressChanged: false,
+                    newAddress: "",
+                    expectedDate: "",
+                    deliveryCharge: "",
+                };
+                setDeliveryPrice(0);
+            }
 
+            // If switching to Direct Delivery, reset some fields
+            if (name === "dvtype" && value === "Direct") {
+                updatedForm = {
+                    ...updatedForm,
+                    district: "",
+                    expectedDate: "",
+                    deliveryCharge: "",
+                };
+            }
+
+            // If Address change is unchecked, clear new address
+            if (name === "isAddressChanged" && !checked) {
+                updatedForm.newAddress = "";
+            }
+
+            return updatedForm;
+        });
+
+        // Handle delivery price updates
         if (name === "district") {
             setDeliveryPrice(deliveryRates[value] || 0);
             fetchDeliveryDates(value);
         }
 
-        if (name === "couponCode") {
-            const selectedCoupon = coupons.find((c) => c.coupon_code === value);
-            setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
-        }
-
-        // If switching to Direct Delivery, reset district & expectedDate
-        if (name === "dvtype" && value === "Direct") {
-            setFormData((prev) => ({ ...prev, district: "", expectedDate: "", deliveryCharge: "" }));
-        }
-
-        // If Direct Delivery, use input field value as delivery charge instead of district rates
+        // If entering Direct delivery charge manually
         if (name === "deliveryCharge" && formData.dvtype === "Direct") {
             setDeliveryPrice(value);
         }
 
-        // If Expected Date is selected for Direct, check delivery availability
+        // Check delivery availability for Direct
         if (name === "expectedDate" && formData.dvtype === "Direct") {
             checkDeliveryAvailability(value);
         }
 
-        // If the address change checkbox is unchecked, remove the newAddress field
-        if (name === "isAddressChanged" && !checked) {
-            setFormData((prev) => ({
-                ...prev,
-                newAddress: "", // Reset new address
-            }));
+        // Handle coupon code
+        if (name === "couponCode") {
+            const selectedCoupon = coupons.find((c) => c.coupon_code === value);
+            setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
         }
     };
+
     const checkDeliveryAvailability = async (date) => {
         try {
             // Mock API call to check delivery availability (Replace with real API)
