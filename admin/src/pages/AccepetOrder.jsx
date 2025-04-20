@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,useRef } from "react";
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import Helmet from "../components/Helmet/Helmet";
@@ -26,6 +26,14 @@ const OrderDetails = () => {
     const [items, setItems] = useState([]); // State to store supplier data
     const [filteredItems, setFilteredItems] = useState([]);
     const [selectedItems, setSelectedItems] = useState([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [itemdetails, setItemDetails] = useState([]);
+    const [selectedItemForReserve, setSelectedItemForReserve] = useState(null);
+    const [showStockModal1, setShowStockModal1] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const debounceTimeout = useRef(null);
+
+
     useEffect(() => {
         fetchOrder();
     }, [id]);
@@ -93,7 +101,6 @@ const OrderDetails = () => {
             items: prevFormData.items.filter((_, i) => i !== index),
         }));
     };
-
 
     const handleChange = (e, index) => {
         const { name, value, type, checked } = e.target;
@@ -358,6 +365,7 @@ const OrderDetails = () => {
         }
         setSearchTerm("");
         setFilteredItems([]);
+        setDropdownOpen(false); // Close dropdown after selection
     };
     const handleQtyChange = (e, itemId) => {
         const value = parseInt(e.target.value) || 1;
@@ -373,6 +381,47 @@ const OrderDetails = () => {
         handleAddItem(selectedItems);
         setShowStockModal(false);
     };
+    const ReservedItem = async (selectedItems) => {
+        if (!selectedItems || selectedItems.length === 0) {
+            console.log("No items selected for reservation");
+            return;
+        }
+        if (!order || !order.orderId) {
+            console.log("Order ID is not available");
+            return;
+        }
+
+        try {
+            const requestData = {
+                orID: order.orderId,  // Order ID from your data
+                selectedItems: selectedItems  // The selected items to be reserved
+            };
+
+            // Call the API to reserve items
+            const response = await fetch("http://localhost:5001/api/admin/main/special-reserved", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            // Parse the response from the server
+            const result = await response.json();
+
+            if (response.ok) {
+                toast.success("Items reserved successfully", result);
+                setShowStockModal1(false);
+            } else {
+                toast.error("Error reserving items:", result.message);
+            }
+
+        } catch (error) {
+            // Handle any errors that occurred during the API call
+            console.error("API call error:", error);
+        }
+    };
+
 
     const handleAddItem = (selectedItems) => {
         setFormData((prevFormData) => ({
@@ -393,6 +442,69 @@ const OrderDetails = () => {
                 })),
             ],
         }));
+    };
+
+    // Fetch stock when modal opens or selectedItemForReserve changes
+    useEffect(() => {
+        if (selectedItemForReserve?.itemId || selectedItemForReserve?.I_Id) {
+            const itemId = selectedItemForReserve.itemId || selectedItemForReserve.I_Id;
+            fetchStockDetails(itemId);
+        }
+        setSearchTerm("");
+        setFilteredItems([]);
+        setDropdownOpen(false);
+    }, [selectedItemForReserve, showStockModal1]);
+
+    const handleSearchChange1 = (e) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+
+        const filtered = itemdetails.filter((item) =>
+            item.I_Id.toString().toLowerCase().includes(term.toLowerCase())
+        );
+        setFilteredItems(filtered);
+        setDropdownOpen(term.trim() !== "" && filtered.length > 0);
+
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
+
+        debounceTimeout.current = setTimeout(() => {
+            const itemId = selectedItemForReserve?.itemId || selectedItemForReserve?.I_Id;
+            fetchStockDetails(itemId);
+        }, 500);
+    };
+
+    const fetchStockDetails = async (itemId) => {
+        console.log(itemId);
+        if (!itemId) {
+            setItemDetails([]);
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const response = await fetch("http://localhost:5001/api/admin/main/get-stock-detail", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ itemId }),
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            const data = await response.json();
+            console.log(data.stockDetails);
+            setItemDetails(data.stockDetails || []);
+            if (!data.stockDetails?.length) {
+                toast.error("No stock details found.");
+            }
+        } catch (error) {
+            toast.error("Error fetching stock: " + error.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     if (loading) return <p>Loading...</p>;
@@ -575,6 +687,7 @@ const OrderDetails = () => {
                                                         </Label>
                                                         <Button color="danger" className="ms-2" onClick={() => handleRemoveItem(index, item)}>Remove</Button>
                                                         <Button color="secondary" className="ms-2" onClick={() => handleEditClick2(item, order)}>Change Qty</Button>
+                                                        <Button color="primary" className="ms-2"  onClick={() => {setSelectedItemForReserve(item);setShowStockModal1(true); }}>Reserved</Button>
                                                     </FormGroup>
 
                                                 )}
@@ -676,6 +789,87 @@ const OrderDetails = () => {
                                     <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
                                 </ModalFooter>
                             </Modal>
+
+                            <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>
+                                <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Special Reserved</ModalHeader>
+                                <ModalBody>
+                                    {selectedItemForReserve && (
+                                        <div className="mb-3">
+                                            <strong>Selected Item ID:</strong>{" "}
+                                            {selectedItemForReserve.itemId || selectedItemForReserve.I_Id || "N/A"}
+                                        </div>
+                                    )}
+
+                                    <FormGroup style={{ position: "relative" }}>
+                                        <Label>Search Item by ID</Label>
+                                        <Input
+                                            type="text"
+                                            value={searchTerm}
+                                            onChange={handleSearchChange1}
+                                            placeholder="Type to search..."
+                                            autoComplete="off"
+                                        />
+                                        {dropdownOpen && filteredItems.length > 0 && (
+                                            <div
+                                                className="dropdown"
+                                                style={{
+                                                    position: "absolute",
+                                                    zIndex: 100,
+                                                    backgroundColor: "white",
+                                                    border: "1px solid #ddd",
+                                                    width: "100%",
+                                                    maxHeight: "200px",
+                                                    overflowY: "auto",
+                                                }}
+                                            >
+                                                {filteredItems.map((item) => (
+                                                    <div
+                                                        key={item.I_Id + item.stock_Id}
+                                                        onClick={() => handleSelectItem(item)}
+                                                        className="dropdown-item"
+                                                        style={{ padding: "8px", cursor: "pointer" }}
+                                                    >
+                                                        {item.I_Id} - {item.pid_Id} - {item.stock_Id}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </FormGroup>
+
+                                    <Label className="mt-3">Selected Items</Label>
+                                    <table className="selected-items-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Item ID</th>
+                                            <th>Batch ID</th>
+                                            <th>Stock ID</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {selectedItems.map((item, index) => (
+                                            <tr key={index}>
+                                                <td>{item.I_Id}</td>
+                                                <td>{item.pid_Id}</td>
+                                                <td>{item.stock_Id}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button
+                                        color="primary"
+                                        onClick={() => ReservedItem(selectedItems, selectedItemForReserve)}
+                                    >
+                                        Pass
+                                    </Button>
+                                    <Button color="secondary" onClick={() => setShowStockModal1(false)}>
+                                        Cancel
+                                    </Button>
+                                </ModalFooter>
+                            </Modal>
+
+
                             {showModal1 && selectedOrder && (
                                 <BillInvoice
                                     selectedOrder={selectedOrder}
