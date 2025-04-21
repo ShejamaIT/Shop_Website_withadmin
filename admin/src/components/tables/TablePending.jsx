@@ -68,7 +68,7 @@ const TablePending = ({ refreshKey }) => {
                         <th>Order Date</th>
                         <th>Order Type</th>
                         <th>Expected Date</th>
-                        <th>Customer </th>
+                        <th>Customer</th>
                         <th>Order Status</th>
                         <th>Delivery Status</th>
                         <th>Total Price</th>

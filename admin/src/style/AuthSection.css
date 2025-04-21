@@ -21,25 +21,25 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
     position: relative;
     overflow: hidden;
-    width: 1268px;
+    width: 868px;
     max-width: 100%;
-    min-height: 680px;
+    min-height: 480px;
 }
 
 .login-process .container p {
-    font-size: 24px;
+    font-size: 20px;
     line-height: 20px;
     letter-spacing: 0.3px;
     margin: 20px 0;
 }
 
 .login-process .container span {
-    font-size: 22px;
+    font-size: 18px;
 }
 
 .login-process .container a {
     color: #333;
-    font-size: 23px;
+    font-size: 17px;
     text-decoration: none;
     margin: 15px 0 10px;
 }
@@ -47,7 +47,7 @@
 .login-process .container button {
     background-color: #0056b3;
     color: #fff;
-    font-size: 22px;
+    font-size: 16px;
     padding: 10px 20px;
     border: 1px solid transparent;
     border-radius: 8px;
@@ -79,7 +79,7 @@
     border: none;
     margin: 8px 0;
     padding: 10px 15px;
-    font-size: 23px;
+    font-size: 15px;
     border-radius: 8px;
     width: 100%;
     outline: none;
