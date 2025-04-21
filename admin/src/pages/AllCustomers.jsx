@@ -41,10 +41,6 @@ const AllCustomer = () => {
     return (
         <Helmet title={'All-Customers'}>
             <section>
-                <Row>
-                    <NavBar />
-                </Row>
-
                 <Container className="all-products">
                     {/* Tab Navigation */}
                     <Nav tabs>

@@ -123,10 +123,6 @@ const AllEmployees = () => {
     return (
         <Helmet title="All-Saleteam">
             <section>
-                <Row>
-                    <NavBar />
-                </Row>
-
                 <Container className="all-products">
                     {/* === MAIN NAVIGATION TABS === */}
                     <Nav tabs>

@@ -47,10 +47,6 @@ const AllProducts = () => {
     return (
         <Helmet title={'All-Products'}>
             <section>
-                <Row>
-                    <NavBar />
-                </Row>
-
                 <Container className="all-products">
                     {/* Main Tabs */}
                     <Nav tabs>

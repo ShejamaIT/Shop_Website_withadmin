@@ -63,9 +63,6 @@ const AllOrders = () => {
     return (
         <Helmet title={'Dashboard'}>
             <section>
-                <Row>
-                    <NavBar />
-                </Row>
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}
                     <Nav tabs className="mb-3">

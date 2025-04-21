@@ -391,5 +391,5 @@ CREATE TABLE Damage_item(
                           ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
+npm install chart.js react-chartjs-2
 npm install boxicons
