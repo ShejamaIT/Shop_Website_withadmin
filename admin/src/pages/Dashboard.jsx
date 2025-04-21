@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import { Container } from "reactstrap";
+import React, {useState} from "react";
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../pages/Navbar";
 import Sidebar from "../pages/Sidebar";
-import '../style/Dashboard.css';
-import { toast } from "react-toastify";
-
+import "../style/Dashboard.css";
 // Page components
-import HomeContent from "../pages/AddSupplier";
-import Customers from "../pages/AddCustomer";
-import Products from "../pages/AddProducts";
-// Add more imports as needed
+// import HomeContent from "../pages/AddSupplier";
+import Customers from "../pages/AllCustomers";
+import Products from "../pages/AllProducts";
+import Orders from "../pages/AllOrders";
+import Suppliers from "../pages/AllSuppliers";
+import Employees from "../pages/AllEmployees";
+import HomeContent from "../pages/HomeContent";
+import {Container} from "reactstrap";
 
 const Dashboard = () => {
     const [activePage, setActivePage] = useState("dashboard");
@@ -18,26 +19,33 @@ const Dashboard = () => {
     // Function to render the current page
     const renderPage = () => {
         switch (activePage) {
+            case "dashboard":
+                return <HomeContent />
             case "customers":
                 return <Customers />;
             case "products":
                 return <Products />;
-            case "dashboard":
+            case "orders":
+                return <Orders />;
+            case "suppliers":
+                return <Suppliers />
+            case "employees" :
+                return <Employees />
             default:
                 return <HomeContent />;
         }
     };
-
     return (
         <Helmet title="Dashboard">
-            <div className="dashboard-layout">
-                <NavBar />
-                <div className="main-layout">
-                    <Sidebar onNavigate={setActivePage} /> {/* Pass navigation function */}
-                    <div className="content-scrollable">
+            <div className="dashboard-container">
+                <Sidebar onNavigate={setActivePage} />
+                <div className="main-content">
+                    <NavBar />
+                    <div className="page-content">
                         <Container fluid>
                             {renderPage()}
                         </Container>
+                        {/* This is where the dynamic content (home, customer, etc.) will load */}
                     </div>
                 </div>
             </div>
