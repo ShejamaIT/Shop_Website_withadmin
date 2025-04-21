@@ -4,11 +4,11 @@ import '../style/Sidebar.css';
 const Sidebar = ({ onNavigate, activePage }) => {
     const menuItems = [
         { id: "dashboard", icon: "bx-grid-alt", label: "Dashboard" },
-        { id: "customers", icon: "bx-user", label: "Customer" },
         { id: "products", icon: "bx-box", label: "Product" },
-        { id: "product_list", icon: "bx-list-ul", label: "Product List" },
-        { id: "orders", icon: "bx-cart", label: "Order" },
-        { id: "stock", icon: "bx-pie-chart-alt-2", label: "Stock" },
+        { id: "orders", icon: "bx-cart", label: "Place Order" },
+        { id: "product_list", icon: "bx-list-ul", label: "Orders" },
+        { id: "customers", icon: "bx-user", label: "Customer" },
+         { id: "stock", icon: "bx-pie-chart-alt-2", label: "Stock" },
         { id: "suppliers", icon: "bx-coin-stack", label: "Supplier" },
         { id: "returns", icon: "bx-arrow-back", label: "Return" },
         { id: "employees", icon: "bx-book-alt", label: "Employee" },
