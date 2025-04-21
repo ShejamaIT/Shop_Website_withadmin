@@ -4,6 +4,7 @@ import 'reactjs-popup/dist/index.css';
 import { toast } from "react-toastify";
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap";
 import "../style/placeorder.css";
+import '../style/OrderManagement .css'
 
 const PlaceOrder = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", email: "", phoneNumber: "",occupation:"",workPlace:"",
@@ -76,52 +77,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     useEffect(() => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change
-    // const handleChange = (e) => {
-    //     const { name, value, type, checked } = e.target;
-    //
-    //     setFormData((prev) => ({
-    //         ...prev,
-    //         [name]: type === "checkbox" ? checked : value, // Handle checkbox separately
-    //     }));
-    //
-    //     // Clear delivery price when changing status
-    //     if (name === "dvtype" || name === "dvStatus") {
-    //         setDeliveryPrice(0);
-    //     }
-    //
-    //     if (name === "district") {
-    //         setDeliveryPrice(deliveryRates[value] || 0);
-    //         fetchDeliveryDates(value);
-    //     }
-    //
-    //     if (name === "couponCode") {
-    //         const selectedCoupon = coupons.find((c) => c.coupon_code === value);
-    //         setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
-    //     }
-    //
-    //     // If switching to Direct Delivery, reset district & expectedDate
-    //     if (name === "dvtype" && value === "Direct") {
-    //         setFormData((prev) => ({ ...prev, district: "", expectedDate: "", deliveryCharge: "" }));
-    //     }
-    //
-    //     // If Direct Delivery, use input field value as delivery charge instead of district rates
-    //     if (name === "deliveryCharge" && formData.dvtype === "Direct") {
-    //         setDeliveryPrice(value);
-    //     }
-    //
-    //     // If Expected Date is selected for Direct, check delivery availability
-    //     if (name === "expectedDate" && formData.dvtype === "Direct") {
-    //         checkDeliveryAvailability(value);
-    //     }
-    //
-    //     // If the address change checkbox is unchecked, remove the newAddress field
-    //     if (name === "isAddressChanged" && !checked) {
-    //         setFormData((prev) => ({
-    //             ...prev,
-    //             newAddress: "", // Reset new address
-    //         }));
-    //     }
-    // };
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
@@ -379,442 +334,465 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     };
 
     return (
-        <Container className="place-order-container">
-            <h3 className="text-center">Place an Order</h3>
-            <Row>
-                <Col lg="8" className="mx-auto">
-                    <Form onSubmit={handleSubmit}>
-                        <div className='order-details'>
-                            <h5 className='text-center underline'>Order Type</h5><hr/>
-                            <Row>
-                            <Label className="fw-bold">Select Order Type</Label>
-                            <div className="d-flex gap-3">
-                                <Label>
-                                    <Input
-                                        type="radio"
-                                        name="orderType"
-                                        value="On-site"
-                                        checked={orderType === "On-site"} // Check if this radio button is selected
-                                        onChange={() => setOrderType("On-site")} // Update the state when selected
-                                    />{" "}
-                                    On-Site
-                                </Label>
-                                <Label>
-                                    <Input
-                                        type="radio"
-                                        name="orderType"
-                                        value="Walking"
-                                        checked={orderType === "Walking"} // Check if this radio button is selected
-                                        onChange={() => setOrderType("Walking")} // Update the state when selected
-                                    />{" "}
-                                    Walking
-                                </Label>
+        <div id="order" className="container mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-4">Place Order</h1>
+            <Form onSubmit={handleSubmit}>
+                <div className='order-details'>
+                    <h2 className="text-xl font-bold mb-2">Order Details</h2>
+                    <hr/>
+                    <Row>
+                        <Label className="block text-sm font-medium text-gray-700">Select Order Type</Label>
+                        <div className="d-flex gap-3">
+                            <div>
+                                <Input
+                                    type="radio"
+                                    name="orderType"
+                                    value="On-site"
+                                    checked={orderType === "On-site"} // Check if this radio button is selected
+                                    onChange={() => setOrderType("On-site")} // Update the state when selected
+                                />{" "}
+                                On-Site
                             </div>
-                        </Row>
-                            <h5 className='text-center underline'>Customer Details</h5><hr/>
-                            <Row>
-                                <Label className="fw-bold">Select Customer Type</Label>
-                                <div className="d-flex gap-3">
-                                    <Label>
-                                        <Input
-                                            type="radio"
-                                            name="customerType"
-                                            checked={isNewCustomer}
-                                            onChange={() => setCustomer("New")}
-                                        /> New Customer
-                                    </Label>
-                                    <Label>
-                                        <Input
-                                            type="radio"
-                                            name="customerType"
-                                            checked={!isNewCustomer}
-                                            onChange={() => setCustomer("Previous")}
-                                        /> Previous Customer
-                                    </Label>
-                                </div>
-                            </Row>
-                            {!isNewCustomer && (
-                                <>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Search Customer</Label>
-                                        <Input
-                                            type="text"
-                                            placeholder="Search by name, NIC, or contact"
-                                            value={searchTerm}
-                                            onChange={handleSearchChange1}
-                                        />
-                                        {searchTerm && filteredCustomers.length > 0 && (
-                                            <div className="dropdown">
-                                                {filteredCustomers.map((customer) => (
-                                                    <div
-                                                        key={customer.id}
-                                                        onClick={() => handleSelectCustomer(customer)}
-                                                        className="dropdown-item"
-                                                    >
-                                                        {customer.FtName} {customer.SrName} ({customer.id})
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </FormGroup>
-                                </>
-                            )}
-                            <Row>
-                                <Col md={3}>
-                                    <FormGroup>
-                                        <Label for="type" className="fw-bold">Title</Label>
-                                        <Input type="select" name="title" id="title" value={formData.title} onChange={handleChange} required>
-                                            <option value="">Title</option>
-                                            <option value="Mr">Mr</option>
-                                            <option value="Mrs">Mrs</option>
-                                            <option value="Ms">Ms</option>
-                                            <option value="Dr">Dr</option>
-                                            <option value="Rev">Rev</option>
-                                        </Input>
-                                    </FormGroup>
-                                </Col>
-                                <Col md={4}>
-                                    <FormGroup>
-                                        <Label className="fw-bold">First Name</Label>
-                                        <Input type="text" name="FtName" value={formData.FtName} onChange={handleChange} required />
-                                    </FormGroup>
-                                </Col>
-                                <Col md={4}>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Last Name</Label>
-                                        <Input type="text" name="SrName" value={formData.SrName} onChange={handleChange} required />
-                                    </FormGroup>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col md={6}>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Phone Number</Label>
-                                        <Input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
-                                    </FormGroup>
-                                </Col>
-                                <Col md={6}>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Optional Number</Label>
-                                        <Input type="text" name="otherNumber" value={formData.otherNumber} onChange={handleChange} required />
-                                    </FormGroup>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col md={6}>
-                                    <FormGroup>
-                                        <Label className="fw-bold">NIC</Label>
-                                        <Input type="text" name="id" value={formData.id} onChange={handleChange} required />
-                                    </FormGroup>
-                                </Col>
-                                {!isNewCustomer && (
-                                    <Col md={6}>
-                                        <FormGroup>
-                                            <Label className="fw-bold">Previous Balance</Label>
-                                            <Input type="text" name="balance" value={formData.balance} onChange={handleChange} required />
-                                        </FormGroup>
-                                    </Col>
-                                )}
-                            </Row>
-                            <FormGroup>
-                                <Label className="fw-bold">Email</Label>
-                                <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
-                            </FormGroup>
-                            <Row>
-                                <Col md={6}>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Category</Label>
-                                        <Input type="select" name="category" id="category" value={formData.category} onChange={handleChange} required>
-                                            <option value="">Select Category</option>
-                                            <option value="Cash">Cash</option>
-                                            <option value="Credit">Credit</option>
-                                            <option value="Loyal">Loyal</option>
-                                        </Input>
-                                    </FormGroup>
-                                </Col>
-
-                                <Col md={6}>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Type</Label>
-                                        <Input type="select" name="type" id="type" value={formData.type} onChange={handleChange} required>
-                                            <option value="">Select type</option>
-                                            <option value="Walking">Walking</option>
-                                            <option value="On site">On site</option>
-                                            <option value="Shop">Shop</option>
-                                            <option value="Force">Force</option>
-                                            <option value="Hotel">Hotel</option>
-                                        </Input>
-                                    </FormGroup>
-                                </Col>
-                            </Row>
-                            {/* Show t_name input only for Shop, Force, Hotel */}
-                            {["Shop", "Force", "Hotel"].includes(formData.type) && (
-                                <FormGroup>
-                                    <Label for="t_name" className="fw-bold">{formData.type} Name</Label>
-                                    <Input type="text" name="t_name" value={formData.t_name} onChange={handleChange} required />
-                                    {errors.t_name && <small className="text-danger">{errors.t_name}</small>}
-                                </FormGroup>
-                            )}
-                            {["Walking", "On site"].includes(formData.type) && (
-                                <>
-                                    <FormGroup>
-                                        <Label for="occupation" className="fw-bold">Occupation</Label>
-                                        <Input type="text" name="occupation" value={formData.occupation} onChange={handleChange} required />
-                                        {errors.occupation && <small className="text-danger">{errors.occupation}</small>}
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label for="workPlace" className="fw-bold">Work Place</Label>
-                                        <Input type="text" name="workPlace" value={formData.workPlace} onChange={handleChange} required />
-                                        {errors.workPlace && <small className="text-danger">{errors.workPlace}</small>}
-                                    </FormGroup>
-                                </>
-                            )}
-                            <FormGroup>
-                                <Label className="fw-bold">Address</Label>
-                                <Input type="text" name="address" value={formData.address} onChange={handleChange} required />
-                            </FormGroup>
+                            <div>
+                                <Input
+                                    type="radio"
+                                    name="orderType"
+                                    value="Walking"
+                                    checked={orderType === "Walking"} // Check if this radio button is selected
+                                    onChange={() => setOrderType("Walking")} // Update the state when selected
+                                />{" "}
+                                Walking
+                            </div>
                         </div>
-                        <div className='order-details'>
-                            <h5 className='text-center underline'>Order Details</h5><hr/>
+                    </Row>
+                    <h2 className="text-xl font-bold mb-2">Customer Details</h2>
+                    <hr/>
+                    <Row>
+                        <Label className="fw-bold">Select Customer Type</Label>
+                        <div className="d-flex gap-3">
+                            <Label>
+                                <Input
+                                    type="radio"
+                                    name="customerType"
+                                    checked={isNewCustomer}
+                                    onChange={() => setCustomer("New")}
+                                /> New Customer
+                            </Label>
+                            <Label>
+                                <Input
+                                    type="radio"
+                                    name="customerType"
+                                    checked={!isNewCustomer}
+                                    onChange={() => setCustomer("Previous")}
+                                /> Previous Customer
+                            </Label>
+                        </div>
+                    </Row>
+                    {!isNewCustomer && (
+                        <>
                             <FormGroup>
-                                <Label className="fw-bold">Item Selection</Label>
-                                <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
-                                {searchTerm && filteredItems.length > 0 && (
+                                <Label className="fw-bold">Search Customer</Label>
+                                <Input
+                                    type="text"
+                                    placeholder="Search by name, NIC, or contact"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange1}
+                                />
+                                {searchTerm && filteredCustomers.length > 0 && (
                                     <div className="dropdown">
-                                        {filteredItems.map((item) => (
-                                            <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
-                                                {item.I_name} - Rs.{item.price}
+                                        {filteredCustomers.map((customer) => (
+                                            <div
+                                                key={customer.id}
+                                                onClick={() => handleSelectCustomer(customer)}
+                                                className="dropdown-item"
+                                            >
+                                                {customer.FtName} {customer.SrName} ({customer.id})
                                             </div>
                                         ))}
                                     </div>
                                 )}
                             </FormGroup>
-                            {selectedItems.map((item) => (
-                                <Row key={item.I_Id} className="mt-2">
-                                    <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
-                                    <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
-                                    <Col md={2}><Button color="danger" onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>
-                                </Row>
-                            ))}
+                        </>
+                    )}
+                    <Row>
+                        <Col md={3}>
                             <FormGroup>
-                                <Label className="fw-bold">Coupon Code</Label>
-                                <Input type="select" name="couponCode" onChange={handleChange}>
-                                    <option value="">Select Coupon</option>
-                                    {coupons.map((coupon) => (
-                                        <option key={coupon.id} value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name}) - {coupon.discount} Off</option>
-                                    ))}
+                                <Label for="type" className="fw-bold">Title</Label>
+                                <Input type="select" name="title" id="title" value={formData.title}
+                                       onChange={handleChange} required>
+                                    <option value="">Title</option>
+                                    <option value="Mr">Mr</option>
+                                    <option value="Mrs">Mrs</option>
+                                    <option value="Ms">Ms</option>
+                                    <option value="Dr">Dr</option>
+                                    <option value="Rev">Rev</option>
                                 </Input>
                             </FormGroup>
+                        </Col>
+                        <Col md={4}>
                             <FormGroup>
-                                <Label className="fw-bold">Special Note</Label><Input type="textarea" name="specialNote" onChange={handleChange}></Input>
+                                <Label className="fw-bold">First Name</Label>
+                                <Input type="text" name="FtName" value={formData.FtName} onChange={handleChange}
+                                       required/>
                             </FormGroup>
-                        </div>
-
-                        <div className="order-details">
-                            <h5 className="text-center underline">Delivery Details</h5>
-                            <hr />
-
-                            {/* Delivery Method Selection */}
+                        </Col>
+                        <Col md={4}>
                             <FormGroup>
-                                <Label className="fw-bold">Delivery Method</Label>
-                                <div className="d-flex gap-3">
-                                    <Label>
-                                        <Input type="radio" name="dvStatus" value="Delivery" onChange={handleChange} /> Delivery
-                                    </Label>
-                                    <Label>
-                                        <Input type="radio" name="dvStatus" value="Pickup" onChange={handleChange} /> Pickup
-                                    </Label>
-                                </div>
+                                <Label className="fw-bold">Last Name</Label>
+                                <Input type="text" name="SrName" value={formData.SrName} onChange={handleChange}
+                                       required/>
                             </FormGroup>
-
-                            {/* Delivery Type (Direct / Combined) */}
-                            {formData.dvStatus === "Delivery" && (
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={6}>
+                            <FormGroup>
+                                <Label className="fw-bold">Phone Number</Label>
+                                <Input type="text" name="phoneNumber" value={formData.phoneNumber}
+                                       onChange={handleChange} required/>
+                            </FormGroup>
+                        </Col>
+                        <Col md={6}>
+                            <FormGroup>
+                                <Label className="fw-bold">Optional Number</Label>
+                                <Input type="text" name="otherNumber" value={formData.otherNumber}
+                                       onChange={handleChange} required/>
+                            </FormGroup>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={6}>
+                            <FormGroup>
+                                <Label className="fw-bold">NIC</Label>
+                                <Input type="text" name="id" value={formData.id} onChange={handleChange}
+                                       required/>
+                            </FormGroup>
+                        </Col>
+                        {!isNewCustomer && (
+                            <Col md={6}>
                                 <FormGroup>
-                                    <Label className="fw-bold">Delivery Type</Label>
-                                    <div className="d-flex gap-3">
-                                        <Label>
-                                            <Input type="radio" name="dvtype" value="Direct" onChange={handleChange} /> Direct
-                                        </Label>
-                                        <Label>
-                                            <Input type="radio" name="dvtype" value="Combined" onChange={handleChange} /> Combined
-                                        </Label>
+                                    <Label className="fw-bold">Previous Balance</Label>
+                                    <Input type="text" name="balance" value={formData.balance}
+                                           onChange={handleChange} required/>
+                                </FormGroup>
+                            </Col>
+                        )}
+                    </Row>
+                    <FormGroup>
+                        <Label className="fw-bold">Email</Label>
+                        <Input type="text" name="email" value={formData.email} onChange={handleChange}
+                               required/>
+                    </FormGroup>
+                    <Row>
+                        <Col md={6}>
+                            <FormGroup>
+                                <Label className="fw-bold">Category</Label>
+                                <Input type="select" name="category" id="category" value={formData.category}
+                                       onChange={handleChange} required>
+                                    <option value="">Select Category</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Credit">Credit</option>
+                                    <option value="Loyal">Loyal</option>
+                                </Input>
+                            </FormGroup>
+                        </Col>
+
+                        <Col md={6}>
+                            <FormGroup>
+                                <Label className="fw-bold">Type</Label>
+                                <Input type="select" name="type" id="type" value={formData.type}
+                                       onChange={handleChange} required>
+                                    <option value="">Select type</option>
+                                    <option value="Walking">Walking</option>
+                                    <option value="On site">On site</option>
+                                    <option value="Shop">Shop</option>
+                                    <option value="Force">Force</option>
+                                    <option value="Hotel">Hotel</option>
+                                </Input>
+                            </FormGroup>
+                        </Col>
+                    </Row>
+                    {/* Show t_name input only for Shop, Force, Hotel */}
+                    {["Shop", "Force", "Hotel"].includes(formData.type) && (
+                        <FormGroup>
+                            <Label for="t_name" className="fw-bold">{formData.type} Name</Label>
+                            <Input type="text" name="t_name" value={formData.t_name} onChange={handleChange}
+                                   required/>
+                            {errors.t_name && <small className="text-danger">{errors.t_name}</small>}
+                        </FormGroup>
+                    )}
+                    {["Walking", "On site"].includes(formData.type) && (
+                        <>
+                            <FormGroup>
+                                <Label for="occupation" className="fw-bold">Occupation</Label>
+                                <Input type="text" name="occupation" value={formData.occupation}
+                                       onChange={handleChange} required/>
+                                {errors.occupation &&
+                                    <small className="text-danger">{errors.occupation}</small>}
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="workPlace" className="fw-bold">Work Place</Label>
+                                <Input type="text" name="workPlace" value={formData.workPlace}
+                                       onChange={handleChange} required/>
+                                {errors.workPlace && <small className="text-danger">{errors.workPlace}</small>}
+                            </FormGroup>
+                        </>
+                    )}
+                    <FormGroup>
+                        <Label className="fw-bold">Address</Label>
+                        <Input type="text" name="address" value={formData.address} onChange={handleChange}
+                               required/>
+                    </FormGroup>
+                </div>
+                <div className='order-details'>
+                <h5 className='text-center underline'>Order Details</h5>
+                    <hr/>
+                    <FormGroup>
+                        <Label className="fw-bold">Item Selection</Label>
+                        <Input type="text" placeholder="Search items" value={searchTerm}
+                               onChange={handleSearchChange}/>
+                        {searchTerm && filteredItems.length > 0 && (
+                            <div className="dropdown">
+                                {filteredItems.map((item) => (
+                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)}
+                                         className="dropdown-item">
+                                        {item.I_name} - Rs.{item.price}
                                     </div>
+                                ))}
+                            </div>
+                        )}
+                    </FormGroup>
+                    {selectedItems.map((item) => (
+                        <Row key={item.I_Id} className="mt-2">
+                            <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
+                            <Col md={4}><Input type="number" value={item.qty}
+                                               onChange={(e) => handleQtyChange(e, item.I_Id)}/></Col>
+                            <Col md={2}><Button color="danger"
+                                                onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>
+                        </Row>
+                    ))}
+                    <FormGroup>
+                        <Label className="fw-bold">Coupon Code</Label>
+                        <Input type="select" name="couponCode" onChange={handleChange}>
+                            <option value="">Select Coupon</option>
+                            {coupons.map((coupon) => (
+                                <option key={coupon.id}
+                                        value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name})
+                                    - {coupon.discount} Off</option>
+                            ))}
+                        </Input>
+                    </FormGroup>
+                    <FormGroup>
+                        <Label className="fw-bold">Special Note</Label><Input type="textarea" name="specialNote"
+                                                                              onChange={handleChange}></Input>
+                    </FormGroup>
+                </div>
+                <div className="order-details">
+                    <h5 className="text-center underline">Delivery Details</h5>
+                    <hr/>
+
+                    {/* Delivery Method Selection */}
+                    <FormGroup>
+                        <Label className="fw-bold">Delivery Method</Label>
+                        <div className="d-flex gap-3">
+                            <Label>
+                                <Input type="radio" name="dvStatus" value="Delivery"
+                                       onChange={handleChange}/> Delivery
+                            </Label>
+                            <Label>
+                                <Input type="radio" name="dvStatus" value="Pickup"
+                                       onChange={handleChange}/> Pickup
+                            </Label>
+                        </div>
+                    </FormGroup>
+
+                    {/* Delivery Type (Direct / Combined) */}
+                    {formData.dvStatus === "Delivery" && (
+                        <FormGroup>
+                            <Label className="fw-bold">Delivery Type</Label>
+                            <div className="d-flex gap-3">
+                                <Label>
+                                    <Input type="radio" name="dvtype" value="Direct"
+                                           onChange={handleChange}/> Direct
+                                </Label>
+                                <Label>
+                                    <Input type="radio" name="dvtype" value="Combined"
+                                           onChange={handleChange}/> Combined
+                                </Label>
+                            </div>
+                        </FormGroup>
+                    )}
+
+                    {/* Direct Delivery Fields */}
+                    {formData.dvtype === "Direct" && (
+                        <>
+                            <FormGroup>
+                                <Label className="fw-bold">Address</Label>
+                                <Input
+                                    type="text"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
+
+                            {/* Checkbox for Address Change */}
+                            <FormGroup check>
+                                <Label check>
+                                    <Input
+                                        type="checkbox"
+                                        name="isAddressChanged"
+                                        checked={formData.isAddressChanged || false}
+                                        onChange={handleChange}
+                                    />
+                                    Changed Address
+                                </Label>
+                            </FormGroup>
+
+                            {/* Optional New Address Field */}
+                            {formData.isAddressChanged && (
+                                <FormGroup>
+                                    <Label className="fw-bold">New Address</Label>
+                                    <Input
+                                        type="text"
+                                        name="newAddress"
+                                        value={formData.newAddress || ""}
+                                        onChange={handleChange}
+                                        required
+                                    />
                                 </FormGroup>
                             )}
 
-                            {/* Direct Delivery Fields */}
-                            {formData.dvtype === "Direct" && (
-                                <>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Address</Label>
-                                        <Input
-                                            type="text"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </FormGroup>
+                            <FormGroup>
+                                <Label className="fw-bold">Expected Date</Label>
+                                <Input type="date" name="expectedDate" onChange={handleChange}/>
+                            </FormGroup>
 
-                                    {/* Checkbox for Address Change */}
-                                    <FormGroup check>
-                                        <Label check>
-                                            <Input
-                                                type="checkbox"
-                                                name="isAddressChanged"
-                                                checked={formData.isAddressChanged || false}
-                                                onChange={handleChange}
-                                            />
-                                            Changed Address
-                                        </Label>
-                                    </FormGroup>
-
-                                    {/* Optional New Address Field */}
-                                    {formData.isAddressChanged && (
-                                        <FormGroup>
-                                            <Label className="fw-bold">New Address</Label>
-                                            <Input
-                                                type="text"
-                                                name="newAddress"
-                                                value={formData.newAddress || ""}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </FormGroup>
-                                    )}
-
-                                    <FormGroup>
-                                        <Label className="fw-bold">Expected Date</Label>
-                                        <Input type="date" name="expectedDate" onChange={handleChange} />
-                                    </FormGroup>
-
-                                    {/* Display Delivery Availability */}
-                                    {formData.expectedDate && (
-                                        <p className={`text-${availableDelivery ? "success" : "danger"}`}>
-                                            {availableDelivery ? "Delivery is available on this date" : "No delivery available on this date"}
-                                        </p>
-                                    )}
-
-                                    <FormGroup>
-                                        <Label className="fw-bold">Delivery Charge</Label>
-                                        <Input type="number" name="deliveryCharge" onChange={handleChange} />
-                                    </FormGroup>
-                                </>
+                            {/* Display Delivery Availability */}
+                            {formData.expectedDate && (
+                                <p className={`text-${availableDelivery ? "success" : "danger"}`}>
+                                    {availableDelivery ? "Delivery is available on this date" : "No delivery available on this date"}
+                                </p>
                             )}
 
-                            {/* Combined Delivery Fields */}
-                            {formData.dvtype === "Combined" && (
-                                <>
-                                    <FormGroup>
-                                        <Label className="fw-bold">Address</Label>
-                                        <Input
-                                            type="text"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </FormGroup>
+                            <FormGroup>
+                                <Label className="fw-bold">Delivery Charge</Label>
+                                <Input type="number" name="deliveryCharge" onChange={handleChange}/>
+                            </FormGroup>
+                        </>
+                    )}
 
-                                    {/* Checkbox for Address Change */}
-                                    <FormGroup check>
-                                        <Label check>
-                                            <Input
-                                                type="checkbox"
-                                                name="isAddressChanged"
-                                                checked={formData.isAddressChanged || false}
-                                                onChange={handleChange}
-                                            />
-                                            Changed Address
-                                        </Label>
-                                    </FormGroup>
+                    {/* Combined Delivery Fields */}
+                    {formData.dvtype === "Combined" && (
+                        <>
+                            <FormGroup>
+                                <Label className="fw-bold">Address</Label>
+                                <Input
+                                    type="text"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
 
-                                    {/* Optional New Address Field */}
-                                    {formData.isAddressChanged && (
-                                        <FormGroup>
-                                            <Label className="fw-bold">New Address</Label>
-                                            <Input
-                                                type="text"
-                                                name="newAddress"
-                                                value={formData.newAddress || ""}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </FormGroup>
-                                    )}
+                            {/* Checkbox for Address Change */}
+                            <FormGroup check>
+                                <Label check>
+                                    <Input
+                                        type="checkbox"
+                                        name="isAddressChanged"
+                                        checked={formData.isAddressChanged || false}
+                                        onChange={handleChange}
+                                    />
+                                    Changed Address
+                                </Label>
+                            </FormGroup>
 
-                                    <FormGroup>
-                                        <Label className="fw-bold">District</Label>
-                                        <Input
-                                            type="select"
-                                            name="district"
-                                            value={formData.district}
-                                            onChange={handleChange}
-                                            required
-                                        >
-                                            <option value="">Select District</option>
-                                            {districts.map((district) => (
-                                                <option key={district} value={district}>{district}</option>
-                                            ))}
-                                        </Input>
-                                    </FormGroup>
-
-                                    {deliveryDates.length > 0 ? (
-                                        <FormGroup>
-                                            <Label className="fw-bold">Expected Delivery Date</Label>
-                                            <Input type="select" name="expectedDate" onChange={handleChange}>
-                                                <option value="">Select Date</option>
-                                                {deliveryDates.map((date, index) => (
-                                                    <option key={index} value={date}>{date}</option>
-                                                ))}
-                                            </Input>
-                                        </FormGroup>
-                                    ) : (
-                                        <FormGroup>
-                                            <Label className="fw-bold">Expected Delivery Date</Label>
-                                            <Input type="date" name="expectedDate" onChange={handleChange}></Input>
-                                        </FormGroup>
-                                    )}
-                                </>
+                            {/* Optional New Address Field */}
+                            {formData.isAddressChanged && (
+                                <FormGroup>
+                                    <Label className="fw-bold">New Address</Label>
+                                    <Input
+                                        type="text"
+                                        name="newAddress"
+                                        value={formData.newAddress || ""}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </FormGroup>
                             )}
 
-                            {/* Pickup Fields */}
-                            {formData.dvStatus === "Pickup" && (
-                                <>
-                                    <FormGroup>
-                                        <Label className="fw-bold">City</Label>
-                                        <Input type="text" name="city" onChange={handleChange} />
-                                    </FormGroup>
+                            <FormGroup>
+                                <Label className="fw-bold">District</Label>
+                                <Input
+                                    type="select"
+                                    name="district"
+                                    value={formData.district}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select District</option>
+                                    {districts.map((district) => (
+                                        <option key={district} value={district}>{district}</option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
 
-                                    <FormGroup>
-                                        <Label className="fw-bold">Expected Date</Label>
-                                        <Input type="date" name="expectedDate" onChange={handleChange} />
-                                    </FormGroup>
-                                </>
+                            {deliveryDates.length > 0 ? (
+                                <FormGroup>
+                                    <Label className="fw-bold">Expected Delivery Date</Label>
+                                    <Input type="select" name="expectedDate" onChange={handleChange}>
+                                        <option value="">Select Date</option>
+                                        {deliveryDates.map((date, index) => (
+                                            <option key={index} value={date}>{date}</option>
+                                        ))}
+                                    </Input>
+                                </FormGroup>
+                            ) : (
+                                <FormGroup>
+                                    <Label className="fw-bold">Expected Delivery Date</Label>
+                                    <Input type="date" name="expectedDate" onChange={handleChange}></Input>
+                                </FormGroup>
                             )}
-                        </div>
+                        </>
+                    )}
 
+                    {/* Pickup Fields */}
+                    {formData.dvStatus === "Pickup" && (
+                        <>
+                            <FormGroup>
+                                <Label className="fw-bold">City</Label>
+                                <Input type="text" name="city" onChange={handleChange}/>
+                            </FormGroup>
 
-                        <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>
-                        <Row>
-                            <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
-                            <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
-                        </Row>
-                    </Form>
-                </Col>
-            </Row>
+                            <FormGroup>
+                                <Label className="fw-bold">Expected Date</Label>
+                                <Input type="date" name="expectedDate" onChange={handleChange}/>
+                            </FormGroup>
+                        </>
+                    )}
+                </div>
+                <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item
+                Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>
+                <Row>
+                    <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
+                    <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
+                </Row>
+            </Form>
             <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>
                 <div className="p-4">
-                    <h4 style={{ color: "red" }}>Validation Errors</h4>
+                    <h4 style={{color: "red"}}>Validation Errors</h4>
                     <ul>
                         {errors.map((error, index) => (
-                            <li key={index} style={{ color: "red" }}>{error}</li>
+                            <li key={index} style={{color: "red"}}>{error}</li>
                         ))}
                     </ul>
                     <button className="btn btn-primary mt-2" onClick={() => setOpenPopup(false)}>Close</button>
                 </div>
             </Popup>
-        </Container>
+        </div>
     );
 };
 export default PlaceOrder;
