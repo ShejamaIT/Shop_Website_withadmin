@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../components/header/navBar";
 import classnames from "classnames";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import TablePending from "../components/tables/TablePending";
 import TableAccepting from "../components/tables/TableAccepting";
 import TableCompleted from "../components/tables/TableCompleted";
-import PlaceOrder from "./Placeorder";
 import Tableforproduction from "../components/tables/Tableforproduction";
 import TableIssued from "../components/tables/TableIssuedOrders";
-import TableInproduction from "../components/tables/TableInProduction";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
 import DeliveryNotes from "./DeliveryNotes";
 import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
@@ -29,7 +26,6 @@ const AllOrders = () => {
 
     // List of tab names corresponding to the tabs
     const tabNames = [
-        "Place Order",
         "Pending Orders",
         "Accepted Orders",
         "Production",
@@ -81,11 +77,11 @@ const AllOrders = () => {
 
                     {/* Main Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        <TabPane tabId="Place Order" key={refreshKey}>
-                            <Row>
-                                <PlaceOrder onPlaceOrder={handleDataUpdate} />
-                            </Row>
-                        </TabPane>
+                        {/*<TabPane tabId="Place Order" key={refreshKey}>*/}
+                        {/*    <Row>*/}
+                        {/*        <PlaceOrder onPlaceOrder={handleDataUpdate} />*/}
+                        {/*    </Row>*/}
+                        {/*</TabPane>*/}
 
                         <TabPane tabId="Pending Orders" key={refreshKey}>
                             <Row>
