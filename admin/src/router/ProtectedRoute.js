@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children }) => {
         setUsername(Cookies.get("user")); // Set username once when component mounts
     }, []); // Empty dependency array ensures this effect runs only once
 
-    return username ? children : <Navigate to={'/login'} />;
+    return username ? children : <Navigate to={'/SignIn'} />;
 }
 
 export default ProtectedRoute;
