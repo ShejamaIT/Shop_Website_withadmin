@@ -4,13 +4,11 @@ import AddProduct from "../pages/AddProducts";
 import AllProducts from "../pages/AllProducts";
 import Dashboard from "../pages/Dashboard";
 import AllOrders from "../pages/AllOrders";
-import Login from "../pages/Login";
 import ProductDetails from "../pages/PurchaseNoteDetails";
 import OrderDetails from "../pages/OrderDetails";
 import ItemDetails from "../pages/ItemDetails";
 import SupplierDetails from "../pages/Supplier";
 import User from "../pages/User";
-import SignUp from "../pages/SignUp";
 import Orders from "../pages/Orders";
 import AccepetOrderDetails from "../pages/AccepetOrder";
 import CompleteOrderDetails from "../pages/CompletedOrders";
@@ -25,12 +23,11 @@ import PlaceOrder from "../pages/Placeorder";
 import AllEmployees from "../pages/AllEmployees";
 import AdvancePayment from "../pages/AdancePayment";
 import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
+import AuthSection from "../pages/AuthSection";
 const Router = () => {
     return(
         <Routes>
-        <Route path="/" element={<Navigate to='/login'/>}/>
-            <Route path='login' element={<Login/>}/>
-            <Route path='signUp' element={<SignUp/>}/>
+        <Route path="/" element={<Navigate to='/SignIn'/>}/>
             <Route path='dashboard' element={<Dashboard/>}/>
             <Route path='all-orders' element={<AllOrders/>}/>
             <Route path='dashboard/users' element={<User/>}/>
@@ -53,6 +50,7 @@ const Router = () => {
             <Route path="create-delivery-note" element={<DeliveryNotes />} />
             <Route path="place-order" element={<PlaceOrder />} />
             <Route path="advance" element={<AdvancePayment />} />
+            <Route path="SignIn" element={<AuthSection />} />
             <Route path="purchase-detail/:id" element={<PurchaseNoteDetails />} />
         </Routes>
     ) ;
