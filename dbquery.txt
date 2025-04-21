@@ -392,3 +392,4 @@ CREATE TABLE Damage_item(
 );
 
 
+npm install boxicons
