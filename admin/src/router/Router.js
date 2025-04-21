@@ -24,10 +24,14 @@ import AllEmployees from "../pages/AllEmployees";
 import AdvancePayment from "../pages/AdancePayment";
 import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
 import AuthSection from "../pages/AuthSection";
+import Login from "../pages/Login";
+import SignUp from "../pages/SignUp";
 const Router = () => {
     return(
         <Routes>
         <Route path="/" element={<Navigate to='/SignIn'/>}/>
+            <Route path='login' element={<Login/>}/>
+            <Route path='signUp' element={<SignUp/>}/>
             <Route path='dashboard' element={<Dashboard/>}/>
             <Route path='all-orders' element={<AllOrders/>}/>
             <Route path='dashboard/users' element={<User/>}/>
