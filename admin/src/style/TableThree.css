@@ -4,29 +4,17 @@
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    overflow-x: auto;
 }
 
 /* Wrapper for responsive tables */
 .table-wrapper {
     width: 100%;
-    overflow-x: auto;
-}
-
-/* Styled table */
-.styled-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-/* Limit table height to show max 4 rows, then scroll */
-.table-wrapper {
-    max-height: 280px; /* Adjust height as needed */
+    max-height: 380px;
     overflow-y: auto;
     display: block;
 }
 
-/* Hide the scrollbar but allow scrolling */
+/* Scrollbar styling */
 .table-wrapper::-webkit-scrollbar {
     width: 6px;
 }
@@ -36,7 +24,13 @@
     border-radius: 10px;
 }
 
-/* Table headers */
+/* Styled table */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Sticky table headers */
 .styled-table thead {
     position: sticky;
     top: 0;
@@ -45,10 +39,8 @@
     z-index: 10;
 }
 
-/* Table headers */
+/* Header cells */
 .styled-table th {
-    background-color: #2c3e50;
-    color: white;
     padding: 12px;
     text-align: left;
     font-weight: bold;
@@ -75,7 +67,7 @@
     font-weight: bold;
 }
 
-/* Different status colors */
+/* Status colors */
 .status.completed {
     background-color: rgba(46, 204, 113, 0.2);
     color: #27ae60;
@@ -95,10 +87,12 @@
     background-color: rgba(155, 89, 182, 0.2);
     color: #9b59b6;
 }
+
 .status.returned {
     background-color: rgba(89, 146, 182, 0.2);
     color: #59a0b6;
 }
+
 /* No data message */
 .no-data {
     text-align: center;
@@ -120,9 +114,10 @@
     cursor: pointer;
     font-size: 16px;
     background: none;
+    transition: color 0.3s ease;
 }
 
-/* Button styles */
+/* Button hover styles */
 .view-btn:hover {
     color: #3498db;
 }
@@ -135,13 +130,7 @@
     color: #e74c3c;
 }
 
-/* Loading and error messages */
-.loading-text, .error-text {
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #555;
-}
+/* Search input */
 .search-input {
     width: 100%;
     padding: 8px;
@@ -151,5 +140,11 @@
     font-size: 16px;
 }
 
-
-
+/* Loading and error messages */
+.loading-text,
+.error-text {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #555;
+}
