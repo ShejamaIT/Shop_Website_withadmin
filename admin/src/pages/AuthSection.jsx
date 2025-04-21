@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import '../style/AuthSection.css';
 import { Link , useNavigate } from "react-router-dom";
-import logo from '../assets/images/HelloShoeShop.png'; // Adjust the path as needed
 
 const AuthSection = () => {
     const [isSignUp, setIsSignUp] = useState(false);
