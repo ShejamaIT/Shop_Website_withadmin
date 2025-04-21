@@ -215,8 +215,8 @@ router.post("/orders", async (req, res) => {
         if (isNewCustomer) {
             Cust_id = await generateNewId("Customer", "c_ID", "Cus");
 
-            const checkExistingCustomer = `SELECT c_ID FROM Customer WHERE email = ? OR contact1 = ? LIMIT 1`;
-            const [existingCustomer] = await db.query(checkExistingCustomer, [email, phoneNumber]);
+            const checkExistingCustomer = `SELECT c_ID FROM Customer WHERE contact2 = ? OR contact1 = ? LIMIT 1`;
+            const [existingCustomer] = await db.query(checkExistingCustomer, [otherNumber, phoneNumber]);
 
             if (existingCustomer.length > 0) {
                 return res.status(400).json({ success: false, message: "Customer already exists." });
@@ -4590,6 +4590,40 @@ router.post("/special-reserved", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
+// GET reserved items for an order
+router.post("/get-special-reserved", async (req, res) => {
+    try {
+        const { orID, itemIds } = req.body;
+        console.log(orID)
+
+        if (!orID || !Array.isArray(itemIds) || itemIds.length === 0) {
+            return res.status(400).json({ error: "Invalid request. Provide orID and itemIds array." });
+        }
+
+        // Construct placeholders for itemIds
+        const placeholders = itemIds.map(() => '?').join(', ');
+
+        const sql = `
+            SELECT sr.srID, sr.orID, sr.pid_Id, p.*
+            FROM Special_Reservation sr
+            JOIN p_i_detail p ON sr.pid_Id = p.pid_Id
+            WHERE sr.orID = ?
+              AND p.I_Id IN (${placeholders})
+        `;
+
+        const [results] = await db.query(sql, [orID, ...itemIds]);
+
+        return res.status(200).json({
+            message: "Special reserved items fetched successfully",
+            reservedItems: results
+        });
+    } catch (error) {
+        console.error("Error fetching special reserved items:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 
 
 // Issued order

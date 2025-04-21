@@ -46,56 +46,93 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
         } else {
             handlePaymentUpdate({
                 orderId: selectedOrder.orderId,
-                paymentType: paymentType,
-                deliveryStatus: deliveryStatus,
-                totalAdvance: totalAdvance,
-                subtotal: subtotal,
-                billTotal: netTotal,
-                balance: balance,
-                delivery: delivery,
-                selectedItems: selectedItems,
+                paymentType: paymentType, deliveryStatus: deliveryStatus, totalAdvance: totalAdvance, subtotal: subtotal,
+                billTotal: netTotal, balance: balance, delivery: delivery, selectedItems: selectedItems,
             });
         }
     };
 
     useEffect(() => {
         const itemIds = [...new Set(selectedOrder.items.map(item => item.itemId))];
-        const fetchItems = async () => {
+
+        const fetchReservedAndUnreserved = async () => {
             try {
-                setIsLoading(true);  // Start loading
-                if (itemIds.length === 0) {
-                    toast.error("No valid item IDs to fetch stock details.");
+                setIsLoading(true);
+
+                if (!selectedOrder?.orderId || itemIds.length === 0) {
+                    toast.error("Invalid order or item data.");
                     return;
                 }
-                const response = await fetch("http://localhost:5001/api/admin/main/get-stock-details", {
+
+                // 1. Fetch reserved items
+                const reservedRes = await fetch("http://localhost:5001/api/admin/main/get-special-reserved", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(itemIds)
+                    body: JSON.stringify({ orID: selectedOrder.orderId, itemIds })
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || "Failed to fetch stock details");
+                let reservedItems = [];
+                if (reservedRes.ok) {
+                    const reservedData = await reservedRes.json();
+                    reservedItems = reservedData.reservedItems || [];
+
+                    setSelectedItem(reservedItems); // Show in table
+                    setSelectedItems(reservedItems); // Preselect
                 }
 
-                const data = await response.json();
-                console.log(data.stockDetails);
-                if (data.stockDetails && data.stockDetails.length > 0) {
-                    setItems(data.stockDetails);
-                } else {
-                    toast.error("No stock details found for selected items.");
+                // 2. Count how many are still needed per item
+                const requiredQtyMap = {};
+                selectedOrder.items.forEach(item => {
+                    requiredQtyMap[item.itemId] = item.quantity;
+                });
+
+                const reservedCountMap = {};
+                reservedItems.forEach(item => {
+                    reservedCountMap[item.I_Id] = (reservedCountMap[item.I_Id] || 0) + 1;
+                });
+
+                const stillNeededItemIds = [];
+                for (const itemId of itemIds) {
+                    const reservedCount = reservedCountMap[itemId] || 0;
+                    const requiredQty = requiredQtyMap[itemId] || 0;
+
+                    if (reservedCount < requiredQty) {
+                        stillNeededItemIds.push(itemId);
+                    }
                 }
+
+                // 3. Fetch unreserved stock for items still needing more
+                let unreservedItems = [];
+                if (stillNeededItemIds.length > 0) {
+                    const stockRes = await fetch("http://localhost:5001/api/admin/main/get-stock-details", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(stillNeededItemIds)
+                    });
+
+                    if (!stockRes.ok) {
+                        const errorText = await stockRes.text();
+                        throw new Error(errorText || "Failed to fetch unreserved stock details");
+                    }
+
+                    const data = await stockRes.json();
+                    unreservedItems = data.stockDetails || [];
+                }
+
+                // 4. Merge for modal use
+                setItems([ ...unreservedItems]);
             } catch (error) {
-                toast.error("Error loading stock details: " + error.message);
+                toast.error("Error loading reserved/unreserved stock: " + error.message);
             } finally {
-                setIsLoading(false);  // Stop loading after fetch
+                setIsLoading(false);
             }
         };
 
-        if (showStockModal && selectedOrder.items.length > 0) {
-            fetchItems();
-        }
-    }, [showStockModal, selectedOrder.items]);
+        fetchReservedAndUnreserved();
+    }, []);
+
+
+
 
     const handleSearchChange = (e) => {
         const term = e.target.value;
@@ -106,64 +143,46 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
         setFilteredItems(filtered);
         setDropdownOpen(filtered.length > 0);
     };
-
     const handleSelectItem = (item) => {
         // Find the requested quantity for the selected item
         const orderedItem = selectedOrder.items.find(orderItem => orderItem.itemId === item.I_Id);
-
         if (!orderedItem) {
             toast.error("Selected stock does not belong to the order.");
             return;
         }
-
         const requestedQty = orderedItem.quantity;
-
         // Count how many times this item (same I_Id) has been selected
         const selectedCount = selectedItems.filter(selected => selected.I_Id === item.I_Id).length;
-
         // Check if the stock item is already selected (prevent duplicate stock selection)
         const isAlreadySelected = selectedItems.some(selected => selected.stock_Id === item.stock_Id);
-
         if (isAlreadySelected) {
             toast.error("This stock item has already been selected.");
             return;
         }
-
         // Check if adding another stock item exceeds the requested quantity
         if (selectedCount >= requestedQty) {
             toast.error(`You cannot select more than ${requestedQty} stock items for this order.`);
             return;
         }
-
         // If all checks pass, add the item to the selectedItems array
         setSelectedItems(prevItems => [...prevItems, item]);
         setSearchTerm('');
         setDropdownOpen(false);
     };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
-    };
-
     const handlePaymentTypeChange = (e) => {
         setPaymentType(e.target.value);
     };
-
     const passReservedItem = () => {
         setSelectedItem(selectedItems);
         setShowStockModal(false);
     };
-
     return (
         <div className="modal-overlay">
             <div className="modal-content final-invoice">
                 <h2 className="invoice-title">Final Invoice</h2>
                 <div className="invoice-section">
-                    <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p>
-                    <p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
-                    <p><strong>Invoice Date:</strong> {invoiceDate}</p>
-                    <p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
+                    <p><strong>Order ID:</strong> #{selectedOrder.orderId}</p><p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
+                    <p><strong>Invoice Date:</strong> {invoiceDate}</p><p><strong>Contact:</strong> {selectedOrder.phoneNumber}</p>
 
                     <div className="payment-type">
                         <label><strong>Payment Status:</strong></label>
@@ -172,16 +191,13 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                             {deliveryStatus === "Pickup" && (
                                 <>
                                     <option value="">-- Please Select Payment Type ---</option>
-                                    <option value="Settled">Settled</option>
-                                    <option value="Credit">Credit</option>
+                                    <option value="Settled">Settled</option><option value="Credit">Credit</option>
                                 </>
                             )}
                             {deliveryStatus === "Delivery" && (
                                 <>
                                     <option value="">-- Please Select Payment Type ---</option>
-                                    <option value="Settled">Settled</option>
-                                    <option value="COD">COD</option>
-                                    <option value="Credit">Credit</option>
+                                    <option value="Settled">Settled</option><option value="COD">COD</option><option value="Credit">Credit</option>
                                 </>
                             )}
                             {balance === 0 && <option value="Settled">Settled</option>} {/* Auto-set to Settled if balance is 0 */}
@@ -238,12 +254,9 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
 
                 <div className="invoice-footer">
                     <div className="total-section">
-                        <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p>
-                        <p><strong>Discount:</strong> Rs. {discount.toFixed(2)}</p>
-                        <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p>
-                        <p><strong>Total:</strong> Rs. {netTotal.toFixed(2)}</p>
-                        <p><strong>Advance:</strong> Rs. {advance.toFixed(2)}</p>
-                        <p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
+                        <p><strong>Subtotal:</strong> Rs. {subtotal.toFixed(2)}</p><p><strong>Discount:</strong> Rs. {discount.toFixed(2)}</p>
+                        <p><strong>Delivery:</strong> Rs. {delivery.toFixed(2)}</p><p><strong>Total:</strong> Rs. {netTotal.toFixed(2)}</p>
+                        <p><strong>Advance:</strong> Rs. {advance.toFixed(2)}</p><p><strong>Balance:</strong> Rs. {balance.toFixed(2)}</p>
                     </div>
 
                     <div className="modal-buttons">
@@ -253,7 +266,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                     </div>
                 </div>
             </div>
-
             {/* Stock Modal */}
             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Scan Stock</ModalHeader>
@@ -271,7 +283,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                             </div>
                         )}
                     </FormGroup>
-
                     <Label>Issued Items</Label>
                     <table className="selected-items-table">
                         <thead>
@@ -300,5 +311,4 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
         </div>
     );
 };
-
 export default FinalInvoice2;
