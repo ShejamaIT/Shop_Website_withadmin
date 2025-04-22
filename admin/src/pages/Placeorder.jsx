@@ -11,6 +11,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", email: "", phoneNumber: "",occupation:"",workPlace:"",
         otherNumber: "", address: "", city: "", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:""});
     const [items, setItems] = useState([]);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [quantity, setQuantity] = useState(1);
     const [selectedItems, setSelectedItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
@@ -197,31 +199,33 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             setFilteredItems(filtered);
         }
     };
+
     const handleSelectItem = (item) => {
-        setSelectedItems((prevItems) => {
-            const existingItem = prevItems.find((selected) => selected.I_Id === item.I_Id);
-            if (existingItem) {
-                // If item already exists, increase its qty
-                return prevItems.map((selected) =>
-                    selected.I_Id === item.I_Id ? { ...selected, qty: selected.qty + 1 } : selected
-                );
-            } else {
-                // If item is new, add it with qty = 1
-                return [...prevItems, { ...item, qty: 1, price: item.price }];
-            }
-        });
+        console.log(item);
+        setSelectedItem(item);
+        setQuantity(1);
         setSearchTerm("");
         setFilteredItems([]);
     };
 
-    const handleQtyChange = (e, itemId) => {
-        const value = parseInt(e.target.value) || 1;
-        setSelectedItems((prevItems) =>
-            prevItems.map((item) => item.I_Id === itemId ? { ...item, qty: value  } : item)
-        );
-    };
-    const handleRemoveItem = (itemId) => {
-        setSelectedItems((prevItems) => prevItems.filter((item) => item.I_Id !== itemId));
+    const handleAddToOrder = () => {
+        if (!selectedItem) return;
+
+        const existingItemIndex = selectedItems.findIndex((i) => i.I_Id === selectedItem.I_Id);
+
+        if (existingItemIndex !== -1) {
+            // If item exists, update qty
+            const updatedItems = [...selectedItems];
+            updatedItems[existingItemIndex].qty += quantity;
+            setSelectedItems(updatedItems);
+        } else {
+            // Add new item
+            setSelectedItems([...selectedItems, { ...selectedItem, qty: quantity }]);
+        }
+
+        // Clear current selection
+        setSelectedItem(null);
+        setQuantity(1);
     };
     const calculateTotalPrice = () => {
         const itemTotal = selectedItems.reduce((total, item) => total + item.price * item.qty, 0);
@@ -338,9 +342,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setShowModal(true);
     };
     const handleAddItem = async (newItem) => {
-        console.log("Adding new item:", newItem);
-
-        try {
+          try {
             const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
 
             const formDataToSend = new FormData();
@@ -387,7 +389,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             toast.error("❌ An error occurred while adding the item.");
         }
     };
-
 
     return (
         <div id="order" className="container mx-auto p-4">
@@ -613,43 +614,125 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         />
 
                         {searchTerm && filteredItems.length > 0 && (
-                            <div className="d-flex gap-2 mt-2">
+                            <div className="d-flex gap-2 mt-2 align-items-start">
                                 <div style={{ flex: 2 }}>
-                                    <Input
-                                        type="select"
-                                        onChange={(e) => {
-                                            const selectedItem = filteredItems.find(item => item.I_Id === parseInt(e.target.value));
-                                            if (selectedItem) handleSelectItem(selectedItem);
-                                        }}
-                                    >
-                                        <option value="">Select an item</option>
+                                    <div className="border rounded bg-white shadow-sm max-h-40 overflow-auto">
                                         {filteredItems.map((item) => (
-                                            <option key={item.I_Id} value={item.I_Id}>
+                                            <div
+                                                key={item.I_Id}
+                                                onClick={() => handleSelectItem(item)}
+                                                className="dropdown-item px-3 py-2 border-bottom cursor-pointer hover:bg-light"
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 {item.I_name} - Rs.{item.price}
-                                            </option>
+                                            </div>
                                         ))}
-                                    </Input>
+                                    </div>
                                 </div>
+
                                 <div style={{ flex: 1 }}>
-                                    <button className="btn btn-primary w-100" onClick={handleButtonClick}>
-                                        Add
+                                    <button
+                                        className="btn btn-primary w-100"
+                                        onClick={handleButtonClick}
+                                    >
+                                        Add New Item
                                     </button>
                                 </div>
                             </div>
                         )}
 
-
                     </FormGroup>
 
-                    {selectedItems.map((item) => (
-                        <Row key={item.I_Id} className="mt-2">
-                            <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
-                            <Col md={4}><Input type="number" value={item.qty}
-                                               onChange={(e) => handleQtyChange(e, item.I_Id)}/></Col>
-                            <Col md={2}><Button color="danger"
-                                                onClick={() => handleRemoveItem(item.I_Id)}>Remove</Button></Col>
-                        </Row>
-                    ))}
+                    <FormGroup className="flex flex-col mb-4">
+                        {/* Row 1: Item Info */}
+                        <div className="w-full px-2 mb-2">
+                            <label className="block text-sm font-medium text-gray-700">Item</label>
+                            <input
+                                type="text"
+                                value={selectedItem ? `${selectedItem.I_name} - Rs.${selectedItem.price}` : ""}
+                                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                disabled
+                            />
+                        </div>
+                    </FormGroup>
+                    <FormGroup className="flex flex-col mb-4">
+                        {/* Row 2: Unit Price, Quantity, Remove Button */}
+                        <div className="w-full flex flex-wrap gap-2 px-2">
+                            {/* Unit Price */}
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block text-sm font-medium text-gray-700">Unit Price</label>
+                                <input
+                                    type="number"
+                                    value={selectedItem ? selectedItem.price : ""}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    disabled
+                                />
+                            </div>
+
+                            {/* Quantity */}
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={quantity}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                                />
+                            </div>
+
+                            {/* Remove Button */}
+                            <div className="flex items-end min-w-[100px]">
+                                <Button
+                                    color="danger"
+                                    className="w-full"
+                                    disabled={!selectedItem}
+                                    onClick={() => setSelectedItem(null)}
+                                >
+                                    Remove
+                                </Button>
+                            </div>
+                        </div>
+                    </FormGroup>
+
+                    <button
+                        type="button"
+                        id="addOrderDetail"
+                        className="bg-green-500 text-white p-2 rounded-md"
+                        onClick={handleAddToOrder}
+                    >
+                        Add to Order
+                    </button>
+                    {/* Order Details Table */}
+                    <table className="min-w-full bg-white border rounded-lg shadow-md mb-6 mt-3">
+                        <thead className="bg-blue-500 text-white">
+                        <tr>
+                            <th className="px-4 py-2">Product ID</th>
+                            <th className="px-4 py-2">Product Details</th>
+                            <th className="px-4 py-2">Unit Selling Price</th>
+                            <th className="px-4 py-2">Quantity</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {selectedItems.length > 0 ? (
+                            selectedItems.map((item, index) => (
+                                <tr key={index}>
+                                    <td className="px-4 py-2">{item.I_Id}</td>
+                                    <td className="px-4 py-2">{item.I_name}</td>
+                                    <td className="px-4 py-2">Rs.{item.price}</td>
+                                    <td className="px-4 py-2">{item.qty}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" className="text-center py-3 text-gray-500">
+                                    No items added yet.
+                                </td>
+                            </tr>
+                        )}
+                        </tbody>
+                    </table>
+
                     <FormGroup>
                         <Label className="fw-bold">Coupon Code</Label>
                         <Input type="select" name="couponCode" onChange={handleChange}>
@@ -667,7 +750,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </FormGroup>
                 </div>
                 <div className="order-details">
-                <h5 className="text-center underline">Delivery Details</h5>
+                    <h5 className="text-center underline">Delivery Details</h5>
                     <hr/>
 
                     {/* Delivery Method Selection */}
