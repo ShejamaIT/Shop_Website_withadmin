@@ -22,6 +22,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [districts, setDistricts] = useState([]);
     const [deliveryRates, setDeliveryRates] = useState({});
     const [discountAmount, setDiscountAmount] = useState(0);
+    const [specialdiscountAmount, setSpecialDiscountAmount] = useState(0);
     const [totalItemPrice, setTotalItemPrice] = useState(0);
     const [totalBillPrice, setTotalBillPrice] = useState(0);
     const [customers, setCustomers] = useState([]);
@@ -35,6 +36,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [availableDelivery, setAvailableDelivery] = useState(null);
     const [orderType, setOrderType] = useState("On-site");
     const [showModal, setShowModal] = useState(false);
+    const [discount, setDiscount] = useState(0);
+
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -211,26 +214,64 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const handleAddToOrder = () => {
         if (!selectedItem) return;
 
-        const existingItemIndex = selectedItems.findIndex((i) => i.I_Id === selectedItem.I_Id);
+        const specialDiscount = parseFloat(discount) || 0;
+        const discountedPrice = selectedItem.price - specialDiscount;
+
+        const existingItemIndex = selectedItems.findIndex(
+            (i) => i.I_Id === selectedItem.I_Id
+        );
 
         if (existingItemIndex !== -1) {
-            // If item exists, update qty
             const updatedItems = [...selectedItems];
             updatedItems[existingItemIndex].qty += quantity;
+            updatedItems[existingItemIndex].discount = specialDiscount;
+            updatedItems[existingItemIndex].price = discountedPrice;
+            updatedItems[existingItemIndex].originalPrice = selectedItem.price;
             setSelectedItems(updatedItems);
         } else {
-            // Add new item
-            setSelectedItems([...selectedItems, { ...selectedItem, qty: quantity }]);
+            setSelectedItems([
+                ...selectedItems,
+                {
+                    ...selectedItem,
+                    qty: quantity,
+                    discount: specialDiscount,
+                    price: discountedPrice,
+                    originalPrice: selectedItem.price,
+                },
+            ]);
         }
 
-        // Clear current selection
         setSelectedItem(null);
         setQuantity(1);
+        setDiscount("");
     };
+
     const calculateTotalPrice = () => {
-        const itemTotal = selectedItems.reduce((total, item) => total + item.price * item.qty, 0);
+        // Calculate the total special discount for all selected items
+        const totalSpecialDiscount = selectedItems.reduce((total, item) => {
+            // Sum up the discount for each item
+            const specialDiscount = item.discount || 0;
+            return total + specialDiscount * item.qty; // Multiply by quantity to get the total discount for each item
+        }, 0);
+
+        // Update the specialdiscountAmount state with the total special discount
+        setSpecialDiscountAmount(totalSpecialDiscount);
+
+        // Calculate the item total by applying the special discount and summing up the price for all items
+        const itemTotal = selectedItems.reduce((total, item) => {
+            const unitPrice = item.originalPrice ?? item.price; // Fallback to price if no originalPrice
+            const specialDiscount = item.discount || 0;
+            const discountedPrice = unitPrice - specialDiscount;
+            return total + discountedPrice * item.qty; // Add the item total to the overall total
+        }, 0);
+
+        // Set the total item price state
         setTotalItemPrice(itemTotal);
-        const total = Number((Number(itemTotal) - Number(discountAmount) ) + Number(deliveryPrice));
+
+        // Calculate the final total bill price (subtract coupon discount and add delivery fee)
+        const total = Number(itemTotal) - Number(discountAmount || 0) + Number(deliveryPrice || 0);
+
+        // Set the total bill price state
         setTotalBillPrice(total);
     };
     const handleSubmit = async (e) => {
@@ -251,7 +292,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             isNewCustomer,
             orderType,
             items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
-            deliveryPrice, discountAmount, totalItemPrice, totalBillPrice,
+            deliveryPrice, discountAmount, totalItemPrice, totalBillPrice,specialdiscountAmount
         };
         console.log(orderData);
         try {
@@ -391,9 +432,10 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     };
 
     return (
-        <div id="order" className="container mx-auto p-4">
+        <div id="order" className="order-container mx-auto p-4">
+
             <h1 className="text-2xl font-bold mb-4">Place Order</h1>
-            <Form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className='order-details'>
                     <h2 className="text-xl font-bold mb-2">Order Type</h2>
                     <hr/>
@@ -606,41 +648,40 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     <hr/>
                     <FormGroup>
                         <Label className="fw-bold">Item Selection</Label>
-                        <Input
-                            type="text"
-                            placeholder="Search items"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                        />
 
+                        {/* Search + Button Row */}
+                        <div className="d-flex gap-2 align-items-start mb-2">
+                            <Input
+                                type="text"
+                                placeholder="Search items"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                style={{flex: 4}}
+                            />
+                            <button
+                                className="btn btn-primary"
+                                style={{flex: 1, whiteSpace: "nowrap"}}
+                                onClick={handleButtonClick}
+                            >
+                                Add New
+                            </button>
+                        </div>
+
+                        {/* Filtered List */}
                         {searchTerm && filteredItems.length > 0 && (
-                            <div className="d-flex gap-2 mt-2 align-items-start">
-                                <div style={{ flex: 2 }}>
-                                    <div className="border rounded bg-white shadow-sm max-h-40 overflow-auto">
-                                        {filteredItems.map((item) => (
-                                            <div
-                                                key={item.I_Id}
-                                                onClick={() => handleSelectItem(item)}
-                                                className="dropdown-item px-3 py-2 border-bottom cursor-pointer hover:bg-light"
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                {item.I_name} - Rs.{item.price}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div style={{ flex: 1 }}>
-                                    <button
-                                        className="btn btn-primary w-100"
-                                        onClick={handleButtonClick}
+                            <div className="border rounded bg-white shadow-sm max-h-40 overflow-auto">
+                                {filteredItems.map((item) => (
+                                    <div
+                                        key={item.I_Id}
+                                        onClick={() => handleSelectItem(item)}
+                                        className="dropdown-item px-3 py-2 border-bottom cursor-pointer hover:bg-light"
+                                        style={{cursor: 'pointer'}}
                                     >
-                                        Add New Item
-                                    </button>
-                                </div>
+                                        {item.I_name} - Rs.{item.price}
+                                    </div>
+                                ))}
                             </div>
                         )}
-
                     </FormGroup>
 
                     <FormGroup className="flex flex-col mb-4">
@@ -656,7 +697,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         </div>
                     </FormGroup>
                     <FormGroup className="flex flex-col mb-4">
-                        {/* Row 2: Unit Price, Quantity, Remove Button */}
+                        {/* Row 1: Unit Price, Quantity, Discount, Total, Remove Button */}
                         <div className="w-full flex flex-wrap gap-2 px-2">
                             {/* Unit Price */}
                             <div className="flex-1 min-w-[150px]">
@@ -668,7 +709,17 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     disabled
                                 />
                             </div>
-
+                            {/* Special Discount */}
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block text-sm font-medium text-gray-700">Special Discount</label>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    value={discount}
+                                    onChange={(e) => setDiscount(e.target.value)}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                />
+                            </div>
                             {/* Quantity */}
                             <div className="flex-1 min-w-[150px]">
                                 <label className="block text-sm font-medium text-gray-700">Quantity</label>
@@ -681,19 +732,36 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 />
                             </div>
 
+                            {/* Total */}
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block text-sm font-medium text-gray-700">Total</label>
+                                <input
+                                    type="number"
+                                    value={selectedItem ? ((selectedItem.price - discount) * quantity).toFixed(2) : ""}
+                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    disabled
+                                />
+                            </div>
+
                             {/* Remove Button */}
-                            <div className="flex items-end min-w-[100px]">
+                            <div className="flex">
                                 <Button
                                     color="danger"
-                                    className="w-full"
+                                    className="text-sm" // reduced padding and smaller text
                                     disabled={!selectedItem}
-                                    onClick={() => setSelectedItem(null)}
+                                    onClick={() => {
+                                        setSelectedItem(null);
+                                        setDiscount(0);
+                                        setQuantity(1);
+                                    }}
                                 >
                                     Remove
                                 </Button>
                             </div>
+
                         </div>
                     </FormGroup>
+
 
                     <button
                         type="button"
@@ -704,34 +772,47 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         Add to Order
                     </button>
                     {/* Order Details Table */}
-                    <table className="min-w-full bg-white border rounded-lg shadow-md mb-6 mt-3">
-                        <thead className="bg-blue-500 text-white">
-                        <tr>
-                            <th className="px-4 py-2">Product ID</th>
-                            <th className="px-4 py-2">Product Details</th>
-                            <th className="px-4 py-2">Unit Selling Price</th>
-                            <th className="px-4 py-2">Quantity</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {selectedItems.length > 0 ? (
-                            selectedItems.map((item, index) => (
-                                <tr key={index}>
-                                    <td className="px-4 py-2">{item.I_Id}</td>
-                                    <td className="px-4 py-2">{item.I_name}</td>
-                                    <td className="px-4 py-2">Rs.{item.price}</td>
-                                    <td className="px-4 py-2">{item.qty}</td>
-                                </tr>
-                            ))
-                        ) : (
+                    <div className="overflow-auto max-w-full">
+                        <table className="min-w-[600px] bg-white border rounded-lg shadow-md mb-6 mt-3">
+                            <thead className="bg-blue-500 text-white">
                             <tr>
-                                <td colSpan="4" className="text-center py-3 text-gray-500">
-                                    No items added yet.
-                                </td>
+                                <th>Product</th>
+                                <th>Unit Price</th>
+                                <th>Special Discount</th>
+                                <th>Gross Total</th>
+                                <th>Qty</th>
+                                <th>Net Total</th>
                             </tr>
-                        )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {selectedItems.length > 0 ? (
+                                selectedItems.map((item, index) => {
+                                    const unitPrice = item.originalPrice || item.price;
+                                    const discount = item.discount || 0;
+                                    const grossTotal = unitPrice - discount;
+                                    const netTotal = grossTotal * item.qty;
+
+                                    return (
+                                        <tr key={index}>
+                                            <td className="">{item.I_name}</td>
+                                            <td>Rs.{unitPrice.toFixed(2)}</td>
+                                            <td>Rs.{discount.toFixed(2)}</td>
+                                            <td>Rs.{grossTotal.toFixed(2)}</td>
+                                            <td>{item.qty}</td>
+                                            <td className="font-semibold text-green-700">Rs.{netTotal.toFixed(2)}</td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-3 text-gray-500">
+                                        No items added yet.
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
 
                     <FormGroup>
                         <Label className="fw-bold">Coupon Code</Label>
@@ -936,8 +1017,29 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         </>
                     )}
                 </div>
-                <h5>Delivery Fee: Rs.{deliveryPrice}</h5><h5>Discount: Rs.{discountAmount}</h5><h5>Total Item
-                Price: Rs.{totalItemPrice}</h5><h4>Total Bill Price: Rs.{totalBillPrice}</h4>
+                <div className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Delivery Fee</span>
+                        <span>Rs.{deliveryPrice}</span>
+                    </div>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Special Discount</span>
+                        <span>Rs.{specialdiscountAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Coupon Discount</span>
+                        <span>Rs.{discountAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Total Item Price</span>
+                        <span>Rs.{totalItemPrice}</span>
+                    </div>
+                    <div
+                        className="flex justify-between text-lg font-semibold text-gray-900 border-t pt-2 mt-2">
+                        <span>Total Bill Price</span>
+                        <span>Rs.{totalBillPrice}</span>
+                    </div>
+                </div>
                 <Row>
                     <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
                     <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
@@ -950,8 +1052,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     handleSubmit2={handleAddItem}
                 />
             )}
-
-
             <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>
                 <div className="p-4">
                     <h4 style={{color: "red"}}>Validation Errors</h4>
