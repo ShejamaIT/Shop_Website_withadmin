@@ -1,40 +1,20 @@
 import React, { useState, useEffect } from "react";
-import {
-    Form,
-    FormGroup,
-    Label,
-    Input,
-    Button,
-    Row,
-    Col
-} from "reactstrap";
+import {Form, FormGroup, Label, Input, Button, Row, Col} from "reactstrap";
 import "../style/invoice.css";
+import AddNewSupplier from "../pages/AddNewSupplier";
+import {toast} from "react-toastify";
 
 const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
     const [formData, setFormData] = useState({
-        I_Id: "",
-        I_name: "",
-        Ca_Id: "",
-        sub_one: "",
-        sub_two: "",
-        descrip: "",
-        color: "",
-        material: "",
-        warrantyPeriod: "",
-        price: "",
-        cost: "",
-        minQty: "",
-        s_Id: "",
-        img: null,
-        img1: null,
-        img2: null,
-        img3: null,
-    });
+        I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "",
+        material: "", warrantyPeriod: "", price: "", cost: "", minQty: "", s_Id: "", img: null, img1: null, img2: null, img3: null,});
 
     const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
     const [subCatOne, setSubCatOne] = useState([]);
     const [subCatTwo, setSubCatTwo] = useState([]);
+    const [showSupplierModal, setShowSupplierModal] = useState(false);
+
 
     // Fetch categories and suppliers on mount
     useEffect(() => {
@@ -116,25 +96,30 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
 
     const handleClear = () => {
         setFormData({
-            I_Id: "",
-            I_name: "",
-            Ca_Id: "",
-            sub_one: "",
-            sub_two: "",
-            descrip: "",
-            color: "",
-            material: "",
-            warrantyPeriod: "",
-            price: "",
-            cost: "",
-            minQty: "",
-            s_Id: "",
-            img: null,
-            img1: null,
-            img2: null,
-            img3: null,
-        });
+            I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "", material: "", warrantyPeriod: "",
+            price: "", cost: "", minQty: "", s_Id: "", img: null, img1: null, img2: null, img3: null,});
     };
+    const handleAddSupplier = async (newSupplier) => {
+        console.log(newSupplier);
+        try {
+            // Example: Save to server (optional)
+            const response = await fetch("http://localhost:5001/api/admin/main/supplier", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newSupplier),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                toast.success("✅ Supplier added successfully!");
+                // Refetch suppliers to refresh dropdown
+                await fetchSuppliers();
+            }
+        } catch (err) {
+            console.error("Failed to add supplier:", err);
+        }
+    };
+
 
     return (
         <div className="modal-overlay">
@@ -145,12 +130,10 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                         <Label for="I_Id">Item ID</Label>
                         <Input type="text" name="I_Id" id="I_Id" value={formData.I_Id} onChange={handleChange} required />
                     </FormGroup>
-
                     <FormGroup>
                         <Label for="I_name">Item Name</Label>
                         <Input type="text" name="I_name" id="I_name" value={formData.I_name} onChange={handleChange} required />
                     </FormGroup>
-
                     <FormGroup>
                         <Label for="Ca_Id">Category</Label>
                         <Input type="select" name="Ca_Id" id="Ca_Id" value={formData.Ca_Id} onChange={handleChange} required>
@@ -160,7 +143,6 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                             ))}
                         </Input>
                     </FormGroup>
-
                     {formData.Ca_Id && (
                         <FormGroup>
                             <Row>
@@ -189,7 +171,6 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                             </Row>
                         </FormGroup>
                     )}
-
                     <FormGroup>
                         <Label for="descrip">Description</Label>
                         <Input type="textarea" name="descrip" id="descrip" value={formData.descrip} onChange={handleChange} required />
@@ -235,27 +216,41 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                         <Label for="img1">Additional Image 1 (Required)</Label>
                         <Input type="file" name="img1" id="img1" accept="image/*" onChange={handleImageChange} />
                     </FormGroup>
-
                     <FormGroup>
                         <Label for="img2">Additional Image 2 (Optional)</Label>
                         <Input type="file" name="img2" id="img2" accept="image/*" onChange={handleImageChange} />
                     </FormGroup>
-
                     <FormGroup>
                         <Label for="img3">Additional Image 3 (Optional)</Label>
                         <Input type="file" name="img3" id="img3" accept="image/*" onChange={handleImageChange} />
                     </FormGroup>
-
                     <FormGroup>
-                        <Label for="s_Id">Select Supplier</Label>
-                        <Input type="select" name="s_Id" id="s_Id" value={formData.s_Id} onChange={handleChange} required>
-                            <option value="">Select Supplier</option>
-                            {suppliers.map((supplier) => (
-                                <option key={supplier.s_ID} value={supplier.s_ID}>
-                                    {supplier.name} ({supplier.contact})
-                                </option>
-                            ))}
-                        </Input>
+                        <Label for="s_Id" className="fw-bold">Select Supplier</Label>
+                        <div className="d-flex gap-2 align-items-start">
+                            {/* Dropdown - takes more space */}
+                            <div style={{ flex: 2 }}>
+                                <Input type="select" name="s_Id" id="s_Id" value={formData.s_Id} onChange={handleChange} required>
+                                    <option value="">Select Supplier</option>
+                                    {suppliers.map((supplier) => (
+                                        <option key={supplier.s_ID} value={supplier.s_ID}>
+                                            {supplier.name} ({supplier.contact})
+                                        </option>
+                                    ))}
+                                </Input>
+                            </div>
+
+                            {/* Add New Supplier Button */}
+                            <div style={{ flex: 1 }}>
+                                <Button
+                                    color="primary"
+                                    className="w-100"
+                                    onClick={() => setShowSupplierModal(true)}
+                                >
+                                    Add New
+                                </Button>
+
+                            </div>
+                        </div>
                     </FormGroup>
 
                     <FormGroup>
@@ -267,7 +262,6 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                         <Label for="minQty">Min Quantity (for production)</Label>
                         <Input type="number" name="minQty" id="minQty" value={formData.minQty} onChange={handleChange} required />
                     </FormGroup>
-
                     <Row className="mt-3">
                         <Col md={6}>
                             <Button type="submit" color="primary" block>
@@ -275,18 +269,20 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                             </Button>
                         </Col>
                         <Col md={6}>
-                            <Button type="button" color="secondary" block onClick={handleClear}>
-                                Clear
-                            </Button>
+                            <Button type="button" color="secondary" block onClick={handleClear}>Clear</Button>
                         </Col>
                     </Row>
-
                     <div className="text-center mt-3">
-                        <Button type="button" color="danger" onClick={() => setShowModal(false)}>
-                            Close
-                        </Button>
+                        <Button type="button" color="danger" onClick={() => setShowModal(false)}>Close</Button>
                     </div>
                 </Form>
+                {showSupplierModal && (
+                    <AddNewSupplier
+                        setShowModal={setShowSupplierModal}
+                        handleSubmit2={handleAddSupplier}
+                    />
+                )}
+
             </div>
         </div>
     );
