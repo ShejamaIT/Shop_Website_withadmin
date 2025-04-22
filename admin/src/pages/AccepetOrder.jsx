@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate for redire
 import Helmet from "../components/Helmet/Helmet";
 import {Container, Row, Col, Button, Input, FormGroup, Label, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
 import { useParams } from "react-router-dom";
-import NavBar from "../components/header/navBar";
+import NavBar from "../pages/Navbar";
 import "../style/orderDetails.css";
 import BillInvoice from "./AccpetBillInvoice";
 import ChangeQty from "./changeQty";
