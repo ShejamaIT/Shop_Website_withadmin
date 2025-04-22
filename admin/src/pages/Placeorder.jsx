@@ -338,7 +338,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             <h1 className="text-2xl font-bold mb-4">Place Order</h1>
             <Form onSubmit={handleSubmit}>
                 <div className='order-details'>
-                    <h2 className="text-xl font-bold mb-2">Order Details</h2>
+                    <h2 className="text-xl font-bold mb-2">Order Type</h2>
                     <hr/>
                     <Row>
                         <Label className="block text-sm font-medium text-gray-700">Select Order Type</Label>
@@ -365,27 +365,27 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             </div>
                         </div>
                     </Row>
-                    <h2 className="text-xl font-bold mb-2">Customer Details</h2>
+                    <h2 className="text-l font-bold mb-2 mt-2">Customer Details</h2>
                     <hr/>
                     <Row>
-                        <Label className="fw-bold">Select Customer Type</Label>
+                        <Label className="block text-sm font-medium text-gray-700">Select Customer Type</Label>
                         <div className="d-flex gap-3">
-                            <Label>
+                            <div>
                                 <Input
                                     type="radio"
                                     name="customerType"
                                     checked={isNewCustomer}
                                     onChange={() => setCustomer("New")}
                                 /> New Customer
-                            </Label>
-                            <Label>
+                            </div>
+                            <div>
                                 <Input
                                     type="radio"
                                     name="customerType"
                                     checked={!isNewCustomer}
                                     onChange={() => setCustomer("Previous")}
                                 /> Previous Customer
-                            </Label>
+                            </div>
                         </div>
                     </Row>
                     {!isNewCustomer && (
@@ -416,7 +416,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     )}
                     <Row>
                         <Col md={3}>
-                            <FormGroup>
+                            <FormGroup className="mt-2">
                                 <Label for="type" className="fw-bold">Title</Label>
                                 <Input type="select" name="title" id="title" value={formData.title}
                                        onChange={handleChange} required>
@@ -545,23 +545,35 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </FormGroup>
                 </div>
                 <div className='order-details'>
-                <h5 className='text-center underline'>Order Details</h5>
+                    <h2 className="text-xl font-bold mb-2">Order Details</h2>
                     <hr/>
                     <FormGroup>
                         <Label className="fw-bold">Item Selection</Label>
-                        <Input type="text" placeholder="Search items" value={searchTerm}
-                               onChange={handleSearchChange}/>
+                        <Input
+                            type="text"
+                            placeholder="Search items"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                        />
+
                         {searchTerm && filteredItems.length > 0 && (
-                            <div className="dropdown">
+                            <Input
+                                type="select"
+                                onChange={(e) => {
+                                    const selectedItem = filteredItems.find(item => item.I_Id === parseInt(e.target.value));
+                                    if (selectedItem) handleSelectItem(selectedItem);
+                                }}
+                            >
+                                <option value="">Select an item</option>
                                 {filteredItems.map((item) => (
-                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)}
-                                         className="dropdown-item">
+                                    <option key={item.I_Id} value={item.I_Id} onClick={() => handleSelectItem(item)}>
                                         {item.I_name} - Rs.{item.price}
-                                    </div>
+                                    </option>
                                 ))}
-                            </div>
+                            </Input>
                         )}
                     </FormGroup>
+
                     {selectedItems.map((item) => (
                         <Row key={item.I_Id} className="mt-2">
                             <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
@@ -588,7 +600,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </FormGroup>
                 </div>
                 <div className="order-details">
-                    <h5 className="text-center underline">Delivery Details</h5>
+                <h5 className="text-center underline">Delivery Details</h5>
                     <hr/>
 
                     {/* Delivery Method Selection */}
