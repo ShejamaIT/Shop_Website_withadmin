@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap";
 import "../style/placeorder.css";
 import '../style/OrderManagement .css'
+import AddNewItem from "../pages/AddNewItem";
 
 const PlaceOrder = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", email: "", phoneNumber: "",occupation:"",workPlace:"",
@@ -31,6 +32,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [isNewCustomer, setIsNewCustomer] = useState(true); // State to determine new or previous customer
     const [availableDelivery, setAvailableDelivery] = useState(null);
     const [orderType, setOrderType] = useState("On-site");
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -332,6 +334,60 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         }
         handleClear(); // Call handleClear when switching customer type
     };
+    const handleButtonClick = () => {
+        setShowModal(true);
+    };
+    const handleAddItem = async (newItem) => {
+        console.log("Adding new item:", newItem);
+
+        try {
+            const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
+
+            const formDataToSend = new FormData();
+            formDataToSend.append("I_Id", newItem.I_Id);
+            formDataToSend.append("I_name", newItem.I_name);
+            formDataToSend.append("Ca_Id", newItem.Ca_Id);
+            formDataToSend.append("sub_one", newItem.sub_one);
+            formDataToSend.append("sub_two", newItem.sub_two || "None");
+            formDataToSend.append("descrip", newItem.descrip);
+            formDataToSend.append("color", newItem.color);
+            formDataToSend.append("material", materialToSend);
+            formDataToSend.append("price", newItem.price);
+            formDataToSend.append("warrantyPeriod", newItem.warrantyPeriod);
+            formDataToSend.append("cost", newItem.cost);
+            formDataToSend.append("s_Id", newItem.s_Id);
+            formDataToSend.append("minQty", newItem.minQty);
+
+            if (newItem.img) {
+                formDataToSend.append("img", newItem.img);
+            } else {
+                toast.error("Main image is required.");
+                return;
+            }
+
+            if (newItem.img1) formDataToSend.append("img1", newItem.img1);
+            if (newItem.img2) formDataToSend.append("img2", newItem.img2);
+            if (newItem.img3) formDataToSend.append("img3", newItem.img3);
+
+            const submitResponse = await fetch("http://localhost:5001/api/admin/main/add-item", {
+                method: "POST",
+                body: formDataToSend,
+            });
+
+            const submitData = await submitResponse.json();
+
+            if (submitResponse.ok) {
+                toast.success("✅ Item added successfully!");
+                fetchItems(); // make sure this exists in your parent component
+            } else {
+                toast.error(submitData.message || "❌ Failed to add item.");
+            }
+        } catch (error) {
+            console.error("❌ Error submitting form:", error);
+            toast.error("❌ An error occurred while adding the item.");
+        }
+    };
+
 
     return (
         <div id="order" className="container mx-auto p-4">
@@ -557,21 +613,32 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         />
 
                         {searchTerm && filteredItems.length > 0 && (
-                            <Input
-                                type="select"
-                                onChange={(e) => {
-                                    const selectedItem = filteredItems.find(item => item.I_Id === parseInt(e.target.value));
-                                    if (selectedItem) handleSelectItem(selectedItem);
-                                }}
-                            >
-                                <option value="">Select an item</option>
-                                {filteredItems.map((item) => (
-                                    <option key={item.I_Id} value={item.I_Id} onClick={() => handleSelectItem(item)}>
-                                        {item.I_name} - Rs.{item.price}
-                                    </option>
-                                ))}
-                            </Input>
+                            <div className="d-flex gap-2 mt-2">
+                                <div style={{ flex: 2 }}>
+                                    <Input
+                                        type="select"
+                                        onChange={(e) => {
+                                            const selectedItem = filteredItems.find(item => item.I_Id === parseInt(e.target.value));
+                                            if (selectedItem) handleSelectItem(selectedItem);
+                                        }}
+                                    >
+                                        <option value="">Select an item</option>
+                                        {filteredItems.map((item) => (
+                                            <option key={item.I_Id} value={item.I_Id}>
+                                                {item.I_name} - Rs.{item.price}
+                                            </option>
+                                        ))}
+                                    </Input>
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <button className="btn btn-primary w-100" onClick={handleButtonClick}>
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
                         )}
+
+
                     </FormGroup>
 
                     {selectedItems.map((item) => (
@@ -793,6 +860,15 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
                 </Row>
             </Form>
+
+            {showModal && (
+                <AddNewItem
+                    setShowModal={setShowModal}
+                    handleSubmit2={handleAddItem}
+                />
+            )}
+
+
             <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>
                 <div className="p-4">
                     <h4 style={{color: "red"}}>Validation Errors</h4>
