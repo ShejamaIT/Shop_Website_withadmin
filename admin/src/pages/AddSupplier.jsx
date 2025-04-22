@@ -83,49 +83,22 @@ const AddSupplier = ({ onAddSupplier }) => {
                     <Form onSubmit={handleSubmit}>
                         <FormGroup>
                             <Label for="name">Supplier Name</Label>
-                            <Input
-                                type="text"
-                                name="name"
-                                id="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                            />
+                            <Input type="text" name="name" id="name" value={formData.name} onChange={handleChange} required/>
                         </FormGroup>
 
                         <FormGroup>
                             <Label for="address">Address</Label>
-                            <Input
-                                type="textarea"
-                                name="address"
-                                id="address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                required
-                            />
+                            <Input type="textarea" name="address" id="address" value={formData.address} onChange={handleChange} required/>
                         </FormGroup>
 
                         <FormGroup>
                             <Label for="contact">Contact</Label>
-                            <Input
-                                type="text"
-                                name="contact"
-                                id="contact"
-                                value={formData.contact}
-                                onChange={handleChange}
-                                required
-                            />
+                            <Input type="text" name="contact" id="contact" value={formData.contact} onChange={handleChange} required/>
                         </FormGroup>
 
                         <FormGroup>
                             <Label for="contact2">Secondary Contact</Label>
-                            <Input
-                                type="text"
-                                name="contact2"
-                                id="contact2"
-                                value={formData.contact2}
-                                onChange={handleChange}
-                            />
+                            <Input type="text" name="contact2" id="contact2" value={formData.contact2} onChange={handleChange}/>
                         </FormGroup>
 
                         <Row>
@@ -135,12 +108,7 @@ const AddSupplier = ({ onAddSupplier }) => {
                                 </Button>
                             </Col>
                             <Col md="6">
-                                <Button
-                                    type="button"
-                                    color="danger"
-                                    block
-                                    onClick={handleClear}
-                                >
+                                <Button type="button" color="danger" block onClick={handleClear}>
                                     Clear
                                 </Button>
                             </Col>
