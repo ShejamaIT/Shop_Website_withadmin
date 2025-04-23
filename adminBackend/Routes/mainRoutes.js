@@ -5606,19 +5606,25 @@ router.post("/settle-payment", async (req, res) => {
 router.get("/today-order-income", async (req, res) => {
     try {
         const sql = `
-            SELECT IFNULL(SUM(amount), 0) AS totalIncome
+            SELECT
+                IFNULL(SUM(CASE WHEN DATE(dateTime) = CURDATE() THEN amount END), 0) AS todayIncome,
+                IFNULL(SUM(CASE WHEN DATE(dateTime) = CURDATE() - INTERVAL 1 DAY THEN amount END), 0) AS yesterdayIncome
             FROM cash_balance
             WHERE ref_type = 'order'
-              AND DATE(dateTime) = CURDATE()
         `;
 
         const [rows] = await db.query(sql);
+        const todayIncome = rows[0].todayIncome;
+        const yesterdayIncome = rows[0].yesterdayIncome;
+
+        const incomeIncreased = todayIncome > yesterdayIncome ? "yes" : "no";
 
         return res.status(200).json({
             success: true,
             message: "Today's order income retrieved successfully",
             data: {
-                totalIncome: rows[0].totalIncome,
+                totalIncome: todayIncome,
+                incomeIncreased: incomeIncreased,
             },
         });
     } catch (err) {
@@ -5627,6 +5633,54 @@ router.get("/today-order-income", async (req, res) => {
             success: false,
             message: "Database error while retrieving income",
             error: err.message,
+        });
+    }
+});
+
+// Get Today in & out order count
+router.get("/today-order-counts", async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                -- Today
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = CURDATE()) AS todayIn,
+                 
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = CURDATE()) AS todayOut,
+                 
+                -- Yesterday
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = CURDATE() - INTERVAL 1 DAY) AS yesterdayIn,
+                 
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = CURDATE() - INTERVAL 1 DAY) AS yesterdayOut
+        `;
+
+        const [rows] = await db.query(sql);
+        const {
+            todayIn,
+            todayOut,
+            yesterdayIn,
+            yesterdayOut
+        } = rows[0];
+
+        return res.status(200).json({
+            success: true,
+            message: "Today's IN/OUT order counts compared with yesterday",
+            data: {
+                inOrders: todayIn,
+                outOrders: todayOut,
+                inOrdersIncreased: todayIn > yesterdayIn ? "yes" : "no",
+                outOrdersIncreased: todayOut > yesterdayOut ? "yes" : "no"
+            }
+        });
+    } catch (err) {
+        console.error("Error comparing today's order counts:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while retrieving order comparison",
+            error: err.message
         });
     }
 });
