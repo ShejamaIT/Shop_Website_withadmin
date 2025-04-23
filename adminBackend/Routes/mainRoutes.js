@@ -55,8 +55,8 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 
         // ✅ Insert into `Item` table
         const itemSql = `
-            INSERT INTO Item (I_Id, I_name, descrip, color, material, price, stockQty, bookedQty, availableQty, minQTY, img, img1, img2, img3, warrantyPeriod, mn_Cat, sb_catOne, sb_catTwo)
-            VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO Item (I_Id, I_name, descrip, color, material, price, stockQty, bookedQty, availableQty,reservedQty,dispatchedQty,damageQty, minQTY, img, img1, img2, img3, warrantyPeriod, mn_Cat, sb_catOne, sb_catTwo)
+            VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0,0,0,0, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         `;
         await db.query(itemSql, [
             I_Id,
@@ -4623,8 +4623,6 @@ router.post("/get-special-reserved", async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
-
 
 // Issued order
 router.post("/issued-order", async (req, res) => {
