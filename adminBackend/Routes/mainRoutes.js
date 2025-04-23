@@ -1134,6 +1134,7 @@ router.get("/order-details", async (req, res) => {
                 stockQuantity: item.stockQty,
             })),
         };
+        console.log(orderResponse.items);
 
         // Fetch Delivery Info if it's a delivery order
         if (orderData.delStatus === "Delivery") {
@@ -3368,11 +3369,9 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
 // Generate barcodes for each stock
 router.post("/addStock", upload.single("image"), async (req, res) => {
     try {
-        // Extracting data from request body and file
         const { purchase_id, supplier_id, date, itemTotal, delivery, invoice, items } = req.body;
         const imageFile = req.file;
 
-        // Ensure values are valid
         const total = Number(itemTotal) || 0;
         const deliveryPrice = Number(delivery) || 0;
 
@@ -3380,7 +3379,6 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             return res.status(400).json({ success: false, message: "All fields are required!" });
         }
 
-        // Handle image upload if any
         let imagePath = null;
         if (imageFile) {
             const imageName = `item_${purchase_id}_${Date.now()}.${imageFile.mimetype.split("/")[1]}`;
@@ -3389,33 +3387,24 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             imagePath = `/uploads/images/${imageName}`;
         }
 
-        // Convert date from 'DD/MM/YYYY' to 'YYYY-MM-DD'
         const formattedDate = date.split('/').reverse().join('-');
 
-        // Insert into the purchase table
         const insertQuery = `
             INSERT INTO purchase (pc_Id, s_ID, rDate, total, pay, balance, deliveryCharge, invoiceId)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-        const [result] = await db.query(insertQuery, [purchase_id, supplier_id, formattedDate, total, 0, total, deliveryPrice, invoice]);
+        await db.query(insertQuery, [purchase_id, supplier_id, formattedDate, total, 0, total, deliveryPrice, invoice]);
 
-        // Ensure stock count is properly defined
-        const stockCount = items.length; // Number of items being processed
+        const stockCount = items.length;
+        const stockDetails = [];
 
-        // Prepare to collect stock details for barcode generation
-        const stockDetails = []; // To collect details for later barcode generation
-        let lastStockId = 0; // Initialize last stock ID
-
-        // Loop through each item and insert it into the purchase_detail table
         for (let i = 0; i < stockCount; i++) {
             const { I_Id, unit_price, quantity } = items[i];
             const totalPrice = parseFloat(unit_price) * Number(quantity);
 
-            // Check and update unit price in item_supplier table if it doesn't match
             const checkUnitPriceQuery = `SELECT unit_cost FROM item_supplier WHERE I_Id = ? AND s_ID = ?`;
             const [unitPriceResult] = await db.query(checkUnitPriceQuery, [I_Id, supplier_id]);
 
-            if (unitPriceResult && unitPriceResult.length > 0) {
-                // If unit price doesn't match, update it
+            if (unitPriceResult.length > 0) {
                 const existingUnitPrice = unitPriceResult[0].unit_cost;
                 if (parseFloat(existingUnitPrice) !== parseFloat(unit_price)) {
                     const updateUnitPriceQuery = `
@@ -3425,59 +3414,47 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
                     await db.query(updateUnitPriceQuery, [unit_price, I_Id, supplier_id]);
                 }
             } else {
-                // If no record found, insert a new entry in item_supplier
                 const insertUnitPriceQuery = `
                     INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
                     VALUES (?, ?, ?)`;
                 await db.query(insertUnitPriceQuery, [I_Id, supplier_id, unit_price]);
             }
 
-            // Insert item details into purchase_detail table
             const purchaseDetailQuery = `
                 INSERT INTO purchase_detail (pc_Id, I_Id, rec_count, unitPrice, total, stock_range)
                 VALUES (?, ?, ?, ?, ?, ?)`;
             await db.query(purchaseDetailQuery, [purchase_id, I_Id, quantity, unit_price, totalPrice, ""]);
 
-            // Prepare to update stock
             stockDetails.push({ I_Id, quantity });
         }
 
-        // Insert barcode details into p_i_detail
         const insertBarcodeQuery = `
             INSERT INTO p_i_detail (pc_Id, I_Id, stock_Id, barcode_img, status, orID, datetime)
-            VALUES (?, ?, ?, ?, ?, ?,?)`;
+            VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
-        // Ensure barcodes folder exists
         const barcodeFolderPath = path.join("./uploads/barcodes");
         if (!fs.existsSync(barcodeFolderPath)) {
             fs.mkdirSync(barcodeFolderPath, { recursive: true });
         }
 
-        // Array to track stock ranges for each item
         const stockRanges = [];
 
-        // Generate barcodes for each stock
         for (let i = 0; i < stockCount; i++) {
             const { I_Id, quantity } = stockDetails[i];
 
-            // Get the last stock ID for this item
             const [lastStockResult] = await db.query(
                 `SELECT MAX(stock_Id) AS lastStockId FROM p_i_detail WHERE I_Id = ?`,
                 [I_Id]
             );
-            lastStockId = lastStockResult[0]?.lastStockId || 0;
-
-            // The starting stock ID for this item
+            let lastStockId = lastStockResult[0]?.lastStockId || 0;
             let startStockId = lastStockId + 1;
 
-            // Generate barcode and insert into p_i_detail
             for (let j = 1; j <= quantity; j++) {
-                lastStockId++; // Increment stock ID for each new stock added
+                lastStockId++;
                 const barcodeData = `${I_Id}-${lastStockId}`;
                 const barcodeImageName = `barcode_${barcodeData}.png`;
                 const barcodeImagePath = path.join(barcodeFolderPath, barcodeImageName);
 
-                // Generate barcode image
                 const pngBuffer = await bwipjs.toBuffer({
                     bcid: "code128",
                     text: barcodeData,
@@ -3487,23 +3464,29 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
                     textxalign: "center",
                 });
 
-                // Save the barcode image
                 fs.writeFileSync(barcodeImagePath, pngBuffer);
 
-                // Insert barcode into p_i_detail table
-                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", ""]);
-                await db.query(
-                    `UPDATE Item SET stockQty = stockQty + ?, availableQty = availableQty + ? WHERE I_Id = ?`,
-                    [quantity, quantity, I_Id]
-                );
+                await db.query(insertBarcodeQuery, [
+                    purchase_id,
+                    I_Id,
+                    lastStockId,
+                    barcodeImagePath,
+                    "Available",
+                    "",
+                    "",
+                ]);
             }
 
-            // After inserting barcodes, store the stock range in the correct format
-            const stockRange = `${startStockId}-${lastStockId}`; // Ensure the range is in correct format
+            // ✅ Update stock only ONCE per item
+            await db.query(
+                `UPDATE Item SET stockQty = stockQty + ?, availableQty = availableQty + ? WHERE I_Id = ?`,
+                [quantity, quantity, I_Id]
+            );
+
+            const stockRange = `${startStockId}-${lastStockId}`;
             stockRanges.push({ I_Id, stockRange });
         }
 
-        // Now that all stock has been inserted, update the stock_range in purchase_detail table
         for (let { I_Id, stockRange } of stockRanges) {
             const updateStockRangeQuery = `
                 UPDATE purchase_detail
@@ -3512,7 +3495,6 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             await db.query(updateStockRangeQuery, [stockRange, purchase_id, I_Id]);
         }
 
-        // Send success response with the relevant data
         return res.status(201).json({
             success: true,
             message: "Stock received successfully, image uploaded, and barcodes saved!",
