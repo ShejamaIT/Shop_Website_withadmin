@@ -1,26 +1,12 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Card, CardBody, Table } from 'reactstrap';
 import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Tooltip,
-    Legend,
-} from 'chart.js';
+import {Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend,} from 'chart.js';
 
 import '../style/HomeContent.css';
+import {toast} from "react-toastify";
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const chartData = {
     labels: [
@@ -44,6 +30,21 @@ const chartOptions = {
 };
 
 const HomeContent = () => {
+    const [income, setIncome] = useState(0);
+    useEffect(() => {
+        fetchSaleIncome();
+    }, []);
+
+    const fetchSaleIncome = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/today-order-income");
+            const data = await response.json();
+            setIncome(data.data.totalIncome);
+        } catch (error) {
+            toast.error("Error fetching items.");
+        }
+    };
+
     return (
         <div className="home-content" id="home">
             <div className="welcome-card" style={{ marginTop: '-20px' }}>
@@ -95,8 +96,8 @@ const HomeContent = () => {
 
                 <div className="box">
                     <div className="right-side">
-                        <div className="box-topic">Total Profit</div>
-                        <div className="number">$12</div>
+                        <div className="box-topic">Today Income</div>
+                        <div className="number">Rs. {income}</div>
                         <div className="indicator">
                             <i className='bx bx-up-arrow-alt'></i>
                             <span className="text">Up from yesterday</span>
@@ -135,7 +136,6 @@ const HomeContent = () => {
                         </div>
                     </CardBody>
                 </Card>
-
             </div>
         </div>
     );
