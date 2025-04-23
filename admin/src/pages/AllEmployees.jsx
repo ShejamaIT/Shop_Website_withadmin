@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button} from "reactstrap";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../components/header/navBar";
+import NavBar from "../pages/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddEmployee from "./AddEmployee";
 import SaleteamDetail from "./SaleteamDetail";
