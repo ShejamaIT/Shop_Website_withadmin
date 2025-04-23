@@ -2898,7 +2898,7 @@ router.get("/orders/by-sales-team", async (req, res) => {
         const ordersLastMonthIssued = ordersLastMonth.filter(order => order.orderStatus === 'Issued');
         const ordersLastMonthOther = ordersLastMonth.filter(order => order.orderStatus !== 'Issued');
 
-        // Fetch coupon separately
+        // Fetch coupon separately for the sales team
         const [coupons] = await db.query(`
             SELECT sc.cpID AS couponId, sc.discount AS couponDiscount
             FROM sales_coupon sc
@@ -2925,7 +2925,7 @@ router.get("/orders/by-sales-team", async (req, res) => {
                 ordersThisMonthOther: ordersThisMonthOther.length > 0 ? ordersThisMonthOther : [],
                 ordersLastMonthIssued: ordersLastMonthIssued.length > 0 ? ordersLastMonthIssued : [],
                 ordersLastMonthOther: ordersLastMonthOther.length > 0 ? ordersLastMonthOther : [],
-                coupons: coupons.length > 0 ? [coupons[0]] : [],
+                coupons: coupons.length > 0 ? coupons : [], // Return all coupons, not just one
                 advanceDetails: advanceDetails.length > 0 ? advanceDetails : [], // Pass detailed advances
                 totalAdvance // Pass total advance amount
             }
@@ -2935,6 +2935,7 @@ router.get("/orders/by-sales-team", async (req, res) => {
         return res.status(500).json({ message: "Error fetching data." });
     }
 });
+
 
 //Get in detail for a specific driver (devID)
 router.get("/drivers/details", async (req, res) => {
