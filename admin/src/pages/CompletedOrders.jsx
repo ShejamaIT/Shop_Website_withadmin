@@ -749,55 +749,84 @@ const CompleteOrderDetails = () => {
                                 </ul>
 
                                 <div className="order-summary">
-                                    {!isEditing ? (
-                                        <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>
-                                    ) : (
-                                        <FormGroup>
-                                            <Label><strong>Discount Price:</strong></Label>
-                                            <Input
-                                                type="text"
-                                                name="discount"
-                                                value={formData.discount ?? order.discount}
-                                                onChange={handleChange}
-                                            />
-                                        </FormGroup>
-                                    )}
+                                    <Row>
+                                        <Col md="4">
+                                            {!isEditing ? (
+                                                <p><strong>Discount
+                                                    Price:</strong> Rs. {formData.discount ?? order.discount}</p>
+                                            ) : (
+                                                <FormGroup>
+                                                    <Label><strong>Discount Price:</strong></Label>
+                                                    <Input
+                                                        type="text"
+                                                        name="discount"
+                                                        value={formData.discount ?? order.discount}
+                                                        onChange={handleChange}
+                                                    />
+                                                </FormGroup>
+                                            )}
+                                        </Col>
 
-                                    {formData.deliveryStatus === "Pick up" ? (
-                                        <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
-                                    ) : (
-                                        !isEditing ? (
-                                            <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Delivery Amount:</strong></Label>
-                                                <Input
-                                                    type="text"
-                                                    name="deliveryCharge"
-                                                    value={formData.deliveryCharge ?? order.deliveryCharge}
-                                                    onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )
-                                    )}
-                                    <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
-                                    <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
-                                    <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
+                                        <Col md="4">
+                                            <p><strong>Special Discount:</strong> Rs. {order.specialdiscount}</p>
+                                        </Col>
+
+                                        <Col md="4">
+                                            {formData.deliveryStatus === "Pick up" ? (
+                                                <p><strong>Delivery
+                                                    Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
+                                                </p>
+                                            ) : (
+                                                !isEditing ? (
+                                                    <p><strong>Delivery
+                                                        Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
+                                                    </p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Delivery Amount:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="deliveryCharge"
+                                                            value={formData.deliveryCharge ?? order.deliveryCharge}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )
+                                            )}
+                                        </Col>
+                                    </Row>
+
+                                    <Row className="mt-4">
+                                        <Col md="4">
+                                            <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
+                                        </Col>
+
+                                        <Col md="4">
+                                            <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
+                                        </Col>
+
+                                        <Col md="4">
+                                            <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
+                                        </Col>
+                                    </Row>
                                 </div>
 
                                 {/* Buttons */}
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
                                         <>
-                                            <Button color="primary" onClick={() => setIsEditing(true)} disabled={loading}>
+                                            <Button color="primary" onClick={() => setIsEditing(true)}
+                                                    disabled={loading}>
                                                 {loading ? "Loading..." : "Edit Order"}
                                             </Button>
-                                            <Button color="success" className="ms-3" onClick={() => handleEditClick(order)} disabled={loading}>
+                                            <Button color="success" className="ms-3"
+                                                    onClick={() => handleEditClick(order)} disabled={loading}>
                                                 Payment
                                             </Button>
                                             {/* Conditionally render the Issued button based on deliveryStatus */}
                                             {order.deliveryStatus === 'pickup' && (
-                                                <Button color="secondary" className="ms-3" onClick={() => handleEditClick3(order)} disabled={loading}>
+                                                <Button color="secondary" className="ms-3"
+                                                        onClick={() => handleEditClick3(order)} disabled={loading}>
                                                     Issued
                                                 </Button>
                                             )}
@@ -808,7 +837,8 @@ const CompleteOrderDetails = () => {
                                             <Button color="success" onClick={handleSave} disabled={loading}>
                                                 {loading ? "Saving..." : "Save Changes"}
                                             </Button>
-                                            <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)} disabled={loading}>
+                                            <Button color="secondary" className="ms-3"
+                                                    onClick={() => setIsEditing(false)} disabled={loading}>
                                                 Cancel
                                             </Button>
                                         </>
@@ -818,13 +848,15 @@ const CompleteOrderDetails = () => {
                             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Add Item</ModalHeader>
                                 <ModalBody>
-                                    <FormGroup style={{ position: "relative" }}>
+                                    <FormGroup style={{position: "relative"}}>
                                         <Label>Items ID</Label>
-                                        <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
+                                        <Input type="text" placeholder="Search items" value={searchTerm}
+                                               onChange={handleSearchChange}/>
                                         {searchTerm && filteredItems.length > 0 && (
                                             <div className="dropdown">
                                                 {filteredItems.map((item) => (
-                                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
+                                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)}
+                                                         className="dropdown-item">
                                                         {item.I_name} - Rs.{item.price}
                                                     </div>
                                                 ))}
@@ -835,7 +867,8 @@ const CompleteOrderDetails = () => {
                                     {selectedItems.map((item) => (
                                         <Row key={item.I_Id} className="mt-2">
                                             <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
-                                            <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
+                                            <Col md={4}><Input type="number" value={item.qty}
+                                                               onChange={(e) => handleQtyChange(e, item.I_Id)}/></Col>
                                             <Col md={2}><Button color="danger" onClick={() => handleRemoveItem1(item.I_Id)}>Remove</Button></Col>
                                         </Row>
                                     ))}
