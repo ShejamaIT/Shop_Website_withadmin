@@ -15,6 +15,7 @@ import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
 import AddDeliveryShedule from "./AddDeliveryShedule";
 import TableReturned from "../components/tables/TableReturnedOrders";
 import TableCancled from "../components/tables/TableCancelledOrders";
+import TableDeliverd from "../components/tables/TableDeliverdOrders";
 
 const AllOrders = () => {
     const [activeTab, setActiveTab] = useState("Place Order");
@@ -31,6 +32,7 @@ const AllOrders = () => {
         "Production",
         "Completed Orders",
         "Delivery Notes",
+        "Delivered Orders",
         "Issued Orders",
         "Returned Orders",
         "Cancel Orders"
@@ -187,6 +189,12 @@ const AllOrders = () => {
                                     </Row>
                                 </TabPane>
                             </TabContent>
+                        </TabPane>
+
+                        <TabPane tabId="Delivered Orders" key={refreshKey}>
+                            <Row>
+                                <TableDeliverd />
+                            </Row>
                         </TabPane>
 
                         <TabPane tabId="Issued Orders" key={refreshKey}>

@@ -3,7 +3,6 @@ import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from 
 import { useLocation, useNavigate } from "react-router-dom";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../components/header/navBar";
 import AddCustomer from "./AddCustomer";
 import TableAllCustomer from "../components/tables/TableAllCustomer";
 import TableCustomer from "../components/tables/TableCustomer";

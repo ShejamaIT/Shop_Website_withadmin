@@ -1571,7 +1571,7 @@ router.get("/orders-completed", async (req, res) => {
     }
 });
 
-// Fetch Issued order
+// Get all orders by status= issued
 router.get("/orders-issued", async (req, res) => {
     try {
         // Query to fetch orders with their acceptance status from accept_orders table
@@ -1590,7 +1590,7 @@ router.get("/orders-issued", async (req, res) => {
 
         // If no orders found, return a 404 status
         if (orders.length === 0) {
-            return res.status(404).json({ message: "No Completed orders found" });
+            return res.status(404).json({ message: "No Issued orders found" });
         }
 
         // Group orders by OrID
@@ -1643,7 +1643,79 @@ router.get("/orders-issued", async (req, res) => {
     }
 });
 
-// Fetch Returned order
+// Get all orders by status= deliverd
+router.get("/orders-deliverd", async (req, res) => {
+    try {
+        // Query to fetch orders with their acceptance status from accept_orders table
+        const query = `
+            SELECT
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived,
+                ao.status AS acceptanceStatus
+            FROM Orders o
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            WHERE o.orStatus = 'Delivered'
+        `;
+
+        const [orders] = await db.query(query);
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No Delivered orders found" });
+        }
+
+        // Group orders by OrID
+        const groupedOrders = {};
+
+        orders.forEach(order => {
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customer: order.c_ID,
+                    ordertype: order.ordertype,
+                    orStatus: order.orStatus,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    itemReceived: order.itemReceived,
+                    acceptanceStatus: "Complete", // Default status is Complete
+                    acceptanceStatuses: [] // Track individual item statuses
+                };
+            }
+
+            // Add each item status to the list
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
+            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
+                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
+            }
+        });
+
+        // Convert the grouped orders into an array
+        const formattedOrders = Object.values(groupedOrders);
+
+        // Send the formatted orders with their acceptance status as a JSON response
+        return res.status(200).json({
+            message: "Completed orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching completed orders:", error.message);
+        return res.status(500).json({ message: "Error fetching completed orders", error: error.message });
+    }
+});
+
+// Get all orders by status= returned
 router.get("/orders-returned", async (req, res) => {
     try {
         // Query to fetch returned orders with their acceptance status and return reason
@@ -1717,7 +1789,7 @@ router.get("/orders-returned", async (req, res) => {
     }
 });
 
-// Fetch Canceled order
+// Get all orders by status= canceled
 router.get("/orders-canceled", async (req, res) => {
     try {
         // Query to fetch returned orders with their acceptance status and return reason
