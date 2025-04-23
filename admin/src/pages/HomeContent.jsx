@@ -36,9 +36,11 @@ const HomeContent = () => {
     const [outOrders, setOutOrders] = useState(0);
     const [inOrdersIncreased, setInOrdersIncreased] = useState("no");
     const [outOrdersIncreased, setOutOrdersIncreased] = useState("no");
+    const [items, setItems] = useState([]);
     useEffect(() => {
         fetchSaleIncome();
         fetchTodayOrders();
+        fetchItems();
     }, []);
 
     const fetchSaleIncome = async () => {
@@ -74,6 +76,21 @@ const HomeContent = () => {
         } catch (error) {
             console.error("Fetch error:", error);
             toast.error("Error fetching order count.");
+        }
+    };
+    // Fetch all out of stock items
+    const fetchItems = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/allitemslessone"); // Adjust API URL if needed
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to fetch items.");
+            }
+
+            setItems(data); // Assuming `data` contains the array of items
+        } catch (err) {
+            console.error("Fetch error:", err);
+            toast.error("Error fetching items.");
         }
     };
 
@@ -187,12 +204,26 @@ const HomeContent = () => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {/* Dynamic rows */}
+                                {/* Mapping over the items to create table rows */}
+                                {items.length > 0 ? (
+                                    items.map((item) => (
+                                        <tr key={item.I_Id}> {/* Assuming each item has a unique `id` */}
+                                            <td>{item.I_Id}</td>
+                                            <td>{item.I_name}</td> {/* Assuming each item has a `itemName` */}
+                                            <td>{item.descrip}</td> {/* Assuming each item has a `description` */}
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="3" className="text-center">No out of stock products</td>
+                                    </tr>
+                                )}
                                 </tbody>
                             </Table>
                         </div>
                     </CardBody>
                 </Card>
+
             </div>
         </div>
     );
