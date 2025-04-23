@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button } from "reactstrap";
 import { useParams } from "react-router-dom";
-import NavBar from "../components/header/navBar";
+import NavBar from "../pages/Navbar";
 import "../style/orderDetails.css";
 
 const IssuedOrderDetails = () => {
