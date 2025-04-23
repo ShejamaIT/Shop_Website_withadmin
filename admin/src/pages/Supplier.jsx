@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Card, CardBody, CardTitle, CardText, Form, FormGroup, Label, Input } from "reactstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import NavBar from "../components/header/navBar";
+import NavBar from "../pages/Navbar";
 import "../style/suppierDetail.css";
 
 const SupplierDetails = () => {
