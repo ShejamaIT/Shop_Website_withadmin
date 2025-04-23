@@ -1,17 +1,19 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import '../style/Sidebar.css';
 
 const Sidebar = ({ onNavigate, activePage }) => {
+    const location = useLocation();
+
     const menuItems = [
-        { id: "dashboard", icon: "bx-grid-alt", label: "Dashboard" },
-        { id: "products", icon: "bx-box", label: "Product" },
-        { id: "orders", icon: "bx-cart", label: "Place Order" },
-        { id: "product_list", icon: "bx-list-ul", label: "Orders" },
-        { id: "customers", icon: "bx-user", label: "Customer" },
-         { id: "stock", icon: "bx-pie-chart-alt-2", label: "Stock" },
-        { id: "suppliers", icon: "bx-coin-stack", label: "Supplier" },
-        { id: "returns", icon: "bx-arrow-back", label: "Return" },
-        { id: "employees", icon: "bx-book-alt", label: "Employee" },
+        { id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/dashboard" },
+        { id: "products", icon: "bx-box", label: "Product", path: "/dashboard/products" },
+        { id: "orders", icon: "bx-cart", label: "Place Order", path: "/dashboard/orders" },
+        { id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/dashboard/product_list" },
+        { id: "customers", icon: "bx-user", label: "Customer", path: "/dashboard/customers" },
+        { id: "stock", icon: "bx-pie-chart-alt-2", label: "Stock", path: "/dashboard/stock" },
+        { id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/dashboard/suppliers" },
+        { id: "employees", icon: "bx-book-alt", label: "Employee", path: "/dashboard/employees" },
     ];
 
     return (
@@ -25,10 +27,10 @@ const Sidebar = ({ onNavigate, activePage }) => {
                     <li key={item.id}>
                         <a
                             href="#"
-                            className={activePage === item.id ? "active" : ""}
+                            className={location.pathname === item.path ? "active" : ""}
                             onClick={(e) => {
                                 e.preventDefault();
-                                onNavigate(item.id);
+                                onNavigate(item.path);
                             }}
                         >
                             <i className={`bx ${item.icon}`}></i>

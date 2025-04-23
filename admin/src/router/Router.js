@@ -1,47 +1,56 @@
 import React from "react";
-import {Route,Routes,Navigate} from "react-router-dom";
-import AddProduct from "../pages/AddProducts";
-import AllProducts from "../pages/AllProducts";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import AllOrders from "../pages/AllOrders";
+import AllProducts from "../pages/AllProducts";
+import AllCustomers from "../pages/AllCustomers";
+import AllSuppliers from "../pages/AllSuppliers";
+import AllEmployees from "../pages/AllEmployees";
+import PlaceOrder from "../pages/Placeorder";
+import Orders from "../pages/OrderManagement";
+import HomeContent from "../pages/HomeContent";
+import Login from "../pages/Login";
+import SignUp from "../pages/SignUp";
+import AuthSection from "../pages/AuthSection";
+// Details pages
 import ProductDetails from "../pages/PurchaseNoteDetails";
 import OrderDetails from "../pages/OrderDetails";
 import ItemDetails from "../pages/ItemDetails";
 import SupplierDetails from "../pages/Supplier";
 import User from "../pages/User";
-import Orders from "../pages/Orders";
 import AccepetOrderDetails from "../pages/AccepetOrder";
 import CompleteOrderDetails from "../pages/CompletedOrders";
-import SaleteamDetail  from "../pages/SaleteamDetail";
-import AllSuppliers from "../pages/AllSuppliers";
+import SaleteamDetail from "../pages/SaleteamDetail";
 import IssuedOrderDetails from "../pages/IssuedOrder";
 import DeliveryNoteDetails from "../pages/DeliveryNoteDetails";
 import DeliveryNotes from "../pages/DeliveryNotes";
 import ReturnedOrderDetails from "../pages/ReturnedOrder";
-import AllCustomer from "../pages/AllCustomers";
-import PlaceOrder from "../pages/Placeorder";
-import AllEmployees from "../pages/AllEmployees";
 import AdvancePayment from "../pages/AdancePayment";
 import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
-import AuthSection from "../pages/AuthSection";
-import Login from "../pages/Login";
-import SignUp from "../pages/SignUp";
+
 const Router = () => {
-    return(
+    return (
         <Routes>
-        <Route path="/" element={<Navigate to='/SignIn'/>}/>
-            <Route path='login' element={<Login/>}/>
-            <Route path='signUp' element={<SignUp/>}/>
-            <Route path='dashboard' element={<Dashboard/>}/>
-            <Route path='all-orders' element={<AllOrders/>}/>
-            <Route path='dashboard/users' element={<User/>}/>
-            <Route path='all-products' element={<AllProducts/>}/>
-            <Route path='all-employee' element={<AllEmployees/>}/>
-            <Route path='all-suppliers' element={<AllSuppliers/>}/>
-            <Route path='all-customers' element={<AllCustomer/>}/>
-            <Route path='dashboard/add-products' element={<AddProduct/>}/>
-            <Route path='dashboard/orders' element={<Orders/>}/>
-            <Route path="dashboard/product-detail/:id" element={<ProductDetails />} />
+            <Route path="/" element={<Navigate to="/SignIn" />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signUp" element={<SignUp />} />
+            <Route path="/SignIn" element={<AuthSection />} />
+
+            <Route path="/dashboard" element={<Dashboard />}>
+                <Route index element={<HomeContent />} />
+                <Route path="customers" element={<AllCustomers />} />
+                <Route path="products" element={<AllProducts />} />
+                <Route path="orders" element={<PlaceOrder />} />
+                <Route path="product_list" element={<AllOrders />} />
+                <Route path="stock" element={<Orders />} />
+                <Route path="suppliers" element={<AllSuppliers />} />
+                <Route path="employees" element={<AllEmployees />} />
+            </Route>
+
+            {/* Other non-dashboard routes */}
+            <Route path="dashboard/add-products" element={<AllProducts />} />
+            <Route path="dashboard/users" element={<User />} />
+            <Route path="dashboard/orders" element={<Orders />} />
             <Route path="order-detail/:id" element={<OrderDetails />} />
             <Route path="accept-order-detail/:id" element={<AccepetOrderDetails />} />
             <Route path="issued-order-detail/:id" element={<IssuedOrderDetails />} />
@@ -54,10 +63,9 @@ const Router = () => {
             <Route path="create-delivery-note" element={<DeliveryNotes />} />
             <Route path="place-order" element={<PlaceOrder />} />
             <Route path="advance" element={<AdvancePayment />} />
-            <Route path="SignIn" element={<AuthSection />} />
             <Route path="purchase-detail/:id" element={<PurchaseNoteDetails />} />
         </Routes>
-    ) ;
+    );
 };
 
-export default Router;
+export default Router
