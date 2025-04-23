@@ -369,8 +369,11 @@ const OrderDetails = () => {
                                                     value={formData.orderStatus}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="Pending">Pending</option><option value="Accepted">Accepted</option>
-                                                    <option value="Processing">Processing</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option>
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Accepted">Accepted</option>
+                                                    <option value="Processing">Processing</option>
+                                                    <option value="Completed">Completed</option>
+                                                    <option value="Cancelled">Cancelled</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
@@ -387,13 +390,14 @@ const OrderDetails = () => {
                                                     value={formData.deliveryStatus}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="Delivery">Delivery</option><option value="Pick up">Pick up</option>
+                                                    <option value="Delivery">Delivery</option>
+                                                    <option value="Pick up">Pick up</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
                                         {!isEditing ? (
                                             <p><strong>Payment Status:</strong>
-                                                <span >
+                                                <span>
                                                     {order.payStatus}
                                                 </span>
                                             </p>
@@ -406,8 +410,11 @@ const OrderDetails = () => {
                                                     value={formData.payStatus}
                                                     onChange={handleChange}
                                                 >
-                                                    <option value="Pending">Pending</option><option value="Advanced">Advanced</option>
-                                                    <option value="Settled">Settled</option><option value="COD">COD</option><option value="Credit">Credit</option>
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Advanced">Advanced</option>
+                                                    <option value="Settled">Settled</option>
+                                                    <option value="COD">COD</option>
+                                                    <option value="Credit">Credit</option>
                                                 </Input>
                                             </FormGroup>
                                         )}
@@ -452,7 +459,9 @@ const OrderDetails = () => {
                                                     <FormGroup>
                                                         <Label><strong>Address:</strong></Label>
                                                         <Input
-                                                            type="text" name="address" value={formData.deliveryInfo.address ?? order.deliveryInfo.address} onChange={handleChange}
+                                                            type="text" name="address"
+                                                            value={formData.deliveryInfo.address ?? order.deliveryInfo.address}
+                                                            onChange={handleChange}
                                                         />
                                                     </FormGroup>
                                                 )}
@@ -462,12 +471,15 @@ const OrderDetails = () => {
                                                     <FormGroup>
                                                         <Label><strong>District:</strong></Label>
                                                         <Input
-                                                            type="text" name="district" value={formData.deliveryInfo.district ?? order.deliveryInfo.district} onChange={handleChange}
+                                                            type="text" name="district"
+                                                            value={formData.deliveryInfo.district ?? order.deliveryInfo.district}
+                                                            onChange={handleChange}
                                                         />
                                                     </FormGroup>
                                                 )}
                                                 <p><strong>Delivery Status:</strong> {order.deliveryInfo.status}</p>
-                                                <p><strong>Scheduled Date:</strong> {order.deliveryInfo.scheduleDate}</p>
+                                                <p><strong>Scheduled Date:</strong> {order.deliveryInfo.scheduleDate}
+                                                </p>
                                             </div>
                                         </>
                                     )}
@@ -487,12 +499,17 @@ const OrderDetails = () => {
                                                     <FormGroup check>
                                                         <Label check>
                                                             <Input
-                                                                type="checkbox" name="booked" checked={formData.items[index]?.booked || false} onChange={(e) => handleChange(e, index)}
+                                                                type="checkbox" name="booked"
+                                                                checked={formData.items[index]?.booked || false}
+                                                                onChange={(e) => handleChange(e, index)}
                                                             />
                                                             Mark as Booked
                                                         </Label>
-                                                        <Button color="danger" className="ms-2" onClick={() => handleRemoveItem(index, item)}>Remove</Button>
-                                                        <Button color="secondary" className="ms-2" onClick={() => handleEditClick2(item, order)}>Change Qty</Button>
+                                                        <Button color="danger" className="ms-2"
+                                                                onClick={() => handleRemoveItem(index, item)}>Remove</Button>
+                                                        <Button color="secondary" className="ms-2"
+                                                                onClick={() => handleEditClick2(item, order)}>Change
+                                                            Qty</Button>
                                                     </FormGroup>
 
                                                 )}
@@ -500,42 +517,73 @@ const OrderDetails = () => {
                                         ))}
                                     </div>
                                     {isEditing && (
-                                        <Button color="primary" className="mt-3" onClick={() => setShowStockModal(true)}>+ Add New Item</Button>
+                                        <Button color="primary" className="mt-3"
+                                                onClick={() => setShowStockModal(true)}>+ Add New Item</Button>
                                     )}
                                 </ul>
 
                                 {/* Order Summary */}
                                 <div className="order-summary">
-                                    {!isEditing ? (
-                                        <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>
-                                    ) : (
-                                        <FormGroup>
-                                            <Label><strong>Discount Price:</strong></Label>
-                                            <Input
-                                                type="text" name="discount" value={formData.discount ?? order.discount} onChange={handleChange}
-                                            />
-                                        </FormGroup>
-                                    )}
+                                    <Row>
+                                        <Col md="4">
+                                            {!isEditing ? (
+                                                <p><strong>Discount
+                                                    Price:</strong> Rs. {formData.discount ?? order.discount}</p>
+                                            ) : (
+                                                <FormGroup>
+                                                    <Label><strong>Discount Price:</strong></Label>
+                                                    <Input
+                                                        type="text"
+                                                        name="discount"
+                                                        value={formData.discount ?? order.discount}
+                                                        onChange={handleChange}
+                                                    />
+                                                </FormGroup>
+                                            )}
+                                        </Col>
 
-                                    {formData.deliveryStatus === "Pick up" ? (
-                                        <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
-                                    ) : (
-                                        !isEditing ? (
-                                            <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
-                                        ) : (
-                                            <FormGroup>
-                                                <Label><strong>Delivery Amount:</strong></Label>
-                                                <Input
-                                                    type="text" name="deliveryCharge" value={formData.deliveryCharge ?? order.deliveryCharge} onChange={handleChange}
-                                                />
-                                            </FormGroup>
-                                        )
-                                    )}
+                                        <Col md="4">
+                                            <p><strong>Special Discount:</strong> Rs. {order.specialdiscount}</p>
+                                        </Col>
 
-                                    {/*<p><strong>Total Amount:</strong> Rs. {formData.totalPrice ?? order.totalPrice}</p>*/}
-                                    <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
-                                    <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
-                                    <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
+                                        <Col md="4">
+                                            {formData.deliveryStatus === "Pick up" ? (
+                                                <p><strong>Delivery
+                                                    Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
+                                                </p>
+                                            ) : (
+                                                !isEditing ? (
+                                                    <p><strong>Delivery
+                                                        Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
+                                                    </p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Delivery Amount:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="deliveryCharge"
+                                                            value={formData.deliveryCharge ?? order.deliveryCharge}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )
+                                            )}
+                                        </Col>
+                                    </Row>
+
+                                    <Row className="mt-4">
+                                        <Col md="4">
+                                            <p><strong>Total Amount:</strong> Rs. {calculateTotal()}</p>
+                                        </Col>
+
+                                        <Col md="4">
+                                            <p><strong>Advance Amount:</strong> Rs. {order.advance}</p>
+                                        </Col>
+
+                                        <Col md="4">
+                                            <p><strong>Balance Amount:</strong> Rs. {order.balance}</p>
+                                        </Col>
+                                    </Row>
                                 </div>
 
                                 <div className="text-center mt-4">
@@ -544,7 +592,8 @@ const OrderDetails = () => {
                                     ) : (
                                         <>
                                             <Button color="success" onClick={handleSave}>Save Changes</Button>
-                                            <Button color="secondary" className="ms-3" onClick={() => setIsEditing(false)}>Cancel</Button>
+                                            <Button color="secondary" className="ms-3"
+                                                    onClick={() => setIsEditing(false)}>Cancel</Button>
                                         </>
                                     )}
                                 </div>
@@ -552,13 +601,15 @@ const OrderDetails = () => {
                             <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
                                 <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Add Item</ModalHeader>
                                 <ModalBody>
-                                    <FormGroup style={{ position: "relative" }}>
+                                    <FormGroup style={{position: "relative"}}>
                                         <Label>Items ID</Label>
-                                        <Input type="text" placeholder="Search items" value={searchTerm} onChange={handleSearchChange} />
+                                        <Input type="text" placeholder="Search items" value={searchTerm}
+                                               onChange={handleSearchChange}/>
                                         {searchTerm && filteredItems.length > 0 && (
                                             <div className="dropdown">
                                                 {filteredItems.map((item) => (
-                                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)} className="dropdown-item">
+                                                    <div key={item.I_Id} onClick={() => handleSelectItem(item)}
+                                                         className="dropdown-item">
                                                         {item.I_name} - Rs.{item.price}
                                                     </div>
                                                 ))}
@@ -569,8 +620,10 @@ const OrderDetails = () => {
                                     {selectedItems.map((item) => (
                                         <Row key={item.I_Id} className="mt-2">
                                             <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
-                                            <Col md={4}><Input type="number" value={item.qty} onChange={(e) => handleQtyChange(e, item.I_Id)} /></Col>
-                                            <Col md={2}><Button color="danger" onClick={() => handleRemoveItem1(item.I_Id)}>Remove</Button></Col>
+                                            <Col md={4}><Input type="number" value={item.qty}
+                                                               onChange={(e) => handleQtyChange(e, item.I_Id)}/></Col>
+                                            <Col md={2}><Button color="danger"
+                                                                onClick={() => handleRemoveItem1(item.I_Id)}>Remove</Button></Col>
                                         </Row>
                                     ))}
                                 </ModalBody>

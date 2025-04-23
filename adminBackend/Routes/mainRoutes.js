@@ -625,7 +625,7 @@ router.get("/accept-order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, c.title, c.FtName, c.SrName, c.address, c.contact1, c.contact2,
-                o.advance, o.balance, o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total,
+                o.advance, o.balance, o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total,o.specialdic,
                 o.ordertype, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
                      LEFT JOIN Customer c ON o.c_ID = c.c_ID
@@ -685,6 +685,7 @@ router.get("/accept-order-details", async (req, res) => {
             deliveryStatus: orderData.delStatus,
             deliveryCharge: orderData.delPrice,
             discount: orderData.discount,
+            specialdiscount: orderData.specialdic,
             totalPrice: orderData.total,
             advance: orderData.advance,
             balance: orderData.balance,
@@ -767,7 +768,7 @@ router.get("/issued-order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount, o.netTotal, o.total,
-                o.advance, o.balance, o.payStatus, o.stID, o.expectedDate, o.specialNote, o.ordertype,
+                o.advance, o.balance, o.payStatus, o.stID, o.expectedDate, o.specialNote, o.ordertype,o.specialdic,
                 c.title, c.FtName, c.SrName, c.email, c.contact1, c.contact2, c.balance AS customerBalance,
                 c.category, c.type, c.t_name, c.occupation, c.workPlace
             FROM Orders o
@@ -831,6 +832,7 @@ router.get("/issued-order-details", async (req, res) => {
             deliveryStatus: orderData.delStatus,
             deliveryCharge: orderData.delPrice,
             discount: orderData.discount,
+            specialdiscount: orderData.specialdic,
             totalPrice: orderData.total,
             netTotal: orderData.netTotal,
             advance: orderData.advance,
@@ -920,7 +922,7 @@ router.get("/returned-order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total, 
-                o.netTotal, o.advance, o.balance, o.payStatus, o.expectedDate, o.specialNote, o.ordertype,
+                o.netTotal, o.advance, o.balance, o.payStatus, o.expectedDate, o.specialNote, o.ordertype,o.specialdic,
                 c.title, c.FtName, c.SrName, c.email, c.contact1, c.contact2, c.address,
                 s.stID, e.name AS salesEmployeeName, ro.detail AS returnReason
             FROM Orders o
@@ -977,6 +979,7 @@ router.get("/returned-order-details", async (req, res) => {
             deliveryStatus: orderData.delStatus,
             deliveryCharge: orderData.delPrice,
             discount: orderData.discount,
+            specialdiscount: orderData.specialdic,
             totalPrice: orderData.total,
             netTotal: orderData.netTotal,
             advance: orderData.advance,
@@ -1064,7 +1067,7 @@ router.get("/order-details", async (req, res) => {
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, c.title, c.FtName, c.SrName, c.address, c.contact1, c.contact2,
-                o.orStatus, o.delStatus, o.delPrice, o.discount, o.netTotal, o.total,
+                o.orStatus, o.delStatus, o.delPrice, o.discount, o.netTotal, o.total,o.specialdic,
                 o.advance, o.balance, o.payStatus, o.expectedDate, o.specialNote, o.ordertype,
                 s.stID, e.name AS salesEmployeeName
             FROM Orders o
@@ -1106,6 +1109,7 @@ router.get("/order-details", async (req, res) => {
             deliveryStatus: orderData.delStatus,
             deliveryCharge: orderData.delPrice,
             discount: orderData.discount,
+            specialdiscount: orderData.specialdic,
             netTotal: orderData.netTotal,
             totalPrice: orderData.total,
             advance: orderData.advance,
