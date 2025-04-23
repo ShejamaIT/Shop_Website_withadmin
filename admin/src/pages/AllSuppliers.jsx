@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../components/header/navBar";
 import { useNavigate } from "react-router-dom";
 import SupplierDetails from "./SupplierDetails";
 import { toast } from "react-toastify";
