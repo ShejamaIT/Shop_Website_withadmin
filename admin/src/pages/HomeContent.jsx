@@ -31,17 +31,49 @@ const chartOptions = {
 
 const HomeContent = () => {
     const [income, setIncome] = useState(0);
+    const [incomeIncreased, setIncomeIncreased] = useState("no");
+    const [inOrders, setInOrders] = useState(0);
+    const [outOrders, setOutOrders] = useState(0);
+    const [inOrdersIncreased, setInOrdersIncreased] = useState("no");
+    const [outOrdersIncreased, setOutOrdersIncreased] = useState("no");
     useEffect(() => {
         fetchSaleIncome();
+        fetchTodayOrders();
     }, []);
 
     const fetchSaleIncome = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/today-order-income");
             const data = await response.json();
-            setIncome(data.data.totalIncome);
+
+            if (data.success) {
+                setIncome(data.data.totalIncome);
+                setIncomeIncreased(data.data.incomeIncreased); // Storing the comparison result
+            } else {
+                toast.error("Failed to fetch today's income.");
+            }
         } catch (error) {
-            toast.error("Error fetching items.");
+            console.error("Error fetching income:", error);
+            toast.error("Error fetching income.");
+        }
+    };
+
+    const fetchTodayOrders = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/today-order-counts");
+            const data = await response.json();
+
+            if (data.success) {
+                setInOrders(data.data.inOrders);
+                setOutOrders(data.data.outOrders);
+                setInOrdersIncreased(data.data.inOrdersIncreased);
+                setOutOrdersIncreased(data.data.outOrdersIncreased);
+            } else {
+                toast.error("Failed to fetch order counts.");
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            toast.error("Error fetching order count.");
         }
     };
 
@@ -72,24 +104,40 @@ const HomeContent = () => {
 
                 <div className="box">
                     <div className="right-side">
-                        <div className="box-topic">Total Products</div>
-                        <div className="number">11</div>
-                        <div className="indicator">
-                            <i className='bx bx-down-arrow-alt down'></i>
-                            <span className="text">Down From Today</span>
-                        </div>
+                        <div className="box-topic">Today InOrders</div>
+                        <div className="number">{inOrders}</div>
+
+                        {inOrdersIncreased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from yesterday</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from yesterday</span>
+                            </div>
+                        )}
                     </div>
                     <i className='bx bx-cart cart four'></i>
                 </div>
 
                 <div className="box">
                     <div className="right-side">
-                        <div className="box-topic">Total Orders</div>
-                        <div className="number">38</div>
-                        <div className="indicator">
-                            <i className='bx bx-up-arrow-alt'></i>
-                            <span className="text">Up from yesterday</span>
-                        </div>
+                        <div className="box-topic">Total OutOrders</div>
+                        <div className="number">{outOrders}</div>
+
+                        {outOrdersIncreased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from yesterday</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from yesterday</span>
+                            </div>
+                        )}
                     </div>
                     <i className='bx bxl-shopify cart two'></i>
                 </div>
@@ -97,22 +145,31 @@ const HomeContent = () => {
                 <div className="box">
                     <div className="right-side">
                         <div className="box-topic">Today Income</div>
-                        <div className="number">Rs. {income}</div>
-                        <div className="indicator">
-                            <i className='bx bx-up-arrow-alt'></i>
-                            <span className="text">Up from yesterday</span>
-                        </div>
+                        <div className="number">Rs.{income}</div>
+
+                        {incomeIncreased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from yesterday</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from yesterday</span>
+                            </div>
+                        )}
                     </div>
-                    <i className='bx bxs-dollar-circle cart three'></i>
+                    <i className='bx bx-dollar-circle cart three'></i>
                 </div>
+
             </div>
 
             <div className="overview row-cards">
                 <Card className="cards chart-card">
                     <CardBody>
                         <h5 className="card-title text-center">Monthly Income of last 12 months</h5>
-                        <div style={{ height: '300px' }}>
-                            <Line data={chartData} options={chartOptions} />
+                        <div style={{height: '300px'}}>
+                            <Line data={chartData} options={chartOptions}/>
                         </div>
                     </CardBody>
                 </Card>
