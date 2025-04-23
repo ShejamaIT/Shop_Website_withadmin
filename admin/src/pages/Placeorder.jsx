@@ -6,6 +6,7 @@ import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reac
 import "../style/placeorder.css";
 import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
+import AddNewCoupone from "../pages/AddNewCoupone";
 
 const PlaceOrder = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", email: "", phoneNumber: "",occupation:"",workPlace:"",
@@ -36,8 +37,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [availableDelivery, setAvailableDelivery] = useState(null);
     const [orderType, setOrderType] = useState("On-site");
     const [showModal, setShowModal] = useState(false);
+    const [showModal1, setShowModal1] = useState(false);
     const [discount, setDiscount] = useState(0);
-
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -382,6 +383,9 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const handleButtonClick = () => {
         setShowModal(true);
     };
+    const handleAddNewCoupon = () => {
+        setShowModal1(true);
+    };
     const handleAddItem = async (newItem) => {
           try {
             const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
@@ -430,6 +434,31 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             toast.error("❌ An error occurred while adding the item.");
         }
     };
+    const handleAddCoupon = async (newCoupon) => {
+        const { couponCode, saleteamCode, discount } = newCoupon;
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/coupone", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ couponCode, saleteamCode, discount }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                toast.success(`Coupon ${couponCode} added successfully!`);
+                fetchCoupons();
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        } catch (error) {
+            console.error("Error submitting coupon:", error);
+            alert("Failed to add coupon. Please try again.");
+        }
+    };
+
 
     return (
         <div id="order" className="order-container mx-auto p-4">
@@ -758,11 +787,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     Remove
                                 </Button>
                             </div>
-
                         </div>
                     </FormGroup>
-
-
                     <button
                         type="button"
                         id="addOrderDetail"
@@ -816,15 +842,25 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
                     <FormGroup>
                         <Label className="fw-bold">Coupon Code</Label>
-                        <Input type="select" name="couponCode" onChange={handleChange}>
-                            <option value="">Select Coupon</option>
-                            {coupons.map((coupon) => (
-                                <option key={coupon.id}
-                                        value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name})
-                                    - {coupon.discount} Off</option>
-                            ))}
-                        </Input>
+                        <Row>
+                            <Col md={8}>
+                                <Input type="select" name="couponCode" onChange={handleChange}>
+                                    <option value="">Select Coupon</option>
+                                    {coupons.map((coupon) => (
+                                        <option key={coupon.id}
+                                                value={coupon.coupon_code}>{coupon.coupon_code}({coupon.employee_name})
+                                            - {coupon.discount} Off</option>
+                                    ))}
+                                </Input>
+                            </Col>
+                            <Col md={4}>
+                                <Button color="primary" block onClick={handleAddNewCoupon}>
+                                    Add New
+                                </Button>
+                            </Col>
+                        </Row>
                     </FormGroup>
+
                     <FormGroup>
                         <Label className="fw-bold">Special Note</Label><Input type="textarea" name="specialNote"
                                                                               onChange={handleChange}></Input>
@@ -1050,6 +1086,13 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 <AddNewItem
                     setShowModal={setShowModal}
                     handleSubmit2={handleAddItem}
+                />
+            )}
+
+            {showModal1 && (
+                <AddNewCoupone
+                    setShowModal1={setShowModal1}
+                    handleSubmit2={handleAddCoupon}
                 />
             )}
             <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>
