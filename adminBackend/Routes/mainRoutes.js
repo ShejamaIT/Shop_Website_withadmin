@@ -2936,7 +2936,6 @@ router.get("/orders/by-sales-team", async (req, res) => {
     }
 });
 
-
 //Get in detail for a specific driver (devID)
 router.get("/drivers/details", async (req, res) => {
     try {
@@ -3349,8 +3348,9 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             fs.writeFileSync(savePath, imageFile.buffer);
             imagePath = `/uploads/images/${imageName}`;
         }
-
+        console.log(date);
         const formattedDate = date.split('/').reverse().join('-');
+        console.log(formattedDate);
 
         const insertQuery = `
             INSERT INTO purchase (pc_Id, s_ID, rDate, total, pay, balance, deliveryCharge, invoiceId)
@@ -5606,15 +5606,18 @@ router.post("/settle-payment", async (req, res) => {
 // Get Today sales income
 router.get("/today-order-income", async (req, res) => {
     try {
+        const today = new Date().toISOString().split("T")[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0]; // 86400000 ms = 1 day
+
         const sql = `
             SELECT
-                IFNULL(SUM(CASE WHEN DATE(dateTime) = CURDATE() THEN amount END), 0) AS todayIncome,
-                IFNULL(SUM(CASE WHEN DATE(dateTime) = CURDATE() - INTERVAL 1 DAY THEN amount END), 0) AS yesterdayIncome
+                IFNULL(SUM(CASE WHEN DATE(dateTime) = ? THEN amount END), 0) AS todayIncome,
+                IFNULL(SUM(CASE WHEN DATE(dateTime) = ? THEN amount END), 0) AS yesterdayIncome
             FROM cash_balance
             WHERE ref_type = 'order'
         `;
 
-        const [rows] = await db.query(sql);
+        const [rows] = await db.query(sql, [today, yesterday]);
         const todayIncome = rows[0].todayIncome;
         const yesterdayIncome = rows[0].yesterdayIncome;
 
@@ -5641,24 +5644,27 @@ router.get("/today-order-income", async (req, res) => {
 // Get Today in & out order count
 router.get("/today-order-counts", async (req, res) => {
     try {
+        const today = new Date().toISOString().split("T")[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
         const sql = `
             SELECT 
                 -- Today
                 (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = CURDATE()) AS todayIn,
-                 
+                 FROM Orders WHERE orDate = ?) AS todayIn,
+
                 (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = CURDATE()) AS todayOut,
-                 
+                 FROM Orders WHERE orDate = ?) AS todayOut,
+
                 -- Yesterday
                 (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = CURDATE() - INTERVAL 1 DAY) AS yesterdayIn,
-                 
+                 FROM Orders WHERE orDate = ?) AS yesterdayIn,
+
                 (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = CURDATE() - INTERVAL 1 DAY) AS yesterdayOut
+                 FROM Orders WHERE orDate = ?) AS yesterdayOut
         `;
 
-        const [rows] = await db.query(sql);
+        const [rows] = await db.query(sql, [today, today, yesterday, yesterday]);
         const {
             todayIn,
             todayOut,
@@ -5685,7 +5691,6 @@ router.get("/today-order-counts", async (req, res) => {
         });
     }
 });
-
 
 // pass sale team value to review in month end
 
