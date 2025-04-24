@@ -121,6 +121,35 @@ const AddOtherDetails = () => {
             toast.error("Failed to add sub-category.");
         }
     };
+    const handleSaveCategory = async () => {
+        if (!catname.Catname.trim()) {
+            toast.error("Category name cannot be empty!");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/category", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ Catname: catname.Catname }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                fetchCategories();
+                toast.success("Category added successfully!");
+                setCatname({ Catname: "" }); // Reset the input field
+            } else {
+                toast.error(result.message || "Failed to add category.");
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            toast.error("Failed to add category. Please try again.");
+        }
+    };
 
     return (
         <Container className="add-item-container">
@@ -137,7 +166,7 @@ const AddOtherDetails = () => {
                             value={catname.Catname}
                             onChange={(e) => setCatname({ Catname: e.target.value })}
                         />
-                        <Button color="primary" onClick={() => toast.success("Category added!")}>
+                        <Button color="primary" onClick={handleSaveCategory}>
                             Add Category
                         </Button>
                     </div>

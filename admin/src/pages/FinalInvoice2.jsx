@@ -17,7 +17,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
     const [filteredItems, setFilteredItems] = useState([]); // List to store filtered items based on search term
     const [selectedItem, setSelectedItem] = useState([]);
     const [isLoading, setIsLoading] = useState(false);  // Loading state for stock fetch
-
     const calculateTotal = (item) => item.quantity * item.unitPrice;
     const discount = Number(selectedOrder.discount) || 0;  // Default to 0 if undefined or NaN
     const delivery = Number(selectedOrder.deliveryPrice) || 0;  // Default to 0 if undefined or NaN
@@ -261,7 +260,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
 
                     <div className="modal-buttons">
                         <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
-                        <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
+                        <button className="print-btn" onClick={handlePrintAndSubmit}>Save</button>
                         <button className="close-btn" onClick={() => setShowModal2(false)}>Close</button>
                     </div>
                 </div>

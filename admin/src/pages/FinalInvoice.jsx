@@ -251,7 +251,7 @@ const FinalInvoice = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => 
 
                 <div className="modal-buttons">
                     <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
-                    <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
+                    <button className="print-btn" onClick={handlePrintAndSubmit}>Save</button>
                     <button className="close-btn" onClick={() => setShowModal2(false)}>Close</button>
                 </div>
             </div>
