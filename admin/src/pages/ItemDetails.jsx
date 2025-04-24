@@ -567,7 +567,7 @@ const ItemDetails = () => {
                                         <>
                                             <Button color="primary" className="ms-3" onClick={() => setIsEditing(true)}>Edit Item</Button>
                                             <Button color="secondary" className="ms-3" onClick={() => setShowSupplierModal(true)}>Add Supplier</Button>
-                                            <Button color="danger" className="ms-3" onClick={() => setShowStockModal(true)}>Add Stock</Button>
+                                            {/*<Button color="danger" className="ms-3" onClick={() => setShowStockModal(true)}>Add Stock</Button>*/}
                                         </>
 
                                     ) : (
@@ -578,69 +578,6 @@ const ItemDetails = () => {
                                     )}
                                 </div>
                             </div>
-                            {/* Add Stock Modal */}
-                            <Modal isOpen={showStockModal} toggle={() => setShowStockModal(!showStockModal)}>
-                                <ModalHeader toggle={() => setShowStockModal(!showStockModal)}>Add Stock</ModalHeader>
-                                <ModalBody>
-                                    <FormGroup>
-                                        <Label>Supplier ID</Label>
-                                        <Input
-                                            type="select"
-                                            name="supplierId"
-                                            value={stockData.supplierId}
-                                            onChange={handleStockChange}
-                                        >
-                                            <option value="">Select Supplier</option>
-                                            {suppliers.map((supplier) => (
-                                                <option key={supplier.s_ID} value={supplier.s_ID}>
-                                                    {supplier.s_ID} - {supplier.name}
-                                                </option>
-                                            ))}
-                                        </Input>
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label>Cost</Label>
-                                        <Input
-                                            type="text"
-                                            name="cost"
-                                            value={stockData.cost || "N/A"} // Display "N/A" if no cost is found
-                                            readOnly // Make it non-editable
-                                        />
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Label>Quantity</Label>
-                                        <Input
-                                            type="number"
-                                            name="stockCount"
-                                            value={stockData.stockCount}
-                                            onChange={handleStockChange}
-                                        />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label>Received Date</Label>
-                                        <Input
-                                            type="date"
-                                            name="date"
-                                            value={stockData.date}
-                                            onChange={handleStockChange}
-                                        />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label>Detail</Label>
-                                        <Input
-                                            type="textarea"
-                                            name="comment"
-                                            value={stockData.comment}
-                                            onChange={handleStockChange}
-                                        />
-                                    </FormGroup>
-                                </ModalBody>
-                                <ModalFooter>
-                                    <Button color="primary" onClick={handleAddStock}>Add Stock</Button>
-                                    <Button color="secondary" onClick={() => setShowStockModal(false)}>Cancel</Button>
-                                </ModalFooter>
-                            </Modal>
                             {/* Add Supplier Modal */}
                             <Modal isOpen={showSupplierModal} toggle={() => setShowSupplierModal(!showSupplierModal)}>
                                 <ModalHeader toggle={() => setShowSupplierModal(!showSupplierModal)}>Add Supplier</ModalHeader>
@@ -681,7 +618,6 @@ const ItemDetails = () => {
                                             onChange={handleSupplierChange} // Now using correct function
                                         />
                                     </FormGroup>
-
                                 </ModalBody>
                                 <ModalFooter>
                                     <Button color="primary" onClick={handleAddSupplier}>Add Supplier</Button>
