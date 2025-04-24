@@ -3351,8 +3351,9 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             imagePath = `/uploads/images/${imageName}`;
         }
         console.log(date);
-        const formattedDate = format(parse(date, 'dd/MM/yyyy', new Date()), 'yyyy-MM-dd');
-        //const formattedDate = moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+        // const formattedDate = format(parse(date, 'dd/MM/yyyy', new Date()), 'yyyy-MM-dd');
+        // const formattedDate = moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+        const formattedDate = moment(date, ['D/M/YYYY', 'M/D/YYYY']).format('YYYY-MM-DD');
         console.log(formattedDate);
 
         const insertQuery = `

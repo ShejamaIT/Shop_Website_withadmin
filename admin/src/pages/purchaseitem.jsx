@@ -108,7 +108,12 @@ const PurchaseDetails = () => {
     };
 
     const handleDeliveryChargeChange = (e) => {
-        setDeliveryCharge(e.target.value);
+        const value = e.target.value;
+
+        // Allow only digits and decimal point (but not multiple decimals)
+        if (/^\d*\.?\d*$/.test(value)) {
+            setDeliveryCharge(value);
+        }
     };
 
     const handleInvoiceChange = (e) => {
@@ -245,7 +250,7 @@ const PurchaseDetails = () => {
                                                         <th>Item Name</th>
                                                         <th>Color</th>
                                                         <th>Unit Price (Rs.)</th>
-                                                        <th>Quantity</th>
+                                                        <th>Qty</th>
                                                         <th>Total Price (Rs.)</th>
                                                     </tr>
                                                     </thead>
@@ -257,14 +262,14 @@ const PurchaseDetails = () => {
                                                             <td>{item.color || "N/A"}</td>
                                                             <td>
                                                                 <Input
-                                                                    type="number"
+                                                                    type="text"
                                                                     value={item.unitPrice}
                                                                     onChange={(e) => handleUnitPriceChange(index, e)}
                                                                 />
                                                             </td>
                                                             <td>
                                                                 <Input
-                                                                    type="number"
+                                                                    type="text"
                                                                     value={item.quantity}
                                                                     onChange={(e) => handleQuantityChange(index, e)}
                                                                 />
@@ -281,7 +286,7 @@ const PurchaseDetails = () => {
                                     <Row className={'mb-3'}>
                                         <Label><strong>Delivery Charges:</strong></Label>
                                         <Input
-                                            type="number"
+                                            type="text"
                                             value={DeliveryCharge}
                                             onChange={handleDeliveryChargeChange}
                                             placeholder="Enter delivery charge"

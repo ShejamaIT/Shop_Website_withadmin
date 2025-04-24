@@ -13,13 +13,13 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         otherNumber: "", address: "", city: "", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:""});
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState("");
     const [selectedItems, setSelectedItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
     const [coupons, setCoupons] = useState([]);
     const [deliveryDates, setDeliveryDates] = useState([]);
-    const [deliveryPrice, setDeliveryPrice] = useState(0);
+    const [deliveryPrice, setDeliveryPrice] = useState("0");
     const [districts, setDistricts] = useState([]);
     const [deliveryRates, setDeliveryRates] = useState({});
     const [discountAmount, setDiscountAmount] = useState(0);
@@ -38,7 +38,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [orderType, setOrderType] = useState("On-site");
     const [showModal, setShowModal] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
-    const [discount, setDiscount] = useState(0);
+    const [discount, setDiscount] = useState("0");
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -742,24 +742,39 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <div className="flex-1 min-w-[150px]">
                                 <label className="block text-sm font-medium text-gray-700">Special Discount</label>
                                 <input
-                                    type="number"
-                                    min={0}
+                                    type="text"
                                     value={discount}
-                                    onChange={(e) => setDiscount(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^\d*\.?\d*$/.test(value)) {setDiscount(value);}
+                                    }}
                                     className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    placeholder="Enter discount"
                                 />
                             </div>
+
                             {/* Quantity */}
                             <div className="flex-1 min-w-[150px]">
                                 <label className="block text-sm font-medium text-gray-700">Quantity</label>
                                 <input
-                                    type="number"
-                                    min={1}
+                                    type="text"
                                     value={quantity}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^\d*$/.test(value)) {
+                                            setQuantity(value);
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        if (quantity === "" || parseInt(quantity) < 1) {
+                                            setQuantity("1");
+                                        }
+                                    }}
                                     className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                                    placeholder="Enter quantity"
                                 />
                             </div>
+
 
                             {/* Total */}
                             <div className="flex-1 min-w-[150px]">
@@ -799,7 +814,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </button>
                     {/* Order Details Table */}
                     <div className="overflow-auto max-w-full">
-                        <table className="min-w-[600px] bg-white border rounded-lg shadow-md mb-6 mt-3">
+                    <table className="min-w-[600px] bg-white border rounded-lg shadow-md mb-6 mt-3">
                             <thead className="bg-blue-500 text-white">
                             <tr>
                                 <th>Product</th>
@@ -957,7 +972,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
                             <FormGroup>
                                 <Label className="fw-bold">Delivery Charge</Label>
-                                <Input type="number" name="deliveryCharge" onChange={handleChange}/>
+                                <Input type="text" name="deliveryCharge" onChange={handleChange}/>
                             </FormGroup>
                         </>
                     )}
