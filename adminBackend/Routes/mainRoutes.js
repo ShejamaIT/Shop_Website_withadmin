@@ -4,8 +4,8 @@ import db from '../utils/db.js';
 import bwipjs from 'bwip-js';
 import path from "path";
 import fs from "fs";
-const { parse, format } = require('date-fns');
-const moment = require('moment');
+import { parse, format } from 'date-fns';
+import moment from 'moment';
 const router = express.Router();
 
 // Save  new item
