@@ -1043,7 +1043,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         <>
                             <FormGroup>
                                 <Label className="fw-bold">City</Label>
-                                <Input type="text" name="city" onChange={handleChange}/>
+                                <Input type="text" name="city" value={formData.address} onChange={handleChange}/>
                             </FormGroup>
 
                             <FormGroup>
