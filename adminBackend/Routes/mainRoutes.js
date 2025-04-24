@@ -4,6 +4,8 @@ import db from '../utils/db.js';
 import bwipjs from 'bwip-js';
 import path from "path";
 import fs from "fs";
+const { parse, format } = require('date-fns');
+const moment = require('moment');
 const router = express.Router();
 
 // Save  new item
@@ -3349,7 +3351,8 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             imagePath = `/uploads/images/${imageName}`;
         }
         console.log(date);
-        const formattedDate = date.split('/').reverse().join('-');
+        const formattedDate = format(parse(date, 'dd/MM/yyyy', new Date()), 'yyyy-MM-dd');
+        //const formattedDate = moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
         console.log(formattedDate);
 
         const insertQuery = `
@@ -3418,26 +3421,11 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
                 const barcodeImageName = `barcode_${barcodeData}.png`;
                 const barcodeImagePath = path.join(barcodeFolderPath, barcodeImageName);
 
-                const pngBuffer = await bwipjs.toBuffer({
-                    bcid: "code128",
-                    text: barcodeData,
-                    scale: 3,
-                    height: 10,
-                    includetext: true,
-                    textxalign: "center",
-                });
+                const pngBuffer = await bwipjs.toBuffer({bcid: "code128", text: barcodeData, scale: 3, height: 10, includetext: true, textxalign: "center",});
 
                 fs.writeFileSync(barcodeImagePath, pngBuffer);
 
-                await db.query(insertBarcodeQuery, [
-                    purchase_id,
-                    I_Id,
-                    lastStockId,
-                    barcodeImagePath,
-                    "Available",
-                    "",
-                    "",
-                ]);
+                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", "",]);
             }
 
             // ✅ Update stock only ONCE per item
