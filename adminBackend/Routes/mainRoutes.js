@@ -667,7 +667,9 @@ router.get("/accept-order-details", async (req, res) => {
         // 2️⃣ Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
+                od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+                od.discount AS unitDiscount,
+                i.price AS unitPrice,
                 i.bookedQty, i.availableQty, i.stockQty
             FROM Order_Detail od
                      JOIN Item i ON od.I_Id = i.I_Id
@@ -718,18 +720,28 @@ router.get("/accept-order-details", async (req, res) => {
             expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
-            items: itemsResult.map(item => ({
-                itemId: item.I_Id,
-                itemName: item.I_name,
-                color: item.color,
-                quantity: item.qty,
-                unitPrice: item.unitPrice,
-                totalPrice: Number(item.qty) * Number(item.unitPrice),
-                booked: item.bookedQty > 0,
-                bookedQuantity: item.bookedQty,
-                availableQuantity: item.availableQty,
-                stockQuantity: item.stockQty
-            })),
+            items: itemsResult.map(item => {
+                const { qty, unitPrice, unitDiscount } = item;
+                const amountBeforeDiscount = unitPrice * qty;
+                const totalDiscountAmount = unitDiscount * qty;
+                const finalAmount = item.tprice;
+
+                return {
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    color: item.color,
+                    quantity: qty,
+                    unitPrice: unitPrice,
+                    discount: unitDiscount,
+                    amountBeforeDiscount: amountBeforeDiscount.toFixed(2),
+                    totalDiscountAmount: totalDiscountAmount.toFixed(2),
+                    amount: finalAmount.toFixed(2),
+                    booked: item.bookedQty > 0,
+                    bookedQuantity: item.bookedQty,
+                    availableQuantity: item.availableQty,
+                    stockQuantity: item.stockQty
+                };
+            }),
             bookedItems: bookedItemsResult.map(item => ({
                 itemId: item.I_Id,
                 itemName: item.I_name,
@@ -1112,7 +1124,9 @@ router.get("/order-details", async (req, res) => {
         // Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
+                od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+                od.discount AS unitDiscount,
+                i.price AS unitPrice,
                 i.bookedQty, i.availableQty, i.stockQty
             FROM Order_Detail od
                      JOIN Item i ON od.I_Id = i.I_Id
@@ -1146,18 +1160,28 @@ router.get("/order-details", async (req, res) => {
             expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
-            items: itemsResult.map(item => ({
-                itemId: item.I_Id,
-                itemName: item.I_name,
-                color: item.color,
-                quantity: item.qty,
-                unitPrice: item.unitPrice,
-                totalPrice: Number(item.qty) * Number(item.unitPrice),
-                booked: item.bookedQty > 0,
-                bookedQuantity: item.bookedQty,
-                availableQuantity: item.availableQty,
-                stockQuantity: item.stockQty,
-            })),
+            items: itemsResult.map(item => {
+                const { qty, unitPrice, unitDiscount } = item;
+                const amountBeforeDiscount = unitPrice * qty;
+                const totalDiscountAmount = unitDiscount * qty;
+                const finalAmount = item.tprice;
+
+                return {
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    color: item.color,
+                    quantity: qty,
+                    unitPrice: unitPrice,
+                    discount: unitDiscount,
+                    amountBeforeDiscount: amountBeforeDiscount.toFixed(2),
+                    totalDiscountAmount: totalDiscountAmount.toFixed(2),
+                    amount: finalAmount.toFixed(2),
+                    booked: item.bookedQty > 0,
+                    bookedQuantity: item.bookedQty,
+                    availableQuantity: item.availableQty,
+                    stockQuantity: item.stockQty
+                };
+            }),
         };
         console.log(orderResponse.items);
 

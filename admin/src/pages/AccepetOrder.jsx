@@ -673,9 +673,11 @@ const OrderDetails = () => {
                                                 <p><strong>Item:</strong> {item.itemName}</p>
                                                 <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
-                                                <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
+                                                <p><strong>Discount:</strong> Rs. {item.discount}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.amount}</p>
+                                                <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
+
                                                 {isEditing && (
                                                     <FormGroup check>
                                                         <Label check>
