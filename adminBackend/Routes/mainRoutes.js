@@ -192,9 +192,10 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 // Save a order
 router.post("/orders", async (req, res) => {
     const {
-        FtName, SrName, address, balance, c_ID, category,newAddress,isAddressChanged, couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
-        expectedDate, id, isNewCustomer, items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice, totalItemPrice,dvtype,
-        type, workPlace, t_name,orderType,specialdiscountAmount
+        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged, couponCode,
+        deliveryPrice, discountAmount, district, dvStatus, email, expectedDate, id, isNewCustomer,
+        items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice,
+        totalItemPrice, dvtype, type, workPlace, t_name, orderType, specialdiscountAmount, advance, balance
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -213,7 +214,8 @@ router.post("/orders", async (req, res) => {
             tType = t_name;
         }
 
-        // **Handle New Customer Creation**
+        const finalOrderStatus = type === 'Walking' ? 'Accepted' : 'Pending';
+
         if (isNewCustomer) {
             Cust_id = await generateNewId("Customer", "c_ID", "Cus");
 
@@ -235,16 +237,13 @@ router.post("/orders", async (req, res) => {
             await db.query(sqlInsertCustomer, valuesCustomer);
         }
 
-        // **Calculate Net Total and Balance**
         const netTotal = parseFloat(totalBillPrice) || 0;
-        const advance = 0;
-        const balance = netTotal - advance;
+        const advance1 = parseFloat(advance) || 0;
+        const balance1 = parseFloat(balance) || 0;
 
-        // **Generate Order ID**
         const orID = `ORD_${Date.now()}`;
         const orderDate = new Date().toISOString().split("T")[0];
 
-        // **Handle Coupon Code**
         if (couponCode) {
             const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
             const [couponResult] = await db.query(couponQuery, [couponCode]);
@@ -259,50 +258,50 @@ router.post("/orders", async (req, res) => {
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
 
-        // **Insert Order**
         const orderQuery = `
-            INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount,specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
-            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, 'Pending')`;
+            INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`;
 
         const orderParams = [
-            orID, orderDate, Cust_id, dvStatus, parseFloat(deliveryPrice) || 0, parseFloat(discountAmount) || 0,parseFloat(specialdiscountAmount) || 0,
-            parseFloat(totalItemPrice) || 0, parseFloat(totalBillPrice) || 0, stID, expectedDate, specialNote,orderType, advance, balance
+            orID, orderDate, Cust_id, finalOrderStatus, dvStatus,
+            parseFloat(deliveryPrice) || 0,
+            parseFloat(discountAmount) || 0,
+            parseFloat(specialdiscountAmount) || 0,
+            parseFloat(totalItemPrice) || 0,
+            parseFloat(totalBillPrice) || 0,
+            stID, expectedDate, specialNote, orderType, advance1, balance1
         ];
 
         await db.query(orderQuery, orderParams);
 
-        // **Insert Order Details (Bulk Insert)**
         const orderDetailValues = items.map(item => [
             orID, item.I_Id, item.qty, parseFloat(item.price)
         ]);
 
-        const orderDetailQuery = `
-            INSERT INTO Order_Detail (orID, I_Id, qty, tprice) VALUES ?`;
-
+        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice) VALUES ?`;
         await db.query(orderDetailQuery, [orderDetailValues]);
 
-        // **Insert Delivery Info**
-        if (dvStatus === "Delivery" && !isAddressChanged) {
+        if (dvStatus === "Delivery") {
             const dvID = `DLV_${Date.now()}`;
             const deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type,driverBalance)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?,0)`;
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date, type, driverBalance)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?, ?, 0)`;
 
-            await db.query(deliveryQuery, [dvID, orID, address, district, Cust_id, expectedDate,dvtype]);
-        }else if (dvStatus === "Delivery" && isAddressChanged){
-            const dvID = `DLV_${Date.now()}`;
-            const deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date,type,driverBalance)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?,?,0)`;
-
-            await db.query(deliveryQuery, [dvID, orID, newAddress, district, Cust_id, expectedDate,dvtype]);
+            const addressToUse = isAddressChanged ? newAddress : address;
+            await db.query(deliveryQuery, [dvID, orID, addressToUse, district, Cust_id, expectedDate, dvtype]);
         }
 
-        // **Insert Coupon Info**
         if (couponCode) {
             const ocID = `OCP_${Date.now()}`;
             const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
             await db.query(couponQuery, [ocID, orID, couponCode]);
+        }
+
+        if (advance1 > 0) {
+            const cashQuery = `
+                INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+                VALUES (?, ?, 'order', NOW(), ?)`;
+            await db.query(cashQuery, ['Order Advance', orID, advance1]);
         }
 
         return res.status(201).json({
