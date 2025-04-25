@@ -100,7 +100,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     ...updatedForm,
                     dvtype: "",
                     district: "",
-                    address: "",
+                    // address: "",
                     isAddressChanged: false,
                     newAddress: "",
                     expectedDate: "",
@@ -149,7 +149,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
         }
     };
-
     const checkDeliveryAvailability = async (date) => {
         try {
             // Mock API call to check delivery availability (Replace with real API)
@@ -203,7 +202,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             setFilteredItems(filtered);
         }
     };
-
     const handleSelectItem = (item) => {
         console.log(item);
         setSelectedItem(item);
@@ -211,7 +209,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setSearchTerm("");
         setFilteredItems([]);
     };
-
     const handleAddToOrder = () => {
         if (!selectedItem) return;
 
@@ -246,7 +243,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setQuantity(1);
         setDiscount("");
     };
-
     const calculateTotalPrice = () => {
         // Calculate the total special discount for all selected items
         const totalSpecialDiscount = selectedItems.reduce((total, item) => {
@@ -458,7 +454,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             alert("Failed to add coupon. Please try again.");
         }
     };
-
 
     return (
         <div id="order" className="order-container mx-auto p-4">
@@ -746,7 +741,9 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     value={discount}
                                     onChange={(e) => {
                                         const value = e.target.value;
-                                        if (/^\d*\.?\d*$/.test(value)) {setDiscount(value);}
+                                        if (/^\d*\.?\d*$/.test(value)) {
+                                            setDiscount(value);
+                                        }
                                     }}
                                     className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                                     placeholder="Enter discount"
@@ -814,7 +811,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </button>
                     {/* Order Details Table */}
                     <div className="overflow-auto max-w-full">
-                    <table className="min-w-[600px] bg-white border rounded-lg shadow-md mb-6 mt-3">
+                        <table className="min-w-[600px] bg-white border rounded-lg shadow-md mb-6 mt-3">
                             <thead className="bg-blue-500 text-white">
                             <tr>
                                 <th>Product</th>
@@ -884,156 +881,90 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 <div className="order-details">
                     <h5 className="text-center underline">Delivery Details</h5>
                     <hr/>
-
-                    {/* Delivery Method Selection */}
                     <FormGroup>
                         <Label className="fw-bold">Delivery Method</Label>
                         <div className="d-flex gap-3">
                             <Label>
-                                <Input type="radio" name="dvStatus" value="Delivery"
-                                       onChange={handleChange}/> Delivery
+                                <Input type="radio" name="dvStatus" value="Delivery" onChange={handleChange}/> Delivery
                             </Label>
                             <Label>
-                                <Input type="radio" name="dvStatus" value="Pickup"
-                                       onChange={handleChange}/> Pickup
+                                <Input type="radio" name="dvStatus" value="Pickup" onChange={handleChange}/> Pickup
                             </Label>
                         </div>
                     </FormGroup>
-
-                    {/* Delivery Type (Direct / Combined) */}
                     {formData.dvStatus === "Delivery" && (
                         <FormGroup>
                             <Label className="fw-bold">Delivery Type</Label>
                             <div className="d-flex gap-3">
                                 <Label>
-                                    <Input type="radio" name="dvtype" value="Direct"
-                                           onChange={handleChange}/> Direct
+                                    <Input type="radio" name="dvtype" value="Direct" onChange={handleChange}/> Direct
                                 </Label>
                                 <Label>
-                                    <Input type="radio" name="dvtype" value="Combined"
-                                           onChange={handleChange}/> Combined
+                                    <Input type="radio" name="dvtype" value="Combined" onChange={handleChange}/> Combined
                                 </Label>
                             </div>
                         </FormGroup>
                     )}
-
-                    {/* Direct Delivery Fields */}
                     {formData.dvtype === "Direct" && (
                         <>
                             <FormGroup>
                                 <Label className="fw-bold">Address</Label>
-                                <Input
-                                    type="text"
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    required
-                                />
+                                <Input type="text" name="address" value={formData.address} onChange={handleChange} required/>
                             </FormGroup>
-
-                            {/* Checkbox for Address Change */}
                             <FormGroup check>
                                 <Label check>
-                                    <Input
-                                        type="checkbox"
-                                        name="isAddressChanged"
-                                        checked={formData.isAddressChanged || false}
-                                        onChange={handleChange}
-                                    />
+                                    <Input type="checkbox" name="isAddressChanged" checked={formData.isAddressChanged || false} onChange={handleChange}/>
                                     Changed Address
                                 </Label>
                             </FormGroup>
-
-                            {/* Optional New Address Field */}
                             {formData.isAddressChanged && (
                                 <FormGroup>
                                     <Label className="fw-bold">New Address</Label>
-                                    <Input
-                                        type="text"
-                                        name="newAddress"
-                                        value={formData.newAddress || ""}
-                                        onChange={handleChange}
-                                        required
-                                    />
+                                    <Input type="text" name="newAddress" value={formData.newAddress || ""} onChange={handleChange} required/>
                                 </FormGroup>
                             )}
-
                             <FormGroup>
                                 <Label className="fw-bold">Expected Date</Label>
                                 <Input type="date" name="expectedDate" onChange={handleChange}/>
                             </FormGroup>
-
-                            {/* Display Delivery Availability */}
                             {formData.expectedDate && (
                                 <p className={`text-${availableDelivery ? "success" : "danger"}`}>
                                     {availableDelivery ? "Delivery is available on this date" : "No delivery available on this date"}
                                 </p>
                             )}
-
                             <FormGroup>
                                 <Label className="fw-bold">Delivery Charge</Label>
                                 <Input type="text" name="deliveryCharge" onChange={handleChange}/>
                             </FormGroup>
                         </>
                     )}
-
-                    {/* Combined Delivery Fields */}
                     {formData.dvtype === "Combined" && (
                         <>
                             <FormGroup>
                                 <Label className="fw-bold">Address</Label>
-                                <Input
-                                    type="text"
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    required
-                                />
+                                <Input type="text" name="address" value={formData.address} onChange={handleChange} required/>
                             </FormGroup>
-
-                            {/* Checkbox for Address Change */}
                             <FormGroup check>
                                 <Label check>
-                                    <Input
-                                        type="checkbox"
-                                        name="isAddressChanged"
-                                        checked={formData.isAddressChanged || false}
-                                        onChange={handleChange}
-                                    />
+                                    <Input type="checkbox" name="isAddressChanged" checked={formData.isAddressChanged || false} onChange={handleChange}/>
                                     Changed Address
                                 </Label>
                             </FormGroup>
-
-                            {/* Optional New Address Field */}
                             {formData.isAddressChanged && (
                                 <FormGroup>
                                     <Label className="fw-bold">New Address</Label>
-                                    <Input
-                                        type="text"
-                                        name="newAddress"
-                                        value={formData.newAddress || ""}
-                                        onChange={handleChange}
-                                        required
-                                    />
+                                    <Input type="text" name="newAddress" value={formData.newAddress || ""} onChange={handleChange} required/>
                                 </FormGroup>
                             )}
-
                             <FormGroup>
                                 <Label className="fw-bold">District</Label>
-                                <Input
-                                    type="select"
-                                    name="district"
-                                    value={formData.district}
-                                    onChange={handleChange}
-                                    required
-                                >
+                                <Input type="select" name="district" value={formData.district} onChange={handleChange} required>
                                     <option value="">Select District</option>
                                     {districts.map((district) => (
                                         <option key={district} value={district}>{district}</option>
                                     ))}
                                 </Input>
                             </FormGroup>
-
                             {deliveryDates.length > 0 ? (
                                 <FormGroup>
                                     <Label className="fw-bold">Expected Delivery Date</Label>
@@ -1052,49 +983,62 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             )}
                         </>
                     )}
-
-                    {/* Pickup Fields */}
                     {formData.dvStatus === "Pickup" && (
                         <>
                             <FormGroup>
                                 <Label className="fw-bold">City</Label>
-                                <Input type="text" name="city" value={formData.address} onChange={handleChange}/>
+                                <Input
+                                    type="text"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                />
                             </FormGroup>
 
                             <FormGroup>
                                 <Label className="fw-bold">Expected Date</Label>
-                                <Input type="date" name="expectedDate" onChange={handleChange}/>
+                                <Input
+                                    type="date"
+                                    name="expectedDate"
+                                    onChange={handleChange}
+                                />
                             </FormGroup>
                         </>
                     )}
                 </div>
-                <div className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
-                    <div className="flex justify-between text-base text-gray-700">
-                        <span>Delivery Fee</span>
-                        <span>Rs.{deliveryPrice}</span>
-                    </div>
-                    <div className="flex justify-between text-base text-gray-700">
-                        <span>Special Discount</span>
-                        <span>Rs.{specialdiscountAmount}</span>
-                    </div>
-                    <div className="flex justify-between text-base text-gray-700">
-                        <span>Coupon Discount</span>
-                        <span>Rs.{discountAmount}</span>
-                    </div>
-                    <div className="flex justify-between text-base text-gray-700">
-                        <span>Total Item Price</span>
-                        <span>Rs.{totalItemPrice}</span>
-                    </div>
-                    <div
-                        className="flex justify-between text-lg font-semibold text-gray-900 border-t pt-2 mt-2">
-                        <span>Total Bill Price</span>
-                        <span>Rs.{totalBillPrice}</span>
-                    </div>
+                <div className="order-details">
+                    <h5 className="text-center underline">Payment Details</h5>
+                    <hr/>
                 </div>
-                <Row>
-                    <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
-                    <Col md="6"><Button type="button" color="danger" block onClick={handleClear}>Clear</Button></Col>
-                </Row>
+                    <div
+                        className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
+                        <div className="flex justify-between text-base text-gray-700">
+                            <span>Delivery Fee</span>
+                            <span>Rs.{deliveryPrice}</span>
+                        </div>
+                        <div className="flex justify-between text-base text-gray-700">
+                            <span>Special Discount</span>
+                            <span>Rs.{specialdiscountAmount}</span>
+                        </div>
+                        <div className="flex justify-between text-base text-gray-700">
+                            <span>Coupon Discount</span>
+                            <span>Rs.{discountAmount}</span>
+                        </div>
+                        <div className="flex justify-between text-base text-gray-700">
+                            <span>Total Item Price</span>
+                            <span>Rs.{totalItemPrice}</span>
+                        </div>
+                        <div
+                            className="flex justify-between text-lg font-semibold text-gray-900 border-t pt-2 mt-2">
+                            <span>Total Bill Price</span>
+                            <span>Rs.{totalBillPrice}</span>
+                        </div>
+                    </div>
+                    <Row>
+                        <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
+                        <Col md="6"><Button type="button" color="danger" block
+                                            onClick={handleClear}>Clear</Button></Col>
+                    </Row>
             </Form>
 
             {showModal && (
