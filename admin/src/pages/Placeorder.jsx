@@ -10,7 +10,7 @@ import AddNewCoupone from "../pages/AddNewCoupone";
 
 const PlaceOrder = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", email: "", phoneNumber: "",occupation:"",workPlace:"",
-        otherNumber: "", address: "", city: "", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:""});
+        otherNumber: "", address: "", city: "", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [quantity, setQuantity] = useState("");
@@ -39,6 +39,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const [showModal, setShowModal] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
     const [discount, setDiscount] = useState("0");
+    const [advance, setAdvance] = useState("0");
+    const [balance, setBalance] = useState("0");
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -84,7 +86,40 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     };
     useEffect(() => {
         calculateTotalPrice();
-    }, [selectedItems, deliveryPrice, discountAmount]); // Recalculate when dependencies change
+    }, [selectedItems, deliveryPrice, discountAmount,advance,balance]); // Recalculate when dependencies change
+    const calculateTotalPrice = () => {
+        // Calculate the total special discount for all selected items
+        const totalSpecialDiscount = selectedItems.reduce((total, item) => {
+            // Sum up the discount for each item
+            const specialDiscount = item.discount || 0;
+            return total + specialDiscount * item.qty; // Multiply by quantity to get the total discount for each item
+        }, 0);
+
+        // Update the specialdiscountAmount state with the total special discount
+        setSpecialDiscountAmount(totalSpecialDiscount);
+
+        // Calculate the item total by applying the special discount and summing up the price for all items
+        const itemTotal = selectedItems.reduce((total, item) => {
+            const unitPrice = item.originalPrice ?? item.price; // Fallback to price if no originalPrice
+            const specialDiscount = item.discount || 0;
+            const discountedPrice = unitPrice - specialDiscount;
+            return total + discountedPrice * item.qty; // Add the item total to the overall total
+        }, 0);
+
+        // Set the total item price state
+        setTotalItemPrice(itemTotal);
+
+        // Calculate the final total bill price (subtract coupon discount and add delivery fee)
+        const total = Number(itemTotal) - Number(discountAmount || 0) + Number(deliveryPrice || 0);
+
+        // Set the total bill price state
+        setTotalBillPrice(total);
+
+        // Advance is a string, so parse and calculate balance
+        const adv = parseFloat(advance) || 0;
+        const remaining = total - adv;
+        setBalance(remaining >= 0 ? remaining.toFixed(2) : "0.00");
+    };
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
@@ -93,7 +128,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 ...prev,
                 [name]: type === "checkbox" ? checked : value,
             };
-
             // If switching to Pickup, reset all Delivery-related fields
             if (name === "dvStatus" && value === "Pickup") {
                 updatedForm = {
@@ -108,7 +142,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 };
                 setDeliveryPrice(0);
             }
-
             // If switching to Direct Delivery, reset some fields
             if (name === "dvtype" && value === "Direct") {
                 updatedForm = {
@@ -118,31 +151,25 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     deliveryCharge: "",
                 };
             }
-
             // If Address change is unchecked, clear new address
             if (name === "isAddressChanged" && !checked) {
                 updatedForm.newAddress = "";
             }
-
             return updatedForm;
         });
-
         // Handle delivery price updates
         if (name === "district") {
             setDeliveryPrice(deliveryRates[value] || 0);
             fetchDeliveryDates(value);
         }
-
         // If entering Direct delivery charge manually
         if (name === "deliveryCharge" && formData.dvtype === "Direct") {
             setDeliveryPrice(value);
         }
-
         // Check delivery availability for Direct
         if (name === "expectedDate" && formData.dvtype === "Direct") {
             checkDeliveryAvailability(value);
         }
-
         // Handle coupon code
         if (name === "couponCode") {
             const selectedCoupon = coupons.find((c) => c.coupon_code === value);
@@ -238,60 +265,50 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 },
             ]);
         }
-
         setSelectedItem(null);
         setQuantity(1);
         setDiscount("");
     };
-    const calculateTotalPrice = () => {
-        // Calculate the total special discount for all selected items
-        const totalSpecialDiscount = selectedItems.reduce((total, item) => {
-            // Sum up the discount for each item
-            const specialDiscount = item.discount || 0;
-            return total + specialDiscount * item.qty; // Multiply by quantity to get the total discount for each item
-        }, 0);
-
-        // Update the specialdiscountAmount state with the total special discount
-        setSpecialDiscountAmount(totalSpecialDiscount);
-
-        // Calculate the item total by applying the special discount and summing up the price for all items
-        const itemTotal = selectedItems.reduce((total, item) => {
-            const unitPrice = item.originalPrice ?? item.price; // Fallback to price if no originalPrice
-            const specialDiscount = item.discount || 0;
-            const discountedPrice = unitPrice - specialDiscount;
-            return total + discountedPrice * item.qty; // Add the item total to the overall total
-        }, 0);
-
-        // Set the total item price state
-        setTotalItemPrice(itemTotal);
-
-        // Calculate the final total bill price (subtract coupon discount and add delivery fee)
-        const total = Number(itemTotal) - Number(discountAmount || 0) + Number(deliveryPrice || 0);
-
-        // Set the total bill price state
-        setTotalBillPrice(total);
-    };
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Basic validation
         if (!formData.FtName || !formData.SrName || !formData.email || !formData.phoneNumber || selectedItems.length === 0) {
             toast.error("Please fill all details and add at least one item.");
             return;
         }
 
-        if (formData.dvStatus === "Delivery" && formData.dvtype === "Combined" &&(!formData.address || !formData.district || !formData.expectedDate)) {
+        if (formData.dvStatus === "Delivery" && formData.dvtype === "Combined" && (!formData.address || !formData.district || !formData.expectedDate)) {
             toast.error("Please complete all delivery details.");
             return;
         }
-        const fullName = `${formData.FtName} ${formData.SrName}`.trim();
+
+        // ✅ Add advance and balance to formData before sending
+        const updatedFormData = {
+            ...formData,
+            advance: parseFloat(advance).toFixed(2),
+            balance: parseFloat(balance).toFixed(2),
+            city: formData.address,
+        };
 
         const orderData = {
-            ...formData,
+            ...updatedFormData,
             isNewCustomer,
             orderType,
-            items: selectedItems.map(item => ({ I_Id: item.I_Id, qty: item.qty, price: item.price * item.qty })),
-            deliveryPrice, discountAmount, totalItemPrice, totalBillPrice,specialdiscountAmount
+            items: selectedItems.map(item => ({
+                I_Id: item.I_Id,
+                qty: item.qty,
+                price: item.price * item.qty,
+            })),
+            deliveryPrice,
+            discountAmount,
+            totalItemPrice,
+            totalBillPrice,
+            specialdiscountAmount,
         };
+
         console.log(orderData);
+
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders", {
                 method: "POST",
@@ -307,7 +324,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 toast.success("Order placed successfully!");
                 handleClear();
                 setTimeout(() => {
-                    window.location.reload(); // Auto-refresh the page
+                    window.location.reload();
                 }, 1000);
             } else {
                 toast.error(result.message || "Something went wrong. Please try again.");
@@ -316,11 +333,11 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             console.error("Error submitting order data:", error);
             toast.error("Error submitting order data. Please try again.");
         }
-
     };
+
     const handleClear = () => {
         setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", email: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
-            city: "", district: "",specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",type:"",category:"",balance:""});
+            city: "", district: "",specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",type:"",category:"",balance:"",advance:""});
         setSelectedItems([]);setSearchTerm("");setDeliveryPrice(0);setDiscountAmount(0);setTotalItemPrice(0);setTotalBillPrice(0);
     };
     const handleSearchChange1 = (e) => {
@@ -1009,35 +1026,64 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                 <div className="order-details">
                     <h5 className="text-center underline">Payment Details</h5>
                     <hr/>
+                    <>
+                        <FormGroup>
+                            <Label className="fw-bold">Advance</Label>
+                            <Input
+                                type="text"
+                                name="advance"
+                                value={advance}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+
+                                    // Allow only numbers and a single dot
+                                    if (/^\d*\.?\d*$/.test(val)) {
+                                        setAdvance(val);
+                                    }
+                                }}
+
+                                required
+                            />
+                        </FormGroup>
+
+                    </>
                 </div>
-                    <div
-                        className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Delivery Fee</span>
-                            <span>Rs.{deliveryPrice}</span>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Special Discount</span>
-                            <span>Rs.{specialdiscountAmount}</span>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Coupon Discount</span>
-                            <span>Rs.{discountAmount}</span>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Total Item Price</span>
-                            <span>Rs.{totalItemPrice}</span>
-                        </div>
-                        <div
-                            className="flex justify-between text-lg font-semibold text-gray-900 border-t pt-2 mt-2">
-                            <span>Total Bill Price</span>
-                            <span>Rs.{totalBillPrice}</span>
-                        </div>
+                <div
+                    className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Delivery Fee</span>
+                        <span>Rs.{deliveryPrice}</span>
                     </div>
-                    <Row>
-                        <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
-                        <Col md="6"><Button type="button" color="danger" block
-                                            onClick={handleClear}>Clear</Button></Col>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Special Discount</span>
+                        <span>Rs.{specialdiscountAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Coupon Discount</span>
+                        <span>Rs.{discountAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Total Item Price</span>
+                        <span>Rs.{totalItemPrice}</span>
+                    </div>
+                    <div
+                        className="flex justify-between text-lg font-semibold text-gray-900 border-t pt-2 mt-2">
+                        <span>Total Bill Price</span>
+                        <span>Rs.{totalBillPrice}</span>
+                    </div>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Advance </span>
+                        <span>Rs.{advance}</span>
+                    </div>
+                    <div className="flex justify-between text-base text-gray-700">
+                        <span>Balance</span>
+                        <span>Rs.{balance}</span>
+                    </div>
+                </div>
+                <Row>
+                    <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
+                    <Col md="6"><Button type="button" color="danger" block
+                                        onClick={handleClear}>Clear</Button></Col>
                     </Row>
             </Form>
 
