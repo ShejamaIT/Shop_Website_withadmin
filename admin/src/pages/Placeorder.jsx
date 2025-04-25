@@ -596,7 +596,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <FormGroup>
                                 <Label className="fw-bold">Optional Number</Label>
                                 <Input type="text" name="otherNumber" value={formData.otherNumber}
-                                       onChange={handleChange} required/>
+                                       onChange={handleChange}/>
                             </FormGroup>
                         </Col>
                     </Row>
@@ -605,7 +605,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <FormGroup>
                                 <Label className="fw-bold">NIC</Label>
                                 <Input type="text" name="id" value={formData.id} onChange={handleChange}
-                                       required/>
+                                       />
                             </FormGroup>
                         </Col>
                         {!isNewCustomer && (
@@ -620,8 +620,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </Row>
                     <FormGroup>
                         <Label className="fw-bold">Email</Label>
-                        <Input type="text" name="email" value={formData.email} onChange={handleChange}
-                               required/>
+                        <Input type="text" name="email" value={formData.email} onChange={handleChange}/>
                     </FormGroup>
                     <Row>
                         <Col md={6}>
