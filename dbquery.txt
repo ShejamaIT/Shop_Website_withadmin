@@ -162,6 +162,7 @@ CREATE TABLE Order_Detail (
     I_Id VARCHAR(25),
     qty INT,
     tprice DOUBLE,
+    discount DOUBLE,
     PRIMARY KEY (orID, I_Id),
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
         ON DELETE CASCADE ON UPDATE CASCADE,
@@ -392,5 +393,3 @@ CREATE TABLE Damage_item(
                           ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-npm install chart.js react-chartjs-2
-npm install boxicons
