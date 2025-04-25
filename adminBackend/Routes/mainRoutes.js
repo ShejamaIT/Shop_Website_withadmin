@@ -192,10 +192,12 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 // Save a order
 router.post("/orders", async (req, res) => {
     const {
-        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged, couponCode,
-        deliveryPrice, discountAmount, district, dvStatus, email, expectedDate, id, isNewCustomer,
-        items, occupation, otherNumber, phoneNumber, specialNote, title, totalBillPrice,
-        totalItemPrice, dvtype, type, workPlace, t_name, orderType, specialdiscountAmount, advance, balance
+        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,
+        couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
+        expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
+        phoneNumber = "", specialNote, title, totalBillPrice, totalItemPrice,
+        dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
+        advance, balance
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -214,16 +216,33 @@ router.post("/orders", async (req, res) => {
             tType = t_name;
         }
 
-        const finalOrderStatus = type === 'Walking' ? 'Accepted' : 'Pending';
+        const trimmedPhone = phoneNumber.trim();
+        const trimmedOther = otherNumber.trim();
 
+        // ✅ Handle New Customer
         if (isNewCustomer) {
             Cust_id = await generateNewId("Customer", "c_ID", "Cus");
 
-            const checkExistingCustomer = `SELECT c_ID FROM Customer WHERE contact2 = ? OR contact1 = ? LIMIT 1`;
-            const [existingCustomer] = await db.query(checkExistingCustomer, [otherNumber, phoneNumber]);
+            // 🔍 Safe and flexible contact search
+            let customerSearchQuery = `SELECT c_ID FROM Customer WHERE `;
+            let searchParams = [];
 
-            if (existingCustomer.length > 0) {
-                return res.status(400).json({ success: false, message: "Customer already exists." });
+            if (trimmedPhone && trimmedOther) {
+                customerSearchQuery += `(contact1 = ? OR contact2 = ? OR contact1 = ? OR contact2 = ?) LIMIT 1`;
+                searchParams = [trimmedPhone, trimmedPhone, trimmedOther, trimmedOther];
+            } else if (trimmedPhone) {
+                customerSearchQuery += `(contact1 = ? OR contact2 = ?) LIMIT 1`;
+                searchParams = [trimmedPhone, trimmedPhone];
+            } else if (trimmedOther) {
+                customerSearchQuery += `(contact1 = ? OR contact2 = ?) LIMIT 1`;
+                searchParams = [trimmedOther, trimmedOther];
+            }
+
+            if (searchParams.length > 0) {
+                const [existingCustomer] = await db.query(customerSearchQuery, searchParams);
+                if (existingCustomer.length > 0) {
+                    return res.status(400).json({ success: false, message: "Customer already exists." });
+                }
             }
 
             const sqlInsertCustomer = `
@@ -231,7 +250,9 @@ router.post("/orders", async (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
             const valuesCustomer = [
-                Cust_id, title, FtName, SrName, address, phoneNumber, otherNumber || "", email, id, 0, type, category, tType, Occupation, WorkPlace
+                Cust_id, title, FtName, SrName, address,
+                trimmedPhone || "-", trimmedOther || "-", email, id,
+                0, type, category, tType, Occupation, WorkPlace
             ];
 
             await db.query(sqlInsertCustomer, valuesCustomer);
@@ -258,12 +279,15 @@ router.post("/orders", async (req, res) => {
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
 
+        // ✅ Set order status for Walking to 'Accepted'
+        const orderStatus = type === "Walking" ? "Accepted" : "Pending";
+
         const orderQuery = `
             INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`;
 
         const orderParams = [
-            orID, orderDate, Cust_id, finalOrderStatus, dvStatus,
+            orID, orderDate, Cust_id, orderStatus, dvStatus,
             parseFloat(deliveryPrice) || 0,
             parseFloat(discountAmount) || 0,
             parseFloat(specialdiscountAmount) || 0,
@@ -297,6 +321,7 @@ router.post("/orders", async (req, res) => {
             await db.query(couponQuery, [ocID, orID, couponCode]);
         }
 
+        // ✅ Insert cash balance if advance exists
         if (advance1 > 0) {
             const cashQuery = `
                 INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
@@ -312,7 +337,6 @@ router.post("/orders", async (req, res) => {
 
     } catch (error) {
         console.error("Error inserting order data:", error);
-
         return res.status(500).json({
             success: false,
             message: "Error inserting data into database",
