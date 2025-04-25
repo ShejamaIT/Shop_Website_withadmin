@@ -299,10 +299,10 @@ router.post("/orders", async (req, res) => {
         await db.query(orderQuery, orderParams);
 
         const orderDetailValues = items.map(item => [
-            orID, item.I_Id, item.qty, parseFloat(item.price)
+            orID, item.I_Id, item.qty, parseFloat(item.price),parseFloat(item.discount)
         ]);
 
-        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice) VALUES ?`;
+        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice,discount) VALUES ?`;
         await db.query(orderDetailQuery, [orderDetailValues]);
 
         if (dvStatus === "Delivery") {

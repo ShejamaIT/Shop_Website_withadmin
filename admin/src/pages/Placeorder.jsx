@@ -278,12 +278,13 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             return;
         }
 
-        if (formData.dvStatus === "Delivery" && formData.dvtype === "Combined" && (!formData.address || !formData.district || !formData.expectedDate)) {
+        if (formData.dvStatus === "Delivery" && formData.dvtype === "Combined" &&
+            (!formData.address || !formData.district || !formData.expectedDate)) {
             toast.error("Please complete all delivery details.");
             return;
         }
 
-        // ✅ Add advance and balance to formData before sending
+        // ✅ Add advance and balance
         const updatedFormData = {
             ...formData,
             advance: parseFloat(advance).toFixed(2),
@@ -291,19 +292,34 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             city: formData.address,
         };
 
+        // ✅ Calculate totals correctly
+        const itemList = selectedItems.map(item => {
+            const unitPrice = parseFloat(item.originalPrice || item.price || 0);
+            const discount = parseFloat(item.discount || 0);
+            const grossPrice = unitPrice - discount;
+            const netPrice = grossPrice * item.qty;
+
+            return {
+                I_Id: item.I_Id,
+                qty: item.qty,
+                price: netPrice.toFixed(2),
+                discount: discount.toFixed(2),
+            };
+        });
+
+        // ✅ Calculate totalItemPrice and totalBillPrice from selectedItems
+        const totalItemPrice = itemList.reduce((sum, item) => sum + parseFloat(item.price), 0);
+        const totalBillPrice = totalItemPrice + parseFloat(deliveryPrice || 0) - parseFloat(discountAmount || 0) - parseFloat(specialdiscountAmount || 0);
+
         const orderData = {
             ...updatedFormData,
             isNewCustomer,
             orderType,
-            items: selectedItems.map(item => ({
-                I_Id: item.I_Id,
-                qty: item.qty,
-                price: item.price * item.qty,
-            })),
+            items: itemList,
             deliveryPrice,
             discountAmount,
-            totalItemPrice,
-            totalBillPrice,
+            totalItemPrice: totalItemPrice.toFixed(2),
+            totalBillPrice: totalBillPrice.toFixed(2),
             specialdiscountAmount,
         };
 
@@ -334,6 +350,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             toast.error("Error submitting order data. Please try again.");
         }
     };
+
 
     const handleClear = () => {
         setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", email: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
