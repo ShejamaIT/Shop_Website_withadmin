@@ -711,12 +711,12 @@ router.get("/accept-order-details", async (req, res) => {
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
             deliveryStatus: orderData.delStatus,
-            deliveryCharge: orderData.delPrice.toFixed(2),
-            discount: orderData.discount.toFixed(2),
-            specialdiscount: orderData.specialdic.toFixed(2),
-            totalPrice: orderData.total.toFixed(2),
-            advance: orderData.advance.toFixed(2),
-            balance: orderData.balance.toFixed(2),
+            deliveryCharge: orderData.delPrice,
+            discount: orderData.discount,
+            specialdiscount: orderData.specialdic,
+            totalPrice: orderData.total,
+            advance: orderData.advance,
+            balance: orderData.balance,
             payStatus: orderData.payStatus,
             expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
@@ -732,11 +732,11 @@ router.get("/accept-order-details", async (req, res) => {
                     itemName: item.I_name,
                     color: item.color,
                     quantity: qty,
-                    unitPrice: unitPrice.toFixed(2),
-                    discount: unitDiscount.toFixed(2),
-                    amountBeforeDiscount: amountBeforeDiscount.toFixed(2),
-                    totalDiscountAmount: totalDiscountAmount.toFixed(2),
-                    amount: finalAmount.toFixed(2),
+                    unitPrice: unitPrice,
+                    discount: unitDiscount,
+                    amountBeforeDiscount: amountBeforeDiscount,
+                    totalDiscountAmount: totalDiscountAmount,
+                    amount: finalAmount,
                     booked: item.bookedQty > 0,
                     bookedQuantity: item.bookedQty,
                     availableQuantity: item.availableQty,
@@ -822,8 +822,10 @@ router.get("/issued-order-details", async (req, res) => {
         // 2️⃣ Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
-                i.bookedQty, i.availableQty
+                od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+                od.discount AS unitDiscount,
+                i.price AS unitPrice,
+                i.bookedQty, i.availableQty, i.stockQty
             FROM Order_Detail od
                      JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
@@ -878,16 +880,28 @@ router.get("/issued-order-details", async (req, res) => {
             payStatus: orderData.payStatus,
             expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
-            items: itemsResult.map(item => ({
-                itemId: item.I_Id,
-                itemName: item.I_name,
-                color: item.color,
-                quantity: item.qty,
-                unitPrice: item.unitPrice,
-                totalPrice: Number(item.qty) * Number(item.unitPrice),
-                bookedQuantity: item.bookedQty,
-                availableQuantity: item.availableQty
-            })),
+            items: itemsResult.map(item => {
+                const { qty, unitPrice, unitDiscount } = item;
+                const amountBeforeDiscount = unitPrice * qty;
+                const totalDiscountAmount = unitDiscount * qty;
+                const finalAmount = item.tprice;
+
+                return {
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    color: item.color,
+                    quantity: qty,
+                    unitPrice: unitPrice,
+                    discount: unitDiscount,
+                    amountBeforeDiscount: amountBeforeDiscount,
+                    totalDiscountAmount: totalDiscountAmount,
+                    amount: finalAmount,
+                    booked: item.bookedQty > 0,
+                    bookedQuantity: item.bookedQty,
+                    availableQuantity: item.availableQty,
+                    stockQuantity: item.stockQty
+                };
+            }),
             issuedItems: issuedItemsResult.map(item => ({
                 pid_Id: item.pid_Id,
                 stockId: item.stock_Id,
@@ -979,10 +993,12 @@ router.get("/returned-order-details", async (req, res) => {
         // 2️⃣ Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.I_Id, i.I_name, i.color, od.qty, od.tprice, i.price AS unitPrice,
-                i.bookedQty, i.availableQty
+                od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+                od.discount AS unitDiscount,
+                i.price AS unitPrice,
+                i.bookedQty, i.availableQty, i.stockQty
             FROM Order_Detail od
-            JOIN Item i ON od.I_Id = i.I_Id
+                     JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
@@ -1027,16 +1043,28 @@ router.get("/returned-order-details", async (req, res) => {
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             returnReason: orderData.returnReason || null,
-            items: itemsResult.map(item => ({
-                itemId: item.I_Id,
-                itemName: item.I_name,
-                color: item.color,
-                quantity: item.qty,
-                unitPrice: item.unitPrice,
-                totalPrice: Number(item.qty) * Number(item.unitPrice),
-                bookedQuantity: item.bookedQty,
-                availableQuantity: item.availableQty
-            })),
+            items: itemsResult.map(item => {
+                const { qty, unitPrice, unitDiscount } = item;
+                const amountBeforeDiscount = unitPrice * qty;
+                const totalDiscountAmount = unitDiscount * qty;
+                const finalAmount = item.tprice;
+
+                return {
+                    itemId: item.I_Id,
+                    itemName: item.I_name,
+                    color: item.color,
+                    quantity: qty,
+                    unitPrice: unitPrice,
+                    discount: unitDiscount,
+                    amountBeforeDiscount: amountBeforeDiscount,
+                    totalDiscountAmount: totalDiscountAmount,
+                    amount: finalAmount,
+                    booked: item.bookedQty > 0,
+                    bookedQuantity: item.bookedQty,
+                    availableQuantity: item.availableQty,
+                    stockQuantity: item.stockQty
+                };
+            }),
             issuedItems: issuedItemsResult.map(item => ({
                 itemId: item.I_Id,
                 itemName: item.I_name,
@@ -1147,13 +1175,13 @@ router.get("/order-details", async (req, res) => {
             optionalNumber: orderData.contact2,
             orderStatus: orderData.orStatus,
             deliveryStatus: orderData.delStatus,
-            deliveryCharge: orderData.delPrice.toFixed(2),
-            discount: orderData.discount.toFixed(2),
-            specialdiscount: orderData.specialdic.toFixed(2),
-            netTotal: orderData.netTotal.toFixed(2),
-            totalPrice: orderData.total.toFixed(2),
-            advance: orderData.advance.toFixed(2),
-            balance: orderData.balance.toFixed(2),
+            deliveryCharge: orderData.delPrice,
+            discount: orderData.discount,
+            specialdiscount: orderData.specialdic,
+            netTotal: orderData.netTotal,
+            totalPrice: orderData.total,
+            advance: orderData.advance,
+            balance: orderData.balance,
             payStatus: orderData.payStatus,
             customerId: orderData.c_ID,
             name: customerName, // Title added to the name
@@ -1172,11 +1200,11 @@ router.get("/order-details", async (req, res) => {
                     itemName: item.I_name,
                     color: item.color,
                     quantity: qty,
-                    unitPrice: unitPrice.toFixed(2),
-                    discount: unitDiscount.toFixed(2),
-                    amountBeforeDiscount: amountBeforeDiscount.toFixed(2),
-                    totalDiscountAmount: totalDiscountAmount.toFixed(2),
-                    amount: finalAmount.toFixed(2),
+                    unitPrice: unitPrice,
+                    discount: unitDiscount,
+                    amountBeforeDiscount: amountBeforeDiscount,
+                    totalDiscountAmount: totalDiscountAmount,
+                    amount: finalAmount,
                     booked: item.bookedQty > 0,
                     bookedQuantity: item.bookedQty,
                     availableQuantity: item.availableQty,
@@ -1204,7 +1232,6 @@ router.get("/order-details", async (req, res) => {
                     status: deliveryData.status,
                     scheduleDate: formatDate(deliveryData.schedule_Date),
                     deliveryDate: deliveryData.delivery_Date ? formatDate(deliveryData.delivery_Date) : null
-
                 };
             }
         }
