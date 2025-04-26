@@ -273,7 +273,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         e.preventDefault();
 
         // Basic validation
-        if (!formData.FtName || !formData.SrName || !formData.email || !formData.phoneNumber || selectedItems.length === 0) {
+        if (!formData.FtName || !formData.phoneNumber || selectedItems.length === 0) {
             toast.error("Please fill all details and add at least one item.");
             return;
         }
