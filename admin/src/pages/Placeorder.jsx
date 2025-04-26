@@ -417,7 +417,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setShowModal1(true);
     };
     const handleAddItem = async (newItem) => {
-          try {
+        try {
             const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
 
             const formDataToSend = new FormData();
@@ -622,7 +622,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             <FormGroup>
                                 <Label className="fw-bold">NIC</Label>
                                 <Input type="text" name="id" value={formData.id} onChange={handleChange}
-                                       />
+                                />
                             </FormGroup>
                         </Col>
                         {!isNewCustomer && (
@@ -1100,7 +1100,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
                     <Col md="6"><Button type="button" color="danger" block
                                         onClick={handleClear}>Clear</Button></Col>
-                    </Row>
+                </Row>
             </Form>
 
             {showModal && (

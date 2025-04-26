@@ -195,10 +195,11 @@ router.post("/orders", async (req, res) => {
         FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,
         couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
-        phoneNumber = "", specialNote, title, totalBillPrice, totalItemPrice,
+        phoneNumber = "", specialNote, title, totalItemPrice,
         dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
         advance, balance
     } = req.body;
+
 
     if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ success: false, message: "Invalid or missing items." });
@@ -209,7 +210,7 @@ router.post("/orders", async (req, res) => {
         let Occupation = "-", WorkPlace = "-", tType = "-";
         let stID = null;
 
-        if (type === 'Walking' || type === 'On site') {
+        if (type === 'Walking' || type === 'On-site') {
             Occupation = occupation;
             WorkPlace = workPlace;
         } else {
@@ -258,9 +259,10 @@ router.post("/orders", async (req, res) => {
             await db.query(sqlInsertCustomer, valuesCustomer);
         }
 
-        const netTotal = parseFloat(totalBillPrice) || 0;
         const advance1 = parseFloat(advance) || 0;
         const balance1 = parseFloat(balance) || 0;
+        const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
+        const TotalOrder = parseFloat(totalItemPrice) + parseFloat(deliveryPrice);
 
         const orID = `ORD_${Date.now()}`;
         const orderDate = new Date().toISOString().split("T")[0];
@@ -274,14 +276,13 @@ router.post("/orders", async (req, res) => {
             }
 
             stID = couponResult[0].stID;
-            const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
+
             const updateSalesTeamQuery = `UPDATE sales_team SET totalOrder = totalOrder + ? WHERE stID = ?`;
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
 
         // ✅ Set order status for Walking to 'Accepted'
-        const orderStatus = type === "Walking" ? "Accepted" : "Pending";
-
+        const orderStatus = orderType === "Walking" ? "Accepted" : "Pending";
         const orderQuery = `
             INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`;
@@ -292,7 +293,7 @@ router.post("/orders", async (req, res) => {
             parseFloat(discountAmount) || 0,
             parseFloat(specialdiscountAmount) || 0,
             parseFloat(totalItemPrice) || 0,
-            parseFloat(totalBillPrice) || 0,
+            parseFloat(TotalOrder) || 0,
             stID, expectedDate, specialNote, orderType, advance1, balance1
         ];
 
