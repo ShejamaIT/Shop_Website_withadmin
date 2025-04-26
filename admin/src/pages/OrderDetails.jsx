@@ -62,11 +62,21 @@ const OrderDetails = () => {
     };
 
     const calculateTotal = () => {
-        const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
+        const items = formData.items || [];
+
+        const itemTotal = items.reduce((sum, item) => {
+            const amount = Number(item.amount) || 0;
+            return sum + amount;
+        }, 0);
+
         const delivery = Number(formData.deliveryCharge || 0);
         const discount = Number(formData.discount || 0);
-        return itemTotal + delivery - discount;
+
+        const total = itemTotal + delivery - discount;
+        return total.toFixed(2);
     };
+
+
     const calculateBalance = (total,advance) => {
         return Number(total) - Number(advance);
     }
@@ -492,9 +502,10 @@ const OrderDetails = () => {
                                                 <p><strong>Item:</strong> {item.itemName}</p>
                                                 <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
-                                                <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
+                                                <p><strong>Discount:</strong> Rs. {item.discount}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.amount}</p>
+                                                <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 {isEditing && (
                                                     <FormGroup check>
                                                         <Label check>
@@ -526,7 +537,7 @@ const OrderDetails = () => {
                                 <div className="order-summary">
                                     <Row>
                                         <Col md="4">
-                                            {!isEditing ? (
+                                        {!isEditing ? (
                                                 <p><strong>Discount
                                                     Price:</strong> Rs. {formData.discount ?? order.discount}</p>
                                             ) : (
