@@ -7,20 +7,20 @@ const Sidebar = ({ onNavigate, activePage }) => {
 
     const menuItems = [
         { id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/dashboard" },
+        { id: "stock", icon: "bx-pie-chart-alt-2", label: "Graphs", path: "/dashboard/stock" },
         { id: "products", icon: "bx-box", label: "Product", path: "/dashboard/products" },
         { id: "orders", icon: "bx-cart", label: "Place Order", path: "/dashboard/orders" },
         { id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/dashboard/product_list" },
+        { id: "deliveries", icon: "bx", label: "Deliveries", path: "/dashboard/delivery" },
         { id: "customers", icon: "bx-user", label: "Customer", path: "/dashboard/customers" },
-        { id: "stock", icon: "bx-pie-chart-alt-2", label: "Stock", path: "/dashboard/stock" },
         { id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/dashboard/suppliers" },
         { id: "employees", icon: "bx-book-alt", label: "Employee", path: "/dashboard/employees" },
     ];
-
     return (
         <div className="sidebar">
             <div className="logo-details">
                 <i className='bx bx-code-alt'></i>
-                <span className="logo_name">Pos System</span>
+                <span className="logo_name">Shejama</span>
             </div>
             <ul className="nav-links">
                 {menuItems.map(item => (
