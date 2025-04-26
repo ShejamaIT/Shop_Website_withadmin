@@ -90,10 +90,6 @@ const DeliveryNotes = () => {
             setReceiptDataD(updatedReceiptData);
             setShowModal2(false);
             setShowDeliveryView(true);
-            setTimeout(() => {
-                window.location.reload(); // Auto-refresh the page
-            }, 1000);
-
         } catch (error) {
             console.error("Error while submitting delivery note:", error);
             toast.error(error.message || "An unexpected error occurred while submitting the delivery note.");
@@ -403,13 +399,6 @@ const DeliveryNotes = () => {
                             handlePaymentUpdate={handleSubmit3}
                         />
                     )}
-                    {/*{showModal1 && selectedOrder && (*/}
-                    {/*    <FinalInvoice*/}
-                    {/*        selectedOrder={selectedOrder}*/}
-                    {/*        setShowModal2={setShowModal1}*/}
-                    {/*        handlePaymentUpdate={handleSubmit3}*/}
-                    {/*    />*/}
-                    {/*)}*/}
                 </Col>
             </Row>
         </Container>

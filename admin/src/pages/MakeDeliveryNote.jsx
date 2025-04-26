@@ -15,6 +15,7 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
 
     // Filter orders with balance
     useEffect(() => {
+        console.log(selectedOrders);
         const ordersWithBalance = selectedOrders.filter(order => order.balance > 0);
         setOrdersWithBalance(ordersWithBalance);
     }, [selectedOrders]);
@@ -24,6 +25,11 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
         const totalBalance = ordersWithBalance.reduce((sum, order) => sum + order.balance, 0);
         setBalanceToCollect(totalBalance);
     }, [ordersWithBalance]);
+    useEffect(() => {
+        const totalDeliveryCharge = selectedOrders.reduce((sum, order) => sum + (order.deliveryCharge || 0), 0);
+        setHire(totalDeliveryCharge.toString());
+    }, [selectedOrders]);
+
 
     // Fetch drivers
     useEffect(() => {
