@@ -3,22 +3,18 @@ import { Container, Row, Nav, NavItem, NavLink, TabContent, TabPane } from "reac
 import Helmet from "../components/Helmet/Helmet";
 import classnames from "classnames";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import TablePending from "../components/tables/TablePending";
 import TableAccepting from "../components/tables/TableAccepting";
 import TableCompleted from "../components/tables/TableCompleted";
 import Tableforproduction from "../components/tables/Tableforproduction";
 import TableIssued from "../components/tables/TableIssuedOrders";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
-import DeliveryNotes from "./DeliveryNotes";
-import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
-import AddDeliveryShedule from "./AddDeliveryShedule";
 import TableReturned from "../components/tables/TableReturnedOrders";
 import TableCancled from "../components/tables/TableCancelledOrders";
 import TableDeliverd from "../components/tables/TableDeliverdOrders";
 
 const AllOrders = () => {
-    const [activeTab, setActiveTab] = useState("Place Order");
+    const [activeTab, setActiveTab] = useState("Pending Orders");
     const [nestedActiveTab, setNestedActiveTab] = useState("1");
     const [refreshKey, setRefreshKey] = useState(0); // For forcing re-render
 
@@ -31,7 +27,6 @@ const AllOrders = () => {
         "Accepted Orders",
         "Production",
         "Completed Orders",
-        "Delivery Notes",
         "Delivered Orders",
         "Issued Orders",
         "Returned Orders",
@@ -79,12 +74,6 @@ const AllOrders = () => {
 
                     {/* Main Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        {/*<TabPane tabId="Place Order" key={refreshKey}>*/}
-                        {/*    <Row>*/}
-                        {/*        <PlaceOrder onPlaceOrder={handleDataUpdate} />*/}
-                        {/*    </Row>*/}
-                        {/*</TabPane>*/}
-
                         <TabPane tabId="Pending Orders" key={refreshKey}>
                             <Row>
                                 <TablePending />
@@ -139,58 +128,6 @@ const AllOrders = () => {
                                 <TableCompleted />
                             </Row>
                         </TabPane>
-
-                        {/* Delivery Notes Tabs */}
-                        <TabPane tabId="Delivery Notes" key={refreshKey}>
-                            <Nav tabs className="mb-3">
-                                <NavItem>
-                                    <NavLink
-                                        className={classnames({ active: nestedActiveTab === "1" })}
-                                        onClick={() => setNestedActiveTab("1")}
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        Create Delivery Note
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink
-                                        className={classnames({ active: nestedActiveTab === "2" })}
-                                        onClick={() => setNestedActiveTab("2")}
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        All delivery notes
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink
-                                        className={classnames({ active: nestedActiveTab === "3" })}
-                                        onClick={() => setNestedActiveTab("3")}
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        Add Scheduled Dates
-                                    </NavLink>
-                                </NavItem>
-                            </Nav>
-
-                            <TabContent activeTab={nestedActiveTab}>
-                                <TabPane tabId="1" key={refreshKey}>
-                                    <Row>
-                                        <DeliveryNotes />
-                                    </Row>
-                                </TabPane>
-                                <TabPane tabId="2" key={refreshKey}>
-                                    <Row>
-                                        <TableAllDeliveryNotes />
-                                    </Row>
-                                </TabPane>
-                                <TabPane tabId="3" key={refreshKey}>
-                                    <Row>
-                                        <AddDeliveryShedule />
-                                    </Row>
-                                </TabPane>
-                            </TabContent>
-                        </TabPane>
-
                         <TabPane tabId="Delivered Orders" key={refreshKey}>
                             <Row>
                                 <TableDeliverd />
