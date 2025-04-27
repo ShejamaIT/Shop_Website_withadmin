@@ -1,11 +1,11 @@
 import React from 'react';
-import '../style/Navbar.css'; // assuming you'll put your styles in this file
+import '../style/Navbar.css';
 import { BiMenu, BiSearch } from 'react-icons/bi';
 
-const Navbar = () => {
+const Navbar = ({ onNavigate }) => {
     return (
         <nav className="navbar">
-            <div className="sidebar-button">
+            <div className="sidebar-button" onClick={() => onNavigate("/dashboard")}>
                 <BiMenu className="sidebarBtn" />
                 <span className="dashboard">Dashboard</span>
             </div>
