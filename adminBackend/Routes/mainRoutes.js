@@ -722,10 +722,12 @@ router.get("/accept-order-details", async (req, res) => {
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: itemsResult.map(item => {
+                console.log(item);
                 const { qty, unitPrice, unitDiscount } = item;
                 const amountBeforeDiscount = unitPrice * qty;
                 const totalDiscountAmount = unitDiscount * qty;
                 const finalAmount = item.tprice;
+                console.log(finalAmount);
 
                 return {
                     itemId: item.I_Id,
@@ -5240,7 +5242,6 @@ router.post("/delivery-payment", async (req, res) => {
     const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate,issuedItems, returnedItems, cancelledItems } = req.body;
     const { RPayment, customerbalance, driverbalance, profitOrLoss } = paymentDetails || {};
 
-
     const receivedPayment = Number(RPayment) || 0;
     const DrivBalance = Number(driverbalance) || 0;
     const CustBalance = Number(customerbalance) || 0;
@@ -5441,6 +5442,7 @@ router.post("/delivery-payment", async (req, res) => {
 
         // Update sales team records only when order status is "Issued"
         if (orderStatus === "Issued") {
+            console.log(advance1 - deliveryCharge, stID);
             await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
         }
 
