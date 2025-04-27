@@ -62,8 +62,6 @@ const DeliveryNoteDetails = () => {
                     received: false,
                 }))
             );
-
-            // Initialize reason state for each order
             const initialReasons = {};
             data.orders.forEach(order => {
                 initialReasons[order.OrID] = { reason: "", type: "" };
@@ -95,29 +93,36 @@ const DeliveryNoteDetails = () => {
         const orderId = orders[orderIndex].OrID;
 
         setOrders(prevOrders =>
-            prevOrders.map((order, i) =>
-                i === orderIndex ? { ...order, [name]: value } : order
-            )
-        );
-        setOrders(prevOrders =>
-            prevOrders.map((order, i) =>
-                i === orderIndex
-                    ? {
-                        ...order,
-                        [name]: type === "checkbox" ? checked : value,
-                        received: type === "checkbox" ? checked : order.received
+            prevOrders.map((order, i) => {
+                if (i !== orderIndex) return order;
+
+                const updatedOrder = {
+                    ...order,
+                    [name]: type === "checkbox" ? checked : value,
+                    received: type === "checkbox" ? checked : order.received,
+                };
+
+                // Auto-set deliveryStatus based on orderStatus
+                if (name === "orderStatus") {
+                    if (value === "Issued") {
+                        updatedOrder.deliveryStatus = "Delivered";
+                    } else if (value === "Returned" || value === "Cancelled") {
+                        updatedOrder.deliveryStatus = "Returned";
                     }
-                    : order
-            )
+                }
+                return updatedOrder;
+            })
         );
+
+        // Reset selected items if orderStatus becomes Returned or Cancelled
         if (name === "orderStatus" && (value === "Returned" || value === "Cancelled")) {
-            setSelectedItems(prev => ({ ...prev, [orderId]: [] })); // Reset selection
+            setSelectedItems(prev => ({ ...prev, [orderId]: [] }));
         }
     };
+
     const handleItemSelection = (orderId, itemId, stockId) => {
         // Create a unique identifier for each issued item based on both itemId and stockId
         const itemKey = `${itemId}-${stockId}`;
-
         setSelectedItems(prev => ({
             ...prev,
             [orderId]: prev[orderId]?.includes(itemKey)
@@ -144,20 +149,14 @@ const DeliveryNoteDetails = () => {
             console.warn("No items selected for status update.");
             return;
         }
-
-        // Iterate over the selected items and update their status
         Object.values(selectedItems).forEach(itemArray => {
             itemArray.forEach(itemKey => {
                 handleItemStatusChange(itemKey, selectedAction);
             });
         });
-
-        // passReservedItem(selectedItems, selectedAction); // Ensure this function handles updates correctly
         setShowStockModal(false); // Close modal
     };
     const handleSave = async () => {
-
-        // Proceed with the API call
         try {
             const returnResponse = await fetch("http://localhost:5001/api/admin/main/delivery-return", {
                 method: "POST",
@@ -168,13 +167,11 @@ const DeliveryNoteDetails = () => {
             if (!returnResponse.ok) {
                 throw new Error(`Server Error: ${returnResponse.status}`);
             }
-
             const returnResult = await returnResponse.json();
             if (!returnResult.success) {
                 toast.error(`Failed: ${returnResult.details || "Unknown error"}`);
                 return;
             }
-
             toast.success("Orders updated successfully.");
             fetchDeliveryNote();
             setIsEditing(false);
@@ -209,7 +206,6 @@ const DeliveryNoteDetails = () => {
                     confirmButtonText: "👍 Pass!",
                     cancelButtonText: "👎",
                 });
-
                 if (result.dismiss === Swal.DismissReason.cancel) {
                     CustBalance = 0;
                 }
@@ -288,43 +284,25 @@ const DeliveryNoteDetails = () => {
                 customerbalance: payment.customerbalance ?? 0,
                 profitOrLoss: payment.profitOrLoss ?? 0,
             };
-
-            console.log("🚀 Order Payment Data:", orderPayment);
-
             const updatedOrder = {
-                orderId: order.OrID,
-                driver: deliveryNote?.driverName || "",
-                driverId: deliveryNote?.devID || "",
-                deliveryDate: deliveryNote?.date || "",
-                orderStatus: order?.orderStatus || "",
-                deliveryStatus: order?.deliveryStatus || "",
-                reason: reasons?.[order.OrID]?.reason || "N/A",
-                customReason: reasons?.[order.OrID]?.customReason || null,
-                rescheduledDate: selectedDeliveryDate || null,
-                issuedItems: Array.isArray(order?.issuedItems) ? order.issuedItems : [],
-
+                orderId: order.OrID, driver: deliveryNote?.driverName || "", driverId: deliveryNote?.devID || "",
+                deliveryDate: deliveryNote?.date || "", orderStatus: order?.orderStatus || "", deliveryStatus: order?.deliveryStatus || "",
+                reason: reasons?.[order.OrID]?.reason || "N/A", customReason: reasons?.[order.OrID]?.customReason || null,
+                rescheduledDate: selectedDeliveryDate || null, issuedItems: Array.isArray(order?.issuedItems) ? order.issuedItems : [],
                 returnedItems:
                     order?.orderStatus === "Returned"
                         ? selectedItems?.[order.OrID]?.map(itemKey => {
                         const [itemId, stockId] = itemKey.split("-");
                         return { itemId, stockId, status: selectedItemStatus?.[itemKey] || "Available" };
-                    }) || []
-                        : [],
-
+                    }) || [] : [],
                 cancelledItems:
                     order?.orderStatus === "Cancelled"
                         ? selectedItems?.[order.OrID]?.map(itemKey => {
                         const [itemId, stockId] = itemKey.split("-");
                         return { itemId, stockId, status: selectedItemStatus?.[itemKey] || "Available" };
-                    }) || []
-                        : [],
-
+                    }) || [] : [],
                 paymentDetails: orderPayment,
             };
-
-            console.log("📦 Updated Order Data:", updatedOrder);
-
-            // ✅ Send request to update order
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-payment`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -334,15 +312,12 @@ const DeliveryNoteDetails = () => {
             if (!response.ok) {
                 throw new Error(`HTTP Error! Status: ${response.status}`);
             }
-
             await response.json();
             toast.success("Order updated successfully!");
             resetModal();
             fetchDeliveryNote();
-
         } catch (error) {
             console.error("❌ Update Order Error:", error);
-            toast.error("An unexpected error occurred while updating the order.");
         }
     };
 
@@ -419,7 +394,12 @@ const DeliveryNoteDetails = () => {
                                                             <>
                                                                 <FormGroup>
                                                                     <Label><strong>Order Status:</strong></Label>
-                                                                    <Input type="select" name="orderStatus" value={order.orderStatus} onChange={(e) => handleChange(e, index)}>
+                                                                    <Input
+                                                                        type="select"
+                                                                        name="orderStatus"
+                                                                        value={order.orderStatus}
+                                                                        onChange={(e) => handleChange(e, index)}
+                                                                    >
                                                                         <option value="Issued">Issued</option>
                                                                         <option value="Returned">Returned</option>
                                                                         <option value="Cancelled">Cancelled</option>
@@ -429,7 +409,12 @@ const DeliveryNoteDetails = () => {
                                                                 {(order.orderStatus === "Returned" || order.orderStatus === "Cancelled") && (
                                                                     <FormGroup>
                                                                         <Label><strong>{order.orderStatus} Reason</strong></Label>
-                                                                        <Input type="select" name="reason" value={reasons[order.OrID]?.reason} onChange={(e) => handleReasonChange(e, order.OrID)}>
+                                                                        <Input
+                                                                            type="select"
+                                                                            name="reason"
+                                                                            value={reasons[order.OrID]?.reason}
+                                                                            onChange={(e) => handleReasonChange(e, order.OrID)}
+                                                                        >
                                                                             <option value="">Select a Reason</option>
                                                                             <option value="Customer Not Answer">Customer Not Answer</option>
                                                                             <option value="Customer Rejected">Customer Rejected</option>
@@ -439,7 +424,14 @@ const DeliveryNoteDetails = () => {
                                                                             <option value="Other">Other</option>
                                                                         </Input>
                                                                         {reasons[order.OrID]?.reason === "Other" && (
-                                                                            <Input type="text" name="customReason" placeholder="Enter custom reason" value={reasons[order.OrID]?.customReason || ""} onChange={(e) => handleReasonChange(e, order.OrID)} className="mt-2"/>
+                                                                            <Input
+                                                                                type="text"
+                                                                                name="customReason"
+                                                                                placeholder="Enter custom reason"
+                                                                                value={reasons[order.OrID]?.customReason || ""}
+                                                                                onChange={(e) => handleReasonChange(e, order.OrID)}
+                                                                                className="mt-2"
+                                                                            />
                                                                         )}
                                                                     </FormGroup>
                                                                 )}
@@ -448,7 +440,12 @@ const DeliveryNoteDetails = () => {
                                                                     <FormGroup>
                                                                         <Label><strong>Reschedule Date</strong></Label>
                                                                         {deliveryDates.length > 0 ? (
-                                                                            <Input type="select" id="deliveryDateSelect" value={selectedDeliveryDate} onChange={setDate}>
+                                                                            <Input
+                                                                                type="select"
+                                                                                id="deliveryDateSelect"
+                                                                                value={selectedDeliveryDate}
+                                                                                onChange={setDate}
+                                                                            >
                                                                                 <option value="">-- Select Date --</option>
                                                                                 {deliveryDates.map((date, index) => (
                                                                                     <option key={index} value={new Date(date).toISOString().split("T")[0]}>
@@ -457,24 +454,20 @@ const DeliveryNoteDetails = () => {
                                                                                 ))}
                                                                             </Input>
                                                                         ) : (
-                                                                            <Input type="date" id="customDeliveryDate" value={selectedDeliveryDate} onChange={(e) => setSelectedDeliveryDate(e.target.value)}/>
+                                                                            <Input
+                                                                                type="date"
+                                                                                id="customDeliveryDate"
+                                                                                value={selectedDeliveryDate}
+                                                                                onChange={(e) => setSelectedDeliveryDate(e.target.value)}
+                                                                            />
                                                                         )}
                                                                     </FormGroup>
                                                                 )}
                                                             </>
                                                         )}
 
-                                                        {!isEditing ? (
-                                                            <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
-                                                        ) : (
-                                                            <FormGroup>
-                                                                <Label><strong>Delivery Status:</strong></Label>
-                                                                <Input type="select" name="deliveryStatus" value={order.deliveryStatus} onChange={(e) => handleChange(e, index)}>
-                                                                    <option value="Delivered">Delivered</option>
-                                                                    <option value="Returned">Returned</option>
-                                                                </Input>
-                                                            </FormGroup>
-                                                        )}
+                                                        /* DELIVERY STATUS: Auto Set — No Dropdown */
+                                                        <p><strong>Delivery Status:</strong> {order.orderStatus === "Issued" ? "Delivered" : "Returned"}</p>
 
                                                         <div className="issued-items">
                                                             <h6 className="mt-3">Issued Items:</h6>
@@ -519,15 +512,6 @@ const DeliveryNoteDetails = () => {
                                                         ) : (
                                                             <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
                                                         )}
-
-                                                        {/* Update Order Button */}
-                                                        {/*{isEditing && (*/}
-                                                        {/*    <div className="text-center mt-3">*/}
-                                                        {/*        <Button color="primary" onClick={() => updateOrder(order.OrID, index)}>*/}
-                                                        {/*            Update Order*/}
-                                                        {/*        </Button>*/}
-                                                        {/*    </div>*/}
-                                                        {/*)}*/}
                                                     </div>
                                                 ))}
                                             </div>
