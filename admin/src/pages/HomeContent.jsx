@@ -4,7 +4,6 @@ import { Line } from 'react-chartjs-2';
 import {Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend,} from 'chart.js';
 
 import '../style/HomeContent.css';
-import {toast} from "react-toastify";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
@@ -51,12 +50,9 @@ const HomeContent = () => {
             if (data.success) {
                 setIncome(data.data.totalIncome);
                 setIncomeIncreased(data.data.incomeIncreased); // Storing the comparison result
-            } else {
-                toast.error("Failed to fetch today's income.");
             }
         } catch (error) {
             console.error("Error fetching income:", error);
-            toast.error("Error fetching income.");
         }
     };
 
@@ -70,12 +66,9 @@ const HomeContent = () => {
                 setOutOrders(data.data.outOrders);
                 setInOrdersIncreased(data.data.inOrdersIncreased);
                 setOutOrdersIncreased(data.data.outOrdersIncreased);
-            } else {
-                toast.error("Failed to fetch order counts.");
             }
         } catch (error) {
             console.error("Fetch error:", error);
-            toast.error("Error fetching order count.");
         }
     };
     // Fetch all out of stock items
@@ -83,14 +76,9 @@ const HomeContent = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitemslessone"); // Adjust API URL if needed
             const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to fetch items.");
-            }
-
             setItems(data); // Assuming `data` contains the array of items
         } catch (err) {
             console.error("Fetch error:", err);
-            toast.error("Error fetching items.");
         }
     };
 
