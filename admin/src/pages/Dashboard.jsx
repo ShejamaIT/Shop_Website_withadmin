@@ -15,7 +15,7 @@ const Dashboard = () => {
             <div className="dashboard-container">
                 <Sidebar onNavigate={navigate} activePage={location.pathname} />
                 <div className="main-content">
-                    <NavBar />
+                    <NavBar onNavigate={navigate} />
                     <div className="page-content">
                         <Container fluid>
                             <Outlet />
