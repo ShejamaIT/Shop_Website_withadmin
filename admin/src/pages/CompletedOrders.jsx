@@ -720,9 +720,11 @@ const CompleteOrderDetails = () => {
                                                 <p><strong>Item:</strong> {item.itemName}</p>
                                                 <p><strong>Color:</strong> {item.color}</p>
                                                 <p><strong>Requested Quantity:</strong> {item.quantity}</p>
-                                                <p><strong>Amount:</strong> Rs. {item.totalPrice}</p>
-                                                <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
                                                 <p><strong>Unit Price:</strong> Rs. {item.unitPrice}</p>
+                                                <p><strong>Discount:</strong> Rs. {item.discount}</p>
+                                                <p><strong>Amount:</strong> Rs. {item.amount}</p>
+                                                <p><strong>Available Quantity:</strong> {item.availableQuantity}</p>
+
                                                 {isEditing && (
                                                     <FormGroup check>
                                                         <Label check>
@@ -734,9 +736,15 @@ const CompleteOrderDetails = () => {
                                                             />
                                                             Mark as Booked
                                                         </Label>
-                                                        <Button color="danger" className="ms-2" onClick={() => handleRemoveItem(index, item)}>Remove</Button>
-                                                        <Button color="secondary" className="ms-2" onClick={() => handleEditClick2(item, order)}>Change Qty</Button>
-                                                        <Button color="primary" className="ms-2"  onClick={() => {setSelectedItemForReserve(item);setShowStockModal1(true); }}>Reserved</Button>
+                                                        <Button color="danger" className="ms-2"
+                                                                onClick={() => handleRemoveItem(index, item)}>Remove</Button>
+                                                        <Button color="secondary" className="ms-2"
+                                                                onClick={() => handleEditClick2(item, order)}>Change
+                                                            Qty</Button>
+                                                        <Button color="primary" className="ms-2" onClick={() => {
+                                                            setSelectedItemForReserve(item);
+                                                            setShowStockModal1(true);
+                                                        }}>Reserved</Button>
                                                     </FormGroup>
 
                                                 )}
@@ -744,7 +752,8 @@ const CompleteOrderDetails = () => {
                                         ))}
                                     </div>
                                     {isEditing && (
-                                        <Button color="primary" className="mt-3" onClick={() => setShowStockModal(true)}>+ Add New Item</Button>
+                                        <Button color="primary" className="mt-3"
+                                                onClick={() => setShowStockModal(true)}>+ Add New Item</Button>
                                     )}
                                 </ul>
 
