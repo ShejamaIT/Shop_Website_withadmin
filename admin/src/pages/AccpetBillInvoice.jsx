@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import html2canvas from "html2canvas";
 import "../style/invoice.css"; // Make sure this file includes the print styles
 
 const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
@@ -40,7 +41,8 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
             balance: balance,
             isPickup: isPickup
         });
-        window.print(); // This will now hide the buttons when printing
+
+        // window.print(); // This will now hide the buttons when printing
     };
 
     const formatDate = (dateString) => {
@@ -127,7 +129,7 @@ const BillInvoice = ({ selectedOrder, setShowModal1, handleSubmit }) => {
 
                 {/* Print & Close Buttons */}
                 <div className="modal-buttons">
-                    <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
+                    <button className="print-btn" onClick={handlePrintAndSubmit}>Save</button>
                     <button className="close-btn" onClick={() => setShowModal1(false)}>Close</button>
                 </div>
             </div>
