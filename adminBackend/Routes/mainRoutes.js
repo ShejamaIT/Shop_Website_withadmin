@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import { parse, format } from 'date-fns';
 import moment from 'moment';
+import mysql from "mysql2";
 const router = express.Router();
 
 // Save  new item
@@ -3521,7 +3522,10 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
 
                 fs.writeFileSync(barcodeImagePath, pngBuffer);
 
-                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", "",]);
+                // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", "",]);
+                // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "",NOW()]);
+                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", null,  mysql.raw('NOW()')]);
+
             }
 
             // ✅ Update stock only ONCE per item
