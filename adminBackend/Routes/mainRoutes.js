@@ -5269,6 +5269,7 @@ router.post("/delivery-payment", async (req, res) => {
     const DrivBalance = Number(driverbalance) || 0;
     const CustBalance = Number(customerbalance) || 0;
     const Loss = Number(profitOrLoss) || 0;
+    console.log(Loss);
 
     try {
         // Fetch order details
@@ -5305,8 +5306,10 @@ router.post("/delivery-payment", async (req, res) => {
         let driverNewBalance = Number(driverData?.[0]?.balance || 0) + DrivBalance;
 
         // Calculate advance and balance
-        let advance1 = Loss !== 0 ? previousAdvance + (receivedPayment + Loss) : previousAdvance + receivedPayment;
+        // let advance1 = Loss !== 0 ? previousAdvance + (receivedPayment + Loss) : previousAdvance + receivedPayment;
+        let advance1 = previousAdvance + receivedPayment;
         let balance1 = Math.max(0, totalAmount - advance1);
+        console.log(advance1,balance1);
 
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {
@@ -5461,7 +5464,7 @@ router.post("/delivery-payment", async (req, res) => {
         }
 
         // Update sales team records only when order status is "Issued"
-        if (orderStatus === "Issued") {
+        if (orderStatus === "Delivered") {
             console.log(advance1 - deliveryCharge, stID);
             await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
         }
