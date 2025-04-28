@@ -58,17 +58,19 @@ const CompleteOrderDetails = () => {
     }
     const calculateItemTotal = () => {
         return formData?.items && Array.isArray(formData.items)
-            ? formData.items.reduce((total, item) => total + (item.quantity * item.unitPrice || 0), 0)
+            ? formData.items.reduce((total, item) => {
+                // Calculate price after discount per item
+                const priceAfterDiscount = (item.quantity * item.unitPrice) - item.totalDiscountAmount;
+                return total + (priceAfterDiscount || 0);
+            }, 0)
             : 0;
     };
-
     const handleRemoveItem = (index) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
             items: prevFormData.items.filter((_, i) => i !== index),
         }));
     };
-
     const fetchOrder = async () => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`);
@@ -93,14 +95,20 @@ const CompleteOrderDetails = () => {
             setLoading(false);
         }
     };
-
     const calculateTotal = () => {
-        const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
+        const items = formData.items || [];
+
+        const itemTotal = items.reduce((sum, item) => {
+            const amount = Number(item.amount) || 0;
+            return sum + amount;
+        }, 0);
+
         const delivery = Number(formData.deliveryCharge || 0);
         const discount = Number(formData.discount || 0);
-        return itemTotal + delivery - discount;
-    };
 
+        const total = itemTotal + delivery - discount;
+        return total.toFixed(2);
+    };
     const handleChange = (e, index) => {
         const { name, value, type, checked } = e.target;
 
@@ -142,7 +150,6 @@ const CompleteOrderDetails = () => {
             return updatedFormData;
         });
     };
-
     const handleSave = async () => {
         const updatedTotal = calculateTotal();
         const updatedItemTotal = calculateItemTotal();
@@ -215,7 +222,6 @@ const CompleteOrderDetails = () => {
             toast.error(`Error: ${err.message}`);
         }
     };
-
     // ✅ Improved change detection functions
     const hasGeneralDetailsChanged = (updatedData) => {
         return updatedData.phoneNumber !== order.phoneNumber ||
@@ -524,7 +530,6 @@ const CompleteOrderDetails = () => {
             fetchStockDetails(itemId);
         }, 500);
     };
-
     const fetchStockDetails = async (itemId) => {
         console.log(itemId);
         if (!itemId) {
@@ -759,37 +764,37 @@ const CompleteOrderDetails = () => {
 
                                 <div className="order-summary">
                                     <Row>
-                                        <Col md="4">
-                                            {!isEditing ? (
-                                                <p><strong>Discount
-                                                    Price:</strong> Rs. {formData.discount ?? order.discount}</p>
-                                            ) : (
-                                                <FormGroup>
-                                                    <Label><strong>Discount Price:</strong></Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="discount"
-                                                        value={formData.discount ?? order.discount}
-                                                        onChange={handleChange}
-                                                    />
-                                                </FormGroup>
-                                            )}
+                                        <Col md="3">
+                                            <p><strong>Item Total:</strong> Rs. {order.netTotal}</p>
+                                        </Col>
+                                        <Col md="3">
+                                            <p><strong>Discount
+                                                Price:</strong> Rs. {formData.discount ?? order.discount}</p>
+                                            {/*{!isEditing ? (*/}
+                                            {/*    <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>*/}
+                                            {/*) : (*/}
+                                            {/*    <FormGroup>*/}
+                                            {/*        <Label><strong>Discount Price:</strong></Label>*/}
+                                            {/*        <Input*/}
+                                            {/*            type="text"*/}
+                                            {/*            name="discount"*/}
+                                            {/*            value={formData.discount ?? order.discount}*/}
+                                            {/*            onChange={handleChange}*/}
+                                            {/*        />*/}
+                                            {/*    </FormGroup>*/}
+                                            {/*)}*/}
                                         </Col>
 
-                                        <Col md="4">
+                                        <Col md="3">
                                             <p><strong>Special Discount:</strong> Rs. {order.specialdiscount}</p>
                                         </Col>
 
-                                        <Col md="4">
+                                        <Col md="3">
                                             {formData.deliveryStatus === "Pick up" ? (
-                                                <p><strong>Delivery
-                                                    Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
-                                                </p>
+                                                <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
                                             ) : (
                                                 !isEditing ? (
-                                                    <p><strong>Delivery
-                                                        Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
-                                                    </p>
+                                                    <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Delivery Amount:</strong></Label>

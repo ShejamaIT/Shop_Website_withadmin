@@ -33,7 +33,6 @@ const OrderDetails = () => {
     const [isLoading, setIsLoading] = useState(true);
     const debounceTimeout = useRef(null);
 
-
     useEffect(() => {
         fetchOrder();
     }, [id]);
@@ -82,19 +81,33 @@ const OrderDetails = () => {
     };
 
     const calculateTotal = () => {
-        const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
+        const items = formData.items || [];
+
+        const itemTotal = items.reduce((sum, item) => {
+            const amount = Number(item.amount) || 0;
+            return sum + amount;
+        }, 0);
+
         const delivery = Number(formData.deliveryCharge || 0);
         const discount = Number(formData.discount || 0);
-        return itemTotal + delivery - discount;
+
+        const total = itemTotal + delivery - discount;
+        return total.toFixed(2);
     };
+
     const calculateBalance = (total,advance) => {
         return Number(total) - Number(advance);
     }
     const calculateItemTotal = () => {
         return formData?.items && Array.isArray(formData.items)
-            ? formData.items.reduce((total, item) => total + (item.quantity * item.unitPrice || 0), 0)
+            ? formData.items.reduce((total, item) => {
+                // Calculate price after discount per item
+                const priceAfterDiscount = (item.quantity * item.unitPrice) - item.totalDiscountAmount;
+                return total + (priceAfterDiscount || 0);
+            }, 0)
             : 0;
     };
+
     const handleRemoveItem = (index) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -150,6 +163,7 @@ const OrderDetails = () => {
         const updatedItemTotal = calculateItemTotal();
         const updatedBalance = calculateBalance(updatedTotal,formData.advance);
         const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance , netTotal:updatedItemTotal};
+        console.log(updatedData);
         let updatedGeneralOrder = null;
         try {
             // Step 1: Update order general details only if changed
@@ -219,16 +233,21 @@ const OrderDetails = () => {
 
     // ✅ Improved change detection functions
     const hasGeneralDetailsChanged = (updatedData) => {
-        return updatedData.phoneNumber !== order.phoneNumber ||
+        const generalFieldsChanged = updatedData.phoneNumber !== order.phoneNumber ||
             updatedData.optionalNumber !== order.optionalNumber ||
             updatedData.orderStatus !== order.orderStatus ||
             updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryCharge !== order.deliveryCharge ||
             updatedData.discount !== order.discount ||
-            updatedData.totalPrice !== order.totalPrice ||
             updatedData.payStatus !== order.payStatus ||
             updatedData.specialNote !== order.specialNote;
+
+        const totalsChangedDueToQtyOrDiscount = updatedData.totalPrice !== order.totalPrice ||
+            updatedData.netTotal !== order.netTotal;
+
+        return generalFieldsChanged || (hasItemsChanged(updatedData) && totalsChangedDueToQtyOrDiscount);
     };
+
     const hasItemsChanged = (updatedData) => {
         // Check for added or removed items
         const updatedItemIds = new Set(updatedData.items.map(item => item.itemId));
@@ -237,7 +256,6 @@ const OrderDetails = () => {
         if (updatedItemIds.size !== originalItemIds.size || [...updatedItemIds].some(id => !originalItemIds.has(id))) {
             return true; // Items were added or removed
         }
-
         // Check for quantity, price, or booking status changes
         return updatedData.items.some(updatedItem => {
             const originalItem = order.items.find(item => item.itemId === updatedItem.itemId);
@@ -421,8 +439,6 @@ const OrderDetails = () => {
             console.error("API call error:", error);
         }
     };
-
-
     const handleAddItem = (selectedItems) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -443,7 +459,6 @@ const OrderDetails = () => {
             ],
         }));
     };
-
     // Fetch stock when modal opens or selectedItemForReserve changes
     useEffect(() => {
         if (selectedItemForReserve?.itemId || selectedItemForReserve?.I_Id) {
@@ -454,7 +469,6 @@ const OrderDetails = () => {
         setFilteredItems([]);
         setDropdownOpen(false);
     }, [selectedItemForReserve, showStockModal1]);
-
     const handleSearchChange1 = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
@@ -474,9 +488,7 @@ const OrderDetails = () => {
             fetchStockDetails(itemId);
         }, 500);
     };
-
     const fetchStockDetails = async (itemId) => {
-        console.log(itemId);
         if (!itemId) {
             setItemDetails([]);
             return;
@@ -506,7 +518,6 @@ const OrderDetails = () => {
             setIsLoading(false);
         }
     };
-
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (!order) return <p>Order not found</p>;
@@ -712,37 +723,37 @@ const OrderDetails = () => {
 
                                 <div className="order-summary">
                                     <Row>
-                                        <Col md="4">
-                                            {!isEditing ? (
-                                                <p><strong>Discount
-                                                    Price:</strong> Rs. {formData.discount ?? order.discount}</p>
-                                            ) : (
-                                                <FormGroup>
-                                                    <Label><strong>Discount Price:</strong></Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="discount"
-                                                        value={formData.discount ?? order.discount}
-                                                        onChange={handleChange}
-                                                    />
-                                                </FormGroup>
-                                            )}
+                                        <Col md="3">
+                                            <p><strong>Item Total:</strong> Rs. {order.netTotal}</p>
+                                        </Col>
+                                        <Col md="3">
+                                            <p><strong>Discount
+                                                Price:</strong> Rs. {formData.discount ?? order.discount}</p>
+                                            {/*{!isEditing ? (*/}
+                                            {/*    <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>*/}
+                                            {/*) : (*/}
+                                            {/*    <FormGroup>*/}
+                                            {/*        <Label><strong>Discount Price:</strong></Label>*/}
+                                            {/*        <Input*/}
+                                            {/*            type="text"*/}
+                                            {/*            name="discount"*/}
+                                            {/*            value={formData.discount ?? order.discount}*/}
+                                            {/*            onChange={handleChange}*/}
+                                            {/*        />*/}
+                                            {/*    </FormGroup>*/}
+                                            {/*)}*/}
                                         </Col>
 
-                                        <Col md="4">
-                                            <p><strong>Special Discount:</strong> Rs. {order.specialdiscount}</p>
+                                        <Col md="3">
+                                        <p><strong>Special Discount:</strong> Rs. {order.specialdiscount}</p>
                                         </Col>
 
-                                        <Col md="4">
+                                        <Col md="3">
                                             {formData.deliveryStatus === "Pick up" ? (
-                                                <p><strong>Delivery
-                                                    Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
-                                                </p>
+                                                <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
                                             ) : (
                                                 !isEditing ? (
-                                                    <p><strong>Delivery
-                                                        Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}
-                                                    </p>
+                                                    <p><strong>Delivery Amount:</strong> Rs. {formData.deliveryCharge ?? order.deliveryCharge}</p>
                                                 ) : (
                                                     <FormGroup>
                                                         <Label><strong>Delivery Amount:</strong></Label>
@@ -757,6 +768,7 @@ const OrderDetails = () => {
                                             )}
                                         </Col>
                                     </Row>
+
 
                                     <Row className="mt-4">
                                         <Col md="4">
