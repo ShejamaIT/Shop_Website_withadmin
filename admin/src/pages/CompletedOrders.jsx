@@ -96,10 +96,18 @@ const CompleteOrderDetails = () => {
         }
     };
     const calculateTotal = () => {
-        const itemTotal = formData.items?.reduce((total, item) => total + (item.quantity * item.unitPrice), 0) || 0;
+        const items = formData.items || [];
+
+        const itemTotal = items.reduce((sum, item) => {
+            const amount = Number(item.amount) || 0;
+            return sum + amount;
+        }, 0);
+
         const delivery = Number(formData.deliveryCharge || 0);
         const discount = Number(formData.discount || 0);
-        return itemTotal + delivery - discount;
+
+        const total = itemTotal + delivery - discount;
+        return total.toFixed(2);
     };
     const handleChange = (e, index) => {
         const { name, value, type, checked } = e.target;
