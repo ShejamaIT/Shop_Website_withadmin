@@ -17,7 +17,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
     const [filteredItems, setFilteredItems] = useState([]); // List to store filtered items based on search term
     const [selectedItem, setSelectedItem] = useState([]);
     const [isLoading, setIsLoading] = useState(false);  // Loading state for stock fetch
-    const calculateTotal = (item) => item.quantity * (item.price/2);
+    const calculateTotal = (item) => item.quantity * (item.price/item.quantity);
     const discount = Number(selectedOrder.discount) || 0;  // Default to 0 if undefined or NaN
     const delivery = Number(selectedOrder.deliveryCharge) || 0;  // Default to 0 if undefined or NaN
     const subtotal = Number(selectedOrder.items.reduce((sum, item) => sum + calculateTotal(item), 0)) || 0;  // Ensure subtotal is a valid number
@@ -224,7 +224,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                         <tr key={index}>
                             <td>{item.itemName}</td>
                             <td>{item.discount}</td>
-                            <td>Rs. {(item.price.toFixed(2)/2)}</td>
+                            <td>Rs. {(item.price.toFixed(2)/item.quantity)}</td>
                             <td>{item.quantity}</td>
                             <td>Rs. {item.price.toFixed(2)}</td>
                         </tr>
