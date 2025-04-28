@@ -189,67 +189,129 @@ const DeliveryNoteDetails = () => {
         setSelectedOrderId(null);
         setShowStockModal1(false); // Close modal
     };
+    // const handlePayment = async () => {
+    //     try {
+    //         let CustBalance = parseFloat(CustomerBalance) || 0;
+    //         let DrivBalance = parseFloat(DriverBalance) || 0;
+    //         const orderId = selectedOrderId;
+    //
+    //         // Customer balance confirmation
+    //         if (CustBalance !== 0) {
+    //             const result = await Swal.fire({
+    //                 title: "<strong>Customer <u>Balance</u></strong>",
+    //                 icon: "info",
+    //                 html: `There is <b>Rs.${CustBalance}</b> balance by customer.`,
+    //                 showCloseButton: true,
+    //                 showCancelButton: true,
+    //                 confirmButtonText: "👍 Pass!",
+    //                 cancelButtonText: "👎",
+    //             });
+    //             if (result.dismiss === Swal.DismissReason.cancel) {
+    //                 CustBalance = 0;
+    //             }
+    //         }
+    //
+    //         // Driver balance confirmation
+    //         if (DrivBalance !== 0) {
+    //             const result = await Swal.fire({
+    //                 title: "<strong>Driver <u>Balance</u></strong>",
+    //                 icon: "info",
+    //                 html: `There is <b>Rs.${DrivBalance}</b> balance by driver.`,
+    //                 showCloseButton: true,
+    //                 showCancelButton: true,
+    //                 confirmButtonText: "👍 Pass!",
+    //                 cancelButtonText: "👎",
+    //             });
+    //
+    //             if (result.dismiss === Swal.DismissReason.cancel) {
+    //                 DrivBalance = 0;
+    //             }
+    //         }
+    //
+    //         // ✅ Construct payment data
+    //         const paymentData = {
+    //             orderid: orderId,
+    //             payment: parseFloat(selectedBalance) || 0,
+    //             driver: deliveryNote?.driverName || "",
+    //             driverId: deliveryNote?.devID || "",
+    //             RPayment: parseFloat(Rpayment) || 0,
+    //             driverbalance: DrivBalance,
+    //             customerbalance: CustBalance,
+    //             profitOrLoss: CustomerBalance - CustBalance,
+    //         };
+    //
+    //         console.log("✅ Payment Data Saved in State:", paymentData);
+    //
+    //         // ✅ Save payment data to state (triggers useEffect)
+    //         setPayment(paymentData);
+    //
+    //     } catch (error) {
+    //         console.error("❌ Payment Handling Error:", error);
+    //         toast.error("An error occurred while processing payment.");
+    //     }
+    // };
     const handlePayment = async () => {
-        try {
-            let CustBalance = parseFloat(CustomerBalance) || 0;
-            let DrivBalance = parseFloat(DriverBalance) || 0;
-            const orderId = selectedOrderId;
+        let CustBalance = parseFloat(CustomerBalance);
+        let DrivBalance = parseFloat(DriverBalance);
+        const orderId = selectedOrderId; // Assuming selectedOrderId is set correctly in the state
 
-            // Customer balance confirmation
-            if (CustBalance !== 0) {
-                const result = await Swal.fire({
-                    title: "<strong>Customer <u>Balance</u></strong>",
-                    icon: "info",
-                    html: `There is <b>Rs.${CustBalance}</b> balance by customer.`,
-                    showCloseButton: true,
-                    showCancelButton: true,
-                    confirmButtonText: "👍 Pass!",
-                    cancelButtonText: "👎",
-                });
+        // Handle Customer Balance Alert
+        const customerPromise = CustBalance !== 0
+            ? Swal.fire({
+                title: "<strong>Customer <u>Balance</u></strong>",
+                icon: "info",
+                html: `There is <b>Rs.${CustBalance}</b> balance by customer.`,
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText: "👍 Pass!",
+                cancelButtonText: "👎",
+            }).then((result) => {
                 if (result.dismiss === Swal.DismissReason.cancel) {
-                    CustBalance = 0;
+                    return { newCustBalance: 0, profitOrLoss: CustBalance };
                 }
-            }
+                return { newCustBalance: CustBalance, profitOrLoss: 0 };
+            })
+            : Promise.resolve({ newCustBalance: 0, profitOrLoss: 0 });
 
-            // Driver balance confirmation
-            if (DrivBalance !== 0) {
-                const result = await Swal.fire({
+        // Handle Driver Balance Alert (Chained After Customer Alert)
+        customerPromise.then(({ newCustBalance, profitOrLoss }) => {
+            CustBalance = newCustBalance; // Update customer balance after alert
+            const driverPromise = DrivBalance !== 0
+                ? Swal.fire({
                     title: "<strong>Driver <u>Balance</u></strong>",
                     icon: "info",
                     html: `There is <b>Rs.${DrivBalance}</b> balance by driver.`,
                     showCloseButton: true,
                     showCancelButton: true,
+                    focusConfirm: false,
                     confirmButtonText: "👍 Pass!",
                     cancelButtonText: "👎",
-                });
+                })
+                : Promise.resolve();
 
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    DrivBalance = 0;
-                }
-            }
+            // Once all alerts are resolved, store the values locally
+            driverPromise.then(() => {
+                // Construct payment data
+                const paymentData = {
+                    orderid: orderId,
+                    payment: parseFloat(selectedBalance) || 0,
+                    driver: deliveryNote?.driverName || "", // Driver name for the payment
+                    driverId: deliveryNote?.devID || "",   // Driver ID for the payment
+                    RPayment: parseFloat(Rpayment) || 0,    // The amount received from the customer
+                    driverbalance: DrivBalance,            // Driver's current balance
+                    customerbalance: CustBalance,          // Updated customer's current balance
+                    profitOrLoss: profitOrLoss,            // Stores original balance if canceled
+                };
 
-            // ✅ Construct payment data
-            const paymentData = {
-                orderid: orderId,
-                payment: parseFloat(selectedBalance) || 0,
-                driver: deliveryNote?.driverName || "",
-                driverId: deliveryNote?.devID || "",
-                RPayment: parseFloat(Rpayment) || 0,
-                driverbalance: DrivBalance,
-                customerbalance: CustBalance,
-                profitOrLoss: CustomerBalance - CustBalance,
-            };
+                console.log("✅ Payment Data Saved in State:", paymentData);
 
-            console.log("✅ Payment Data Saved in State:", paymentData);
-
-            // ✅ Save payment data to state (triggers useEffect)
-            setPayment(paymentData);
-
-        } catch (error) {
-            console.error("❌ Payment Handling Error:", error);
-            toast.error("An error occurred while processing payment.");
-        }
+                // Save payment data to state (triggers useEffect)
+                setPayment(paymentData);
+            });
+        });
     };
+
     useEffect(() => {
         if (payment && payment.orderid) {
             const index = orders.findIndex(o => o.OrID === payment.orderid);
@@ -466,7 +528,7 @@ const DeliveryNoteDetails = () => {
                                                             </>
                                                         )}
 
-                                                        /* DELIVERY STATUS: Auto Set — No Dropdown */
+                                                        {/* DELIVERY STATUS: Auto Set — No Dropdown*/}
                                                         <p><strong>Delivery Status:</strong> {order.orderStatus === "Issued" ? "Delivered" : "Returned"}</p>
 
                                                         <div className="issued-items">
