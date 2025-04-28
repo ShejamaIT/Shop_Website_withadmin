@@ -650,7 +650,7 @@ router.get("/accept-order-details", async (req, res) => {
         // 1️⃣ Fetch Order Info with Customer and Sales Team Details
         const orderQuery = `
             SELECT
-                o.OrID, o.orDate, o.c_ID, c.title, c.FtName, c.SrName, c.address, c.contact1, c.contact2,
+                o.OrID, o.orDate, o.c_ID, c.title, c.FtName, c.SrName, c.address, c.contact1, c.contact2,o.netTotal,
                 o.advance, o.balance, o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total,o.specialdic,
                 o.ordertype, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
@@ -715,6 +715,7 @@ router.get("/accept-order-details", async (req, res) => {
             discount: orderData.discount,
             specialdiscount: orderData.specialdic,
             totalPrice: orderData.total,
+            netTotal: orderData.netTotal,
             advance: orderData.advance,
             balance: orderData.balance,
             payStatus: orderData.payStatus,
@@ -722,13 +723,10 @@ router.get("/accept-order-details", async (req, res) => {
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
             items: itemsResult.map(item => {
-                console.log(item);
                 const { qty, unitPrice, unitDiscount } = item;
                 const amountBeforeDiscount = unitPrice * qty;
                 const totalDiscountAmount = unitDiscount * qty;
                 const finalAmount = item.tprice;
-                console.log(finalAmount);
-
                 return {
                     itemId: item.I_Id,
                     itemName: item.I_name,
@@ -1214,7 +1212,6 @@ router.get("/order-details", async (req, res) => {
                 };
             }),
         };
-        console.log(orderResponse.items);
 
         // Fetch Delivery Info if it's a delivery order
         if (orderData.delStatus === "Delivery") {
@@ -2649,7 +2646,6 @@ router.put("/update-order-items", async (req, res) => {
             return res.status(400).json({ success: false, message: "No items provided." });
         }
 
-        // Fetch existing order details
         const [existingRecords] = await db.query(
             `SELECT I_Id FROM Order_Detail WHERE orID = ?`,
             [orderId]
@@ -2657,31 +2653,33 @@ router.put("/update-order-items", async (req, res) => {
         const existingItemIds = existingRecords.map(item => item.I_Id);
         const newItemIds = items.map(item => item.itemId);
 
-        // Find items to remove
         const itemsToRemove = existingItemIds.filter(id => !newItemIds.includes(id));
 
-        // Remove missing items
         for (const itemId of itemsToRemove) {
             await db.query(`DELETE FROM Order_Detail WHERE orID = ? AND I_Id = ?`, [orderId, itemId]);
             await db.query(`DELETE FROM accept_orders WHERE orID = ? AND I_Id = ?`, [orderId, itemId]);
         }
 
-        // Insert or update items
         for (const item of items) {
-            const { itemId, quantity, amount } = item;  // use amount instead of price
+            console.log("Item Details:", JSON.stringify(item, null, 2));
+            const { itemId, quantity, amount, originalQuantity, originalAmount } = item;
             const safePrice = amount !== undefined && amount !== null ? amount : 0;
 
-            // Check if exists
             const [orderDetailRecord] = await db.query(
                 `SELECT * FROM Order_Detail WHERE orID = ? AND I_Id = ?`,
                 [orderId, itemId]
             );
 
             if (orderDetailRecord.length > 0) {
-                await db.query(
-                    `UPDATE Order_Detail SET qty = ?, tprice = ? WHERE orID = ? AND I_Id = ?`,
-                    [quantity, safePrice, orderId, itemId]
-                );
+                const existingItem = orderDetailRecord[0];
+
+                // Only update qty and tprice if quantity or amount has changed
+                if (quantity !== existingItem.qty || safePrice !== existingItem.tprice) {
+                    await db.query(
+                        `UPDATE Order_Detail SET qty = ?, tprice = ? WHERE orID = ? AND I_Id = ?`,
+                        [quantity, safePrice, orderId, itemId]
+                    );
+                }
             } else {
                 await db.query(
                     `INSERT INTO Order_Detail (orID, I_Id, qty, tprice) VALUES (?, ?, ?, ?)`,
@@ -2690,21 +2688,17 @@ router.put("/update-order-items", async (req, res) => {
             }
         }
 
-
-
-        // Check booking
         const isAnyItemBooked = items.some(item => item.booked);
         if (isAnyItemBooked && orderStatus !== "Accepted") {
             return res.status(400).json({ success: false, message: "Order status must be 'Accepted' if any item is booked." });
         }
 
-        // Update accept_orders table and inventory
+        // Now booking / unbooking logic
         for (const item of items) {
             const { itemId, quantity, booked } = item;
             const itemReceived = booked ? "Yes" : "No";
             const itemStatus = booked ? "Complete" : "Incomplete";
 
-            // Check accept_orders
             const [acceptRecord] = await db.query(
                 `SELECT * FROM accept_orders WHERE orID = ? AND I_Id = ?`,
                 [orderId, itemId]
@@ -2723,7 +2717,6 @@ router.put("/update-order-items", async (req, res) => {
             }
 
             if (booked) {
-                // Handle booking
                 const [bookedItem] = await db.query(
                     `SELECT * FROM booked_item WHERE orID = ? AND I_Id = ?`,
                     [orderId, itemId]
@@ -2740,7 +2733,6 @@ router.put("/update-order-items", async (req, res) => {
                     );
                 }
             } else {
-                // Unbook item
                 await db.query(
                     `DELETE FROM booked_item WHERE orID = ? AND I_Id = ?`,
                     [orderId, itemId]
@@ -2766,6 +2758,7 @@ router.put("/update-order-items", async (req, res) => {
         return res.status(500).json({ success: false, message: "Database update failed.", details: error.message });
     }
 });
+
 router.put("/update-delivery", async (req, res) => {
     try {
         const { orderId, deliveryStatus, phoneNumber, deliveryInfo } = req.body;
@@ -3455,12 +3448,9 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             fs.writeFileSync(savePath, imageFile.buffer);
             imagePath = `/uploads/images/${imageName}`;
         }
-        console.log(date);
         // const formattedDate = format(parse(date, 'dd/MM/yyyy', new Date()), 'yyyy-MM-dd');
         // const formattedDate = moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
         const formattedDate = moment(date, ['D/M/YYYY', 'M/D/YYYY']).format('YYYY-MM-DD');
-        console.log(formattedDate);
-
         const insertQuery = `
             INSERT INTO purchase (pc_Id, s_ID, rDate, total, pay, balance, deliveryCharge, invoiceId)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -3971,7 +3961,6 @@ router.get("/find-completed-orders-by-date", async (req, res) => {
         });
     }
 });
-
 
 //Find Return orders by  date
 router.get("/find-returned-orders-by-date", async (req, res) => {
@@ -4642,8 +4631,6 @@ router.post("/special-reserved", async (req, res) => {
 router.post("/get-special-reserved", async (req, res) => {
     try {
         const { orID, itemIds } = req.body;
-        console.log(orID)
-
         if (!orID || !Array.isArray(itemIds) || itemIds.length === 0) {
             return res.status(400).json({ error: "Invalid request. Provide orID and itemIds array." });
         }
@@ -5418,9 +5405,6 @@ router.post("/delivery-payment", async (req, res) => {
         if (cancelledItems && Array.isArray(cancelledItems)) {
             for (const item of cancelledItems) {
                 if (!item.itemId || !item.stockId) continue;
-
-                console.log(item.itemId, item.stockId);
-
                 await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
                     [item.status, item.itemId, item.stockId]);
 
