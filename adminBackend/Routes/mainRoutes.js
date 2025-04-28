@@ -640,6 +640,45 @@ router.post("/customer", async (req, res) => {
     }
 });
 
+// Check if customer exists by phone number
+router.get("/customer/check-customer", async (req, res) => {
+    const { phone } = req.query;
+
+    if (!phone) {
+        return res.status(400).json({
+            exists: false,
+            message: "Phone number is required.",
+        });
+    }
+
+    try {
+        const [customer] = await db.query(
+            `SELECT * FROM Customer WHERE contact1 = ? OR contact2 = ?`,
+            [phone, phone]
+        );
+
+        if (customer.length > 0) {
+            return res.status(200).json({
+                exists: true,
+                customerName: `${customer[0].FtName} ${customer[0].SrName}`,
+                data: customer[0]
+            });
+        } else {
+            return res.status(200).json({
+                exists: false,
+                message: "Customer not found.",
+            });
+        }
+    } catch (err) {
+        console.error("Error checking customer:", err.message);
+        return res.status(500).json({
+            exists: false,
+            message: "Database error.",
+            details: err.message,
+        });
+    }
+});
+
 // Get one accept order in-detail
 router.get("/accept-order-details", async (req, res) => {
     try {
@@ -5269,8 +5308,6 @@ router.post("/delivery-payment", async (req, res) => {
     const DrivBalance = Number(driverbalance) || 0;
     const CustBalance = Number(customerbalance) || 0;
     const Loss = Number(profitOrLoss) || 0;
-    console.log(Loss);
-
     try {
         // Fetch order details
         const [Orderpayment] = await db.query(
@@ -5309,7 +5346,6 @@ router.post("/delivery-payment", async (req, res) => {
         // let advance1 = Loss !== 0 ? previousAdvance + (receivedPayment + Loss) : previousAdvance + receivedPayment;
         let advance1 = previousAdvance + receivedPayment;
         let balance1 = Math.max(0, totalAmount - advance1);
-        console.log(advance1,balance1);
 
         // Process returned items
         if (returnedItems && Array.isArray(returnedItems)) {

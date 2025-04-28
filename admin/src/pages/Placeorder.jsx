@@ -360,7 +360,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     const handleClear = () => {
         setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", email: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
             city: "", district: "",specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",type:"",category:"",balance:"",advance:""});
-        setSelectedItems([]);setSearchTerm("");setDeliveryPrice(0);setDiscountAmount(0);setTotalItemPrice(0);setTotalBillPrice(0);
+        setSelectedItems([]);setSearchTerm("");setDeliveryPrice(0);setDiscountAmount(0);setTotalItemPrice(0);setTotalBillPrice(0);setAdvance(0);
     };
     const handleSearchChange1 = (e) => {
         const value = e.target.value;
@@ -493,7 +493,25 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             alert("Failed to add coupon. Please try again.");
         }
     };
+    const handlePhoneNumberBlur = async () => {
+        const phoneNumber = formData.phoneNumber;
+        if (!phoneNumber) return;
 
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/customer/check-customer?phone=${phoneNumber}`);
+            const data = await response.json();
+
+            if (data.exists) {
+                toast.info(`Customer already exists: ${data.customerName}`);
+                // You can also update form data if needed
+            } else {
+                toast.success("Customer does not exist, continue creating order.");
+            }
+        } catch (error) {
+            console.error("Error checking customer:", error.message);
+            toast.error("Failed to check customer.");
+        }
+    };
     return (
         <div id="order" className="order-container mx-auto p-4">
 
@@ -610,9 +628,16 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         <Col md={6}>
                             <FormGroup>
                                 <Label className="fw-bold">Phone Number</Label>
-                                <Input type="text" name="phoneNumber" value={formData.phoneNumber}
-                                       onChange={handleChange} required/>
+                                <Input
+                                    type="text"
+                                    name="phoneNumber"
+                                    value={formData.phoneNumber}
+                                    onChange={handleChange}
+                                    onBlur={handlePhoneNumberBlur}  // <-- new
+                                    required
+                                />
                             </FormGroup>
+
                         </Col>
                         <Col md={6}>
                             <FormGroup>
@@ -1054,31 +1079,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         </>
                     )}
                 </div>
-                <div className="order-details">
-                    <h5 className="text-center underline">Payment Details</h5>
-                    <hr/>
-                    <>
-                        <FormGroup>
-                            <Label className="fw-bold">Advance</Label>
-                            <Input
-                                type="text"
-                                name="advance"
-                                value={advance}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-
-                                    // Allow only numbers and a single dot
-                                    if (/^\d*\.?\d*$/.test(val)) {
-                                        setAdvance(val);
-                                    }
-                                }}
-
-                                required
-                            />
-                        </FormGroup>
-
-                    </>
-                </div>
                 <div
                     className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
                     <div className="flex justify-between text-base text-gray-700">
@@ -1104,7 +1104,21 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                     </div>
                     <div className="flex justify-between text-base text-gray-700">
                         <span>Advance </span>
-                        <span>Rs.{advance}</span>
+                        <span>
+                            <Input
+                                type="text"
+                                name="advance"
+                                value={advance}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    // Allow only numbers and a single dot
+                                    if (/^\d*\.?\d*$/.test(val)) {
+                                        setAdvance(val);
+                                    }
+                                }}
+                                required
+                            />
+                        </span>
                     </div>
                     <div className="flex justify-between text-base text-gray-700">
                         <span>Balance</span>
