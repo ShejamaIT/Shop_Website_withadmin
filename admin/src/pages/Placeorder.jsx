@@ -230,7 +230,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         }
     };
     const handleSelectItem = (item) => {
-        console.log(item);
         setSelectedItem(item);
         setQuantity(1);
         setSearchTerm("");
@@ -269,6 +268,12 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         setQuantity(1);
         setDiscount("");
     };
+    const handleRemoveItem = (index) => {
+        const updatedItems = [...selectedItems];
+        updatedItems.splice(index, 1); // Remove 1 item at the given index
+        setSelectedItems(updatedItems);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -853,6 +858,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 <th>Gross Total</th>
                                 <th>Qty</th>
                                 <th>Net Total</th>
+                                <th>Remove</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -871,6 +877,15 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                             <td>Rs.{grossTotal.toFixed(2)}</td>
                                             <td>{item.qty}</td>
                                             <td className="font-semibold text-green-700">Rs.{netTotal.toFixed(2)}</td>
+                                            <td>
+                                                <button
+                                                    onClick={() => handleRemoveItem(index)}
+                                                    className="text-red-600 hover:text-red-800"
+                                                    title="Remove Item"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </td>
                                         </tr>
                                     );
                                 })
