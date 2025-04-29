@@ -11,17 +11,28 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
     const currentDateTime = new Date().toLocaleString();
 
     // Function to save the receipt as an image
-    const saveAsImage = () => {
+    const handleSaveAndRefresh = () => {
         if (receiptRef.current) {
             html2canvas(receiptRef.current, { scale: 2 }).then((canvas) => {
-                const image = canvas.toDataURL("image/png"); // Convert canvas to image URL (Base64)
+                const image = canvas.toDataURL("image/png");
                 const link = document.createElement("a");
                 link.href = image;
-                link.download = `deliveryNote_${Date.now()}.png`; // Set the download file name
-                link.click(); // Trigger the download action
+                link.download = `deliveryNote_${Date.now()}.png`;
+                link.click();
             });
         }
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     };
+
+    const handleCloseAndRefresh = () => {
+        setShowDeliveryView(false);
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    };
+
 
     return (
         <div className="modal-overlay">
@@ -29,7 +40,7 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
                 <h4 className="text-dark text-center">Shejama Groups</h4>
                 <h5 className="text-center">No.75, Sri Premarathana Mw, Moratumulla</h5>
                 <h5 className="text-center">071 3 608 108 / 077 3 608 108</h5>
-                <hr />
+                <hr/>
 
                 <div className="delivery-note-info">
                     <p><strong>Delivery Note Date:</strong> {(selectedDeliveryDate || currentDateTime)}</p>
@@ -86,8 +97,8 @@ const DeliveryNoteView = ({ receiptData, setShowDeliveryView }) => {
             </div>
 
             <div className="modal-buttons">
-                <button onClick={saveAsImage} className="print-btn">Save</button>
-                <button onClick={() => setShowDeliveryView(false)} className="close-btn">Close</button>
+                <button onClick={handleSaveAndRefresh} className="print-btn">Save</button>
+                <button onClick={handleCloseAndRefresh} className="close-btn">Close</button>
             </div>
         </div>
     );
