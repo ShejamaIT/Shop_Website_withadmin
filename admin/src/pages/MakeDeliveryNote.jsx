@@ -172,7 +172,7 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
 
                 {/* Action Buttons */}
                 <div className="modal-buttons">
-                    <button className="print-btn" onClick={handlePrintAndSubmit}>Print</button>
+                    <button className="print-btn" onClick={handlePrintAndSubmit}>Save</button>
                     <button className="close-btn" onClick={() => setShowModal(false)}>Close</button>
                 </div>
             </div>
