@@ -493,8 +493,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             alert("Failed to add coupon. Please try again.");
         }
     };
-    const handlePhoneNumberBlur = async () => {
-        const phoneNumber = formData.phoneNumber;
+    const handlePhoneNumberBlur = async (phoneNumber) => {
         if (!phoneNumber) return;
 
         try {
@@ -503,7 +502,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
             if (data.exists) {
                 toast.info(`Customer already exists: ${data.customerName}`);
-                // You can also update form data if needed
+                // Optionally populate form data
             } else {
                 toast.success("Customer does not exist, continue creating order.");
             }
@@ -512,6 +511,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             toast.error("Failed to check customer.");
         }
     };
+
     return (
         <div id="order" className="order-container mx-auto p-4">
 
@@ -633,19 +633,25 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     name="phoneNumber"
                                     value={formData.phoneNumber}
                                     onChange={handleChange}
-                                    onBlur={handlePhoneNumberBlur}  // <-- new
+                                    onBlur={() => handlePhoneNumberBlur(formData.phoneNumber)}
                                     required
                                 />
                             </FormGroup>
-
                         </Col>
+
                         <Col md={6}>
                             <FormGroup>
                                 <Label className="fw-bold">Optional Number</Label>
-                                <Input type="text" name="otherNumber" value={formData.otherNumber}
-                                       onChange={handleChange}/>
+                                <Input
+                                    type="text"
+                                    name="otherNumber"
+                                    value={formData.otherNumber}
+                                    onChange={handleChange}
+                                    onBlur={() => handlePhoneNumberBlur(formData.otherNumber)}
+                                />
                             </FormGroup>
                         </Col>
+
                     </Row>
                     <Row>
                         <Col md={6}>
