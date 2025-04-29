@@ -2798,7 +2798,6 @@ router.put("/update-order-items", async (req, res) => {
         return res.status(500).json({ success: false, message: "Database update failed.", details: error.message });
     }
 });
-
 router.put("/update-delivery", async (req, res) => {
     try {
         const { orderId, deliveryStatus, phoneNumber, deliveryInfo } = req.body;
