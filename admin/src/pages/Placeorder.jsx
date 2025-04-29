@@ -752,12 +752,14 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 style={{flex: 4}}
                             />
                             <button
+                                type="button"  // <-- Add this line
                                 className="btn btn-primary"
                                 style={{flex: 1, whiteSpace: "nowrap"}}
                                 onClick={handleButtonClick}
                             >
                                 Add New
                             </button>
+
                         </div>
 
                         {/* Filtered List */}

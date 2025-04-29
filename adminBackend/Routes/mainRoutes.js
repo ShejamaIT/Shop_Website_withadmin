@@ -2440,7 +2440,17 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
 // Update order in invoice part
 router.put("/update-invoice", async (req, res) => {
     try {
-        const {orID, isPickup, netTotal, totalAdvance, previousAdvance, balance, addedAdvance, updatedDeliveryCharge, updatedDiscount} = req.body;
+        const {
+            orID,
+            isPickup,
+            netTotal,
+            totalAdvance,
+            previousAdvance,
+            balance,
+            addedAdvance,
+            updatedDeliveryCharge,
+            updatedDiscount,
+        } = req.body;
 
         if (!orID) {
             return res.status(400).json({
@@ -2448,11 +2458,14 @@ router.put("/update-invoice", async (req, res) => {
                 message: "Order ID is required",
             });
         }
+
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
-        // 🔍 Check if the order exists
-        const orderCheckQuery = `SELECT * FROM Orders WHERE OrID = ?`;
-        const [orderResult] = await db.query(orderCheckQuery, [orID]);
+        // 🔍 Fetch order details
+        const [orderResult] = await db.query(
+            `SELECT OrID, orStatus, stID FROM Orders WHERE OrID = ?`,
+            [orID]
+        );
 
         if (orderResult.length === 0) {
             return res.status(404).json({
@@ -2461,39 +2474,48 @@ router.put("/update-invoice", async (req, res) => {
             });
         }
 
+        const { orStatus, stID } = orderResult[0] || {};
+
         // 🔄 Determine Payment Status
-        let payStatus = "Pending"; // Default status
-
-        if (totalAdvance > 0) {
-            payStatus = "Advanced"; // Some advance payment has been made
-        }
-
-        if (balance === 0) {
-            payStatus = "Settled"; // Fully paid order
-        }
+        let payStatus = "Pending";
+        if (totalAdvance > 0) payStatus = "Advanced";
+        if (balance === 0) payStatus = "Settled";
 
         // 🔄 Update Orders table
         const orderUpdateQuery = `
             UPDATE Orders
             SET total = ?, discount = ?, delPrice = ?, advance = ?, balance = ?, payStatus = ?
             WHERE OrID = ?`;
-        const orderUpdateParams = [netTotal, updatedDiscount, updatedDeliveryCharge, totalAdvance, balance, payStatus, orID];
-        await db.query(orderUpdateQuery, orderUpdateParams);
+        await db.query(orderUpdateQuery, [
+            netTotal,
+            updatedDiscount,
+            updatedDeliveryCharge,
+            totalAdvance,
+            balance,
+            payStatus,
+            orID,
+        ]);
 
-        // 🛑 If it's a pickup order, remove it from the delivery table
+        // 🛑 If pickup, delete from delivery
         if (isPickup) {
-            const deleteDeliveryQuery = `DELETE FROM delivery WHERE orID = ?`;
-            await db.query(deleteDeliveryQuery, [orID]);
+            await db.query(`DELETE FROM delivery WHERE orID = ?`, [orID]);
         }
 
-        // 🕒 Get the current date and time
-        const currentDateTime = new Date().toISOString().slice(0, 19).replace("T", " ");
-
-        // 💰 Insert a new entry into the Payment table
+        // 💰 Add advance payment (if any)
         if (addedAdvance > 0) {
-            await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orID, addedAdvance]);
-            await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", addedAdvance]);
+            const netAdvance = totalAdvance - updatedDeliveryCharge;
 
+            await db.query(
+                `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
+                 VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
+                [op_ID, orID, addedAdvance, orStatus, netAdvance, stID]
+            );
+
+            await db.query(
+                `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+                 VALUES (?, ?, ?, NOW(), ?)`,
+                ["Order payment", op_ID, "order", addedAdvance]
+            );
         }
 
         return res.status(200).json({
@@ -5441,9 +5463,26 @@ router.post("/delivery-payment", async (req, res) => {
         await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
 
         if (receivedPayment !== 0) {
-            await db.query("INSERT INTO order_payment (op_ID, orID, amount, dateTime) VALUES (?, ?, ?, NOW())", [op_ID, orderId, receivedPayment]);
-            await db.query("INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)", ["Order payment", op_ID, "order", receivedPayment]);
+            const netValue = (advance1 - deliveryCharge) - Loss;
+
+            if (orderStatus === "Delivered") {
+                await db.query(
+                    "INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID) VALUES (?, ?, ?, NOW(), ?, ?, ?)",
+                    [op_ID, orderId, receivedPayment, "Issued", netValue, stID]
+                );
+            } else {
+                await db.query(
+                    "INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID) VALUES (?, ?, ?, NOW(), ?, ?, ?)",
+                    [op_ID, orderId, receivedPayment, orderStatus, netValue, stID]
+                );
+            }
+
+            await db.query(
+                "INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)",
+                ["Order payment", op_ID, "order", receivedPayment]
+            );
         }
+
 
         if (orderStatus === "Delivered") {
             await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
@@ -5472,7 +5511,15 @@ router.post("/delivery-payment", async (req, res) => {
     }
 });
 router.post("/delivery-update", async (req, res) => {
-    const { deliveryStatus, driverId, deliveryDate, orderId, orderStatus, issuedItems, rescheduledDate } = req.body;
+    const {
+        deliveryStatus,
+        driverId,
+        deliveryDate,
+        orderId,
+        orderStatus,
+        issuedItems,
+        rescheduledDate
+    } = req.body;
 
     try {
         // Fetch order and required details
@@ -5489,7 +5536,10 @@ router.post("/delivery-update", async (req, res) => {
         const orderNetTotal = Number(netTotal) || 0;
 
         // Fetch delivery ID
-        const [deliveryData] = await db.query("SELECT dv_id FROM delivery WHERE orID = ?", [orderId]);
+        const [deliveryData] = await db.query(
+            "SELECT dv_id FROM delivery WHERE orID = ?",
+            [orderId]
+        );
         const dv_id = deliveryData?.[0]?.dv_id || null;
 
         /** ------------------- Process Issued Items --------------------- */
@@ -5564,14 +5614,19 @@ router.post("/delivery-update", async (req, res) => {
             );
         }
 
-        res.json({ success: true, message: "Order and delivery updated successfully." });
+        /** ------------------- Update order_payment.or_status --------------------- */
+        await db.query(
+            "UPDATE order_payment SET or_status = ? WHERE orID = ?",
+            [orderStatus, orderId]
+        );
+
+        res.json({ success: true, message: "Order, delivery, and payment status updated successfully." });
 
     } catch (error) {
         console.error("Error processing delivery update:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
-
 
 // get delivery schdule by date
 router.get("/check-delivery", async (req, res) => {
