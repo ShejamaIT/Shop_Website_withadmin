@@ -4821,7 +4821,7 @@ router.post("/issued-items", async (req, res) => {
         for (const item of orderItems) {
             await db.query(
                 `UPDATE Item
-                 SET stockQty = stockQty - ?, availableQty = availableQty - ?
+                 SET bookedQty = bookedQty - ?, dispatchedQty = dispatchedQty + ?
                  WHERE I_Id = ?`,
                 [item.qty, item.qty, item.I_Id]
             );
@@ -5300,13 +5300,14 @@ router.post("/delivery-return", async (req, res) => {
 
 // update payment in delivery note
 router.post("/delivery-payment", async (req, res) => {
-    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate,issuedItems, returnedItems, cancelledItems } = req.body;
+    const { customReason, deliveryStatus, driver, driverId, deliveryDate, orderId, orderStatus, paymentDetails, reason, rescheduledDate, issuedItems, returnedItems, cancelledItems } = req.body;
     const { RPayment, customerbalance, driverbalance, profitOrLoss } = paymentDetails || {};
 
     const receivedPayment = Number(RPayment) || 0;
     const DrivBalance = Number(driverbalance) || 0;
     const CustBalance = Number(customerbalance) || 0;
     const Loss = Number(profitOrLoss) || 0;
+
     try {
         // Fetch order details
         const [Orderpayment] = await db.query(
@@ -5319,209 +5320,152 @@ router.post("/delivery-payment", async (req, res) => {
             return res.status(404).json({ error: "Order not found." });
         }
 
-        // Extract order details
         const { orID, c_ID, balance, advance, total, netTotal, discount, delPrice, stID } = Orderpayment[0];
-
-        // Ensure valid numbers
         let NetTotal1 = Math.max(0, Number(netTotal) || 0);
         let totalAmount = Math.max(0, Number(total) || 0);
         let discountAmount = Number(discount) || 0;
         let deliveryCharge = Number(delPrice) || 0;
         let previousAdvance = Number(advance) || 0;
 
-        // Fetch delivery details
+        // Fetch delivery
         const [deliveryData] = await db.query("SELECT dv_id FROM delivery WHERE orID = ?", [orderId]);
         const dv_id = deliveryData?.[0]?.dv_id || null;
 
-        // Fetch customer balance
+        // Fetch customer and driver balance
         const [customerData] = await db.query("SELECT balance FROM Customer WHERE c_ID = ?", [c_ID]);
         let customerBalance = Number(customerData?.[0]?.balance || 0) + CustBalance;
 
-        // Fetch driver balance
         const [driverData] = await db.query("SELECT balance FROM Driver WHERE devID = ?", [driverId]);
         let driverNewBalance = Number(driverData?.[0]?.balance || 0) + DrivBalance;
 
-        // Calculate advance and balance
-        // let advance1 = Loss !== 0 ? previousAdvance + (receivedPayment + Loss) : previousAdvance + receivedPayment;
+        // Calculate new advance and balance
         let advance1 = previousAdvance + receivedPayment;
         let balance1 = Math.max(0, totalAmount - advance1);
 
-        // Process returned items
+        /** ------------------- Process Returned Items --------------------- */
         if (returnedItems && Array.isArray(returnedItems)) {
             for (const item of returnedItems) {
                 if (!item.itemId || !item.stockId) continue;
+                console.log(item.itemId, item.stockId, item.status);
 
-                const [price] = await db.query("SELECT price FROM Item WHERE I_Id = ?", [item.itemId]);
-                if (price?.[0]?.price) {
-                    NetTotal1 -= parseFloat(price[0].price);
-                }
-            }
-        }
+                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
 
-        // Process cancelled items
-        if (cancelledItems && Array.isArray(cancelledItems)) {
-            for (const item of cancelledItems) {
-                if (!item.itemId || !item.stockId) continue;
-
-                const [price] = await db.query("SELECT price FROM Item WHERE I_Id = ?", [item.itemId]);
-                if (price?.[0]?.price) {
-                    NetTotal1 -= parseFloat(price[0].price);
-                }
-            }
-        }
-
-        // Ensure NetTotal1 is valid
-        NetTotal1 = Math.max(0, NetTotal1);
-        // Determine payment status (Only Settled if Balance1 is 0)
-        const payStatus = (balance1 === 0) ? "Settled" : "N-Settled";
-
-        // Update customer balance
-        let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
-        let reducePrice = newTotal - totalAmount;
-        customerBalance += (NetTotal1 === 0 ? receivedPayment : reducePrice);
-
-        // Generate unique Advance Payment ID
-        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
-
-        // Update customer & driver balance
-        await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
-        await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
-
-        if (orderStatus === "Delivered" ) {
-            await db.query(
-                "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
-                [balance1, advance1,"Issued", newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
-            );
-        }else {
-            await db.query(
-                "UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
-                [balance1, advance1,orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId]
-            );
-        }
-
-        // Update delivery details
-        if (dv_id) {
-            await db.query(
-                "UPDATE delivery SET delivery_Date = ?, status = ? ,driverBalance =?, devID=? WHERE dv_id = ?",
-                [deliveryDate, deliveryStatus,DrivBalance,driverId, dv_id]
-            );
-        }
-
-        // Process returned items
-        if (returnedItems && Array.isArray(returnedItems)) {
-            for (const item of returnedItems) {
-                if (!item.itemId || !item.stockId) continue;  // Use itemId and stockId
-
-                console.log(item.itemId, item.stockId,item.status);
-
-                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
-                    [item.status, item.itemId, item.stockId]);  // Use correct keys
-
-                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
-                    [item.itemId, item.stockId]);
-
+                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
                 const srdId = srdData?.[0]?.pid_Id || null;
+
                 if (srdId !== null) {
-                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
-                        [item.status, srdId, orderId]);  // Use item.status
+                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?", [item.status, srdId, orderId]);
                 }
 
-                // Update stock based on status
                 if (item.status === "Available") {
-                    await db.query("UPDATE Item SET stockQty = stockQty + 1, availableQty = availableQty + 1 WHERE I_Id = ?",
-                        [item.itemId]);
+                    await db.query("UPDATE Item SET dispatchedQty = dispatchedQty - 1, availableQty = availableQty + 1 WHERE I_Id = ?", [item.itemId]);
                 } else if (item.status === "Reserved") {
                     if (srdId !== null) {
                         await db.query("INSERT INTO Special_Reservation (orID, pid_Id) VALUES (?, ?)", [orderId, srdId]);
                     }
-                    await db.query("UPDATE Item SET stockQty = stockQty + 1, reservedQty = reservedQty + 1, availableQty = availableQty - 1 WHERE I_Id = ?",
-                        [item.itemId]);
+                    await db.query("UPDATE Item SET reservedQty = reservedQty + 1, dispatchedQty = dispatchedQty - 1 WHERE I_Id = ?", [item.itemId]);
                 } else if (item.status === "Damaged") {
-                    await db.query("UPDATE Item SET stockQty = stockQty + 1, damageQty = damageQty + 1, availableQty = availableQty - 1 WHERE I_Id = ?",
-                        [item.itemId]);
+                    await db.query("UPDATE Item SET dispatchedQty = dispatchedQty - 1, damageQty = damageQty + 1 WHERE I_Id = ?", [item.itemId]);
                 }
             }
         }
 
-        // Process cancelled items
+        /** ------------------- Process Cancelled Items --------------------- */
         if (cancelledItems && Array.isArray(cancelledItems)) {
             for (const item of cancelledItems) {
                 if (!item.itemId || !item.stockId) continue;
-                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
-                    [item.status, item.itemId, item.stockId]);
 
-                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
-                    [item.itemId, item.stockId]);
+                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
 
+                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?", [item.itemId, item.stockId]);
                 const srdId = srdData?.[0]?.pid_Id || null;
+
                 if (srdId !== null) {
-                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
-                        [item.status, srdId, orderId]);
+                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?", [item.status, srdId, orderId]);
                 }
 
-                // Update stock based on status
                 if (item.status === "Available") {
-                    await db.query("UPDATE Item SET stockQty = stockQty + 1, availableQty = availableQty + 1 WHERE I_Id = ?",
-                        [item.itemId]);
+                    await db.query("UPDATE Item SET dispatchedQty = dispatchedQty - 1, availableQty = availableQty + 1 WHERE I_Id = ?", [item.itemId]);
                 } else if (item.status === "Damaged") {
-                    await db.query("UPDATE Item SET stockQty = stockQty + 1, damageQty = damageQty + 1, availableQty = availableQty - 1 WHERE I_Id = ?",
-                        [item.itemId]);
+                    await db.query("UPDATE Item SET dispatchedQty = dispatchedQty - 1, damageQty = damageQty + 1 WHERE I_Id = ?", [item.itemId]);
                 }
             }
         }
 
-        // Process issued items (dispatched => issued)
+        /** ------------------- Process Issued Items --------------------- */
         if (issuedItems && Array.isArray(issuedItems)) {
             for (const item of issuedItems) {
                 if (!item.I_Id || !item.stock_Id) continue;
 
-                await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?",
-                    ["Issued", item.I_Id, item.stock_Id]);
+                const [itemData] = await db.query("SELECT status FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?", [item.I_Id, item.stock_Id]);
+                const currentStatus = itemData?.[0]?.status || "";
 
-                const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
-                    [item.I_Id, item.stock_Id]);
+                if (currentStatus === "Dispatched") {  // Only update if still Dispatched
+                    await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", ["Issued", item.I_Id, item.stock_Id]);
+                    await db.query("UPDATE Item SET dispatchedQty = dispatchedQty - 1, stockQty = stockQty - 1 WHERE I_Id = ?", [item.itemId]);
+                    const [srdData] = await db.query("SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?", [item.I_Id, item.stock_Id]);
+                    const srdId = srdData?.[0]?.pid_Id || null;
 
-                const srdId = srdData?.[0]?.pid_Id || null;
-                if (srdId !== null) {
-                    await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?",
-                        ["Issued", srdId, orderId]);
+                    if (srdId !== null) {
+                        await db.query("UPDATE issued_items SET status = ? WHERE pid_Id = ? AND orID = ?", ["Issued", srdId, orderId]);
+                    }
                 }
             }
         }
 
-        // Update balance in delivery note orders
-        await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
+        /** ------------------- Update Order and Balances --------------------- */
+        NetTotal1 = Math.max(0, NetTotal1);
+        const payStatus = (balance1 === 0) ? "Settled" : "N-Settled";
+        let newTotal = Math.max(0, (NetTotal1 - discountAmount) + deliveryCharge);
+        let reducePrice = newTotal - totalAmount;
+        customerBalance += (NetTotal1 === 0 ? receivedPayment : reducePrice);
 
-        // Insert payment record
-        if (receivedPayment !== 0){
-            await db.query("INSERT INTO order_payment (op_ID,orID, amount, dateTime) VALUES (?,?, ?, NOW())", [op_ID,orderId, receivedPayment]);
-            await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Order payment",op_ID,"order", receivedPayment]);
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
+
+        await db.query("UPDATE Customer SET balance = ? WHERE c_ID = ?", [customerBalance, c_ID]);
+        await db.query("UPDATE Driver SET balance = ? WHERE devID = ?", [driverNewBalance, driverId]);
+
+        if (orderStatus === "Delivered") {
+            await db.query("UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
+                [balance1, advance1, "Issued", newTotal, NetTotal1, deliveryStatus, payStatus, orderId]);
+        } else {
+            await db.query("UPDATE Orders SET balance = ?, advance = ?, orStatus = ?, total = ?, netTotal = ?, delStatus = ?, payStatus = ? WHERE OrID = ?",
+                [balance1, advance1, orderStatus, newTotal, NetTotal1, deliveryStatus, payStatus, orderId]);
         }
 
-        // Update sales team records only when order status is "Issued"
+        if (dv_id) {
+            await db.query("UPDATE delivery SET delivery_Date = ?, status = ?, driverBalance = ?, devID = ? WHERE dv_id = ?",
+                [deliveryDate, deliveryStatus, DrivBalance, driverId, dv_id]);
+        }
+
+        await db.query("UPDATE delivery_note_orders SET balance = ? WHERE orID = ?", [balance1, orderId]);
+
+        if (receivedPayment !== 0) {
+            await db.query("INSERT INTO order_payment (op_ID, orID, amount, dateTime) VALUES (?, ?, ?, NOW())", [op_ID, orderId, receivedPayment]);
+            await db.query("INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)", ["Order payment", op_ID, "order", receivedPayment]);
+        }
+
         if (orderStatus === "Delivered") {
-            console.log(advance1 - deliveryCharge, stID);
             await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
         }
 
-        // Insert loss profit if applicable
         if (Loss !== 0) {
-            // Generate unique Advance Payment ID
             const op_ID1 = await generateNewId("order_payment", "op_ID", "OP");
-            await db.query("INSERT INTO cash_balance (reason, ref, ref_type,dateTime,amount) VALUES (?,?, ?, NOW(),?)", ["Ignore Balance",op_ID1,"Loss", -Loss]);
+            await db.query("INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount) VALUES (?, ?, ?, NOW(), ?)", ["Ignore Balance", op_ID1, "Loss", -Loss]);
         }
 
-        // Insert return or canceled orders only if necessary
         if (orderStatus === "Returned" || orderStatus === "Cancelled") {
             const reasonTable = orderStatus === "Returned" ? "return_orders" : "canceled_orders";
             await db.query(`INSERT INTO ${reasonTable} (orID, detail) VALUES (?, ?)`, [orID, reason]);
         }
-        if (rescheduledDate !== null){
+
+        if (rescheduledDate !== null) {
             await db.query("UPDATE Orders SET expectedDate = ? WHERE orID = ?", [rescheduledDate, orderId]);
             await db.query("UPDATE delivery SET schedule_Date = ? WHERE orID = ?", [rescheduledDate, orderId]);
         }
 
         res.json({ success: true, message: "Payment processed successfully.", paymentStatus: payStatus });
+
     } catch (error) {
         console.error("Error processing delivery payment:", error);
         res.status(500).json({ error: "Internal server error" });
