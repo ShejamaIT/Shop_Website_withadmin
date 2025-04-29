@@ -8,6 +8,7 @@ import SaleteamDetail from "./SaleteamDetail";
 import DriverDetail from "./DriverDetail";
 import AdancePayment from "./AdancePayment";
 import LoanPayment from "./LoanPayment";
+import Salarysheet from "./Salarysheet";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -154,7 +155,7 @@ const AllEmployees = () => {
                                 className={mainTab === "payment" ? "active" : ""}
                                 onClick={() => handleMainTabChange("payment")}
                             >
-                                Salary
+                                Payments
                             </NavLink>
                         </NavItem>
                     </Nav>
@@ -241,7 +242,7 @@ const AllEmployees = () => {
                                 </NavItem>
                                 <NavItem>
                                     <NavLink className={paymentSubTab === "salary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("salary")}>
-                                        Month Salary
+                                        Monthly Salary
                                     </NavLink>
                                 </NavItem>
                             </Nav>
@@ -253,7 +254,7 @@ const AllEmployees = () => {
                                     <LoanPayment />
                                 </TabPane>
                                 <TabPane tabId="salary">
-                                    <p>Monthly Salary Details...</p>
+                                    <Salarysheet />
                                 </TabPane>
                             </TabContent>
                         </TabPane>

@@ -5919,6 +5919,48 @@ router.get("/today-order-counts", async (req, res) => {
         });
     }
 });
+// Get advance and loan amount for a month by employee id
+router.get("/salary-payments", async (req, res) => {
+    try {
+        const { eid } = req.query;
+
+        if (!eid) {
+            return res.status(400).json({ success: false, message: "Employee ID (eid) is required" });
+        }
+
+        // Define start and end of current month
+        const startOfMonth = moment().startOf("month").format("YYYY-MM-DD HH:mm:ss");
+        const endOfMonth = moment().endOf("month").format("YYYY-MM-DD HH:mm:ss");
+        console.log(startOfMonth,endOfMonth);
+
+        // Fetch salary advances
+        const [advances] = await db.query(
+            "SELECT * FROM salary_advance WHERE E_Id = ? AND dateTime BETWEEN ? AND ?",
+            [eid, startOfMonth, endOfMonth]
+        );
+        console.log(advances);
+
+        // Fetch salary loans
+        const [loans] = await db.query(
+            "SELECT * FROM salary_loan WHERE E_Id = ? AND dateTime BETWEEN ? AND ?",
+            [eid, startOfMonth, endOfMonth]
+        );
+
+        return res.status(200).json({
+            success: true,
+            advancePayments: advances,
+            loanPayments: loans
+        });
+
+    } catch (error) {
+        console.error("Error fetching salary payments:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
 
 // pass sale team value to review in month end
 
