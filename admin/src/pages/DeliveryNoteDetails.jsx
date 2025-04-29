@@ -383,6 +383,61 @@ const DeliveryNoteDetails = () => {
         }
     };
 
+    const handleFullyPaidDelivery = async (index) => {
+        try {
+            const order = orders?.[index];
+
+            if (!order) {
+                toast.error("Order not found!");
+                return;
+            }
+
+            const updatedOrder = {
+                orderId: order.OrID,
+                driver: deliveryNote?.driverName || "",
+                driverId: deliveryNote?.devID || "",
+                deliveryDate: deliveryNote?.date || "",
+                orderStatus: "Delivered",
+                deliveryStatus: "Delivered",
+                reason: reasons?.[order.OrID]?.reason || "N/A",
+                customReason: reasons?.[order.OrID]?.customReason || null,
+                rescheduledDate: selectedDeliveryDate || null,
+                issuedItems: Array.isArray(order?.issuedItems) ? order.issuedItems : [],
+                returnedItems:
+                    order?.orderStatus === "Returned"
+                        ? selectedItems?.[order.OrID]?.map(itemKey => {
+                        const [itemId, stockId] = itemKey.split("-");
+                        return { itemId, stockId, status: selectedItemStatus?.[itemKey] || "Available" };
+                    }) || [] : [],
+                cancelledItems:
+                    order?.orderStatus === "Cancelled"
+                        ? selectedItems?.[order.OrID]?.map(itemKey => {
+                        const [itemId, stockId] = itemKey.split("-");
+                        return { itemId, stockId, status: selectedItemStatus?.[itemKey] || "Available" };
+                    }) || [] : []
+            };
+
+            const response = await fetch(`http://localhost:5001/api/admin/main/delivery-update`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedOrder),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error! Status: ${response.status}`);
+            }
+
+            await response.json();
+            toast.success("Delivery processed successfully!");
+            resetModal();
+            fetchDeliveryNote();
+        } catch (error) {
+            console.error("❌ Fully Paid Delivery Error:", error);
+            toast.error("Failed to process delivery.");
+        }
+    };
+
+
     const setDate = (e) => {
         const routedate = e.target.value;
         setSelectedDeliveryDate(routedate); // Set the selected date
@@ -558,22 +613,25 @@ const DeliveryNoteDetails = () => {
                                                             )}
                                                         </div>
 
-                                                        {order.balanceAmount > 0 ? (
-                                                            isEditing ? (
-                                                                <FormGroup>
-                                                                    <Label><strong>Balance:</strong> Rs.{order.balanceAmount}</Label>
-                                                                    <div className="d-flex align-items-center">
-                                                                        <Button className='ms-4' onClick={() => handleOpenModal(order.OrID, order.balanceAmount)}>
+                                                        {isEditing ? (
+                                                            <FormGroup>
+                                                                <Label><strong>Balance:</strong> Rs.{order.balanceAmount}</Label>
+                                                                <div className="d-flex align-items-center">
+                                                                    {Number(order.balanceAmount) > 0 ? (
+                                                                        <Button className="ms-4" onClick={() => handleOpenModal(order.OrID, order.balanceAmount)}>
                                                                             Payment
                                                                         </Button>
-                                                                    </div>
-                                                                </FormGroup>
-                                                            ) : (
-                                                                <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
-                                                            )
+                                                                    ) : (
+                                                                        <Button className="ms-4" onClick={() => handleFullyPaidDelivery(index)}>
+                                                                            Update
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+                                                            </FormGroup>
                                                         ) : (
                                                             <p><strong>Balance:</strong> Rs.{order.balanceAmount}</p>
                                                         )}
+
                                                     </div>
                                                 ))}
                                             </div>

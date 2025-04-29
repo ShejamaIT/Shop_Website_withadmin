@@ -5471,6 +5471,107 @@ router.post("/delivery-payment", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+router.post("/delivery-update", async (req, res) => {
+    const { deliveryStatus, driverId, deliveryDate, orderId, orderStatus, issuedItems, rescheduledDate } = req.body;
+
+    try {
+        // Fetch order and required details
+        const [orderResult] = await db.query(
+            "SELECT OrID, stID, netTotal FROM Orders WHERE OrID = ?",
+            [orderId]
+        );
+
+        if (!orderResult.length) {
+            return res.status(404).json({ error: "Order not found." });
+        }
+
+        const { OrID, stID, netTotal } = orderResult[0];
+        const orderNetTotal = Number(netTotal) || 0;
+
+        // Fetch delivery ID
+        const [deliveryData] = await db.query("SELECT dv_id FROM delivery WHERE orID = ?", [orderId]);
+        const dv_id = deliveryData?.[0]?.dv_id || null;
+
+        /** ------------------- Process Issued Items --------------------- */
+        if (issuedItems && Array.isArray(issuedItems)) {
+            for (const item of issuedItems) {
+                if (!item.I_Id || !item.stock_Id) continue;
+
+                const [itemData] = await db.query(
+                    "SELECT status FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
+                    [item.I_Id, item.stock_Id]
+                );
+                const currentStatus = itemData?.[0]?.status || "";
+
+                if (currentStatus === "Dispatched") {
+                    await db.query(
+                        "UPDATE p_i_detail SET status = 'Issued' WHERE I_Id = ? AND stock_Id = ?",
+                        [item.I_Id, item.stock_Id]
+                    );
+                    await db.query(
+                        "UPDATE Item SET dispatchedQty = dispatchedQty - 1, stockQty = stockQty - 1 WHERE I_Id = ?",
+                        [item.itemId]
+                    );
+
+                    const [srdData] = await db.query(
+                        "SELECT pid_Id FROM p_i_detail WHERE I_Id = ? AND stock_Id = ?",
+                        [item.I_Id, item.stock_Id]
+                    );
+                    const srdId = srdData?.[0]?.pid_Id || null;
+
+                    if (srdId !== null) {
+                        await db.query(
+                            "UPDATE issued_items SET status = 'Issued' WHERE pid_Id = ? AND orID = ?",
+                            [srdId, orderId]
+                        );
+                    }
+                }
+            }
+        }
+
+        /** ------------------- Update Order Status --------------------- */
+        const newOrderStatus = (orderStatus === "Delivered") ? "Issued" : orderStatus;
+
+        await db.query(
+            "UPDATE Orders SET orStatus = ?, delStatus = ? WHERE OrID = ?",
+            [newOrderStatus, deliveryStatus, orderId]
+        );
+
+        if (dv_id) {
+            await db.query(
+                "UPDATE delivery SET delivery_Date = ?, status = ?, devID = ? WHERE dv_id = ?",
+                [deliveryDate, deliveryStatus, driverId, dv_id]
+            );
+        }
+
+        /** ------------------- Update sales_team (add netTotal) --------------------- */
+        if (orderStatus === "Delivered" && stID) {
+            await db.query(
+                "UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?",
+                [orderNetTotal, stID]
+            );
+        }
+
+        /** ------------------- Handle Rescheduling --------------------- */
+        if (rescheduledDate !== null) {
+            await db.query(
+                "UPDATE Orders SET expectedDate = ? WHERE orID = ?",
+                [rescheduledDate, orderId]
+            );
+            await db.query(
+                "UPDATE delivery SET schedule_Date = ? WHERE orID = ?",
+                [rescheduledDate, orderId]
+            );
+        }
+
+        res.json({ success: true, message: "Order and delivery updated successfully." });
+
+    } catch (error) {
+        console.error("Error processing delivery update:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 
 // get delivery schdule by date
 router.get("/check-delivery", async (req, res) => {
