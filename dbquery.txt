@@ -252,7 +252,12 @@ CREATE TABLE order_payment(
     op_ID VARCHAR(25) PRIMARY KEY,
     orID VARCHAR(25),
     amount DOUBLE,
+    netTotal DOUBLE,
+    or_status VARCHAR(25),
+    stID VARCHAR(25),
     dateTime DATETIME ,
+    CONSTRAINT FOREIGN KEY (stID) REFERENCES sales_team (stID)
+                            ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
                          ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -394,3 +399,11 @@ CREATE TABLE Damage_item(
                           ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+
+ALTER TABLE order_payment
+ADD COLUMN netTotal DOUBLE AFTER amount,
+ADD COLUMN or_status VARCHAR(25) AFTER netTotal,
+ADD COLUMN stID VARCHAR(25) AFTER or_status,
+ADD CONSTRAINT fk_order_payment_stID FOREIGN KEY (stID)
+    REFERENCES sales_team(stID)
+    ON DELETE CASCADE ON UPDATE CASCADE;
