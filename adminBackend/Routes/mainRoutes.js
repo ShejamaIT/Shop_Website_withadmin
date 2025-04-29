@@ -5470,6 +5470,10 @@ router.post("/delivery-payment", async (req, res) => {
                     "INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID) VALUES (?, ?, ?, NOW(), ?, ?, ?)",
                     [op_ID, orderId, receivedPayment, "Issued", netValue, stID]
                 );
+                await db.query(
+                    "UPDATE order_payment SET or_status = ? WHERE orID = ?",
+                    ["Issued", orderId]
+                );
             } else {
                 await db.query(
                     "INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID) VALUES (?, ?, ?, NOW(), ?, ?, ?)",
