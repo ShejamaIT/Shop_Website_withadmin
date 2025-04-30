@@ -36,6 +36,13 @@ const SalarySheet = () => {
             setEmployees([]); // Default to empty array on error
         }
     };
+    const handleEmployeeSelect = (e) => {
+        const selectedId = e.target.value;
+        const selectedEmployee = employees.find(emp => emp.E_Id === selectedId);
+
+        fetchSalaryPayments(selectedId); // Keep this as-is
+        fetchLeaveCount(selectedId, selectedEmployee); // Now passes employee to update formData inside
+    };
     const fetchSalaryPayments = async (eid) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/advance&loan?eid=${eid}`);
@@ -85,19 +92,9 @@ const SalarySheet = () => {
             // Optional fallback to clear formData on error
         }
     };
-
-
-    const handleSubmit = async (e) => {
+        const handleSubmit = async (e) => {
         e.preventDefault();
     }
-    const handleEmployeeSelect = (e) => {
-        const selectedId = e.target.value;
-        const selectedEmployee = employees.find(emp => emp.E_Id === selectedId);
-
-        fetchSalaryPayments(selectedId); // Keep this as-is
-        fetchLeaveCount(selectedId, selectedEmployee); // Now passes employee to update formData inside
-    };
-
 
     return (
         <Helmet title={`Salary Sheet`}>
@@ -253,40 +250,44 @@ const SalarySheet = () => {
                                         <tr>
                                             <td><strong>Saving</strong></td>
                                             <td>
-                                                <input
-                                                    type="text"
-                                                    name="saving"
-                                                    value={formData.saving}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            saving: e.target.value
-                                                        })
-                                                    }
-                                                    className="form-control"
-                                                />
+                                                <div className="input-cell">
+                                                    Rs.
+                                                    <Input
+                                                        type="text"
+                                                        name="saving"
+                                                        value={formData.saving}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                saving: e.target.value
+                                                            })
+                                                        }
+                                                        className="form-input"
+                                                    />
+                                                </div>
                                             </td>
                                             <td><strong>Other</strong></td>
                                             <td>
-                                                <input
-                                                    type="text"
-                                                    name="otherpay"
-                                                    value={formData.otherpay}
-                                                    onChange={(e) =>
-                                                        setFormData({
-                                                            ...formData,
-                                                            otherpay: e.target.value
-                                                        })
-                                                    }
-                                                    className="form-control"
-                                                />
+                                                <div className="input-cell">
+                                                    Rs.
+                                                    <Input
+                                                        type="text"
+                                                        name="otherpay"
+                                                        value={formData.otherpay}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                otherpay: e.target.value
+                                                            })
+                                                        }
+                                                        className="form-input"
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                         </tbody>
                                     </Table>
                                 </div>
-
-
                             </Form>
                         </Col>
                     </Row>

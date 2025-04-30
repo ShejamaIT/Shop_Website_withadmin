@@ -10,6 +10,7 @@ import AdancePayment from "./AdancePayment";
 import LoanPayment from "./LoanPayment";
 import Salarysheet from "./Salarysheet";
 import Leaveform from "./Leaveform";
+import AddOrderTargets from "./AddorderTargets";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -247,6 +248,11 @@ const AllEmployees = () => {
                                     </NavLink>
                                 </NavItem>
                                 <NavItem>
+                                    <NavLink className={paymentSubTab === "target" ? "active" : ""} onClick={() => handlePaymentSubTabChange("target")}>
+                                        Set Targets
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
                                     <NavLink className={paymentSubTab === "salary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("salary")}>
                                         Monthly Salary
                                     </NavLink>
@@ -261,6 +267,9 @@ const AllEmployees = () => {
                                 </TabPane>
                                 <TabPane tabId="leave">
                                     <Leaveform />
+                                </TabPane>
+                                <TabPane tabId="target">
+                                    <AddOrderTargets />
                                 </TabPane>
                                 <TabPane tabId="salary">
                                     <Salarysheet />

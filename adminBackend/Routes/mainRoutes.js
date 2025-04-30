@@ -6022,7 +6022,6 @@ router.get("/leave-count", async (req, res) => {
     }
 });
 
-
 // Save leave form
 router.post("/add-leave", async (req, res) => {
     try {
@@ -6051,6 +6050,52 @@ router.post("/add-leave", async (req, res) => {
 
     } catch (error) {
         console.error("Error adding leave:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+// Save a new order target
+// POST: Save a new target and bonus
+router.post("/order-targets", async (req, res) => {
+    try {
+        const { target, bonus } = req.body;
+
+        if (!target || !bonus) {
+            return res.status(400).json({ success: false, message: "Target and bonus are required" });
+        }
+
+        await db.query(
+            "INSERT INTO order_target_bonus (targetRate, bonus) VALUES (?, ?)",
+            [target, bonus]
+        );
+
+        return res.status(200).json({ success: true, message: "Target added successfully" });
+    } catch (error) {
+        console.error("Error saving target:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+//Get all order targets bonus
+// GET: Retrieve all target-bonus records
+router.get("/order-targets", async (req, res) => {
+    try {
+        const [targets] = await db.query("SELECT id, targetRate AS target, bonus FROM order_target_bonus");
+
+        return res.status(200).json({
+            success: true,
+            targets
+        });
+    } catch (error) {
+        console.error("Error fetching targets:", error.message);
         return res.status(500).json({
             success: false,
             message: "Server error",

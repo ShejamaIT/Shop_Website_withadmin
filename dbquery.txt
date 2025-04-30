@@ -169,7 +169,6 @@ CREATE TABLE Order_Detail (
     CONSTRAINT FOREIGN KEY (I_Id) REFERENCES Item (I_Id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
-ALTER TABLE Order_Detail MODIFY tprice DOUBLE NOT NULL DEFAULT 0;
 CREATE TABLE delivery(
     dv_id VARCHAR(25) PRIMARY KEY,
     orID VARCHAR(25),
@@ -407,8 +406,12 @@ CREATE TABLE Emp_leaves(
     CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
                              ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-
+CREATE TABLE order_target_bonus(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    targetRate DOUBLE,
+    bonus DOUBLE
+);
+ALTER TABLE Order_Detail MODIFY tprice DOUBLE NOT NULL DEFAULT 0;
 ALTER TABLE order_payment
 ADD COLUMN netTotal DOUBLE AFTER amount,
 ADD COLUMN or_status VARCHAR(25) AFTER netTotal,
