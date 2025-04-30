@@ -5920,7 +5920,7 @@ router.get("/today-order-counts", async (req, res) => {
     }
 });
 // Get advance and loan amount for a month by employee id
-router.get("/salary-payments", async (req, res) => {
+router.get("/advance&loan", async (req, res) => {
     try {
         const { eid } = req.query;
 
@@ -5954,6 +5954,103 @@ router.get("/salary-payments", async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching salary payments:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+// Get leave count for a month by employee id
+router.get("/leave-count", async (req, res) => {
+    try {
+        const { eid } = req.query;
+
+        if (!eid) {
+            return res.status(400).json({ success: false, message: "Employee ID (eid) is required" });
+        }
+
+        const startOfMonth = moment().startOf("month").format("YYYY-MM-DD HH:mm:ss");
+        const endOfMonth = moment().endOf("month").format("YYYY-MM-DD HH:mm:ss");
+
+        const [leaveCounts] = await db.query(
+            `SELECT type, COUNT(*) AS count 
+             FROM emp_leaves 
+             WHERE E_Id = ? AND date BETWEEN ? AND ?
+             GROUP BY type`,
+            [eid, startOfMonth, endOfMonth]
+        );
+
+        let informedCount = 0;
+        let uninformedCount = 0;
+
+        leaveCounts.forEach(leave => {
+            if (leave.type === "Informed") {
+                informedCount = leave.count;
+            } else if (leave.type === "Uninformed") {
+                uninformedCount = leave.count;
+            }
+        });
+
+        const totalLeaves = informedCount + uninformedCount;
+
+        let bonus = 0;
+        let deduction = 0;
+
+        if (totalLeaves < 4) {
+            bonus = (4 - totalLeaves) * 1000;
+        } else if (totalLeaves > 4) {
+            deduction = (totalLeaves - 4) * 2000;
+        }
+
+        return res.status(200).json({
+            success: true,
+            informedLeave: informedCount,
+            uninformedLeave: uninformedCount,
+            attendanceBonus: bonus,
+            attendanceDeduction: deduction,
+        });
+
+    } catch (error) {
+        console.error("Error counting leaves:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+});
+
+
+// Save leave form
+router.post("/add-leave", async (req, res) => {
+    try {
+        const { id, date, type, reason } = req.body;
+
+        if (!id || !date || !type || !reason) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields (id, date, type, reason)"
+            });
+        }
+
+        // Format the date for SQL DATETIME
+        const formattedDate = moment(date).format("YYYY-MM-DD HH:mm:ss");
+
+        // Insert into Emp_leaves
+        await db.query(
+            "INSERT INTO Emp_leaves (E_Id, date, type, reason) VALUES (?, ?, ?, ?)",
+            [id, formattedDate, type, reason]
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Leave successfully recorded"
+        });
+
+    } catch (error) {
+        console.error("Error adding leave:", error.message);
         return res.status(500).json({
             success: false,
             message: "Server error",

@@ -7,6 +7,10 @@ const SalarySheet = () => {
     const [employees, setEmployees] = useState([]);
     const [advancePayments, setAdvancePayments] = useState([]);
     const [loanPayments, setLoanPayments] = useState([]);
+    const [informedLeaves,setInformedLeaves] = useState(0);
+    const [uninformedLeaves ,setUninformedLeaves]= useState(0);
+    const [attdanceBouns , setAttdanceBouns] = useState(0);
+    const [deduction , setDeduction] = useState(0);
     const [formData, setFormData] = useState({
         id: "", name: "", job: "",
         informedLeave:"", uninformedLeave:"",
@@ -32,9 +36,9 @@ const SalarySheet = () => {
             setEmployees([]); // Default to empty array on error
         }
     };
-    const fetchSalaryPayments = async (eid, startDate, endDate) => {
+    const fetchSalaryPayments = async (eid) => {
         try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/salary-payments?eid=${eid}`);
+            const response = await fetch(`http://localhost:5001/api/admin/main/advance&loan?eid=${eid}`);
             const data = await response.json();
 
             if (data.success) {
@@ -50,6 +54,38 @@ const SalarySheet = () => {
             setLoanPayments([]);
         }
     };
+    const fetchLeaveCount = async (eid, selectedEmployee) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/leave-count?eid=${eid}`);
+            const data = await response.json();
+
+            const informed = data.success ? data.informedLeave || 0 : 0;
+            const uninformed = data.success ? data.uninformedLeave || 0 : 0;
+            const attendanceBonus = data.success ? data.attendanceBonus || 0 : 0;
+            const attendanceDeduction = data.success ? data.attendanceDeduction || 0 : 0;
+
+            setInformedLeaves(informed);
+            setUninformedLeaves(uninformed);
+            setAttdanceBouns(attendanceBonus);
+            setDeduction(attendanceDeduction);
+            if (selectedEmployee) {
+                setFormData({
+                    id: selectedEmployee.E_Id,
+                    name: selectedEmployee.name,
+                    job: selectedEmployee.job,
+                    basic: selectedEmployee.basic,
+                    informedLeave: informed,
+                    uninformedLeave: uninformed,
+                    attendance: attendanceBonus,
+                    leaveDeduction: attendanceDeduction,
+                });
+            }
+        } catch (err) {
+            console.error("Error fetching leave counts:", err);
+            // Optional fallback to clear formData on error
+        }
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -57,23 +93,11 @@ const SalarySheet = () => {
     const handleEmployeeSelect = (e) => {
         const selectedId = e.target.value;
         const selectedEmployee = employees.find(emp => emp.E_Id === selectedId);
-        fetchSalaryPayments(selectedId);
-        if (selectedEmployee) {
-            setFormData({
-                id: selectedEmployee.E_Id, name: selectedEmployee.name, basic: selectedEmployee.basic,
-                job: selectedEmployee.job,
-                informedLeave:"", uninformedLeave:"",
-                attendance:"",leaveDeduction:"",
-            });
-        } else {
-            setFormData({
-                id: "", name: "", job: "",
-                informedLeave:"", uninformedLeave:"",
-                basic: "", loan: "",
-                attendance:"",leaveDeduction:"",
-            });
-        }
+
+        fetchSalaryPayments(selectedId); // Keep this as-is
+        fetchLeaveCount(selectedId, selectedEmployee); // Now passes employee to update formData inside
     };
+
 
     return (
         <Helmet title={`Salary Sheet`}>
