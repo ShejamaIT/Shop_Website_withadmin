@@ -17,11 +17,13 @@ const AllEmployees = () => {
     const [activeSubTab, setActiveSubTab] = useState(""); // Tracks sub-tab for Sales Team
     const [salesteamMembers, setSalesteamMembers] = useState([]);
     const [drivers, setDrivers] = useState([]);
+    const [it, setIt] = useState([]);
+    const [hr, setHr] = useState([]);
+    const [admin, setAdmin] = useState([]);
+    const [other, setOther] = useState([]);
     const [paymentSubTab, setPaymentSubTab] = useState("advance");
-
     const location = useLocation();
     const navigate = useNavigate();
-
     // Update both main tab and sub-tab from URL query parameters
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -29,10 +31,9 @@ const AllEmployees = () => {
         const subTab = searchParams.get("subTab");
 
         // Set the main tab based on the query parameter (or default to salesTeam)
-        if (tab && ["salesTeam", "drivers", "addEmployee"].includes(tab)) {
+        if (tab && ["salesTeam", "drivers", "addEmployee","other"].includes(tab)) {
             setMainTab(tab);
         }
-
         // Set the sub-tab based on the query parameter (or default to the first member's ID)
         if (subTab) {
             setActiveSubTab(subTab);
@@ -46,13 +47,29 @@ const AllEmployees = () => {
     useEffect(() => {
         fetchSalesTeamMembers();
         fetchDrivers();
+        fetchOtherEmployees();
     }, []);
+
+    const fetchOtherEmployees = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/grouped-employees");
+            const data = await response.json();
+
+            if (data.success && Array.isArray(data.employees)) {
+                setOther(data.employees);  // All IT, HR, Admin employees in one array
+            } else {
+                setOther([]);  // Reset if failed
+            }
+        } catch (error) {
+            console.error("Error fetching OtherEmployees:", error);
+            setOther([]);
+        }
+    };
 
     const fetchSalesTeamMembers = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/salesteam");
             const data = await response.json();
-
             if (data.data && data.data.length > 0) {
                 setSalesteamMembers(data.data);
                 if (!activeSubTab) {
@@ -63,7 +80,6 @@ const AllEmployees = () => {
             console.error("Error fetching sales team members:", error);
         }
     };
-
     const fetchDrivers = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/drivers");
@@ -79,7 +95,6 @@ const AllEmployees = () => {
             console.error("Error fetching drivers:", error);
         }
     };
-
     const handleMainTabChange = (tabName) => {
         setMainTab(tabName);
         setActiveSubTab(""); // Reset the sub-tab when changing the main tab
@@ -88,9 +103,14 @@ const AllEmployees = () => {
 
     const handleSubTabChange = (subTabId) => {
         setActiveSubTab(subTabId);
-        const newTab = mainTab === "salesTeam" ? "salesTeam" : "drivers"; // Keep the main tab the same
-        navigate(`?tab=${newTab}&subTab=${subTabId}`); // Update the URL with the sub-tab query param
+        navigate(`?tab=${mainTab}&subTab=${subTabId}`); // Use current mainTab dynamically
     };
+    useEffect(() => {
+        if (mainTab === "other" && other.length > 0 && !activeSubTab) {
+            setActiveSubTab(other[0].E_Id);
+            navigate(`?tab=other&subTab=${other[0].E_Id}`);
+        }
+    }, [mainTab, other, activeSubTab, navigate]);
 
     const handleAddEmployee = (newEmployee) => {
         if (newEmployee.job === "Sales") {
@@ -154,6 +174,14 @@ const AllEmployees = () => {
                         </NavItem>
                         <NavItem>
                             <NavLink
+                                className={mainTab === "other" ? "active" : ""}
+                                onClick={() => handleMainTabChange("other")}
+                            >
+                                Other
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
                                 className={mainTab === "payment" ? "active" : ""}
                                 onClick={() => handleMainTabChange("payment")}
                             >
@@ -200,7 +228,6 @@ const AllEmployees = () => {
                                 <p className="text-muted mt-3">No Sales Team members found.</p>
                             )}
                         </TabPane>
-
                         {/* === DRIVERS TAB === */}
                         <TabPane tabId="drivers">
                             {drivers.length > 0 ? (
@@ -230,6 +257,43 @@ const AllEmployees = () => {
                                 <p className="text-muted mt-3">No Drivers found.</p>
                             )}
                         </TabPane>
+                        <TabPane tabId="other">
+                            {/* Job Role Tabs (IT, HR, Admin) */}
+                            <Nav tabs className="mt-3">
+                                {["It", "HR", "Admin"].map((jobKey) => {
+                                    const employeesByJob = other.filter(emp => emp.job === jobKey);
+                                    return employeesByJob.map((emp) => (
+                                        <NavItem key={emp.E_Id}>
+                                            <NavLink
+                                                className={activeSubTab === emp.E_Id ? "active" : ""}
+                                                onClick={() => handleSubTabChange(emp.E_Id)}
+                                            >
+                                                {emp.name}
+                                            </NavLink>
+                                        </NavItem>
+                                    ));
+                                })}
+                            </Nav>
+
+                            {/* Tab Content for Selected Employee */}
+                            <TabContent activeTab={activeSubTab} className="mt-3">
+                                {other.map((emp) => (
+                                    <TabPane tabId={emp.E_Id} key={emp.E_Id}>
+                                        <div>
+                                            <h5>{emp.name}</h5>
+                                            <p><strong>Job:</strong> {emp.job}</p>
+                                            <p><strong>Contact:</strong> {emp.contact}</p>
+                                            <p><strong>NIC:</strong> {emp.nic}</p>
+                                            <p><strong>Address:</strong> {emp.address}</p>
+                                            <p><strong>DOB:</strong> {emp.dob}</p>
+                                            <p><strong>Basic Salary:</strong> {emp.basic}</p>
+                                            <p><strong>Type:</strong> {emp.type}</p>
+                                        </div>
+                                    </TabPane>
+                                ))}
+                            </TabContent>
+                        </TabPane>
+
                         <TabPane tabId="payment">
                             <Nav tabs className="mt-3">
                                 <NavItem>
