@@ -419,3 +419,8 @@ ADD COLUMN stID VARCHAR(25) AFTER or_status,
 ADD CONSTRAINT fk_order_payment_stID FOREIGN KEY (stID)
     REFERENCES sales_team(stID)
     ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE sal_loan_detail
+ADD COLUMN status ENUM('Paid', 'Unpaid') NOT NULL DEFAULT 'Unpaid';
+ALTER TABLE salary_loan
+ADD COLUMN status ENUM('Finished', 'Unfinished') NOT NULL DEFAULT 'Unfinished';
+
