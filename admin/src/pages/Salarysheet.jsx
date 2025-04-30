@@ -16,12 +16,33 @@ const SalarySheet = () => {
         informedLeave:"", uninformedLeave:"",
         basic: "", loan: "",
         attendance:"",leaveDeduction:"",
-        saving:"",otherpay:"",
+        saving:"",otherpay:"",total :"",
     });
     // Fetch Employees
     useEffect(() => {
         fetchEmployees();
     }, []);
+    useEffect(() => {
+        if (!formData.basic) return;
+
+        const basic = parseFloat(formData.basic) || 0;
+        const attendance = parseFloat(formData.attendance) || 0;
+        const deduction = parseFloat(formData.leaveDeduction) || 0;
+        const saving = parseFloat(formData.saving) || 0;
+        const other = parseFloat(formData.otherpay) || 0;
+
+        const totalAdvance = advancePayments.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
+        const totalLoan = loanPayments.reduce((sum, l) => sum + parseFloat(l.installment || 0), 0);
+
+        const totalSalary =
+            basic + attendance - deduction - totalAdvance - totalLoan - saving - other;
+
+        setFormData((prev) => ({
+            ...prev,
+            total: totalSalary.toFixed(2),
+        }));
+    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments]);
+
 
     const fetchEmployees = async () => {
         try {
@@ -283,25 +304,36 @@ const SalarySheet = () => {
                                         </tbody>
                                     </Table>
                                 </div>
-                                <Row>
-                                    <Col md="6">
-                                        <Button type="submit" color="primary" block>
-                                            Pay
-                                        </Button>
-                                    </Col>
-                                    <Col md="6">
-                                        <Button type="button" color="danger" block>
-                                            Clear
-                                        </Button>
-                                    </Col>
-                                </Row>
+                                <div className="salesteam-details">
+                                    <Label>Total salary</Label>
+                                    <Table bordered className="member-table">
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Total salary in hand</strong></td>
+                                                <td>{formData.total}</td>
+                                            </tr>
+                                        </tbody>
+                                    </Table>
+                                </div>
+                                        <Row>
+                                            <Col md="6">
+                                                <Button type="submit" color="primary" block>
+                                                    Pay
+                                                </Button>
+                                            </Col>
+                                            <Col md="6">
+                                                <Button type="button" color="danger" block>
+                                                    Clear
+                                                </Button>
+                                            </Col>
+                                        </Row>
                             </Form>
                         </Col>
                     </Row>
                 </Container>
             </section>
         </Helmet>
-    );
+);
 };
 
 export default SalarySheet;

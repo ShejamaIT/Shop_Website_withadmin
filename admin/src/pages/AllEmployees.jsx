@@ -123,7 +123,7 @@ const AllEmployees = () => {
     };
 
     return (
-        <Helmet title="All-Saleteam">
+        <Helmet title="All-Employee">
             <section>
                 <Container className="all-products">
                     {/* === MAIN NAVIGATION TABS === */}
