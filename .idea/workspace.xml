@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update db">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with sale team order target">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -302,7 +301,7 @@
       <workItem from="1745987770087" duration="3551000" />
       <workItem from="1745991843042" duration="5611000" />
       <workItem from="1745997923843" duration="218000" />
-      <workItem from="1745998170645" duration="3151000" />
+      <workItem from="1745998170645" duration="4989000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -647,7 +646,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="328" />
+    <option name="localTasksCounter" value="329" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -666,7 +665,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update delivery nte detail view" />
     <MESSAGE value="update api" />
     <MESSAGE value="update bugs" />
     <MESSAGE value="update order with new address" />
@@ -691,6 +689,7 @@
     <MESSAGE value="update deliverynote details" />
     <MESSAGE value="update details" />
     <MESSAGE value="update db" />
-    <option name="LAST_COMMIT_MESSAGE" value="update db" />
+    <MESSAGE value="update with sale team order target" />
+    <option name="LAST_COMMIT_MESSAGE" value="update with sale team order target" />
   </component>
 </project>

@@ -16,6 +16,7 @@ const SalarySheet = () => {
         informedLeave:"", uninformedLeave:"",
         basic: "", loan: "",
         attendance:"",leaveDeduction:"",
+        saving:"",otherpay:"",
     });
     // Fetch Employees
     useEffect(() => {
@@ -92,8 +93,9 @@ const SalarySheet = () => {
             // Optional fallback to clear formData on error
         }
     };
-        const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(formData);
     }
 
     return (
@@ -205,44 +207,37 @@ const SalarySheet = () => {
                                     </Table>
                                 </div>
                                 <div className="salesteam-details">
-                                    <Label>Loan Payments</Label>
-                                    <Table bordered className="member-table">
-                                        <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Payment</th>
-                                            <th>Pass</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {loanPayments.length > 0 ? (
-                                            <>
-                                                {loanPayments.map((payment, index) => (
-                                                    <tr key={index}>
-                                                        <td>{new Date(payment.dateTime).toLocaleDateString()}</td>
-                                                        <td>Rs. {payment.amount}</td>
-                                                        <td><Button>Pass</Button></td>
-                                                    </tr>
-                                                ))}
-                                                <tr>
-                                                    <td><strong>Total</strong></td>
-                                                    <td>
-                                                        <strong>
-                                                            Rs.{" "}
-                                                            {loanPayments.reduce((total, p) => total + Number(p.amount), 0).toFixed(2)}
-                                                        </strong>
-                                                    </td>
-                                                    <td></td>
-                                                </tr>
-                                            </>
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={3}>No loan payments</td>
-                                            </tr>
-                                        )}
-                                        </tbody>
-                                    </Table>
+                                    <Label className="fw-bold mb-3">Loan Payments</Label>
+
+                                    {loanPayments.length > 0 ? (
+                                        <div className="d-flex flex-column gap-3">
+                                            {loanPayments.map((payment, index) => (
+                                                <div key={index}
+                                                     className="border rounded p-3 shadow-sm d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <div>
+                                                            <strong>Date:</strong> {new Date(payment.dateTime).toLocaleDateString()}
+                                                        </div>
+                                                        <div><strong>Payment:</strong> Rs. {payment.installment}</div>
+                                                    </div>
+                                                    <Button color="success">Pass</Button>
+                                                </div>
+                                            ))}
+
+                                            {/* Total Section */}
+                                            <div className="border-top pt-3 mt-2 d-flex justify-content-between">
+                                                <strong>Total</strong>
+                                                <strong>
+                                                    Rs.{" "}
+                                                    {loanPayments.reduce((total, p) => total + Number(p.installment), 0).toFixed(2)}
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-muted">No loan payments</div>
+                                    )}
                                 </div>
+
                                 <div className="salesteam-details">
                                     <Label>Other Payments</Label>
                                     <Table bordered className="member-table">
@@ -288,6 +283,18 @@ const SalarySheet = () => {
                                         </tbody>
                                     </Table>
                                 </div>
+                                <Row>
+                                    <Col md="6">
+                                        <Button type="submit" color="primary" block>
+                                            Pay
+                                        </Button>
+                                    </Col>
+                                    <Col md="6">
+                                        <Button type="button" color="danger" block>
+                                            Clear
+                                        </Button>
+                                    </Col>
+                                </Row>
                             </Form>
                         </Col>
                     </Row>

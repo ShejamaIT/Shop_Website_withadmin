@@ -79,6 +79,9 @@ const AddOrderTargets = () => {
 
             if (data.success) {
                 toast.success("Sales target updated successfully!");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
                 // Optional: refresh the sales team data
                 fetchSalesTeam();
                 setEditFields({ totalOrder: "", totalIssued: "" });
