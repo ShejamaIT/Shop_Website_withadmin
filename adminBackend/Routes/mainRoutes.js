@@ -2992,6 +2992,30 @@ router.get("/drivers", async (req, res) => {
     }
 });
 
+// Get All other employee
+router.get("/grouped-employees", async (req, res) => {
+    try {
+        // Get employees with job IN ('It', 'HR', 'Admin')
+        const [rows] = await db.query(
+            "SELECT * FROM Employee WHERE job IN ('It', 'HR', 'Admin')"
+        );
+        console.log(rows);
+
+        // Return all employees in a single array
+        return res.status(200).json({
+            success: true,
+            employees: rows // Send all employees regardless of their job type
+        });
+    } catch (error) {
+        console.error("Error fetching grouped employees:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
 // Get orders for a specific sales team member (stID)
 router.get("/orders/by-sales-team", async (req, res) => {
     try {
