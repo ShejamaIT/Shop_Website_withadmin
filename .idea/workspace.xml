@@ -5,87 +5,388 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-11.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-12.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-13.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-14.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC01-9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-3-26.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-4-26.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-5-26.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-6-26.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT2Dw-7-26.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-1-27.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-2-27.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-3-27.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-4-27.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KTLS-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KTLS-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KTLS-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-1-25.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-2-25.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-3-25.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-4-28.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-5-28.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_SSW-6-28.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_test1-1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_test1-2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_test1-3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_test1-4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_test1-5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_test1-6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_test2-1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_10_24_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_10_24__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_10_52_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_10_52__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_12_06_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_12_06__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_14_08_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_14_08__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_16_38_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_19_03_2025_16_38__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_15_26_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_15_26_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_15_26_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_15_26_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_15_26__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_16_20_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_16_20_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_16_20_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_16_20_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_16_20__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_20_03_2025_18_03__Changes_.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC-4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC-5.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KRC-6.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-10.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-5.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-6.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-7.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-8.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DB-9.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-10.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-5.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-6.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-7.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-8.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-9.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2dP-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2dP-2.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Shop_Website_withadmin.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Shop_Website_withadmin.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_11_43__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_12_22__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_14_51__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_28__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_15_49__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_03_2025_17_22__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_11_21__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_14_23__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_22_03_2025_17_56__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_13_00__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KRC01-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KRC01-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KRC01-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KRC01-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KRC01-7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KTLS-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_KTLS-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_16_36__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KRC01-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KRC01-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KRC01-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KRC01-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KRC01-7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KRC01-8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KRC01-9.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KTLS-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KTLS-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_KTLS-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_03_2025_17_41__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KRC01-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KRC01-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KRC01-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KRC01-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KRC01-7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KRC01-8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KRC01-9.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KTLS-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KTLS-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_KTLS-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_10_39__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-10.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-11.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-12.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-13.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-14.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KRC01-9.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KTLS-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KTLS-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_KTLS-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_12_03__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-10.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-11.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-12.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-13.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-14.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KRC01-9.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KTLS-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KTLS-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_KTLS-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_test1-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_test1-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_test1-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_test1-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_test1-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_test1-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/barcode_test2-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_24_03_2025_13_42__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-10.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-11.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-12.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-13.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-14.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KRC01-9.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT2Dw-3-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT2Dw-4-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT2Dw-5-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT2Dw-6-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT2Dw-7-26.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT3DP-1-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT3DP-2-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT3DP-3-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KT3DP-4-27.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KTLS-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KTLS-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_KTLS-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-1-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-2-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-3-25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-4-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-5-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_SSW-6-28.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_test1-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_test1-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_test1-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_test1-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_test1-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_test1-6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/barcode_test2-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_25_03_2025_10_32__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/ReturnedOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/ReturnedOrder.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/SaleteamDetail.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/placeorder.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/placeorder.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/node_modules/.package-lock.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,25 +430,28 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;js.last.introduce.type&quot;: &quot;CONST&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/shejama/Shop_Website_withadmin/admin/src/components/tables&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/shejama/Shop_Website_withadmin/admin/src/pages&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.start admin.executor&quot;: &quot;Run&quot;,
+    &quot;npm.start adminBackend.executor&quot;: &quot;Run&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.1.2\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.new.ui&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.1\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\components\tables" />
       <recent name="D:\shejama\Shop_Website_withadmin\admin\src\pages" />
+      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\components\tables" />
       <recent name="C:\Users\LENOVO\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\pages" />
@@ -160,7 +464,7 @@
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start adminBackend">
+  <component name="RunManager" selected="npm.start admin">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -207,6 +511,14 @@
       <item itemvalue="npm.start client" />
       <item itemvalue="npm.start clientBackend" />
     </list>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-18abd8497189-intellij.indexing.shared.core-IU-241.14494.240" />
+        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-IU-241.14494.240" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -329,6 +641,42 @@
       <workItem from="1743076893632" duration="1911000" />
       <workItem from="1743133771527" duration="12000" />
       <workItem from="1743133841828" duration="1225000" />
+      <workItem from="1745224378514" duration="1026000" />
+      <workItem from="1745230185352" duration="1617000" />
+      <workItem from="1745233217969" duration="298000" />
+      <workItem from="1745235371766" duration="474000" />
+      <workItem from="1745292211764" duration="1935000" />
+      <workItem from="1745295317394" duration="1428000" />
+      <workItem from="1745298397920" duration="1831000" />
+      <workItem from="1745300675600" duration="3186000" />
+      <workItem from="1745315454043" duration="6226000" />
+      <workItem from="1745322105746" duration="1636000" />
+      <workItem from="1745378658755" duration="13418000" />
+      <workItem from="1745393215914" duration="13402000" />
+      <workItem from="1745468161130" duration="2859000" />
+      <workItem from="1745473460742" duration="5287000" />
+      <workItem from="1745482622062" duration="62000" />
+      <workItem from="1745482877496" duration="5530000" />
+      <workItem from="1745489204333" duration="4561000" />
+      <workItem from="1745553238159" duration="5120000" />
+      <workItem from="1745559074193" duration="15907000" />
+      <workItem from="1745641189571" duration="3975000" />
+      <workItem from="1745646508966" duration="223000" />
+      <workItem from="1745647432563" duration="6950000" />
+      <workItem from="1745655212830" duration="8608000" />
+      <workItem from="1745727666682" duration="3139000" />
+      <workItem from="1745754615587" duration="31000" />
+      <workItem from="1745756125842" duration="4833000" />
+      <workItem from="1745765382209" duration="3361000" />
+      <workItem from="1745812230542" duration="9008000" />
+      <workItem from="1745822389191" duration="448000" />
+      <workItem from="1745823073083" duration="13220000" />
+      <workItem from="1745898481348" duration="23913000" />
+      <workItem from="1745927064746" duration="150000" />
+      <workItem from="1745927323455" duration="4202000" />
+      <workItem from="1745968558410" duration="4431000" />
+      <workItem from="1745983558669" duration="4117000" />
+      <workItem from="1745987770087" duration="807000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -718,85 +1066,5 @@
     <MESSAGE value="update deliverynote details" />
     <MESSAGE value="update details" />
     <option name="LAST_COMMIT_MESSAGE" value="update details" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5251</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5252</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5249</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5248</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5229</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5230</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5231</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5232</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5233</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5237</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5238</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5240</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js</url>
-          <line>5241</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
