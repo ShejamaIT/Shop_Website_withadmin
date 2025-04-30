@@ -5919,6 +5919,7 @@ router.get("/today-order-counts", async (req, res) => {
         });
     }
 });
+
 // Get advance and loan amount for a month by employee id
 router.get("/advance&loan", async (req, res) => {
     try {
@@ -5938,11 +5939,13 @@ router.get("/advance&loan", async (req, res) => {
             "SELECT * FROM salary_advance WHERE E_Id = ? AND dateTime BETWEEN ? AND ?",
             [eid, startOfMonth, endOfMonth]
         );
-        console.log(advances);
 
-        // Fetch salary loans
+        // Fetch salary loans (payment details)
         const [loans] = await db.query(
-            "SELECT * FROM salary_loan WHERE E_Id = ? AND dateTime BETWEEN ? AND ?",
+            `SELECT d.*, l.E_Id 
+                FROM sal_loan_detail d 
+                JOIN salary_loan l ON d.sl_ID = l.sl_ID 
+                 WHERE l.E_Id = ? AND d.date BETWEEN ? AND ?`,
             [eid, startOfMonth, endOfMonth]
         );
 
@@ -6022,6 +6025,29 @@ router.get("/leave-count", async (req, res) => {
     }
 });
 
+//  Get Sales Team Targets
+router.get("/sales-team-targets", async (req, res) => {
+    try {
+        const [results] = await db.query(`
+            SELECT st.stID, st.E_Id, emp.name, st.orderTarget, st.issuedTarget
+            FROM sales_team st
+            JOIN employee emp ON st.E_Id = emp.E_Id
+        `);
+
+        return res.status(200).json({
+            success: true,
+            salesTeam: results
+        });
+    } catch (error) {
+        console.error("Error fetching sales team targets:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
 // Save leave form
 router.post("/add-leave", async (req, res) => {
     try {
@@ -6059,7 +6085,6 @@ router.post("/add-leave", async (req, res) => {
 });
 
 // Save a new order target
-// POST: Save a new target and bonus
 router.post("/order-targets", async (req, res) => {
     try {
         const { target, bonus } = req.body;
@@ -6085,7 +6110,6 @@ router.post("/order-targets", async (req, res) => {
 });
 
 //Get all order targets bonus
-// GET: Retrieve all target-bonus records
 router.get("/order-targets", async (req, res) => {
     try {
         const [targets] = await db.query("SELECT id, targetRate AS target, bonus FROM order_target_bonus");
@@ -6103,6 +6127,41 @@ router.get("/order-targets", async (req, res) => {
         });
     }
 });
+
+// Update sale team target values
+router.put("/update-sales-target", async (req, res) => {
+    try {
+        const { stID, totalOrder, totalIssued } = req.body;
+
+        if (!stID || totalOrder == null || totalIssued == null) {
+            return res.status(400).json({ success: false, message: "Missing required fields" });
+        }
+
+        const [result] = await db.query(
+            `UPDATE sales_team
+             SET orderTarget = ?, issuedTarget = ?
+             WHERE stID = ?`,
+            [parseFloat(totalOrder), parseFloat(totalIssued), stID]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Sales team member not found" });
+        }
+
+        return res.status(200).json({ success: true, message: "Sales target updated successfully" });
+
+    } catch (err) {
+        console.error("Error updating sales target:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: err.message
+        });
+    }
+});
+
+// get sale team total
+
 
 // pass sale team value to review in month end
 
