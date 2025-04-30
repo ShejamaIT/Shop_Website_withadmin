@@ -9,6 +9,7 @@ import DriverDetail from "./DriverDetail";
 import AdancePayment from "./AdancePayment";
 import LoanPayment from "./LoanPayment";
 import Salarysheet from "./Salarysheet";
+import Leaveform from "./Leaveform";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -241,6 +242,11 @@ const AllEmployees = () => {
                                     </NavLink>
                                 </NavItem>
                                 <NavItem>
+                                    <NavLink className={paymentSubTab === "leave" ? "active" : ""} onClick={() => handlePaymentSubTabChange("leave")}>
+                                        Leaves
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
                                     <NavLink className={paymentSubTab === "salary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("salary")}>
                                         Monthly Salary
                                     </NavLink>
@@ -252,6 +258,9 @@ const AllEmployees = () => {
                                 </TabPane>
                                 <TabPane tabId="loan">
                                     <LoanPayment />
+                                </TabPane>
+                                <TabPane tabId="leave">
+                                    <Leaveform />
                                 </TabPane>
                                 <TabPane tabId="salary">
                                     <Salarysheet />
