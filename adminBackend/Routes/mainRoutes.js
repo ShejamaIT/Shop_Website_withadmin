@@ -2014,7 +2014,8 @@ router.get("/supplier-items", async (req, res) => {
                 Item.color,
                 item_supplier.unit_cost,
                 Item.warrantyPeriod,
-                Item.img  -- Fetch the binary image (LONGBLOB)
+                Item.img,
+                Item.material
             FROM item_supplier
                      JOIN Item ON Item.I_Id = item_supplier.I_Id
             WHERE item_supplier.s_ID = ?
@@ -3545,7 +3546,7 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
         const stockDetails = [];
 
         for (let i = 0; i < stockCount; i++) {
-            const { I_Id, unit_price, quantity } = items[i];
+            const { I_Id, unit_price, quantity,material } = items[i];
             const totalPrice = parseFloat(unit_price) * Number(quantity);
 
             const checkUnitPriceQuery = `SELECT unit_cost FROM item_supplier WHERE I_Id = ? AND s_ID = ?`;
@@ -3572,12 +3573,12 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?)`;
             await db.query(purchaseDetailQuery, [purchase_id, I_Id, quantity, unit_price, totalPrice, ""]);
 
-            stockDetails.push({ I_Id, quantity });
+            stockDetails.push({ I_Id, quantity ,material});
         }
 
         const insertBarcodeQuery = `
-            INSERT INTO p_i_detail (pc_Id, I_Id, stock_Id, barcode_img, status, orID, datetime)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            INSERT INTO p_i_detail (pc_Id, I_Id, stock_Id, barcode_img, status, orID, datetime,material)
+            VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
 
         const barcodeFolderPath = path.join("./uploads/barcodes");
         if (!fs.existsSync(barcodeFolderPath)) {
@@ -3587,7 +3588,7 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
         const stockRanges = [];
 
         for (let i = 0; i < stockCount; i++) {
-            const { I_Id, quantity } = stockDetails[i];
+            const { I_Id, quantity,material } = stockDetails[i];
 
             const [lastStockResult] = await db.query(
                 `SELECT MAX(stock_Id) AS lastStockId FROM p_i_detail WHERE I_Id = ?`,
@@ -3608,7 +3609,7 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
 
                 // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", "",]);
                 // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "",NOW()]);
-                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", null,  mysql.raw('NOW()')]);
+                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", null,  mysql.raw('NOW()'),material]);
 
             }
 
