@@ -5895,7 +5895,57 @@ router.get("/today-order-income", async (req, res) => {
     }
 });
 
-// Get Daily & monthly  in & out order count
+// Get Daily in & out order count
+router.get("/today-order-counts", async (req, res) => {
+    try {
+        const today = new Date().toISOString().split("T")[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
+        const sql = `
+            SELECT 
+                -- Today
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = ?) AS todayIn,
+
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = ?) AS todayOut,
+
+                -- Yesterday
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = ?) AS yesterdayIn,
+
+                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
+                 FROM Orders WHERE orDate = ?) AS yesterdayOut
+        `;
+
+        const [rows] = await db.query(sql, [today, today, yesterday, yesterday]);
+        const {
+            todayIn,
+            todayOut,
+            yesterdayIn,
+            yesterdayOut
+        } = rows[0];
+
+        return res.status(200).json({
+            success: true,
+            message: "Today's IN/OUT order counts compared with yesterday",
+            data: {
+                inOrders: todayIn,
+                outOrders: todayOut,
+                inOrdersIncreased: todayIn > yesterdayIn ? "yes" : "no",
+                outOrdersIncreased: todayOut > yesterdayOut ? "yes" : "no"
+            }
+        });
+    } catch (err) {
+        console.error("Error comparing today's order counts:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while retrieving order comparison",
+            error: err.message
+        });
+    }
+});
+
 router.get("/order-summary", async (req, res) => {
     try {
         const today = moment().format("YYYY-MM-DD");
@@ -5974,46 +6024,6 @@ router.get("/order-summary", async (req, res) => {
     }
 });
 
-// Get total delivery hire price monthly
-router.get("/monthly-hire-summary", async (req, res) => {
-    try {
-        const startOfThisMonth = moment().startOf("month").format("YYYY-MM-DD");
-        const startOfLastMonth = moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
-        const endOfLastMonth = moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
-
-        const sql = `
-            SELECT
-                -- This month total hire
-                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
-                 WHERE date BETWEEN ? AND ? AND status = 'Complete') AS thisMonthHire,
-
-                -- Last month total hire
-                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
-                 WHERE date BETWEEN ? AND ? AND status = 'Complete') AS lastMonthHire
-        `;
-
-        const [rows] = await db.query(sql, [
-            startOfThisMonth, moment().format("YYYY-MM-DD"),
-            startOfLastMonth, endOfLastMonth
-        ]);
-
-        const result = rows[0];
-
-        return res.status(200).json({
-            success: true,
-            message: "Monthly hire comparison for completed deliveries",
-            thisMonthHire: result.thisMonthHire,
-            hireIncreased: result.thisMonthHire > result.lastMonthHire ? "yes" : "no"
-        });
-    } catch (err) {
-        console.error("Error fetching monthly hire summary:", err.message);
-        return res.status(500).json({
-            success: false,
-            message: "Database error while fetching monthly hire data",
-            error: err.message
-        });
-    }
-});
 // Get advance and loan amount for a month by employee id
 router.get("/advance&loan", async (req, res) => {
     try {
@@ -6343,6 +6353,80 @@ router.get("/monthly-issued-material-prices", async (req, res) => {
     }
 });
 
+// Get Monthly Net Total for walking and onsite orders
+router.get("/monthly-net-total-summary", async (req, res) => {
+    try {
+        const startOfThisMonth = moment().startOf("month").format("YYYY-MM-DD");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
+
+        const sql = `
+            SELECT
+                -- This month net total for walking orders
+                (SELECT IFNULL(SUM(netTotal), 0) 
+                 FROM Orders 
+                 WHERE orDate BETWEEN ? AND ? 
+                 AND ordertype = 'walking' 
+                 AND orStatus != 'cancel') AS thisMonthWalkingTotal,
+                 
+                -- This month net total for onsite orders
+                (SELECT IFNULL(SUM(netTotal), 0) 
+                 FROM Orders 
+                 WHERE orDate BETWEEN ? AND ? 
+                 AND ordertype = 'onsite' 
+                 AND orStatus != 'cancel') AS thisMonthOnsiteTotal,
+                 
+                -- Last month net total for walking orders
+                (SELECT IFNULL(SUM(netTotal), 0) 
+                 FROM Orders 
+                 WHERE orDate BETWEEN ? AND ? 
+                 AND ordertype = 'walking' 
+                 AND orStatus != 'cancel') AS lastMonthWalkingTotal,
+                 
+                -- Last month net total for onsite orders
+                (SELECT IFNULL(SUM(netTotal), 0) 
+                 FROM Orders 
+                 WHERE orDate BETWEEN ? AND ? 
+                 AND ordertype = 'onsite' 
+                 AND orStatus != 'cancel') AS lastMonthOnsiteTotal
+        `;
+
+        const [rows] = await db.query(sql, [
+            startOfThisMonth, moment().format("YYYY-MM-DD"),
+            startOfThisMonth, moment().format("YYYY-MM-DD"),
+            startOfLastMonth, endOfLastMonth,
+            startOfLastMonth, endOfLastMonth
+        ]);
+
+        const result = rows[0];
+
+        return res.status(200).json({
+            success: true,
+            message: "Monthly net total comparison for walking and onsite orders",
+            walking: {
+                thisMonthTotal: result.thisMonthWalkingTotal,
+                lastMonthTotal: result.lastMonthWalkingTotal,
+                compare: {
+                    increased: result.thisMonthWalkingTotal > result.lastMonthWalkingTotal ? "yes" : "no"
+                }
+            },
+            onsite: {
+                thisMonthTotal: result.thisMonthOnsiteTotal,
+                lastMonthTotal: result.lastMonthOnsiteTotal,
+                compare: {
+                    increased: result.thisMonthOnsiteTotal > result.lastMonthOnsiteTotal ? "yes" : "no"
+                }
+            }
+        });
+    } catch (err) {
+        console.error("Error fetching monthly net total summary:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while fetching monthly net total data",
+            error: err.message
+        });
+    }
+});
 
 // get sale team total
 
