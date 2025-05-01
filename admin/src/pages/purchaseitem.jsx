@@ -69,6 +69,7 @@ const PurchaseDetails = () => {
             const response = await fetch(`http://localhost:5001/api/admin/main/supplier-items?s_Id=${supplierId}`);
             const data = await response.json();
             if (data.success) {
+                console.log(data.items);
                 setSupplierItems(data.items);
             } else {
                 setSupplierItems([]);
@@ -138,6 +139,7 @@ const PurchaseDetails = () => {
             invoice: Invoice,
             items: selectedItems.map(item => ({
                 I_Id: item.I_Id,
+                material:item.material,
                 color: item.color || "N/A",
                 unit_price: item.unitPrice,
                 quantity: item.quantity,

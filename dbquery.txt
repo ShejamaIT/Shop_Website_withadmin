@@ -423,4 +423,7 @@ ALTER TABLE sal_loan_detail
 ADD COLUMN status ENUM('Paid', 'Unpaid') NOT NULL DEFAULT 'Unpaid';
 ALTER TABLE salary_loan
 ADD COLUMN status ENUM('Finished', 'Unfinished') NOT NULL DEFAULT 'Unfinished';
-
+ALTER TABLE p_i_detail
+ADD COLUMN material VARCHAR(20) NOT NULL;
+ALTER TABLE p_i_detail
+ADD COLUMN price DOUBLE NOT NULL DEFAULT 0;

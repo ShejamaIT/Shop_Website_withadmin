@@ -130,9 +130,6 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
         fetchReservedAndUnreserved();
     }, []);
 
-
-
-
     const handleSearchChange = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
@@ -143,31 +140,42 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
         setDropdownOpen(filtered.length > 0);
     };
     const handleSelectItem = (item) => {
-        // Find the requested quantity for the selected item
         const orderedItem = selectedOrder.items.find(orderItem => orderItem.itemId === item.I_Id);
         if (!orderedItem) {
             toast.error("Selected stock does not belong to the order.");
             return;
         }
+
         const requestedQty = orderedItem.quantity;
-        // Count how many times this item (same I_Id) has been selected
         const selectedCount = selectedItems.filter(selected => selected.I_Id === item.I_Id).length;
-        // Check if the stock item is already selected (prevent duplicate stock selection)
+
         const isAlreadySelected = selectedItems.some(selected => selected.stock_Id === item.stock_Id);
         if (isAlreadySelected) {
             toast.error("This stock item has already been selected.");
             return;
         }
-        // Check if adding another stock item exceeds the requested quantity
+
         if (selectedCount >= requestedQty) {
             toast.error(`You cannot select more than ${requestedQty} stock items for this order.`);
             return;
         }
-        // If all checks pass, add the item to the selectedItems array
-        setSelectedItems(prevItems => [...prevItems, item]);
+
+        // Calculate price per item (unit price)
+        const unitPrice = orderedItem.price && orderedItem.quantity
+            ? orderedItem.price / orderedItem.quantity
+            : 0;
+
+        // Add price to the item object
+        const itemWithPrice = {
+            ...item,
+            price: unitPrice
+        };
+
+        setSelectedItems(prevItems => [...prevItems, itemWithPrice]);
         setSearchTerm('');
         setDropdownOpen(false);
     };
+
     const handlePaymentTypeChange = (e) => {
         setPaymentType(e.target.value);
     };
