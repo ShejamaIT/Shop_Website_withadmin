@@ -46,7 +46,7 @@
 }
 
 .home-content .box .number {
-    font-size: 35px;
+    font-size: 26px;
     font-weight: 500;
     margin-top: -6px;
 }
@@ -96,6 +96,46 @@
     line-height: 50px;
     text-align: center;
     color: #b066ff;
+    border-radius: 12px;
+}
+.home-content .box .store1 {
+    font-size: 32px;
+    height: 50px;
+    width: 50px;
+    background: #e5fdd9;
+    line-height: 50px;
+    text-align: center;
+    color: #a3ff66;
+    border-radius: 12px;
+}
+.home-content .box .store2 {
+    font-size: 32px;
+    height: 50px;
+    width: 50px;
+    background: #ffccf3;
+    line-height: 50px;
+    text-align: center;
+    color: #ff66f7;
+    border-radius: 12px;
+}
+.home-content .box .store3 {
+    font-size: 32px;
+    height: 50px;
+    width: 50px;
+    background: #ffdecc;
+    line-height: 50px;
+    text-align: center;
+    color: #ff9c66;
+    border-radius: 12px;
+}
+.home-content .box .delivery {
+    font-size: 32px;
+    height: 50px;
+    width: 50px;
+    background: #ffcccc;
+    line-height: 50px;
+    text-align: center;
+    color: #ff6666;
     border-radius: 12px;
 }
 
