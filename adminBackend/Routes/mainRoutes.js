@@ -6186,6 +6186,96 @@ router.put("/update-sales-target", async (req, res) => {
     }
 });
 
+// Summing Total salling price of items for each category
+router.get("/monthly-issued-material-prices", async (req, res) => {
+    try {
+        const startOfThisMonth = moment().startOf("month").format("YYYY-MM-DD");
+        const endOfThisMonth = moment().endOf("month").format("YYYY-MM-DD");
+
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
+
+        const sql = `
+            SELECT
+                materialGroup,
+                SUM(price) as totalPrice
+            FROM (
+                SELECT 
+                    CASE
+                        WHEN material IN ('Teak', 'Mahogani', 'Mara', 'Attoriya', 'Sapu') THEN 'Furniture'
+                        ELSE material
+                    END AS materialGroup,
+                    price,
+                    datetime
+                FROM p_i_detail
+                WHERE status = 'Issued' AND datetime IS NOT NULL
+            ) AS sub
+            WHERE DATE(datetime) BETWEEN ? AND ?
+            GROUP BY materialGroup
+        `;
+
+        const [thisMonthRows] = await db.query(sql, [startOfThisMonth, endOfThisMonth]);
+        const [lastMonthRows] = await db.query(sql, [startOfLastMonth, endOfLastMonth]);
+
+        const toPriceMap = (rows) =>
+            rows.reduce((acc, row) => {
+                acc[row.materialGroup] = parseFloat(row.totalPrice || 0);
+                return acc;
+            }, {});
+
+        const thisMonthMap = toPriceMap(thisMonthRows);
+        const lastMonthMap = toPriceMap(lastMonthRows);
+
+        const materials = ['MDF', 'MM', 'Mattress', 'Furniture'];
+
+        const data = materials.map(material => {
+            const current = thisMonthMap[material] || 0;
+            const previous = lastMonthMap[material] || 0;
+            return {
+                material,
+                totalPrice: current,
+                lastMonthTotal: previous,
+                increased: current > previous ? "yes" : "no"
+            };
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Monthly issued material total price comparison",
+            MDF: [{
+                totalPrice: thisMonthMap['MDF'] || 0,
+                lastMonthTotal: lastMonthMap['MDF'] || 0,
+                increased: (thisMonthMap['MDF'] || 0) > (lastMonthMap['MDF'] || 0) ? "yes" : "no"
+            }],
+            MM: [{
+                totalPrice: thisMonthMap['MM'] || 0,
+                lastMonthTotal: lastMonthMap['MM'] || 0,
+                increased: (thisMonthMap['MM'] || 0) > (lastMonthMap['MM'] || 0) ? "yes" : "no"
+            }],
+            Mattress: [{
+                totalPrice: thisMonthMap['Mattress'] || 0,
+                lastMonthTotal: lastMonthMap['Mattress'] || 0,
+                increased: (thisMonthMap['Mattress'] || 0) > (lastMonthMap['Mattress'] || 0) ? "yes" : "no"
+            }],
+            Furniture: [{
+                totalPrice: thisMonthMap['Furniture'] || 0,
+                lastMonthTotal: lastMonthMap['Furniture'] || 0,
+                increased: (thisMonthMap['Furniture'] || 0) > (lastMonthMap['Furniture'] || 0) ? "yes" : "no"
+            }]
+        });
+
+
+    } catch (err) {
+        console.error("Error retrieving issued material prices:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while retrieving issued material price comparison",
+            error: err.message
+        });
+    }
+});
+
+
 // get sale team total
 
 
