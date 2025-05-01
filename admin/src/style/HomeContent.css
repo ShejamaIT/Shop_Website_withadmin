@@ -88,6 +88,16 @@
     color: #66b0ff;
     border-radius: 12px;
 }
+.home-content .box .store {
+    font-size: 32px;
+    height: 50px;
+    width: 50px;
+    background: #eaccff;
+    line-height: 50px;
+    text-align: center;
+    color: #b066ff;
+    border-radius: 12px;
+}
 
 .home-content .box .cart.two {
     color: #2BD47D;

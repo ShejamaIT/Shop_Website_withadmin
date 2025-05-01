@@ -4,16 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update employee view">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update purchase items">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-14.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/purchaseitem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/purchaseitem.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddNewItem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddNewItem.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/HomeContent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/HomeContent.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/HomeContent.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/HomeContent.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -309,7 +309,7 @@
       <workItem from="1745998170645" duration="4989000" />
       <workItem from="1746008065620" duration="4810000" />
       <workItem from="1746072229627" duration="87000" />
-      <workItem from="1746072436938" duration="4233000" />
+      <workItem from="1746072436938" duration="6727000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -654,7 +654,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="331" />
+    <option name="localTasksCounter" value="332" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -673,7 +673,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update order with new address" />
     <MESSAGE value="update with delivery note" />
     <MESSAGE value="update with search part" />
     <MESSAGE value="update with tab name" />
@@ -698,6 +697,7 @@
     <MESSAGE value="update with sale team order target" />
     <MESSAGE value="update salary sheet" />
     <MESSAGE value="update employee view" />
-    <option name="LAST_COMMIT_MESSAGE" value="update employee view" />
+    <MESSAGE value="update purchase items" />
+    <option name="LAST_COMMIT_MESSAGE" value="update purchase items" />
   </component>
 </project>

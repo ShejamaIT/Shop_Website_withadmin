@@ -183,7 +183,8 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
 
                     <FormGroup>
                         <Label for="material">Material</Label>
-                        <Input type="select" name="material" id="material" value={formData.material} onChange={handleChange} required>
+                        <Input type="select" name="material" id="material" value={formData.material}
+                               onChange={handleChange} required>
                             <option value="">Select Material</option>
                             <option value="Teak">Teak</option>
                             <option value="Mahogani">Mahogani</option>
@@ -193,6 +194,7 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                             <option value="Steel">Steel</option>
                             <option value="MDF">MDF</option>
                             <option value="MM">MM</option>
+                            <option value="Mattress">Mattress</option>
                             <option value="Other">Other</option>
                         </Input>
                     </FormGroup>

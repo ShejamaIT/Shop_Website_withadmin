@@ -263,6 +263,7 @@ const AddItem = () => {
                                 <option value="Steel">Steel</option>
                                 <option value="MDF">MDF</option>
                                 <option value="MM">MM</option>
+                                <option value="Mattress">Mattress</option>
                                 <option value="Other">Other</option>
                             </Input>
                         </FormGroup>

@@ -2,9 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { Card, CardBody, Table } from 'reactstrap';
 import { Line } from 'react-chartjs-2';
 import {Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend,} from 'chart.js';
-
 import '../style/HomeContent.css';
-
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const chartData = {
@@ -149,7 +147,7 @@ const HomeContent = () => {
 
                 <div className="box">
                     <div className="right-side">
-                        <div className="box-topic">Today Income</div>
+                        <div className="box-topic">Today Cashin</div>
                         <div className="number">Rs.{income}</div>
 
                         {incomeIncreased === "yes" ? (
@@ -166,7 +164,52 @@ const HomeContent = () => {
                     </div>
                     <i className='bx bx-dollar-circle cart three'></i>
                 </div>
-
+            </div>
+            <div className="overview-boxes">
+                <div className="box">
+                    <div className="right-side">
+                        <div className="box-topic">Furniture Sale</div>
+                        <div className="number">40</div>
+                        <div className="indicator">
+                            <i className='bx bx-up-arrow-alt'></i>
+                            <span className="text">Up from yesterday</span>
+                        </div>
+                    </div>
+                    <i className='bx bxs-store store'></i>
+                </div>
+                <div className="box">
+                    <div className="right-side">
+                        <div className="box-topic">MDF Sale</div>
+                        <div className="number">40</div>
+                        <div className="indicator">
+                            <i className='bx bx-up-arrow-alt'></i>
+                            <span className="text">Up from yesterday</span>
+                        </div>
+                    </div>
+                    <i className='bx bxs-store store'></i>
+                </div>
+                <div className="box">
+                    <div className="right-side">
+                        <div className="box-topic">MM sale</div>
+                        <div className="number">40</div>
+                        <div className="indicator">
+                            <i className='bx bx-up-arrow-alt'></i>
+                            <span className="text">Up from yesterday</span>
+                        </div>
+                    </div>
+                    <i className='bx bxs-store store'></i>
+                </div>
+                <div className="box">
+                    <div className="right-side">
+                        <div className="box-topic">Mettress Sale</div>
+                        <div className="number">40</div>
+                        <div className="indicator">
+                            <i className='bx bx-up-arrow-alt'></i>
+                            <span className="text">Up from yesterday</span>
+                        </div>
+                    </div>
+                    <i className='bx bxs-store store'></i>
+                </div>
             </div>
 
             <div className="overview row-cards">
@@ -180,7 +223,7 @@ const HomeContent = () => {
                 </Card>
 
                 <Card id="outStockTable" className="cards table-card">
-                    <CardBody>
+                <CardBody>
                         <h5 className="card-title text-center">Out of Stock Products</h5>
                         <div className="out-stock-table-wrapper" style={{ height: '200px' }}>
                             <Table striped responsive className="mb-0 out-stock-table">
