@@ -6341,8 +6341,6 @@ router.get("/monthly-issued-material-prices", async (req, res) => {
                 increased: (thisMonthMap['Furniture'] || 0) > (lastMonthMap['Furniture'] || 0) ? "yes" : "no"
             }]
         });
-
-
     } catch (err) {
         console.error("Error retrieving issued material prices:", err.message);
         return res.status(500).json({
