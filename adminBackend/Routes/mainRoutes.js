@@ -4774,9 +4774,10 @@ router.post("/issued-order", async (req, res) => {
             );
 
             await db.query(
-                `INSERT INTO issued_items (orID, pid_Id, status, date) VALUES (?, ?, 'Issued', NOW())`,
+                `UPDATE issued_items SET status = 'Issued', date = NOW() WHERE orID = ? AND pid_Id = ?`,
                 [orID, item.pid_Id]
             );
+
         });
 
         // Run all queries in parallel
