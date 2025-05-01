@@ -34,10 +34,15 @@ const HomeContent = () => {
     const [inOrdersIncreased, setInOrdersIncreased] = useState("no");
     const [outOrdersIncreased, setOutOrdersIncreased] = useState("no");
     const [items, setItems] = useState([]);
+    const [mdf, setMDF] = useState([]);
+    const [mm, setMM] = useState([]);
+    const [furnitures, setFurnitures] = useState([]);
+    const [mattress, setMattress] = useState([]);
     useEffect(() => {
         fetchSaleIncome();
         fetchTodayOrders();
         fetchItems();
+        fetchmonthlyCategorySales();
     }, []);
 
     const fetchSaleIncome = async () => {
@@ -69,6 +74,23 @@ const HomeContent = () => {
             console.error("Fetch error:", error);
         }
     };
+
+    const fetchmonthlyCategorySales = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/monthly-issued-material-prices");
+            const data = await response.json();
+            console.log(data.MDF)
+            if (data.success) {
+                setMDF(data.MDF);
+                setMM(data.MM);
+                setFurnitures(data.Furniture);
+                setMattress(data.Mattress);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+        }
+    };
+
     // Fetch all out of stock items
     const fetchItems = async () => {
         try {
@@ -166,50 +188,90 @@ const HomeContent = () => {
                 </div>
             </div>
             <div className="overview-boxes">
+                {/* Furniture Sale */}
                 <div className="box">
                     <div className="right-side">
                         <div className="box-topic">Furniture Sale</div>
-                        <div className="number">40</div>
-                        <div className="indicator">
-                            <i className='bx bx-up-arrow-alt'></i>
-                            <span className="text">Up from yesterday</span>
-                        </div>
+                        <div className="number">Rs.{furnitures[0]?.totalPrice || 0}</div>
+
+                        {furnitures[0]?.increased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from last month</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from last month</span>
+                            </div>
+                        )}
                     </div>
                     <i className='bx bxs-store store'></i>
                 </div>
+
+                {/* MDF Sale */}
                 <div className="box">
                     <div className="right-side">
                         <div className="box-topic">MDF Sale</div>
-                        <div className="number">40</div>
-                        <div className="indicator">
-                            <i className='bx bx-up-arrow-alt'></i>
-                            <span className="text">Up from yesterday</span>
-                        </div>
+                        <div className="number">Rs.{mdf[0]?.totalPrice || 0}</div>
+
+                        {mdf[0]?.increased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from last month</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from last month</span>
+                            </div>
+                        )}
                     </div>
                     <i className='bx bxs-store store'></i>
                 </div>
+
+                {/* MM Sale */}
                 <div className="box">
                     <div className="right-side">
-                        <div className="box-topic">MM sale</div>
-                        <div className="number">40</div>
-                        <div className="indicator">
-                            <i className='bx bx-up-arrow-alt'></i>
-                            <span className="text">Up from yesterday</span>
-                        </div>
+                        <div className="box-topic">MM Sale</div>
+                        <div className="number">Rs.{mm[0]?.totalPrice || 0}</div>
+
+                        {mm[0]?.increased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from last month</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from last month</span>
+                            </div>
+                        )}
                     </div>
                     <i className='bx bxs-store store'></i>
                 </div>
+
+                {/* Mattress Sale */}
                 <div className="box">
                     <div className="right-side">
-                        <div className="box-topic">Mettress Sale</div>
-                        <div className="number">40</div>
-                        <div className="indicator">
-                            <i className='bx bx-up-arrow-alt'></i>
-                            <span className="text">Up from yesterday</span>
-                        </div>
+                        <div className="box-topic">Mattress Sale</div>
+                        <div className="number">Rs.{mattress[0]?.totalPrice || 0}</div>
+
+                        {mattress[0]?.increased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from last month</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from last month</span>
+                            </div>
+                        )}
                     </div>
                     <i className='bx bxs-store store'></i>
                 </div>
+
             </div>
 
             <div className="overview row-cards">

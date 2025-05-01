@@ -10,10 +10,8 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-14.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddNewItem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddNewItem.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddProducts.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/HomeContent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/HomeContent.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/style/HomeContent.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/HomeContent.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +89,7 @@
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start adminBackend">
+  <component name="RunManager" selected="npm.start admin">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -309,7 +307,8 @@
       <workItem from="1745998170645" duration="4989000" />
       <workItem from="1746008065620" duration="4810000" />
       <workItem from="1746072229627" duration="87000" />
-      <workItem from="1746072436938" duration="6727000" />
+      <workItem from="1746072436938" duration="8996000" />
+      <workItem from="1746082226483" duration="1556000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -654,7 +653,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="332" />
+    <option name="localTasksCounter" value="333" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
