@@ -5895,57 +5895,125 @@ router.get("/today-order-income", async (req, res) => {
     }
 });
 
-// Get Today in & out order count
-router.get("/today-order-counts", async (req, res) => {
+// Get Daily & monthly  in & out order count
+router.get("/order-summary", async (req, res) => {
     try {
-        const today = new Date().toISOString().split("T")[0];
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+        const today = moment().format("YYYY-MM-DD");
+        const yesterday = moment().subtract(1, "day").format("YYYY-MM-DD");
+
+        const startOfThisMonth = moment().startOf("month").format("YYYY-MM-DD");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
 
         const sql = `
-            SELECT 
-                -- Today
-                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = ?) AS todayIn,
+            SELECT
+                -- TODAY
+                (SELECT COUNT(*) FROM Orders WHERE orDate = ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS todayInCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate = ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS todayInTotal,
+                (SELECT COUNT(*) FROM Orders WHERE orDate = ? AND orStatus IN ('Issued', 'Delivered')) AS todayOutCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate = ? AND orStatus IN ('Issued', 'Delivered')) AS todayOutTotal,
 
-                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = ?) AS todayOut,
+                -- YESTERDAY
+                (SELECT COUNT(*) FROM Orders WHERE orDate = ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS yesterdayInCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate = ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS yesterdayInTotal,
+                (SELECT COUNT(*) FROM Orders WHERE orDate = ? AND orStatus IN ('Issued', 'Delivered')) AS yesterdayOutCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate = ? AND orStatus IN ('Issued', 'Delivered')) AS yesterdayOutTotal,
 
-                -- Yesterday
-                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Pending', 'Accepted', 'Completed') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = ?) AS yesterdayIn,
+                -- THIS MONTH
+                (SELECT COUNT(*) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS thisMonthInCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS thisMonthInTotal,
+                (SELECT COUNT(*) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Issued', 'Delivered')) AS thisMonthOutCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Issued', 'Delivered')) AS thisMonthOutTotal,
 
-                (SELECT IFNULL(SUM(CASE WHEN orStatus IN ('Issued', 'Delivered') THEN 1 ELSE 0 END), 0)
-                 FROM Orders WHERE orDate = ?) AS yesterdayOut
+                -- LAST MONTH
+                (SELECT COUNT(*) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS lastMonthInCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Pending', 'Accepted', 'Completed')) AS lastMonthInTotal,
+                (SELECT COUNT(*) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Issued', 'Delivered')) AS lastMonthOutCount,
+                (SELECT IFNULL(SUM(netTotal), 0) FROM Orders WHERE orDate BETWEEN ? AND ? AND orStatus IN ('Issued', 'Delivered')) AS lastMonthOutTotal
         `;
 
-        const [rows] = await db.query(sql, [today, today, yesterday, yesterday]);
-        const {
-            todayIn,
-            todayOut,
-            yesterdayIn,
-            yesterdayOut
-        } = rows[0];
+        const params = [
+            today, today, today, today,
+            yesterday, yesterday, yesterday, yesterday,
+            startOfThisMonth, today, startOfThisMonth, today,
+            startOfThisMonth, today, startOfThisMonth, today,
+            startOfLastMonth, endOfLastMonth, startOfLastMonth, endOfLastMonth,
+            startOfLastMonth, endOfLastMonth, startOfLastMonth, endOfLastMonth
+        ];
+
+        const [rows] = await db.query(sql, params);
+        const r = rows[0];
 
         return res.status(200).json({
             success: true,
-            message: "Today's IN/OUT order counts compared with yesterday",
-            data: {
-                inOrders: todayIn,
-                outOrders: todayOut,
-                inOrdersIncreased: todayIn > yesterdayIn ? "yes" : "no",
-                outOrdersIncreased: todayOut > yesterdayOut ? "yes" : "no"
+            message: "Today's and this month's order summary with comparisons",
+            today: {
+                in: { count: r.todayInCount, total: r.todayInTotal },
+                out: { count: r.todayOutCount, total: r.todayOutTotal },
+                compare: {
+                    inIncreased: r.todayInCount > r.yesterdayInCount ? "yes" : "no",
+                    outIncreased: r.todayOutCount > r.yesterdayOutCount ? "yes" : "no"
+                }
+            },
+            thisMonth: {
+                in: { count: r.thisMonthInCount, total: r.thisMonthInTotal },
+                out: { count: r.thisMonthOutCount, total: r.thisMonthOutTotal },
+                compare: {
+                    inIncreased: r.thisMonthInCount > r.lastMonthInCount ? "yes" : "no",
+                    outIncreased: r.thisMonthOutCount > r.lastMonthOutCount ? "yes" : "no"
+                }
             }
         });
     } catch (err) {
-        console.error("Error comparing today's order counts:", err.message);
+        console.error("Error fetching order summary:", err.message);
         return res.status(500).json({
             success: false,
-            message: "Database error while retrieving order comparison",
+            message: "Database error while fetching summary",
             error: err.message
         });
     }
 });
 
+// Get total delivery hire price monthly
+router.get("/monthly-hire-summary", async (req, res) => {
+    try {
+        const startOfThisMonth = moment().startOf("month").format("YYYY-MM-DD");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
+
+        const sql = `
+            SELECT
+                -- This month total hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date BETWEEN ? AND ? AND status = 'Complete') AS thisMonthHire,
+
+                -- Last month total hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date BETWEEN ? AND ? AND status = 'Complete') AS lastMonthHire
+        `;
+
+        const [rows] = await db.query(sql, [
+            startOfThisMonth, moment().format("YYYY-MM-DD"),
+            startOfLastMonth, endOfLastMonth
+        ]);
+
+        const result = rows[0];
+
+        return res.status(200).json({
+            success: true,
+            message: "Monthly hire comparison for completed deliveries",
+            thisMonthHire: result.thisMonthHire,
+            hireIncreased: result.thisMonthHire > result.lastMonthHire ? "yes" : "no"
+        });
+    } catch (err) {
+        console.error("Error fetching monthly hire summary:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while fetching monthly hire data",
+            error: err.message
+        });
+    }
+});
 // Get advance and loan amount for a month by employee id
 router.get("/advance&loan", async (req, res) => {
     try {
