@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { Card, CardBody, Table } from 'reactstrap';
 import { Line } from 'react-chartjs-2';
 import {Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend,} from 'chart.js';
+import {PieChart, Pie, Cell, ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Bar} from "recharts";
 import '../style/HomeContent.css';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
@@ -25,6 +26,7 @@ const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
 };
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const HomeContent = () => {
     const [income, setIncome] = useState(0);
@@ -39,19 +41,43 @@ const HomeContent = () => {
     const [thisMonthOutPriceIncreased, setThisMonthOutPriceIncreased] = useState("no");
     const [thisMonthHire, setThisMonthHire] = useState(0);
     const [hireIncreased, setHireIncreased] = useState("no");
+    const [walkingTotalThisMonth, setWalkingTotalThisMonth] = useState(0);
+    const [onsiteTotalThisMonth, setOnsiteTotalThisMonth] = useState(0);
+    const [walkingComparison, setWalkingComparison] = useState('no');
+    const [onsiteComparison, setOnsiteComparison] = useState('no');
     const [items, setItems] = useState([]);
     const [mdf, setMDF] = useState([]);
     const [mm, setMM] = useState([]);
     const [furnitures, setFurnitures] = useState([]);
     const [mattress, setMattress] = useState([]);
+    const [data, setData] = useState([]);
     useEffect(() => {
         fetchSaleIncome();
         fetchItems();
         fetchmonthlyCategorySales();
         fetchOrderSummary();
         fetchMonthlyHire();
+        fetchMonthlyNetTotalSummary();
+        fetchmonthlyCategory();
     }, []);
+    const fetchmonthlyCategory = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/monthly-issued-material-prices");
+            const result = await response.json();
 
+            if (result.success) {
+                const chartData = [
+                    { name: "MDF", value: result.MDF[0]?.totalPrice || 0 },
+                    { name: "MM", value: result.MM[0]?.totalPrice || 0 },
+                    { name: "Furniture", value: result.Furniture[0]?.totalPrice || 0 },
+                    { name: "Mattress", value: result.Mattress[0]?.totalPrice || 0 },
+                ];
+                setData(chartData);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+        }
+    };
     const fetchSaleIncome = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/today-order-income");
@@ -65,7 +91,6 @@ const HomeContent = () => {
             console.error("Error fetching income:", error);
         }
     };
-
     const fetchOrderSummary = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/order-summary");
@@ -92,7 +117,7 @@ const HomeContent = () => {
         try {
             const res = await fetch("http://localhost:5001/api/admin/main/monthly-hire-summary");
             const data = await res.json();
-        console.log(data);
+
             if (data.success) {
                 setThisMonthHire(data.thisMonthHire);
                 setHireIncreased(data.hireIncreased);
@@ -101,7 +126,6 @@ const HomeContent = () => {
             console.error("Error fetching monthly hire summary:", error);
         }
     };
-
     const fetchmonthlyCategorySales = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/monthly-issued-material-prices");
@@ -117,7 +141,22 @@ const HomeContent = () => {
             console.error("Fetch error:", error);
         }
     };
+    const fetchMonthlyNetTotalSummary = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/admin/main/monthly-net-total-summary');
+            const data = await response.json();
+            console.log(data);
+            if (data.success) {
+                setWalkingTotalThisMonth(data.walking.thisMonthTotal);
+                setWalkingComparison(data.walking.compare.increased);
 
+                setOnsiteTotalThisMonth(data.onsite.thisMonthTotal);
+                setOnsiteComparison(data.onsite.compare.increased);
+            }
+        } catch (error) {
+            console.error("Error fetching monthly net total summary:", error);
+        }
+    };
     // Fetch all out of stock items
     const fetchItems = async () => {
         try {
@@ -131,8 +170,13 @@ const HomeContent = () => {
 
     return (
         <div className="home-content" id="home">
-            <div className="welcome-card" style={{ marginTop: '-20px' }}>
-                <Card className="m-3" style={{ borderRadius: '8px', background: 'linear-gradient(115deg, #97abff, #123593)', color: '#f5f7fa', boxShadow: '0 1px 1px rgba(0, 0, 0, 0.1)' }}>
+            <div className="welcome-card" style={{marginTop: '-20px'}}>
+                <Card className="m-3" style={{
+                    borderRadius: '8px',
+                    background: 'linear-gradient(115deg, #97abff, #123593)',
+                    color: '#f5f7fa',
+                    boxShadow: '0 1px 1px rgba(0, 0, 0, 0.1)'
+                }}>
                     <CardBody>
                         <h5 className="card-title">Welcome to dashboard !</h5>
                         <p className="card-text">Hello Admin, welcome to your Shejama Group Poss dashboard !</p>
@@ -226,91 +270,7 @@ const HomeContent = () => {
                 </div>
 
             </div>
-            <div className="overview-boxes">
 
-                <div className="box">
-                    <div className="right-side">
-                        <div className="box-topic">Furniture Sale</div>
-                        <div className="number">Rs.{furnitures[0]?.totalPrice.toFixed(2) || 0.00}</div>
-
-                        {furnitures[0]?.increased === "yes" ? (
-                            <div className="indicator">
-                                <i className='bx bx-up-arrow-alt'></i>
-                                <span className="text">Up from last month</span>
-                            </div>
-                        ) : (
-                            <div className="indicator">
-                                <i className='bx bx-down-arrow-alt down'></i>
-                                <span className="text">Down from last month</span>
-                            </div>
-                        )}
-                    </div>
-                    <i className='bx bxs-package store'></i>
-                </div>
-
-                <div className="box">
-                    <div className="right-side">
-                        <div className="box-topic">MDF Sale</div>
-                        <div className="number">Rs.{mdf[0]?.totalPrice.toFixed(2) || 0.00}</div>
-
-                        {mdf[0]?.increased === "yes" ? (
-                            <div className="indicator">
-                                <i className='bx bx-up-arrow-alt'></i>
-                                <span className="text">Up from last month</span>
-                            </div>
-                        ) : (
-                            <div className="indicator">
-                                <i className='bx bx-down-arrow-alt down'></i>
-                                <span className="text">Down from last month</span>
-                            </div>
-                        )}
-                    </div>
-                    <i className='bx bxs-package store2'></i>
-                </div>
-
-                <div className="box">
-                    <div className="right-side">
-                        <div className="box-topic">MM Sale</div>
-                        <div className="number">Rs.{mm[0]?.totalPrice.toFixed(2) || 0.00}</div>
-
-                        {mm[0]?.increased === "yes" ? (
-                            <div className="indicator">
-                                <i className='bx bx-up-arrow-alt'></i>
-                                <span className="text">Up from last month</span>
-                            </div>
-                        ) : (
-                            <div className="indicator">
-                                <i className='bx bx-down-arrow-alt down'></i>
-                                <span className="text">Down from last month</span>
-                            </div>
-                        )}
-                    </div>
-                    {/*<i className='bx bxs-shopping-bags'></i>*/}
-                    <i className='bx bxs-shopping-bags store1'></i>
-                </div>
-
-                <div className="box">
-                    <div className="right-side">
-                        <div className="box-topic">Mattress Sale</div>
-                        <div className="number">Rs.{mattress[0]?.totalPrice.toFixed(2) || 0.00}</div>
-
-                        {mattress[0]?.increased === "yes" ? (
-                            <div className="indicator">
-                                <i className='bx bx-up-arrow-alt'></i>
-                                <span className="text">Up from last month</span>
-                            </div>
-                        ) : (
-                            <div className="indicator">
-                                <i className='bx bx-down-arrow-alt down'></i>
-                                <span className="text">Down from last month</span>
-                            </div>
-                        )}
-                    </div>
-                    <i className='bx bxs-shopping-bags store3'></i>
-                    {/*<i className='bx bxs-store '></i>*/}
-                </div>
-
-            </div>
             <div className="overview-boxes">
                 <div className="box">
                     <div className="right-side">
@@ -331,7 +291,44 @@ const HomeContent = () => {
                     </div>
                     <i className='bx bxs-truck delivery'></i>
                 </div>
+                <div className="box">
+                    <div className="right-side">
+                        <div className="box-topic">Total shop sale</div>
+                        <div className="number">Rs.{walkingTotalThisMonth.toFixed(2)}</div>
 
+                        {walkingComparison === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from last month</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from last month</span>
+                            </div>
+                        )}
+                    </div>
+                    <i className='bx bxs-store cart one'></i>
+                </div>
+                <div className="box">
+                    <div className="right-side">
+                        <div className="box-topic">Total Onsite sale</div>
+                        <div className="number">Rs.{onsiteTotalThisMonth.toFixed(2)}</div>
+
+                        {onsiteComparison === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from last month</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from last month</span>
+                            </div>
+                        )}
+                    </div>
+                    <i className='bx bxs-store cart two'></i>
+                </div>
                 <div className="box">
                     <div className="right-side">
                         <div className="box-topic">Today Cashin</div>
@@ -370,7 +367,7 @@ const HomeContent = () => {
                             <Table striped responsive className="mb-0 out-stock-table">
                                 <thead>
                                 <tr>
-                                <th scope="col">ID</th>
+                                    <th scope="col">ID</th>
                                     <th scope="col">Item</th>
                                     <th scope="col">Description</th>
                                 </tr>
@@ -381,8 +378,10 @@ const HomeContent = () => {
                                     items.map((item) => (
                                         <tr key={item.I_Id}> {/* Assuming each item has a unique `id` */}
                                             <td>{item.I_Id}</td>
-                                            <td>{item.I_name}</td> {/* Assuming each item has a `itemName` */}
-                                            <td>{item.descrip}</td> {/* Assuming each item has a `description` */}
+                                            <td>{item.I_name}</td>
+                                            {/* Assuming each item has a `itemName` */}
+                                            <td>{item.descrip}</td>
+                                            {/* Assuming each item has a `description` */}
                                         </tr>
                                     ))
                                 ) : (
@@ -395,7 +394,141 @@ const HomeContent = () => {
                         </div>
                     </CardBody>
                 </Card>
+            </div>
 
+            <div className="overview row-cards">
+                <Card className="cards chart-card">
+                    <CardBody>
+                        {/*<ResponsiveContainer width="100%" height={300}>*/}
+                        {/*    <PieChart>*/}
+                        {/*        <Pie*/}
+                        {/*            data={data}*/}
+                        {/*            dataKey="value"*/}
+                        {/*            nameKey="name"*/}
+                        {/*            cx="50%"*/}
+                        {/*            cy="50%"*/}
+                        {/*            outerRadius={100}*/}
+                        {/*            fill="#8884d8"*/}
+                        {/*            label={({ name, value }) => `${name}: Rs.${value.toFixed(2)}`}*/}
+                        {/*        >*/}
+                        {/*            {data.map((entry, index) => (*/}
+                        {/*                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />*/}
+                        {/*            ))}*/}
+                        {/*        </Pie>*/}
+
+                        {/*        <Tooltip/>*/}
+                        {/*        <Legend/>*/}
+                        {/*    </PieChart>*/}
+                        {/*</ResponsiveContainer>*/}
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis tickFormatter={(value) => `Rs.${value}`} />
+                                <Tooltip formatter={(value) => `Rs.${value}`} />
+                                <Legend />
+                                <Bar dataKey="value" fill="#8884d8">
+                                    {data.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+
+                    </CardBody>
+                </Card>
+                <Card id="outStockTable" className="cards table-card">
+                    <CardBody>
+                        <div className="overview-boxes">
+                            <div className="box">
+                                <div className="right-side">
+                                    <div className="box-topic">Furniture Sale</div>
+                                    <div className="number">Rs.{furnitures[0]?.totalPrice.toFixed(2) || 0.00}</div>
+
+                                    {furnitures[0]?.increased === "yes" ? (
+                                        <div className="indicator">
+                                            <i className='bx bx-up-arrow-alt'></i>
+                                            <span className="text">Up from last month</span>
+                                        </div>
+                                    ) : (
+                                        <div className="indicator">
+                                            <i className='bx bx-down-arrow-alt down'></i>
+                                            <span className="text">Down from last month</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <i className='bx bxs-package store'></i>
+                            </div>
+
+                            <div className="box">
+                                <div className="right-side">
+                                    <div className="box-topic">MDF Sale</div>
+                                    <div className="number">Rs.{mdf[0]?.totalPrice.toFixed(2) || 0.00}</div>
+
+                                    {mdf[0]?.increased === "yes" ? (
+                                        <div className="indicator">
+                                            <i className='bx bx-up-arrow-alt'></i>
+                                            <span className="text">Up from last month</span>
+                                        </div>
+                                    ) : (
+                                        <div className="indicator">
+                                            <i className='bx bx-down-arrow-alt down'></i>
+                                            <span className="text">Down from last month</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <i className='bx bxs-package store2'></i>
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
+                <Card id="outStockTable" className="cards table-card">
+                    <CardBody>
+                        <div className="overview-boxes">
+                            <div className="box">
+                                <div className="right-side">
+                                    <div className="box-topic">MM Sale</div>
+                                    <div className="number">Rs.{mm[0]?.totalPrice.toFixed(2) || 0.00}</div>
+
+                                    {mm[0]?.increased === "yes" ? (
+                                        <div className="indicator">
+                                            <i className='bx bx-up-arrow-alt'></i>
+                                            <span className="text">Up from last month</span>
+                                        </div>
+                                    ) : (
+                                        <div className="indicator">
+                                            <i className='bx bx-down-arrow-alt down'></i>
+                                            <span className="text">Down from last month</span>
+                                        </div>
+                                    )}
+                                </div>
+                                {/*<i className='bx bxs-shopping-bags'></i>*/}
+                                <i className='bx bxs-shopping-bags store1'></i>
+                            </div>
+
+                            <div className="box">
+                                <div className="right-side">
+                                    <div className="box-topic">Mattress Sale</div>
+                                    <div className="number">Rs.{mattress[0]?.totalPrice.toFixed(2) || 0.00}</div>
+
+                                    {mattress[0]?.increased === "yes" ? (
+                                        <div className="indicator">
+                                            <i className='bx bx-up-arrow-alt'></i>
+                                            <span className="text">Up from last month</span>
+                                        </div>
+                                    ) : (
+                                        <div className="indicator">
+                                            <i className='bx bx-down-arrow-alt down'></i>
+                                            <span className="text">Down from last month</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <i className='bx bxs-shopping-bags store3'></i>
+                                {/*<i className='bx bxs-store '></i>*/}
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
             </div>
         </div>
     );
