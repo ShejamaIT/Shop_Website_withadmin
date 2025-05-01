@@ -4850,9 +4850,9 @@ router.post("/issued-items", async (req, res) => {
         for (const item of selectedItems) {
             await db.query(
                 `UPDATE p_i_detail
-                 SET status = 'Dispatched', orID = ?, datetime = NOW()
+                 SET status = 'Dispatched', orID = ?, datetime = NOW(),price = ?
                  WHERE pid_Id = ?`,
-                [orID, item.pid_Id]
+                [orID,item.price, item.pid_Id]
             );
             await db.query(
                 `INSERT INTO issued_items (orID, pid_Id, status, date) VALUES (?, ?, 'Dispatched', NOW())`,
