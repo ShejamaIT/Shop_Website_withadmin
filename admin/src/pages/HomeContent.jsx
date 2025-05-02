@@ -6,25 +6,29 @@ import {PieChart, Pie, Cell, ResponsiveContainer, BarChart, CartesianGrid, XAxis
 import '../style/HomeContent.css';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
-const chartData = {
-    labels: [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ],
-    datasets: [
-        {
-            label: 'Monthly Income ($)',
-            data: [120, 190, 300, 500, 200, 300, 400, 320, 280, 420, 390, 450],
-            fill: false,
-            borderColor: '#123593',
-            tension: 0.4,
-        },
-    ],
-};
 
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    plugins: {
+        legend: { display: true, position: 'top' },
+        tooltip: { enabled: true },
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            title: {
+                display: true,
+                text: 'Income (Rs.)',
+            },
+        },
+        x: {
+            title: {
+                display: true,
+                text: 'Month',
+            },
+        },
+    },
 };
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -50,6 +54,7 @@ const HomeContent = () => {
     const [items, setItems] = useState([]);
     const [mdf, setMDF] = useState([]);
     const [mm, setMM] = useState([]);
+    const [monthlyData, setMonthlyData] = useState([]);
     const [furnitures, setFurnitures] = useState([]);
     const [mattress, setMattress] = useState([]);
     const [data, setData] = useState([]);
@@ -61,6 +66,7 @@ const HomeContent = () => {
         fetchMonthlyHire();
         fetchMonthlyNetTotalSummary();
         fetchmonthlyCategory();
+        fetchMonthlyIncome();
     }, []);
     const fetchmonthlyCategory = async () => {
         try {
@@ -161,7 +167,6 @@ const HomeContent = () => {
             console.error("Error fetching monthly net total summary:", error);
         }
     };
-    // Fetch all out of stock items
     const fetchItems = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitemslessone"); // Adjust API URL if needed
@@ -170,6 +175,33 @@ const HomeContent = () => {
         } catch (err) {
             console.error("Fetch error:", err);
         }
+    };
+    const fetchMonthlyIncome = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/monthly-order-income");
+            const data = await response.json();
+            if (data.success) {
+                setMonthlyData(data.monthlyIncome);
+            }
+        } catch (error) {
+            console.error("Error fetching income data:", error);
+        }
+    };
+
+    const chartData = {
+        labels: [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ],
+        datasets: [
+            {
+                label: 'Monthly Income (Rs.)',
+                data: monthlyData,
+                fill: false,
+                borderColor: '#123593',
+                tension: 0.4,
+            },
+        ],
     };
 
     return (
