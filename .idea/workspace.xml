@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update apis">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update homecontent with year sales">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -312,7 +312,8 @@
       <workItem from="1746087778748" duration="915000" />
       <workItem from="1746089183027" duration="4145000" />
       <workItem from="1746094656287" duration="2540000" />
-      <workItem from="1746158331707" duration="4365000" />
+      <workItem from="1746158331707" duration="5236000" />
+      <workItem from="1746163745149" duration="994000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -657,7 +658,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="336" />
+    <option name="localTasksCounter" value="338" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -676,9 +677,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update with tab name" />
-    <MESSAGE value="update DeliveryNotes" />
-    <MESSAGE value="update Dashboard with saleteam" />
     <MESSAGE value="update Dashboard with saleteam orders" />
     <MESSAGE value="update saleteam with oders" />
     <MESSAGE value="update view" />
@@ -701,6 +699,9 @@
     <MESSAGE value="update purchase items" />
     <MESSAGE value="update dashboard" />
     <MESSAGE value="update apis" />
-    <option name="LAST_COMMIT_MESSAGE" value="update apis" />
+    <MESSAGE value="update homecontent with api" />
+    <MESSAGE value="update homecontent view" />
+    <MESSAGE value="update homecontent with year sales" />
+    <option name="LAST_COMMIT_MESSAGE" value="update homecontent with year sales" />
   </component>
 </project>
