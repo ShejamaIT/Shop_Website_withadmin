@@ -6277,19 +6277,20 @@ router.get("/monthly-issued-material-prices", async (req, res) => {
         const sql = `
             SELECT
                 materialGroup,
-                SUM(price) as totalPrice
+                SUM(tprice) AS totalPrice
             FROM (
                 SELECT 
                     CASE
                         WHEN material IN ('Teak', 'Mahogani', 'Mara', 'Attoriya', 'Sapu') THEN 'Furniture'
                         ELSE material
                     END AS materialGroup,
-                    price,
-                    datetime
-                FROM p_i_detail
-                WHERE status = 'Issued' AND datetime IS NOT NULL
+                    tprice,
+                    o.orDate
+                FROM Order_Detail od
+                JOIN Orders o ON od.orID = o.orID
+                WHERE o.orDate IS NOT NULL
             ) AS sub
-            WHERE DATE(datetime) BETWEEN ? AND ?
+            WHERE DATE(orDate) BETWEEN ? AND ?
             GROUP BY materialGroup
         `;
 
@@ -6321,32 +6322,18 @@ router.get("/monthly-issued-material-prices", async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Monthly issued material total price comparison",
-            MDF: [{
-                totalPrice: thisMonthMap['MDF'] || 0,
-                lastMonthTotal: lastMonthMap['MDF'] || 0,
-                increased: (thisMonthMap['MDF'] || 0) > (lastMonthMap['MDF'] || 0) ? "yes" : "no"
-            }],
-            MM: [{
-                totalPrice: thisMonthMap['MM'] || 0,
-                lastMonthTotal: lastMonthMap['MM'] || 0,
-                increased: (thisMonthMap['MM'] || 0) > (lastMonthMap['MM'] || 0) ? "yes" : "no"
-            }],
-            Mattress: [{
-                totalPrice: thisMonthMap['Mattress'] || 0,
-                lastMonthTotal: lastMonthMap['Mattress'] || 0,
-                increased: (thisMonthMap['Mattress'] || 0) > (lastMonthMap['Mattress'] || 0) ? "yes" : "no"
-            }],
-            Furniture: [{
-                totalPrice: thisMonthMap['Furniture'] || 0,
-                lastMonthTotal: lastMonthMap['Furniture'] || 0,
-                increased: (thisMonthMap['Furniture'] || 0) > (lastMonthMap['Furniture'] || 0) ? "yes" : "no"
-            }]
+            data,
+            // Optionally keep backward-compatible format:
+            MDF: [data.find(d => d.material === 'MDF')],
+            MM: [data.find(d => d.material === 'MM')],
+            Mattress: [data.find(d => d.material === 'Mattress')],
+            Furniture: [data.find(d => d.material === 'Furniture')]
         });
     } catch (err) {
-        console.error("Error retrieving issued material prices:", err.message);
+        console.error("Error retrieving material prices:", err.message);
         return res.status(500).json({
             success: false,
-            message: "Database error while retrieving issued material price comparison",
+            message: "Database error while retrieving material price comparison",
             error: err.message
         });
     }
@@ -6427,7 +6414,60 @@ router.get("/monthly-net-total-summary", async (req, res) => {
     }
 });
 
-// get sale team total
+// Get Total hire daily & monthly
+router.get("/monthly-hire-summary", async (req, res) => {
+    try {
+        const today = moment().format("YYYY-MM-DD");
+        const yesterday = moment().subtract(1, "day").format("YYYY-MM-DD");
+        const startOfThisMonth = moment().startOf("month").format("YYYY-MM-DD");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
+
+        const sql = `
+            SELECT
+                -- Today's hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date = ? AND status = 'complete') AS todayHire,
+
+                -- Yesterday's hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date = ? AND status = 'complete') AS yesterdayHire,
+
+                -- This month's total hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date BETWEEN ? AND ? AND status = 'complete') AS thisMonthHire,
+
+                -- Last month's total hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date BETWEEN ? AND ? AND status = 'complete') AS lastMonthHire
+        `;
+
+        const [rows] = await db.query(sql, [
+            today,                 // today's hire
+            yesterday,             // yesterday's hire
+            startOfThisMonth, today,   // this month
+            startOfLastMonth, endOfLastMonth // last month
+        ]);
+
+        const result = rows[0];
+
+        return res.status(200).json({
+            success: true,
+            message: "Hire summary: daily and monthly comparison",
+            todayHire: result.todayHire,
+            todayIncreased: result.todayHire > result.yesterdayHire ? "yes" : "no",
+            thisMonthHire: result.thisMonthHire,
+            hireIncreased: result.thisMonthHire > result.lastMonthHire ? "yes" : "no"
+        });
+    } catch (err) {
+        console.error("Error fetching hire summary:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while fetching hire data",
+            error: err.message
+        });
+    }
+});
 
 
 // pass sale team value to review in month end
