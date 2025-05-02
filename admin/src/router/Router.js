@@ -28,6 +28,7 @@ import DeliveryNotes from "../pages/DeliveryNotes";
 import ReturnedOrderDetails from "../pages/ReturnedOrder";
 import AdvancePayment from "../pages/AdancePayment";
 import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
+import Graphs  from "../pages/Graphs";
 
 const Router = () => {
     return (
@@ -43,7 +44,7 @@ const Router = () => {
                 <Route path="products" element={<AllProducts />} />
                 <Route path="orders" element={<PlaceOrder />} />
                 <Route path="product_list" element={<AllOrders />} />
-                <Route path="stock" element={<Orders />} />
+                <Route path="graphs" element={<Graphs />} />
                 <Route path="suppliers" element={<AllSuppliers />} />
                 <Route path="employees" element={<AllEmployees />} />
                 <Route path="delivery" element={<AllDeliveryNotes />} />

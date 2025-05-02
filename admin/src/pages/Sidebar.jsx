@@ -7,7 +7,7 @@ const Sidebar = ({ onNavigate, activePage }) => {
 
     const menuItems = [
         {id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/dashboard"},
-        {id: "stock", icon: "bx-line-chart-down", label: "Graphs", path: "/dashboard/stock"},
+        {id: "stock", icon: "bx-line-chart-down", label: "Graphs", path: "/dashboard/graphs"},
         {id: "products", icon: "bx-box", label: "Product", path: "/dashboard/products"},
         {id: "customers", icon: "bx-user", label: "Customer", path: "/dashboard/customers"},
         {id: "orders", icon: "bx-cart", label: "Place Order", path: "/dashboard/orders"},
