@@ -458,7 +458,8 @@ const HomeContent = () => {
                                         </div>
                                     )}
                                 </div>
-                                <i className='bx bxs-package store2'></i>
+
+                                <i className='bx bxs-shopping-bags store3'></i>
                             </div>
                         </div>
                     </CardBody>
@@ -504,7 +505,7 @@ const HomeContent = () => {
                                         </div>
                                     )}
                                 </div>
-                                <i className='bx bxs-shopping-bags store3'></i>
+                                <i className='bx bxs-package store2'></i>
                                 {/*<i className='bx bxs-store '></i>*/}
                             </div>
                         </div>
