@@ -100,7 +100,7 @@ const Graphs = () => {
             <div className="overview row-cards">
                 <Card className="cards chart-card">
                     <CardBody>
-                        <h5 className="card-title text-center">Monthly Income of last 12 months(Shop & Onsite)</h5>
+                        <h5 className="card-title text-center">Monthly Income of last 12 months(Shop & Online)</h5>
                         <div style={{height: '300px'}}>
                             <Line data={chartData} options={chartOptions}/>
                         </div>
@@ -117,7 +117,7 @@ const Graphs = () => {
                                 <Line data={chartData1} options={chartOptions}/>
                             </div>
                             <div style={{flex: 1}}>
-                                <h6 className="text-center">On-site</h6>
+                                <h6 className="text-center">On-line</h6>
                                 <Line data={chartData2} options={chartOptions}/>
                             </div>
                         </div>

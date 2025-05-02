@@ -181,7 +181,7 @@ const HomeContent = () => {
             const response = await fetch("http://localhost:5001/api/admin/main/monthly-order-income");
             const data = await response.json();
             if (data.success) {
-                setMonthlyData(data.monthlyIncome);
+                setMonthlyData(data.totalIncome);
             }
         } catch (error) {
             console.error("Error fetching income data:", error);
@@ -365,7 +365,7 @@ const HomeContent = () => {
                 </div>
                 <div className="box">
                     <div className="right-side">
-                        <div className="box-topic">Total Onsite sale</div>
+                        <div className="box-topic">Total Online sale</div>
                         <div className="number">Rs.{onsiteTotalThisMonth.toFixed(2)}</div>
 
                         {onsiteComparison === "yes" ? (
