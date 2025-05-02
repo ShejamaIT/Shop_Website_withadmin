@@ -301,10 +301,10 @@ router.post("/orders", async (req, res) => {
         await db.query(orderQuery, orderParams);
 
         const orderDetailValues = items.map(item => [
-            orID, item.I_Id, item.qty, parseFloat(item.price),parseFloat(item.discount)
+            orID, item.I_Id, item.qty, parseFloat(item.price),parseFloat(item.discount),item.material
         ]);
 
-        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice,discount) VALUES ?`;
+        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice,discount,material) VALUES ?`;
         await db.query(orderDetailQuery, [orderDetailValues]);
 
         if (dvStatus === "Delivery") {
@@ -402,6 +402,7 @@ router.get("/allitems", async (req, res) => {
             I_Id: item.I_Id, // Item ID
             I_name: item.I_name, // Item name
             descrip: item.descrip, // Item description
+            material:item.material, // Item material
             price: item.price, // Price
             stockQty: item.stockQty, // Quantity
             availableQty : item.availableQty, // available stock
