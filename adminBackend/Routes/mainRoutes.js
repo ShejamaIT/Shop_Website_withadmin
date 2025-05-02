@@ -6359,7 +6359,7 @@ router.get("/monthly-net-total-summary", async (req, res) => {
                 (SELECT IFNULL(SUM(netTotal), 0) 
                  FROM Orders 
                  WHERE orDate BETWEEN ? AND ? 
-                 AND ordertype = 'onsite' 
+                 AND ordertype = 'On-site' 
                  AND orStatus != 'cancel') AS thisMonthOnsiteTotal,
                  
                 -- Last month net total for walking orders
@@ -6373,7 +6373,7 @@ router.get("/monthly-net-total-summary", async (req, res) => {
                 (SELECT IFNULL(SUM(netTotal), 0) 
                  FROM Orders 
                  WHERE orDate BETWEEN ? AND ? 
-                 AND ordertype = 'onsite' 
+                 AND ordertype = 'On-site' 
                  AND orStatus != 'cancel') AS lastMonthOnsiteTotal
         `;
 
@@ -6477,25 +6477,40 @@ router.get("/monthly-order-income", async (req, res) => {
         const sql = `
             SELECT 
                 MONTH(orDate) AS month,
+                ordertype,
                 SUM(total) AS monthlyTotal
             FROM Orders
             WHERE orStatus != 'cancel' AND YEAR(orDate) = ?
-            GROUP BY MONTH(orDate)
-            ORDER BY MONTH(orDate)
+            GROUP BY MONTH(orDate), ordertype
+            ORDER BY MONTH(orDate), ordertype
         `;
 
         const [rows] = await db.query(sql, [currentYear]);
 
-        // Prepare array with default 0 for each month
-        const incomeByMonth = Array(12).fill(0);
+        const totalIncome = Array(12).fill(0);
+        const walkingIncome = Array(12).fill(0);
+        const onsiteIncome = Array(12).fill(0);
+
         rows.forEach(row => {
-            incomeByMonth[row.month - 1] = parseFloat(row.monthlyTotal);
+            const index = row.month - 1;
+            const income = parseFloat(row.monthlyTotal);
+
+            // Sum to total regardless of type
+            totalIncome[index] += income;
+
+            if (row.ordertype === 'Walking') {
+                walkingIncome[index] = income;
+            } else if (row.ordertype === 'On-site') {
+                onsiteIncome[index] = income;
+            }
         });
 
         return res.status(200).json({
             success: true,
             year: currentYear,
-            monthlyIncome: incomeByMonth
+            totalIncome,
+            walkingIncome,
+            onsiteIncome
         });
 
     } catch (err) {
