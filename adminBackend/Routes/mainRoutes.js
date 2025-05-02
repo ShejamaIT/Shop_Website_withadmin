@@ -6414,7 +6414,60 @@ router.get("/monthly-net-total-summary", async (req, res) => {
     }
 });
 
-// get sale team total
+// Get Total hire daily & monthly
+router.get("/monthly-hire-summary", async (req, res) => {
+    try {
+        const today = moment().format("YYYY-MM-DD");
+        const yesterday = moment().subtract(1, "day").format("YYYY-MM-DD");
+        const startOfThisMonth = moment().startOf("month").format("YYYY-MM-DD");
+        const startOfLastMonth = moment().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+        const endOfLastMonth = moment().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
+
+        const sql = `
+            SELECT
+                -- Today's hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date = ? AND status = 'complete') AS todayHire,
+
+                -- Yesterday's hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date = ? AND status = 'complete') AS yesterdayHire,
+
+                -- This month's total hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date BETWEEN ? AND ? AND status = 'complete') AS thisMonthHire,
+
+                -- Last month's total hire
+                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                 WHERE date BETWEEN ? AND ? AND status = 'complete') AS lastMonthHire
+        `;
+
+        const [rows] = await db.query(sql, [
+            today,                 // today's hire
+            yesterday,             // yesterday's hire
+            startOfThisMonth, today,   // this month
+            startOfLastMonth, endOfLastMonth // last month
+        ]);
+
+        const result = rows[0];
+
+        return res.status(200).json({
+            success: true,
+            message: "Hire summary: daily and monthly comparison",
+            todayHire: result.todayHire,
+            todayIncreased: result.todayHire > result.yesterdayHire ? "yes" : "no",
+            thisMonthHire: result.thisMonthHire,
+            hireIncreased: result.thisMonthHire > result.lastMonthHire ? "yes" : "no"
+        });
+    } catch (err) {
+        console.error("Error fetching hire summary:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while fetching hire data",
+            error: err.message
+        });
+    }
+});
 
 
 // pass sale team value to review in month end
