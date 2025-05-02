@@ -41,6 +41,8 @@ const HomeContent = () => {
     const [thisMonthOutPriceIncreased, setThisMonthOutPriceIncreased] = useState("no");
     const [thisMonthHire, setThisMonthHire] = useState(0);
     const [hireIncreased, setHireIncreased] = useState("no");
+    const [todayHire, setTodayHire] = useState(0);
+    const [todayhireIncreased, settodayHireIncreased] = useState("no");
     const [walkingTotalThisMonth, setWalkingTotalThisMonth] = useState(0);
     const [onsiteTotalThisMonth, setOnsiteTotalThisMonth] = useState(0);
     const [walkingComparison, setWalkingComparison] = useState('no');
@@ -119,6 +121,8 @@ const HomeContent = () => {
             const data = await res.json();
 
             if (data.success) {
+                setTodayHire(data.todayHire);
+                settodayHireIncreased(data.todayIncreased);
                 setThisMonthHire(data.thisMonthHire);
                 setHireIncreased(data.hireIncreased);
             }
@@ -268,10 +272,27 @@ const HomeContent = () => {
                     </div>
                     <i className='bx bxl-shopify cart one'></i>
                 </div>
-
             </div>
-
             <div className="overview-boxes">
+                <div className="box">
+                    <div className="right-side">
+                        <div className="box-topic">Daily Hire</div>
+                        <div className="number">Rs.{todayHire.toFixed(2)}</div>
+
+                        {todayhireIncreased === "yes" ? (
+                            <div className="indicator">
+                                <i className='bx bx-up-arrow-alt'></i>
+                                <span className="text">Up from last month</span>
+                            </div>
+                        ) : (
+                            <div className="indicator">
+                                <i className='bx bx-down-arrow-alt down'></i>
+                                <span className="text">Down from last month</span>
+                            </div>
+                        )}
+                    </div>
+                    <i className='bx bxs-truck store3'></i>
+                </div>
                 <div className="box">
                     <div className="right-side">
                         <div className="box-topic">Monthly Hire</div>
@@ -329,25 +350,6 @@ const HomeContent = () => {
                     </div>
                     <i className='bx bxs-store cart two'></i>
                 </div>
-                <div className="box">
-                    <div className="right-side">
-                        <div className="box-topic">Today Cashin</div>
-                        <div className="number">Rs.{income}</div>
-
-                        {incomeIncreased === "yes" ? (
-                            <div className="indicator">
-                                <i className='bx bx-up-arrow-alt'></i>
-                                <span className="text">Up from yesterday</span>
-                            </div>
-                        ) : (
-                            <div className="indicator">
-                                <i className='bx bx-down-arrow-alt down'></i>
-                                <span className="text">Down from yesterday</span>
-                            </div>
-                        )}
-                    </div>
-                    <i className='bx bx-dollar-circle cart three'></i>
-                </div>
             </div>
 
             <div className="overview row-cards">
@@ -399,27 +401,6 @@ const HomeContent = () => {
             <div className="overview row-cards">
                 <Card className="cards chart-card">
                     <CardBody>
-                        {/*<ResponsiveContainer width="100%" height={300}>*/}
-                        {/*    <PieChart>*/}
-                        {/*        <Pie*/}
-                        {/*            data={data}*/}
-                        {/*            dataKey="value"*/}
-                        {/*            nameKey="name"*/}
-                        {/*            cx="50%"*/}
-                        {/*            cy="50%"*/}
-                        {/*            outerRadius={100}*/}
-                        {/*            fill="#8884d8"*/}
-                        {/*            label={({ name, value }) => `${name}: Rs.${value.toFixed(2)}`}*/}
-                        {/*        >*/}
-                        {/*            {data.map((entry, index) => (*/}
-                        {/*                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />*/}
-                        {/*            ))}*/}
-                        {/*        </Pie>*/}
-
-                        {/*        <Tooltip/>*/}
-                        {/*        <Legend/>*/}
-                        {/*    </PieChart>*/}
-                        {/*</ResponsiveContainer>*/}
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
