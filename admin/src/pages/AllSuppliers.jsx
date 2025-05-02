@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
-import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import { useNavigate } from "react-router-dom";
 import SupplierDetails from "./SupplierDetails";
@@ -43,7 +42,7 @@ const AllSuppliers = () => {
     return (
         <Helmet title={'All-Suppliers'}>
             <section>
-                <Container className="all-products">
+                <Container className="dashboard">
                     {/* Tab Navigation */}
                     <Nav tabs>
                         {/* Add Supplier Tab */}

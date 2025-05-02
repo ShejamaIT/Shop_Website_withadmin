@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button} from "reactstrap";
-import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddEmployee from "./AddEmployee";
@@ -145,7 +144,7 @@ const AllEmployees = () => {
     return (
         <Helmet title="All-Employee">
             <section>
-                <Container className="all-products">
+                <Container className="dashboard">
                     {/* === MAIN NAVIGATION TABS === */}
                     <Nav tabs>
                         <NavItem>

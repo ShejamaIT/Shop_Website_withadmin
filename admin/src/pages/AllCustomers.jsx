@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import { useLocation, useNavigate } from "react-router-dom";
-import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import AddCustomer from "./AddCustomer";
 import TableAllCustomer from "../components/tables/TableAllCustomer";
@@ -40,7 +39,7 @@ const AllCustomer = () => {
     return (
         <Helmet title={'All-Customers'}>
             <section>
-                <Container className="all-products">
+                <Container className="dashboard">
                     {/* Tab Navigation */}
                     <Nav tabs>
                         {tabNames.map((label, index) => (

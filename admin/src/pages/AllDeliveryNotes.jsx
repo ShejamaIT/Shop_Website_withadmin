@@ -8,8 +8,6 @@ import DeliveryNotes from "./DeliveryNotes";
 import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
 import AddDeliveryShedule from "./AddDeliveryShedule";
 
-import "../style/allProducts.css"; // (or your style)
-
 const AllDeliveryNotes = () => {
     const [activeTab, setActiveTab] = useState("Create Delivery Note"); // Default tab
     const location = useLocation();
@@ -37,7 +35,7 @@ const AllDeliveryNotes = () => {
     return (
         <Helmet title={'Delivery Notes'}>
             <section>
-                <Container className="all-products">
+                <Container className="dashboard">
                     {/* Main Tabs */}
                     <Nav tabs className="mb-3">
                         {tabNames.map((label, index) => (

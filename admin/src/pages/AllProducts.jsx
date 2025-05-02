@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import { useLocation, useNavigate } from "react-router-dom";
-import '../style/allProducts.css';
 import Helmet from "../components/Helmet/Helmet";
 import TableAllItem from "../components/tables/TableAllItem";
 import Tableforproduction from "../components/tables/Tableforproduction";
@@ -46,7 +45,7 @@ const AllProducts = () => {
     return (
         <Helmet title={'All-Products'}>
             <section>
-                <Container className="all-products">
+                <Container className="dashboard">
                     {/* Main Tabs */}
                     <Nav tabs>
                         {tabNames.map((label, index) => (
