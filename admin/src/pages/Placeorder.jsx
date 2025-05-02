@@ -306,6 +306,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
             return {
                 I_Id: item.I_Id,
+                material: item.material,
                 qty: item.qty,
                 price: netPrice.toFixed(2),
                 discount: discount.toFixed(2),
