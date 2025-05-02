@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import classnames from "classnames";
 import Helmet from "../components/Helmet/Helmet";
 
-import Graphs from "./Graphs"; // Placeholder for all three — can be split later
+import IncomeGraphs from "./IncomeGraphs"; // Placeholder for all three — can be split later
 
 // import "../style/allProducts.css";
 
@@ -62,19 +62,19 @@ const AllGraphs = () => {
                     <TabContent activeTab={activeTab}>
                         <TabPane tabId="income-performance">
                             <Row>
-                                <Graphs />
+                                <IncomeGraphs />
                             </Row>
                         </TabPane>
 
                         <TabPane tabId="item-selling-performance">
                             <Row>
-                                <Graphs />
+                                <IncomeGraphs />
                             </Row>
                         </TabPane>
 
                         <TabPane tabId="sale-team-performance">
                             <Row>
-                                <Graphs />
+                                <IncomeGraphs />
                             </Row>
                         </TabPane>
                     </TabContent>
