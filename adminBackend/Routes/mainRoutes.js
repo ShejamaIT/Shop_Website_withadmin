@@ -6469,7 +6469,7 @@ router.get("/monthly-hire-summary", async (req, res) => {
     }
 });
 
-//get monthly totals
+//get year totals month by month
 router.get("/monthly-order-income", async (req, res) => {
     try {
         const currentYear = moment().year();
@@ -6518,6 +6518,63 @@ router.get("/monthly-order-income", async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Database error while fetching monthly order income",
+            error: err.message
+        });
+    }
+});
+
+// get month total day by day
+router.get("/daily-order-income", async (req, res) => {
+    try {
+        // Use moment to get the current year and month
+        const year = moment().year();
+        const month = moment().month() + 1; // month() is 0-based, so add 1
+
+        const sql = `
+            SELECT 
+                DAY(orDate) AS day,
+                ordertype,
+                SUM(total) AS dailyTotal
+            FROM Orders
+            WHERE orStatus != 'cancel' AND YEAR(orDate) = ? AND MONTH(orDate) = ?
+            GROUP BY DAY(orDate), ordertype
+            ORDER BY DAY(orDate), ordertype
+        `;
+
+        const [rows] = await db.query(sql, [year, month]);
+
+        const daysInMonth = moment(`${year}-${month}`, "YYYY-MM").daysInMonth();
+        const totalIncome = Array(daysInMonth).fill(0);
+        const walkingIncome = Array(daysInMonth).fill(0);
+        const onsiteIncome = Array(daysInMonth).fill(0);
+
+        rows.forEach(row => {
+            const index = row.day - 1;
+            const amount = parseFloat(row.dailyTotal);
+
+            totalIncome[index] += amount;
+
+            if (row.ordertype === "Walking") {
+                walkingIncome[index] = amount;
+            } else if (row.ordertype === "On-site") {
+                onsiteIncome[index] = amount;
+            }
+        });
+
+        return res.status(200).json({
+            success: true,
+            year,
+            month,
+            totalIncome,
+            walkingIncome,
+            onsiteIncome
+        });
+
+    } catch (err) {
+        console.error("Error fetching daily income:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while fetching daily order income",
             error: err.message
         });
     }
