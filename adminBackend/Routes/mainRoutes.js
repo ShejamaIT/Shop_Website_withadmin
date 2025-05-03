@@ -6803,10 +6803,14 @@ router.post("/other-hire", async (req, res) => {
 router.get("/other-hires", async (req, res) => {
     try {
         const sql = `
-            SELECT oh.*, v.registration_no, d.name AS driverName
+            SELECT
+                oh.*,
+                v.registration_no,
+                e.name AS driverName
             FROM otherHire oh
-            LEFT JOIN vehicle v ON oh.vehicleID = v.id
-            LEFT JOIN driver d ON oh.driverId = d.devID
+                     LEFT JOIN vehicle v ON oh.vehicleID = v.id
+                     LEFT JOIN driver d ON oh.driverId = d.devID
+                     LEFT JOIN employee e ON d.E_ID = e.E_ID
             ORDER BY oh.date DESC
         `;
 
