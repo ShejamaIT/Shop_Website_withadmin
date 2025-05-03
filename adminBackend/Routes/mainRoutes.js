@@ -6580,6 +6580,140 @@ router.get("/daily-order-income", async (req, res) => {
     }
 });
 
+// Daily Issued Material Prices
+router.get("/daily-issued-material-prices", async (req, res) => {
+    try {
+        // Use moment to get the current year and month if not passed in the request
+        const year =  moment().year(); // Default to current year if not provided
+        const month = moment().month() + 1; // Default to current month (moment() returns 0-based month, so add 1)
+
+        // Ensure year and month are valid
+        if (!year || !month) {
+            return res.status(400).json({ success: false, message: "Year and month are required." });
+        }
+
+        // Get the start and end date for the selected month
+        const startOfMonth = moment(`${year}-${month}-01`).startOf("month").format("YYYY-MM-DD");
+        const endOfMonth = moment(`${year}-${month}-01`).endOf("month").format("YYYY-MM-DD");
+
+        // SQL query to fetch data
+        const sql = `
+            SELECT 
+                CASE
+                    WHEN pid.material IN ('Teak', 'Mahogani', 'Mara', 'Attoriya', 'Sapu') THEN 'Furniture'
+                    ELSE pid.material
+                END AS materialGroup,
+                DAY(pid.datetime) AS day,
+                SUM(pid.price) AS totalPrice
+            FROM p_i_detail pid
+            WHERE pid.status = 'Issued' 
+            AND pid.datetime BETWEEN ? AND ?
+            GROUP BY materialGroup, day
+            ORDER BY day
+        `;
+
+        const [rows] = await db.query(sql, [startOfMonth, endOfMonth]);
+
+        // Initialize arrays for each material group (31 days for the month)
+        const data = {
+            "MDF": Array(31).fill(0),
+            "MM": Array(31).fill(0),
+            "Mattress": Array(31).fill(0),
+            "Furniture": Array(31).fill(0),
+        };
+
+        // Populate the data with the queried values
+        rows.forEach(row => {
+            data[row.materialGroup][row.day - 1] = parseFloat(row.totalPrice);
+        });
+
+        // Return the data in the response
+        return res.status(200).json({
+            success: true,
+            year,
+            month,
+            data: data
+        });
+
+    } catch (err) {
+        console.error("Error retrieving daily issued material prices:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error retrieving material price data for the day",
+            error: err.message
+        });
+    }
+});
+// Yearly Issued Material Prices
+router.get("/yearly-issued-material-prices", async (req, res) => {
+    try {
+        // Use query year if provided, otherwise use current year
+        const year = req.query.year ? parseInt(req.query.year) : moment().year();
+
+        // Validate the year
+        if (isNaN(year) || year < 1900 || year > 2100) {
+            return res.status(400).json({ success: false, message: "Valid year is required." });
+        }
+
+        // Get start and end of the year
+        const startOfYear = moment(`${year}-01-01`).startOf("year").format("YYYY-MM-DD");
+        const endOfYear = moment(`${year}-12-31`).endOf("year").format("YYYY-MM-DD");
+
+        // SQL to aggregate material prices per month
+        const sql = `
+            SELECT
+                sub.materialGroup,
+                MONTH(sub.datetime) AS month,
+                SUM(sub.price) AS totalPrice
+            FROM (
+                SELECT
+                CASE
+                WHEN material IN ('Teak', 'Mahogani', 'Mara', 'Attoriya', 'Sapu') THEN 'Furniture'
+                ELSE material
+                END AS materialGroup,
+                price,
+                datetime
+                FROM p_i_detail
+                WHERE datetime BETWEEN ? AND ? AND status = 'Issued'
+                ) AS sub
+            GROUP BY sub.materialGroup, month
+            ORDER BY month
+        `;
+
+
+        const [rows] = await db.query(sql, [startOfYear, endOfYear]);
+
+        // Initialize data containers
+        const data = {
+            "MDF": Array(12).fill(0),
+            "MM": Array(12).fill(0),
+            "Mattress": Array(12).fill(0),
+            "Furniture": Array(12).fill(0),
+        };
+
+        // Populate data with results
+        rows.forEach(row => {
+            if (data[row.materialGroup]) {
+                data[row.materialGroup][row.month - 1] = parseFloat(row.totalPrice);
+            }
+        });
+
+        return res.status(200).json({
+            success: true,
+            year,
+            data
+        });
+
+    } catch (err) {
+        console.error("Error retrieving yearly issued material prices:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Error retrieving material price data for the year",
+            error: err.message
+        });
+    }
+});
+
 // pass sale team value to review in month end
 
 // Function to generate new ida
