@@ -6714,6 +6714,65 @@ router.get("/yearly-issued-material-prices", async (req, res) => {
     }
 });
 
+// Save Vehicle
+router.post("/vehicle", async (req, res) => {
+    try {
+        const {registration_no, brand, model, color, year, license_Date, insurance_Date, fuel_type, size, status} = req.body;
+
+        if (!registration_no || !brand || !model || !status) {
+            return res.status(400).json({ success: false, message: "Required fields missing" });
+        }
+
+        const sql = `
+            INSERT INTO vehicle (
+                registration_no, brand, model, color, year,
+                license_Date, insurance_Date, fuel_type, size, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const [result] = await db.query(sql, [
+            registration_no, brand, model, color, year,
+            license_Date, insurance_Date, fuel_type, size, status
+        ]);
+
+        res.status(201).json({
+            success: true,
+            message: "Vehicle saved successfully",
+            vehicleId: result.insertId
+        });
+
+    } catch (err) {
+        console.error("Error saving vehicle:", err.message);
+        res.status(500).json({
+            success: false,
+            message: "Error saving vehicle",
+            error: err.message
+        });
+    }
+});
+
+// Get All Vehicles
+router.get("/vehicles", async (req, res) => {
+    try {
+        const sql = `SELECT * FROM vehicle ORDER BY id DESC`;
+        const [rows] = await db.query(sql);
+
+        res.status(200).json({
+            success: true,
+            data: rows
+        });
+
+    } catch (err) {
+        console.error("Error fetching vehicles:", err.message);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching vehicles",
+            error: err.message
+        });
+    }
+});
+
+
 // pass sale team value to review in month end
 
 // Function to generate new ida
