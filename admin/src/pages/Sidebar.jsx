@@ -13,10 +13,10 @@ const Sidebar = ({ onNavigate, activePage }) => {
         {id: "orders", icon: "bx-cart", label: "Place Order", path: "/dashboard/orders"},
         {id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/dashboard/product_list"},
         {id: "deliveries", icon: "bxs-truck", label: "Deliveries", path: "/dashboard/delivery"},
-        {id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/dashboard/suppliers"},
         {id: "employees", icon: "bx-book-alt", label: "Employee", path: "/dashboard/employees"},
+        {id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/dashboard/suppliers"},
+        {id: "vehicles", icon: "bx-bus-school", label: "Vehicles", path: "/dashboard/vehicles"},
     ];
-
     return (
         <div className="sidebar">
             <div className="logo-details">

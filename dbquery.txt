@@ -429,3 +429,16 @@ ALTER TABLE p_i_detail
 ADD COLUMN price DOUBLE NOT NULL DEFAULT 0;
 ALTER TABLE Order_Detail
 ADD COLUMN material VARCHAR(20) NOT NULL;
+CREATE TABLE vehicle (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    registration_no VARCHAR(25) UNIQUE,
+    brand VARCHAR(25),
+    model VARCHAR(25),
+    color VARCHAR(20),
+    year INT,
+    license_Date DATE,
+    insurance_Date DATE,
+    fuel_type VARCHAR(25),
+    size VARCHAR(25),
+    status ENUM('Active', 'Inactive', 'Sold'),
+);

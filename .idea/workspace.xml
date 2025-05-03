@@ -5,14 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update income graphs view">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/ItemGraphs.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/AddVehicle.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/AllVehicles.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-14.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllGraphs.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllGraphs.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Sidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -316,6 +319,9 @@
       <workItem from="1746158331707" duration="5236000" />
       <workItem from="1746163745149" duration="15261000" />
       <workItem from="1746245318152" duration="299000" />
+      <workItem from="1746253345413" duration="340000" />
+      <workItem from="1746254347024" duration="1078000" />
+      <workItem from="1746256901963" duration="307000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>

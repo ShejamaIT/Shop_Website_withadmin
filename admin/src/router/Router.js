@@ -6,6 +6,7 @@ import AllProducts from "../pages/AllProducts";
 import AllCustomers from "../pages/AllCustomers";
 import AllSuppliers from "../pages/AllSuppliers";
 import AllEmployees from "../pages/AllEmployees";
+import AllVehicles from "../pages/AllVehicles";
 import AllDeliveryNotes from "../pages/AllDeliveryNotes";
 import PlaceOrder from "../pages/Placeorder";
 import Orders from "../pages/OrderManagement";
@@ -48,6 +49,7 @@ const Router = () => {
                 <Route path="suppliers" element={<AllSuppliers />} />
                 <Route path="employees" element={<AllEmployees />} />
                 <Route path="delivery" element={<AllDeliveryNotes />} />
+                <Route path="vehicles" element={<AllVehicles />} />
             </Route>
 
             {/* Other non-dashboard routes */}
