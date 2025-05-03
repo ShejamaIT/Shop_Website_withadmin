@@ -78,6 +78,8 @@ const TableHire = ({ refreshKey }) => {
                         <th>Destination</th>
                         <th>Hire</th>
                         <th>Date</th>
+                        <th>Driver</th>
+                        <th>Vehicle</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -98,6 +100,8 @@ const TableHire = ({ refreshKey }) => {
                                 <td>{hire.destination}</td>
                                 <td>{hire.hire}</td>
                                 <td>{formatDate(hire.date)}</td>
+                                <td>{hire.driverName }</td>
+                                <td>{hire.registration_no }</td>
                                 <td>
                                     <button
                                         className="view-btn"
