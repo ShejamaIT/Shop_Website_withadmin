@@ -5,8 +5,7 @@ import classnames from "classnames";
 import Helmet from "../components/Helmet/Helmet";
 
 import AddVehicle from "./AddVehicle";
-
-// import "../style/allProducts.css";
+import TableAllVehicles from "../components/tables/TableAllVehicles";
 
 const AllGraphs = () => {
     const [activeTab, setActiveTab] = useState("add-new-vehicle");
@@ -66,6 +65,7 @@ const AllGraphs = () => {
 
                         <TabPane tabId="all-vehicles">
                             <Row>
+                                <TableAllVehicles />
                             </Row>
                         </TabPane>
                     </TabContent>
