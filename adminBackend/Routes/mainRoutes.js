@@ -6772,6 +6772,60 @@ router.get("/vehicles", async (req, res) => {
     }
 });
 
+// Save New Hire
+router.post("/other-hire", async (req, res) => {
+    try {
+        const {custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID} = req.body;
+
+        const sql = `
+            INSERT INTO otherHire 
+            (custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID,status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        await db.query(sql, [custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID,'Booked']);
+        return res.status(201).json({
+            success: true,
+            message: "New hire entry saved successfully."
+        });
+
+    } catch (err) {
+        console.error("Error saving new hire:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to save hire entry.",
+            error: err.message
+        });
+    }
+});
+
+// Get All Hires
+router.get("/other-hires", async (req, res) => {
+    try {
+        const sql = `
+            SELECT oh.*, v.registration_no, d.name AS driverName
+            FROM otherHire oh
+            LEFT JOIN vehicle v ON oh.vehicleID = v.id
+            LEFT JOIN driver d ON oh.driverId = d.devID
+            ORDER BY oh.date DESC
+        `;
+
+        const [rows] = await db.query(sql);
+
+        return res.status(200).json({
+            success: true,
+            data: rows
+        });
+
+    } catch (err) {
+        console.error("Error fetching hires:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to retrieve hire entries.",
+            error: err.message
+        });
+    }
+});
 
 // pass sale team value to review in month end
 
