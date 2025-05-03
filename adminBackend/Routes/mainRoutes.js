@@ -6810,7 +6810,7 @@ router.get("/other-hires", async (req, res) => {
             FROM otherHire oh
                      LEFT JOIN vehicle v ON oh.vehicleID = v.id
                      LEFT JOIN driver d ON oh.driverId = d.devID
-                     LEFT JOIN employee e ON d.E_ID = e.E_ID
+                     LEFT JOIN Employee e ON d.E_ID = e.E_Id
             ORDER BY oh.date DESC
         `;
 
