@@ -442,3 +442,23 @@ CREATE TABLE vehicle (
     size VARCHAR(25),
     status ENUM('Active', 'Inactive', 'Sold'),
 );
+CREATE TABLE otherHire (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    custname VARCHAR(50),
+    phoneNumber VARCHAR(15),
+    otherNumber VARCHAR(15),
+    date DATE,
+    bookingDate DATE,
+    pickup TEXT,
+    destination TEXT,
+    distance INT,
+    hire DOUBLE,
+    driverId VARCHAR(25),
+    vehicleID INT,
+    status VARCHAR(20),
+    CONSTRAINT fk_vehicle FOREIGN KEY (vehicleID) REFERENCES vehicle(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_driver FOREIGN KEY (driverId) REFERENCES driver(devID)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+

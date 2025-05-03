@@ -7,15 +7,21 @@ import Helmet from "../components/Helmet/Helmet";
 import DeliveryNotes from "./DeliveryNotes";
 import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
 import AddDeliveryShedule from "./AddDeliveryShedule";
+import AddHire from "./AddHire";
+import TableAccepting from "../components/tables/TableAccepting";
+import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
 
 const AllDeliveryNotes = () => {
     const [activeTab, setActiveTab] = useState("Create Delivery Note"); // Default tab
+    const [nestedActiveTab, setNestedActiveTab] = useState("1");
+    const [refreshKey, setRefreshKey] = useState(0); // For forcing re-render
     const location = useLocation();
     const navigate = useNavigate();
 
     const tabNames = [
         "Create Delivery Note",
         "All Delivery Notes",
+        "Hire",
         "Add Scheduled Dates",
     ];
 
@@ -63,6 +69,41 @@ const AllDeliveryNotes = () => {
                             <Row>
                                 <TableAllDeliveryNotes />
                             </Row>
+                        </TabPane>
+                        <TabPane tabId="Hire" key={refreshKey}>
+                            <Nav tabs className="mb-3">
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "1" })}
+                                        onClick={() => setNestedActiveTab("1")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        Add New Hire
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "2" })}
+                                        onClick={() => setNestedActiveTab("2")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        All Hires
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+
+                            <TabContent activeTab={nestedActiveTab}>
+                                <TabPane tabId="1" key={refreshKey}>
+                                    <Row>
+                                        <AddHire />
+                                    </Row>
+                                </TabPane>
+                                <TabPane tabId="2" key={refreshKey}>
+                                    <Row>
+                                        <TableAcceptingUnbooked />
+                                    </Row>
+                                </TabPane>
+                            </TabContent>
                         </TabPane>
 
                         <TabPane tabId="Add Scheduled Dates">
