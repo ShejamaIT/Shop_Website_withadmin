@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="add all vehicle and update">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/AddHire.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="add new hire and update">
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/Tablehire.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -13,7 +13,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/AllDeliveryNotes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllDeliveryNotes.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +57,7 @@
     "git-widget-placeholder": "main",
     "js.last.introduce.type": "CONST",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/shejama/Shop_Website_withadmin/admin/src/pages",
+    "last_opened_file_path": "D:/shejama/Shop_Website_withadmin/admin/src/components/tables",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -77,8 +76,8 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\pages" />
       <recent name="D:\shejama\Shop_Website_withadmin\admin\src\components\tables" />
+      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\LENOVO\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\pages" />
@@ -321,7 +320,7 @@
       <workItem from="1746254347024" duration="1078000" />
       <workItem from="1746256901963" duration="1240000" />
       <workItem from="1746260124684" duration="1680000" />
-      <workItem from="1746261882699" duration="3318000" />
+      <workItem from="1746261882699" duration="4425000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -666,7 +665,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="346" />
+    <option name="localTasksCounter" value="347" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -685,7 +684,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add &amp; update advance payment" />
     <MESSAGE value="update order place" />
     <MESSAGE value="bug fixxing" />
     <MESSAGE value="update advance and tables" />
@@ -710,6 +708,7 @@
     <MESSAGE value="update income graphs view" />
     <MESSAGE value="add vehicle and update" />
     <MESSAGE value="add all vehicle and update" />
-    <option name="LAST_COMMIT_MESSAGE" value="add all vehicle and update" />
+    <MESSAGE value="add new hire and update" />
+    <option name="LAST_COMMIT_MESSAGE" value="add new hire and update" />
   </component>
 </project>

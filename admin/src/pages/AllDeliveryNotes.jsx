@@ -8,7 +8,7 @@ import DeliveryNotes from "./DeliveryNotes";
 import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
 import AddDeliveryShedule from "./AddDeliveryShedule";
 import AddHire from "./AddHire";
-import TableAccepting from "../components/tables/TableAccepting";
+import Tablehire from "../components/tables/Tablehire";
 import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
 
 const AllDeliveryNotes = () => {
@@ -100,7 +100,7 @@ const AllDeliveryNotes = () => {
                                 </TabPane>
                                 <TabPane tabId="2" key={refreshKey}>
                                     <Row>
-                                        <TableAcceptingUnbooked />
+                                        <Tablehire />
                                     </Row>
                                 </TabPane>
                             </TabContent>
