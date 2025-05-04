@@ -6773,24 +6773,40 @@ router.get("/vehicles", async (req, res) => {
 });
 
 // Save New Hire
+// POST: Create a new hire
 router.post("/other-hire", async (req, res) => {
     try {
         const {custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID} = req.body;
 
-        const sql = `
-            INSERT INTO otherHire 
-            (custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID,status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        const Cust_id = await generateNewId("hireCustomer", "custID", "HC");
+        console.log(Cust_id);
+          // Insert into hireCustomer
+        const insertCustomer = `
+            INSERT INTO hireCustomer (custID, name, phoneNumber, otherNumber, balance)
+            VALUES (?, ?, ?, ?, 0)
         `;
+        await db.query(insertCustomer, [Cust_id, custname, phoneNumber, otherNumber]);
 
-        await db.query(sql, [custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID,'Booked']);
+        // Insert into otherHire
+        const insertHire = `
+            INSERT INTO otherHire (
+                customer, date, bookingDate, pickup, destination,
+                distance, hire, driverId, vehicleID, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Booked')
+        `;
+        console.log(insertHire);
+        await db.query(insertHire, [
+            Cust_id, date, bookingDate, pickup, destination,
+            distance, hire, driverId, vehicleID
+        ]);
+
         return res.status(201).json({
             success: true,
             message: "New hire entry saved successfully."
         });
 
     } catch (err) {
-        console.error("Error saving new hire:", err.message);
+        console.error("❌ Error saving new hire:", err.message);
         return res.status(500).json({
             success: false,
             message: "Failed to save hire entry.",
@@ -6799,18 +6815,23 @@ router.post("/other-hire", async (req, res) => {
     }
 });
 
-// Get All Hires
+// GET: All hire entries
 router.get("/other-hires", async (req, res) => {
     try {
         const sql = `
             SELECT
                 oh.*,
+                hc.name AS custname,
+                hc.phoneNumber,
+                hc.otherNumber,
+                hc.balance AS customerBalance,
                 v.registration_no,
                 e.name AS driverName
             FROM otherHire oh
-                     LEFT JOIN vehicle v ON oh.vehicleID = v.id
-                     LEFT JOIN driver d ON oh.driverId = d.devID
-                     LEFT JOIN employee e ON d.E_ID = e.E_ID
+            LEFT JOIN hireCustomer hc ON oh.customer = hc.custID
+            LEFT JOIN vehicle v ON oh.vehicleID = v.id
+            LEFT JOIN driver d ON oh.driverId = d.devID
+            LEFT JOIN Employee e ON d.E_ID = e.E_Id
             ORDER BY oh.date DESC
         `;
 
@@ -6822,7 +6843,7 @@ router.get("/other-hires", async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Error fetching hires:", err.message);
+        console.error("❌ Error fetching hires:", err.message);
         return res.status(500).json({
             success: false,
             message: "Failed to retrieve hire entries.",
@@ -6830,6 +6851,9 @@ router.get("/other-hires", async (req, res) => {
         });
     }
 });
+
+// Update Hire payments
+
 
 // pass sale team value to review in month end
 
