@@ -122,6 +122,7 @@ const TableHire = ({ refreshKey }) => {
                         <th>Date</th>
                         <th>Driver</th>
                         <th>Vehicle</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -144,6 +145,7 @@ const TableHire = ({ refreshKey }) => {
                                 <td>{formatDate(hire.date)}</td>
                                 <td>{hire.driverName }</td>
                                 <td>{hire.registration_no }</td>
+                                <td>{hire.status}</td>
                                 <td>
                                     <button
                                         className="view-btn"
