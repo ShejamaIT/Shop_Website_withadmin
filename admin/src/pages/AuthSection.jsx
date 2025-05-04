@@ -1,34 +1,87 @@
 import React, { useState } from 'react';
 import '../style/AuthSection.css';
 import { Link , useNavigate } from "react-router-dom";
+import {toast} from "react-toastify";
 
 const AuthSection = () => {
     const [isSignUp, setIsSignUp] = useState(false);
     const navigate = useNavigate();
     const toggleClass = isSignUp ? 'container active' : 'container';
 
-    const submitLogin = () => {
-        navigate("/dashboard");
-        // const headers = {'Content-Type': 'application/json'}
-        //
-        // let body = {
-        //     email: email,
-        //     password: password
-        // }
-        // console.log(body);
-        //
-        // axios.post("http://localhost:4000/auth/login", body, {headers: headers}).then(r => {
-        //     Cookies.set("token", r.data.token);
-        //     Cookies.set("user_email", r.data.data.email);
-        //     navigate("/dashboard");
-        //     toast.success('Login Sucessfully..')
-        //
-        // }).catch(err => {
-        //     toast.error('Something went wrong...')
-        //     console.log(err)
-        // })
+    const submitLogin = async (e) => {
+        e.preventDefault();
+        const contact = document.getElementById("signIn-contact").value;
+        const password = document.getElementById("signIn-password").value;
 
-    }
+        const loginData = {
+            contact,
+            password
+        };
+
+        console.log("Login Data:", loginData);
+        try {
+            const response = await fetch("http://localhost:5001/api/auth/emp/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(loginData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                toast.error(data.message || "Failed to Login user.");
+                return;
+            }
+            toast.success("User Login successfully!");
+            // Save token to local storage
+            localStorage.setItem("token", data.data.token);
+            localStorage.setItem("contact", data.data.contact);
+            localStorage.setItem("type", data.data.role);
+            localStorage.setItem("EID", data.data.E_Id);
+            navigate("/dashboard");
+        } catch (error) {
+            console.error("Signup error:", error);
+            toast.error("An error occurred while signing up.");
+        }
+    };
+    const submitSignUp = async (e) => {
+        e.preventDefault();
+
+        const password = document.getElementById("signUp-password").value;
+        const role = document.getElementById("signUp-role").value;
+        const contactNumber = document.getElementById("signUp-number").value;
+
+        const signUpData = {
+            password,
+            role,
+            contactNumber
+        };
+
+        console.log("Sign Up Data:", signUpData);
+
+        try {
+            const response = await fetch("http://localhost:5001/api/auth/emp/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(signUpData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                toast.error(data.message || "Failed to register user.");
+                return;
+            }
+            toast.success("User registered successfully!");
+        } catch (error) {
+            console.error("Signup error:", error);
+            toast.error("An error occurred while signing up.");
+        }
+    };
 
     return (
         <section id="process" className="login-process">
@@ -36,17 +89,18 @@ const AuthSection = () => {
                 <div className="form-container sign-up-form">
                     <form id="signUpForm">
                         <h1 className="heading">Create Account</h1>
-                        {/*<img className="logo" src={logo} alt="Shoe Shop Logo" width="150px" />*/}
-                        <span>or use your email for registration</span>
-                        <input id="signUp-email" type="email" placeholder="Email" required />
-                        <input id="signUp-password" type="password" placeholder="Password" required />
+                        <span>or use your contact for registration</span>
+                        <input id="signUp-number" type="text" placeholder="Contact Number" required/>
+                        <input id="signUp-password" type="password" placeholder="Password" required/>
                         <select id="signUp-role" required>
-                            <option value="" disabled selected>Select Role</option>
+                            <option value="" disabled>Select Role</option>
+                            <option value="ADMIN">Admin</option>
                             <option value="USER">User</option>
-                            <option value="ADMIN">Manager</option>
+                            <option value="CHASHIER">Chashier</option>
                         </select>
+
                         <div className="btn-panel">
-                            <button id="signUpBtn" type="submit">Sign Up</button>
+                            <button id="signUpBtn" onClick={submitSignUp} type="submit">Sign Up</button>
                         </div>
                     </form>
                 </div>
@@ -54,9 +108,8 @@ const AuthSection = () => {
                 <div className="form-container sign-in-form">
                     <form id="signInForm">
                         <h1 className="heading">Sign In</h1>
-                        {/*<img className="logo" src={logo} alt="Shoe Shop Logo" width="150px" />*/}
-                        <span>or use your email password</span>
-                        <input id="signIn-email" type="email" placeholder="Email" required />
+                        <span>or use your contact password</span>
+                        <input id="signIn-contact" type="text" placeholder="Contact Number" required />
                         <input id="signIn-password" type="password" placeholder="Password" required />
                         <a href="#">Forget Your Password?</a>
                         <button id="signInBtn"  onClick={submitLogin} type="submit">Sign In</button>
@@ -68,12 +121,12 @@ const AuthSection = () => {
                         <div className="toggle-panel toggle-left-panel">
                             <h1>Welcome Back!</h1>
                             <p>Register now for a personalized experience with HelloShoes Poss Management System!</p>
-                            <button className="hidden" id="signInToggle" onClick={() => setIsSignUp(false)}>Sign In</button>
+                            <button className="" id="signInToggle" onClick={() => setIsSignUp(false)}>Sign In</button>
                         </div>
                         <div className="toggle-panel toggle-right-panel">
                             <h1>Hello, Officer!</h1>
                             <p>Register now for a personalized experience with HelloShoes Poss Management System!</p>
-                            <button className="hidden" id="signUpToggle" onClick={() => setIsSignUp(true)}>Sign Up</button>
+                            <button className="" id="signUpToggle" onClick={() => setIsSignUp(true)}>Sign Up</button>
                         </div>
                     </div>
                 </div>
