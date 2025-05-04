@@ -107,7 +107,6 @@ CREATE TABLE Customer(
        FtName TEXT,
        SrName TEXT,
        id VARCHAR(15),
-       email TEXT NULL,
        address TEXT,
        contact1 VARCHAR(10),
        contact2 VARCHAR(10),

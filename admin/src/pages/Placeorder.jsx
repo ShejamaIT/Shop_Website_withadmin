@@ -9,7 +9,7 @@ import AddNewItem from "../pages/AddNewItem";
 import AddNewCoupone from "../pages/AddNewCoupone";
 
 const PlaceOrder = ({ onPlaceOrder }) => {
-    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", email: "", phoneNumber: "",occupation:"",workPlace:"",
+    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",
         otherNumber: "", address: "", city: "", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -359,7 +359,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
 
     const handleClear = () => {
-        setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", email: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
+        setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
             city: "", district: "",specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",type:"",category:"",balance:"",advance:""});
         setSelectedItems([]);setSearchTerm("");setDeliveryPrice(0);setDiscountAmount(0);setTotalItemPrice(0);setTotalBillPrice(0);setAdvance(0);
     };
@@ -389,7 +389,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             title: customer.title,
             FtName: customer.FtName ,
             SrName: customer.SrName,
-            email: customer.email,
             phoneNumber: customer.contact1,
             otherNumber: customer.contact2,
             address: customer.address,
@@ -673,8 +672,8 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         )}
                     </Row>
                     <FormGroup>
-                        <Label className="fw-bold">Email</Label>
-                        <Input type="text" name="email" value={formData.email} onChange={handleChange}/>
+                        <Label className="fw-bold">Address</Label>
+                        <Input type="text" name="address" value={formData.address} onChange={handleChange} required/>
                     </FormGroup>
                     <Row>
                         <Col md={6}>
@@ -731,11 +730,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                             </FormGroup>
                         </>
                     )}
-                    <FormGroup>
-                        <Label className="fw-bold">Address</Label>
-                        <Input type="text" name="address" value={formData.address} onChange={handleChange}
-                               required/>
-                    </FormGroup>
+
                 </div>
                 <div className='order-details'>
                     <h2 className="text-xl font-bold mb-2">Order Details</h2>
