@@ -70,6 +70,8 @@ const HirePayment = ({ selectedHire, setShowModal, handleSubmit2 }) => {
 
                 // Final data with balance decisions
                 handleSubmit2({
+                    customer:selectedHire.customer,
+                    driver:selectedHire.driverId,
                     customerPayment: parseFloat(customerPayment),
                     customerBalance: CustBalance,
                     driverHandover: parseFloat(driverHandover),

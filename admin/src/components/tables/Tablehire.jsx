@@ -22,7 +22,7 @@ const TableHire = ({ refreshKey }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/other-hires");
             const data = await response.json();
-
+            console.log(data);
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch hires");
             }
@@ -62,35 +62,40 @@ const TableHire = ({ refreshKey }) => {
         setFilteredHires(filteredData);
     };
     const handleSubmit2 = async (formData) => {
-        console.log(formData);
-        // try {
-        //     const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
-        //         method: "PUT",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({
-        //             itemId: formData.itemId,
-        //             newQuantity: formData.newQuantity,
-        //             updatedPrice: formData.updatedPrice,
-        //             orId: formData.orId,
-        //             booked: formData.booked,
-        //         }),
-        //     });
-        //
-        //     const data = await response.json();
-        //
-        //     if (response.ok) {
-        //         fetchOrder();
-        //         alert("Quantity updated successfully!");
-        //     } else {
-        //         alert(`Failed to update quantity: ${data.message}`);
-        //     }
-        // } catch (error) {
-        //     console.error("Error during quantity update:", error);
-        //     alert(`Error updating quantity: ${error.message}`);
-        // }
-    }
+        console.log("Submitting payment data:", formData);
+
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/other-hire/payment`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    customer: formData.customer,
+                    customerPayment: Number(formData.customerPayment),
+                    customerBalance: Number(formData.customerBalance),
+                    driver: formData.driver,
+                    driverHandover: Number(formData.driverHandover),
+                    driverBalance: Number(formData.driverBalance),
+                    profitOrLoss: Number(formData.profitOrLoss),
+                    lossBy: formData.lossBy || null,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                fetchHires(); // Refresh data if applicable
+                alert("Payment processed successfully!");
+            } else {
+                alert(`❌ Failed to update payment: ${data.message || "Unknown error"}`);
+            }
+        } catch (error) {
+            console.error("❌ Error during payment update:", error);
+            alert(`Error updating payment: ${error.message}`);
+        }
+    };
+
 
 
     return (

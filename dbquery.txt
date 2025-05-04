@@ -291,7 +291,7 @@ CREATE TABLE cash_balance (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     reason VARCHAR(45),
     ref VARCHAR(25),
-    ref_type ENUM('order', 'advance','loss','other','supplier','Loan') NOT NULL,
+    ref_type ENUM('order', 'advance','loss','other','supplier','Loan','hire') NOT NULL,
     dateTime DATETIME,
     amount DOUBLE
 );
@@ -461,6 +461,7 @@ CREATE TABLE otherHire (
     driverId VARCHAR(25),
     vehicleID INT,
     status VARCHAR(20),
+    payment DOUBLE,
     CONSTRAINT FOREIGN KEY (customer) REFERENCES hireCustomer(custID)
             ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (vehicleID) REFERENCES vehicle(id)
