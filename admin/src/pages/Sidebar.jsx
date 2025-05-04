@@ -1,9 +1,53 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import '../style/Sidebar.css';
+import Swal from "sweetalert2";
 
 const Sidebar = ({ onNavigate, activePage }) => {
     const location = useLocation();
+    const navigate = useNavigate()
+    const handleLogout = async () => {
+        const result = await Swal.fire({
+            title: 'Do you want to logout?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            confirmButtonColor: '#0a1d37',
+            cancelButtonColor: '#D3D3D3',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-popup',
+            },
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/SignIn');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:5001/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                localStorage.clear();
+
+                if (response.ok) {
+                    navigate('/SignIn');
+                } else {
+                    const data = await response.json();
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        }
+    };
 
     const menuItems = [
         {id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/dashboard"},
@@ -40,11 +84,15 @@ const Sidebar = ({ onNavigate, activePage }) => {
                     </li>
                 ))}
                 <li className="log_out">
-                    <a href="#">
+                    <a href="/" onClick={(e) => {
+                        e.preventDefault(); // Prevent navigation
+                        handleLogout();     // Call your logout function
+                    }}>
                         <i className='bx bx-log-out'></i>
                         <span className="links_name">Log out</span>
                     </a>
                 </li>
+
             </ul>
         </div>
     );
