@@ -6791,8 +6791,8 @@ router.post("/other-hire", async (req, res) => {
         const insertHire = `
             INSERT INTO otherHire (
                 customer, date, bookingDate, pickup, destination,
-                distance, hire, driverId, vehicleID, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Booked')
+                distance, hire, driverId, vehicleID, status,payment
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Booked',0)
         `;
         console.log(insertHire);
         await db.query(insertHire, [
@@ -6853,7 +6853,66 @@ router.get("/other-hires", async (req, res) => {
 });
 
 // Update Hire payments
+router.put("/other-hire/payment", async (req, res) => {
+    const {customer, customerPayment, customerBalance, driver, driverHandover, driverBalance, profitOrLoss, lossBy} = req.body;
 
+    try {
+        const currentDateTime = new Date();
+
+        // 1️⃣ Update hire status to 'Done'
+        await db.query(
+            `UPDATE otherHire
+             SET status = 'Done', payment=?
+             WHERE customer = ? AND driverId = ? AND status != 'Done'`,
+            [customerPayment,customer, driver]
+        );
+
+        // 2️⃣ Insert customer payment into cash_balance
+        await db.query(
+            `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+             VALUES (?, ?, 'Hire', ?, ?)`,
+            ['Hire payment from customer', customer, currentDateTime, customerPayment]
+        );
+
+        // 3️⃣ If loss exists, insert as negative cash_balance
+        if (profitOrLoss > 0 && lossBy) {
+            await db.query(
+                `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+                 VALUES (?, ?, 'loss', ?, ?)`,
+                [`Loss by ${lossBy}`, customer, currentDateTime, -Math.abs(profitOrLoss)]
+            );
+        }
+
+        // 4️⃣ Update customer balance if needed
+        if (customerBalance !== 0) {
+            await db.query(
+                `UPDATE hireCustomer SET balance = ? WHERE custID = ?`,
+                [customerBalance, customer]
+            );
+        }
+
+        // 5️⃣ Update driver balance if needed
+        if (driverBalance !== 0) {
+            await db.query(
+                `UPDATE driver SET balance = ? WHERE devID = ?`,
+                [driverBalance, driver]
+            );
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Hire payment processed successfully."
+        });
+
+    } catch (error) {
+        console.error("❌ Error in hire payment update:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to process hire payment.",
+            error: error.message
+        });
+    }
+});
 
 // pass sale team value to review in month end
 
