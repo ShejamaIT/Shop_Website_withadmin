@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import db from '../utils/db.js';
 
 const router = express.Router();
-
+const saltRounds = 10;
 // Login Route
 router.post('/login', async (req, res) => {
     const { email, password} = req.body;
@@ -90,5 +90,144 @@ router.post('/logout', async (req, res) => {
         res.status(500).json({ message: 'Internal server error.' });
     }
 });
+
+// Employee Sign up
+router.post('/emp/signup', async (req, res) => {
+    const { password, role, contactNumber } = req.body;
+
+    try {
+        // 1️⃣ Validate input
+        if ( !password || !role || !contactNumber) {
+            return res.status(400).json({
+                success: false,
+                message: 'All fields are required.'
+            });
+        }
+
+        // 2️⃣ Find Employee by contact number
+        const [empRows] = await db.query(
+            `SELECT * FROM Employee WHERE contact = ?`,
+            [contactNumber]
+        );
+
+        if (empRows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Employee not found with the given contact number.'
+            });
+        }
+
+        const employee = empRows[0];
+
+        // 3️⃣ Check if user already exists for this employee
+        const [userExists] = await db.query(
+            `SELECT * FROM user WHERE E_Id = ?`,
+            [employee.E_Id]
+        );
+
+        if (userExists.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: 'User already registered for this employee.'
+            });
+        }
+
+        // 4️⃣ Hash password
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // 5️⃣ Insert user record
+        await db.query(
+            `INSERT INTO user (contact, password, type, E_Id)
+             VALUES (?, ?, ?, ?)`,
+            [contactNumber, hashedPassword, role, employee.E_Id]
+        );
+
+        return res.status(201).json({
+            success: true,
+            message: 'User registered successfully.'
+        });
+
+    } catch (err) {
+        console.error("Error during sign-up:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error.',
+            error: err.message
+        });
+    }
+});
+
+// EMployee Sign in
+router.post('/emp/login', async (req, res) => {
+    const { contact, password } = req.body;
+
+    try {
+        // 1️⃣ Validate input
+        if (!contact || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Both contact and password are required.'
+            });
+        }
+
+        // 2️⃣ Find user by contact
+        const [userRows] = await db.query(
+            `SELECT * FROM user WHERE contact = ?`,
+            [contact]
+        );
+
+        if (userRows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found.'
+            });
+        }
+
+        const user = userRows[0];
+
+        // 3️⃣ Compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid password.'
+            });
+        }
+
+        // 4️⃣ Generate JWT token
+        const expTime = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour expiry
+        const token = jwt.sign(
+            { id: user.id, role: user.type, exp: expTime },
+            process.env.JWT_SECRET
+        );
+
+        // 5️⃣ Log the session in sessionlogs table
+        const [result] = await db.query(
+            `INSERT INTO sessionlogs (user, LoginTime, Token) VALUES (?, ?, ?)`,
+            [user.id, new Date(), token]
+        );
+
+        // 6️⃣ Return success with the token
+        return res.status(200).json({
+            success: true,
+            message: 'Login successful.',
+            data: {
+                token,
+                role: user.type,
+                E_Id: user.E_Id,
+                contact: user.contact,
+            }
+        });
+
+    } catch (err) {
+        console.error("Error during login:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error.',
+            error: err.message
+        });
+    }
+});
+
 
 export default router;
