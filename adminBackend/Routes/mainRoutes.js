@@ -6425,28 +6425,48 @@ router.get("/monthly-hire-summary", async (req, res) => {
 
         const sql = `
             SELECT
-                -- Today's hire
-                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
-                 WHERE date = ? AND status = 'complete') AS todayHire,
+                -- Today Hire Total
+                (
+                    (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                     WHERE date = ? AND status = 'complete')
+                    +
+                    (SELECT IFNULL(SUM(payment), 0) FROM otherHire 
+                     WHERE bookingDate = ? AND status = 'Done')
+                ) AS todayHire,
 
-                -- Yesterday's hire
-                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
-                 WHERE date = ? AND status = 'complete') AS yesterdayHire,
+                -- Yesterday Hire Total
+                (
+                    (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                     WHERE date = ? AND status = 'complete')
+                    +
+                    (SELECT IFNULL(SUM(payment), 0) FROM otherHire 
+                     WHERE bookingDate = ? AND status = 'Done')
+                ) AS yesterdayHire,
 
-                -- This month's total hire
-                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
-                 WHERE date BETWEEN ? AND ? AND status = 'complete') AS thisMonthHire,
+                -- This Month Total
+                (
+                    (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                     WHERE date BETWEEN ? AND ? AND status = 'complete')
+                    +
+                    (SELECT IFNULL(SUM(payment), 0) FROM otherHire 
+                     WHERE bookingDate BETWEEN ? AND ? AND status = 'Done')
+                ) AS thisMonthHire,
 
-                -- Last month's total hire
-                (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
-                 WHERE date BETWEEN ? AND ? AND status = 'complete') AS lastMonthHire
+                -- Last Month Total
+                (
+                    (SELECT IFNULL(SUM(hire), 0) FROM delivery_note 
+                     WHERE date BETWEEN ? AND ? AND status = 'complete')
+                    +
+                    (SELECT IFNULL(SUM(payment), 0) FROM otherHire 
+                     WHERE bookingDate BETWEEN ? AND ? AND status = 'Done')
+                ) AS lastMonthHire
         `;
 
         const [rows] = await db.query(sql, [
-            today,                 // today's hire
-            yesterday,             // yesterday's hire
-            startOfThisMonth, today,   // this month
-            startOfLastMonth, endOfLastMonth // last month
+            today, today,           // Today's
+            yesterday, yesterday,   // Yesterday's
+            startOfThisMonth, today, startOfThisMonth, today,   // This Month
+            startOfLastMonth, endOfLastMonth, startOfLastMonth, endOfLastMonth // Last Month
         ]);
 
         const result = rows[0];
@@ -6459,6 +6479,7 @@ router.get("/monthly-hire-summary", async (req, res) => {
             thisMonthHire: result.thisMonthHire,
             hireIncreased: result.thisMonthHire > result.lastMonthHire ? "yes" : "no"
         });
+
     } catch (err) {
         console.error("Error fetching hire summary:", err.message);
         return res.status(500).json({
@@ -6468,6 +6489,7 @@ router.get("/monthly-hire-summary", async (req, res) => {
         });
     }
 });
+
 
 //get year totals month by month
 router.get("/monthly-order-income", async (req, res) => {
