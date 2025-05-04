@@ -194,7 +194,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 router.post("/orders", async (req, res) => {
     const {
         FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,
-        couponCode, deliveryPrice, discountAmount, district, dvStatus, email,
+        couponCode, deliveryPrice, discountAmount, district, dvStatus,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
         phoneNumber = "", specialNote, title, totalItemPrice,
         dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
@@ -248,12 +248,12 @@ router.post("/orders", async (req, res) => {
             }
 
             const sqlInsertCustomer = `
-                INSERT INTO Customer (c_ID, title, FtName, SrName, address, contact1, contact2, email, id, balance, type, category, t_name, occupation, workPlace)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                INSERT INTO Customer (c_ID, title, FtName, SrName, address, contact1, contact2, id, balance, type, category, t_name, occupation, workPlace)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
             const valuesCustomer = [
                 Cust_id, title, FtName, SrName, address,
-                trimmedPhone || "-", trimmedOther || "-", email, id,
+                trimmedPhone || "-", trimmedOther || "-", id,
                 0, type, category, tType, Occupation, WorkPlace
             ];
 
