@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../style/TableThree.css";
+import ChangeQty from "../../pages/changeQty";
+import HirePayment from "../../pages/hirePayment";
 
 const TableHire = ({ refreshKey }) => {
     const [hires, setHires] = useState([]);
@@ -9,6 +11,8 @@ const TableHire = ({ refreshKey }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [showModal, setShowModal] = useState(false);
+    const [selectedHire, setSelectedHire] = useState(null);
 
     useEffect(() => {
         fetchHires();
@@ -39,8 +43,10 @@ const TableHire = ({ refreshKey }) => {
             .padStart(2, "0")}-${date.getFullYear()}`;
     };
 
-    const handleView = (id) => {
-        navigate(`/other-hire/${id}`);
+    const handleView = (hire) => {
+        console.log(hire);
+        setSelectedHire(hire);
+        setShowModal(true);
     };
 
     const handleSearch = (event) => {
@@ -55,6 +61,37 @@ const TableHire = ({ refreshKey }) => {
 
         setFilteredHires(filteredData);
     };
+    const handleSubmit2 = async (formData) => {
+        console.log(formData);
+        // try {
+        //     const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
+        //         method: "PUT",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         body: JSON.stringify({
+        //             itemId: formData.itemId,
+        //             newQuantity: formData.newQuantity,
+        //             updatedPrice: formData.updatedPrice,
+        //             orId: formData.orId,
+        //             booked: formData.booked,
+        //         }),
+        //     });
+        //
+        //     const data = await response.json();
+        //
+        //     if (response.ok) {
+        //         fetchOrder();
+        //         alert("Quantity updated successfully!");
+        //     } else {
+        //         alert(`Failed to update quantity: ${data.message}`);
+        //     }
+        // } catch (error) {
+        //     console.error("Error during quantity update:", error);
+        //     alert(`Error updating quantity: ${error.message}`);
+        // }
+    }
+
 
     return (
         <div className="table-container">
@@ -105,7 +142,7 @@ const TableHire = ({ refreshKey }) => {
                                 <td>
                                     <button
                                         className="view-btn"
-                                        onClick={() => handleView(hire.id)}
+                                        onClick={() => handleView(hire)}
                                     >
                                         👁️
                                     </button>
@@ -115,6 +152,14 @@ const TableHire = ({ refreshKey }) => {
                     )}
                     </tbody>
                 </table>
+                {showModal && selectedHire && (
+                    <HirePayment
+                        selectedHire={selectedHire}
+                        setShowModal={setShowModal}
+                        handleSubmit2={handleSubmit2}
+                    />
+                )}
+
             </div>
         </div>
     );
