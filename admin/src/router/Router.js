@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminDashboard from "../pages/AdminDashboard";
 import CashierDashboard from "../pages/CashierDashboard";
+import UserDashboard from "../pages/UserDashboard";
 import AllOrders from "../pages/AllOrders";
 import AllProducts from "../pages/AllProducts";
 import AllCustomers from "../pages/AllCustomers";
@@ -54,6 +55,11 @@ const Router = () => {
 
             <Route path="/chashier-dashboard" element={<CashierDashboard />}>
                 <Route index element={<PlaceOrder />} />
+                <Route path="orders" element={<PlaceOrder />} />
+            </Route>
+            <Route path="/user-dashboard" element={<UserDashboard />}>
+                <Route index element={<HomeContent />} />
+                <Route path="product_list" element={<AllOrders />} />
                 <Route path="orders" element={<PlaceOrder />} />
             </Route>
 
