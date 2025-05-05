@@ -4,14 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update order tables with logins">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="change folders">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/AddNewUser.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-14.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-1.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-2.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,11 +85,11 @@
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\pages" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\pages\SideBar" />
+      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\pages\Dashboard" />
       <recent name="D:\shejama\Shop_Website_withadmin\admin\src\style" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\style" />
-      <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\components\tables" />
-      <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
   <component name="RunManager" selected="npm.start adminBackend">
@@ -330,7 +333,7 @@
       <workItem from="1746417622734" duration="1239000" />
       <workItem from="1746418920844" duration="705000" />
       <workItem from="1746420132080" duration="8495000" />
-      <workItem from="1746429951424" duration="7062000" />
+      <workItem from="1746429951424" duration="8470000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -675,7 +678,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="361" />
+    <option name="localTasksCounter" value="362" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -694,7 +697,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update dashboard" />
     <MESSAGE value="update apis" />
     <MESSAGE value="update homecontent with api" />
     <MESSAGE value="update homecontent view" />
@@ -719,6 +721,7 @@
     <MESSAGE value="add userDashboard" />
     <MESSAGE value="update tables with sale team" />
     <MESSAGE value="update order tables with logins" />
-    <option name="LAST_COMMIT_MESSAGE" value="update order tables with logins" />
+    <MESSAGE value="change folders" />
+    <option name="LAST_COMMIT_MESSAGE" value="change folders" />
   </component>
 </project>

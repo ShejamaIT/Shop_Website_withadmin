@@ -57,7 +57,8 @@ const AdminSidebar = ({ onNavigate, activePage }) => {
         {id: "orders", icon: "bx-cart", label: "Place Order", path: "/admin-dashboard/orders"},
         {id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/admin-dashboard/product_list"},
         {id: "deliveries", icon: "bxs-truck", label: "Deliveries", path: "/admin-dashboard/delivery"},
-        {id: "employees", icon: "bx-book-alt", label: "Employee", path: "/admin-dashboard/employees"},
+        {id: "employees", icon: "bx-user-circle", label: "Employee", path: "/admin-dashboard/employees"},
+        {id: "accounts", icon: "bxs-user-account", label: "User Account", path: "/admin-dashboard/users"},
         {id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/admin-dashboard/suppliers"},
         {id: "vehicles", icon: "bx-bus-school", label: "Vehicles", path: "/admin-dashboard/vehicles"},
     ];
