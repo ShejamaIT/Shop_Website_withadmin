@@ -1,6 +1,6 @@
 import React from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
-import '../style/Sidebar.css';
+import '../../style/Sidebar.css';
 import Swal from "sweetalert2";
 
 const UserSidebar = ({ onNavigate, activePage }) => {
@@ -77,7 +77,7 @@ const UserSidebar = ({ onNavigate, activePage }) => {
                     </li>
                 ))}
                 <li className="log_out">
-                    <a href="/" onClick={(e) => {
+                    <a href="/admin/public" onClick={(e) => {
                         e.preventDefault(); // Prevent navigation
                         handleLogout();     // Call your logout function
                     }}>

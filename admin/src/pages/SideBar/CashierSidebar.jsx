@@ -1,8 +1,8 @@
 import React from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
-import '../style/Sidebar.css';
+import '../../style/Sidebar.css';
 import Swal from "sweetalert2";
-import CashierDashboard from "./CashierDashboard";
+import CashierDashboard from "../Dashboard/CashierDashboard";
 
 const CashierSidebar = ({ onNavigate, activePage }) => {
     const location = useLocation();
@@ -76,7 +76,7 @@ const CashierSidebar = ({ onNavigate, activePage }) => {
                     </li>
                 ))}
                 <li className="log_out">
-                    <a href="/" onClick={(e) => {
+                    <a href="/admin/public" onClick={(e) => {
                         e.preventDefault(); // Prevent navigation
                         handleLogout();     // Call your logout function
                     }}>

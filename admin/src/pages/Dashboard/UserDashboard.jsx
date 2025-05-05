@@ -1,11 +1,11 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../pages/Navbar";
-import UserSidebar from "./UserSidebar";
-import "../style/Dashboard.css";
+import Helmet from "../../components/Helmet/Helmet";
+import NavBar from "../Navbar";
+import UserSidebar from "../SideBar/UserSidebar";
+import "../../style/Dashboard.css";
 import { Container } from "reactstrap";
-import useAuth from "../router/useAuth";
+import useAuth from "../../router/useAuth";
 
 const UserDashboard = () => {
     const navigate = useNavigate();

@@ -1,20 +1,20 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../pages/Navbar";
-import CashierSidebar from "./CashierSidebar";
-import "../style/Dashboard.css";
+import Helmet from "../../components/Helmet/Helmet";
+import NavBar from "../Navbar";
+import AdminSidebar from "../SideBar/AdminSidebar";
+import "../../style/Dashboard.css";
 import { Container } from "reactstrap";
-import useAuth from "../router/useAuth";
+import useAuth from "../../router/useAuth";
 
-const CashierDashboard = () => {
+const AdminDashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
     useAuth();
     return (
         <Helmet title="AdminDashboard">
             <div className="dashboard-container">
-                <CashierSidebar onNavigate={navigate} activePage={location.pathname} />
+                <AdminSidebar onNavigate={navigate} activePage={location.pathname} />
                 <div className="main-content">
                     <NavBar onNavigate={navigate} />
                     <div className="page-content">
@@ -28,4 +28,4 @@ const CashierDashboard = () => {
     );
 };
 
-export default CashierDashboard;
+export default AdminDashboard;

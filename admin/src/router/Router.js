@@ -1,8 +1,8 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import AdminDashboard from "../pages/AdminDashboard";
-import CashierDashboard from "../pages/CashierDashboard";
-import UserDashboard from "../pages/UserDashboard";
+import AdminDashboard from "../pages/Dashboard/AdminDashboard";
+import CashierDashboard from "../pages/Dashboard/CashierDashboard";
+import UserDashboard from "../pages/Dashboard/UserDashboard";
 import AllOrders from "../pages/AllOrders";
 import AllProducts from "../pages/AllProducts";
 import AllCustomers from "../pages/AllCustomers";
