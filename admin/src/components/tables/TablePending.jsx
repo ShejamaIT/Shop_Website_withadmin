@@ -16,18 +16,29 @@ const TablePending = ({ refreshKey }) => {
 
     const fetchOrders = async () => {
         setLoading(true);
+        const type = localStorage.getItem("type");
+        const Eid = localStorage.getItem("EID");
+        console.log(type,Eid);
+
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-pending");
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/orders-pending"
+                : `http://localhost:5001/api/admin/main/orders-pending-stid?eid=${Eid}`;
+
+
+            const response = await fetch(endpoint);
             if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch`);
+
             const data = await response.json();
             setOrders(data.data);
-            setFilteredOrders(data.data); // Initialize filtered list
+            setFilteredOrders(data.data);
         } catch (err) {
             setError(err.message || "Unexpected error occurred.");
         } finally {
             setLoading(false);
         }
     };
+
 
     const formatDate = (dateString) =>
         new Intl.DateTimeFormat("en-GB").format(new Date(dateString));

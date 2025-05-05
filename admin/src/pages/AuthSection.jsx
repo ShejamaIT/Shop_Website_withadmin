@@ -47,6 +47,8 @@ const AuthSection = () => {
                     navigate('/admin-dashboard');
                 } else if (userType === 'CHASHIER') {
                     navigate('/chashier-dashboard');
+                } else if (userType === 'USER') {
+                    navigate('/user-dashboard');
                 }
             }
         } catch (error) {
