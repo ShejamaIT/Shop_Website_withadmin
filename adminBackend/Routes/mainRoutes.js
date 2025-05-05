@@ -1488,69 +1488,75 @@ router.get("/orders-pending-stid", async (req, res) => {
 });
 
 // Get all orders by status= accepting
+// 📌 Categorize orders into booked and unbooked
+function categorizeOrders(orders) {
+    const groupedOrders = {};
+
+    orders.forEach(order => {
+        if (!groupedOrders[order.OrID]) {
+            groupedOrders[order.OrID] = {
+                OrID: order.OrID,
+                orDate: order.orDate,
+                customer: order.c_ID,
+                ordertype: order.ordertype,
+                orStatus: order.orStatus,
+                dvStatus: order.delStatus,
+                dvPrice: order.delPrice,
+                disPrice: order.discount,
+                totPrice: order.total,
+                advance: order.advance,
+                balance: order.balance,
+                payStatus: order.payStatus,
+                stID: order.stID,
+                expectedDeliveryDate: order.expectedDeliveryDate,
+                itemReceived: order.itemReceived,
+                acceptanceStatuses: []
+            };
+        }
+
+        groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+    });
+
+    const bookedOrders = [];
+    const unbookedOrders = [];
+
+    Object.values(groupedOrders).forEach(order => {
+        const allComplete = order.acceptanceStatuses.every(status => status === "Complete");
+        if (allComplete) {
+            order.acceptanceStatus = "Complete";
+            bookedOrders.push(order);
+        } else {
+            order.acceptanceStatus = "Incomplete";
+            unbookedOrders.push(order);
+        }
+    });
+
+    return { bookedOrders, unbookedOrders };
+}
 router.get("/orders-accepting", async (req, res) => {
     try {
-        // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
             SELECT
-                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orwStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus
             FROM Orders o
-                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             WHERE o.orStatus = 'Accepted'
         `;
 
         const [orders] = await db.query(query);
 
-        // If no orders found, return a 404 status
         if (orders.length === 0) {
             return res.status(404).json({ message: "No Accepted orders found" });
         }
 
-        // Group orders by OrID
-        const groupedOrders = {};
+        const { bookedOrders, unbookedOrders } = categorizeOrders(orders);
 
-        orders.forEach(order => {
-            if (!groupedOrders[order.OrID]) {
-                groupedOrders[order.OrID] = {
-                    OrID: order.OrID,
-                    orDate: order.orDate,
-                    customer: order.c_ID,
-                    ordertype: order.ordertype,
-                    orStatus: order.orStatus,
-                    dvStatus: order.delStatus,
-                    dvPrice: order.delPrice,
-                    disPrice: order.discount,
-                    totPrice: order.total,
-                    advance: order.advance,
-                    balance: order.balance,
-                    payStatus: order.payStatus,
-                    stID: order.stID,
-                    expectedDeliveryDate: order.expectedDeliveryDate,
-                    itemReceived: order.itemReceived,
-                    acceptanceStatus: "Complete", // Default status is Complete
-                    acceptanceStatuses: [] // Track individual item statuses
-                };
-            }
-
-            // Add each item status to the list
-            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
-
-            // If any items have an "In Production" or "None" status, mark as "Incomplete"
-            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
-                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
-            }
-        });
-
-        // Convert the grouped orders into an array
-        const formattedOrders = Object.values(groupedOrders);
-
-        // Send the formatted orders with their acceptance status as a JSON response
         return res.status(200).json({
             message: "Accepted orders found.",
-            data: formattedOrders,
+            data: { bookedOrders, unbookedOrders }
         });
 
     } catch (error) {
@@ -1558,82 +1564,42 @@ router.get("/orders-accepting", async (req, res) => {
         return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
     }
 });
+
 //Get all orders by status= accepting & specific sale team
 router.get("/orders-accepting-stid", async (req, res) => {
     try {
         const Eid = req.query.eid;
-        // Step 1: Get sales team ID (stID) for this employee
-        const [salesResult] = await db.query(
-            "SELECT stID FROM sales_team WHERE E_Id = ?",
-            [Eid]
-        );
+        if (!Eid) return res.status(400).json({ message: "Missing 'eid' in query params" });
 
+        const [salesResult] = await db.query("SELECT stID FROM sales_team WHERE E_Id = ?", [Eid]);
         if (salesResult.length === 0) {
             return res.status(404).json({ message: "No sales team entry found for this employee." });
         }
 
         const stID = salesResult[0].stID;
-        // Query to fetch orders with their acceptance status from accept_orders table
+
         const query = `
             SELECT
-                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orwStatus, o.delStatus, o.delPrice,
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus
             FROM Orders o
-                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
-            WHERE o.orStatus = 'Accepted' AND stID = ?
+            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            WHERE o.orStatus = 'Accepted' AND o.stID = ?
         `;
 
-        const [orders] = await db.query(query,[stID]);
+        const [orders] = await db.query(query, [stID]);
 
-        // If no orders found, return a 404 status
         if (orders.length === 0) {
-            return res.status(404).json({ message: "No Accepted orders found" });
+            return res.status(404).json({ message: "No Accepted orders found for this sales team." });
         }
 
-        // Group orders by OrID
-        const groupedOrders = {};
+        const { bookedOrders, unbookedOrders } = categorizeOrders(orders);
 
-        orders.forEach(order => {
-            if (!groupedOrders[order.OrID]) {
-                groupedOrders[order.OrID] = {
-                    OrID: order.OrID,
-                    orDate: order.orDate,
-                    customer: order.c_ID,
-                    ordertype: order.ordertype,
-                    orStatus: order.orStatus,
-                    dvStatus: order.delStatus,
-                    dvPrice: order.delPrice,
-                    disPrice: order.discount,
-                    totPrice: order.total,
-                    advance: order.advance,
-                    balance: order.balance,
-                    payStatus: order.payStatus,
-                    stID: order.stID,
-                    expectedDeliveryDate: order.expectedDeliveryDate,
-                    itemReceived: order.itemReceived,
-                    acceptanceStatus: "Complete", // Default status is Complete
-                    acceptanceStatuses: [] // Track individual item statuses
-                };
-            }
-
-            // Add each item status to the list
-            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
-
-            // If any items have an "In Production" or "None" status, mark as "Incomplete"
-            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
-                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
-            }
-        });
-
-        // Convert the grouped orders into an array
-        const formattedOrders = Object.values(groupedOrders);
-
-        // Send the formatted orders with their acceptance status as a JSON response
         return res.status(200).json({
             message: "Accepted orders found.",
-            data: formattedOrders,
+            data: { bookedOrders, unbookedOrders }
         });
 
     } catch (error) {
@@ -1658,6 +1624,90 @@ router.get("/orders-completed", async (req, res) => {
         `;
 
         const [orders] = await db.query(query);
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No Completed orders found" });
+        }
+
+        // Group orders by OrID
+        const groupedOrders = {};
+
+        orders.forEach(order => {
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customer: order.c_ID,
+                    ordertype: order.ordertype,
+                    orStatus: order.orStatus,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    itemReceived: order.itemReceived,
+                    acceptanceStatus: "Complete", // Default status is Complete
+                    acceptanceStatuses: [] // Track individual item statuses
+                };
+            }
+
+            // Add each item status to the list
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
+            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
+                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
+            }
+        });
+
+        // Convert the grouped orders into an array
+        const formattedOrders = Object.values(groupedOrders);
+
+        // Send the formatted orders with their acceptance status as a JSON response
+        return res.status(200).json({
+            message: "Completed orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching completed orders:", error.message);
+        return res.status(500).json({ message: "Error fetching completed orders", error: error.message });
+    }
+});
+
+// Get all orders by status= completed & specific sale team
+router.get("/orders-completed-stid", async (req, res) => {
+    try {
+        const Eid = req.query.eid;
+        // Step 1: Get sales team ID (stID) for this employee
+        const [salesResult] = await db.query(
+            "SELECT stID FROM sales_team WHERE E_Id = ?",
+            [Eid]
+        );
+
+        if (salesResult.length === 0) {
+            return res.status(404).json({ message: "No sales team entry found for this employee." });
+        }
+
+        const stID = salesResult[0].stID;
+        // Query to fetch orders with their acceptance status from accept_orders table
+        const query = `
+            SELECT
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived,
+                ao.status AS acceptanceStatus
+            FROM Orders o
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            WHERE o.orStatus = 'Completed' AND stID = ?
+        `;
+
+        const [orders] = await db.query(query,[stID]);
 
         // If no orders found, return a 404 status
         if (orders.length === 0) {
@@ -1785,9 +1835,92 @@ router.get("/orders-issued", async (req, res) => {
         return res.status(500).json({ message: "Error fetching completed orders", error: error.message });
     }
 });
+// Get all orders by status= issued & specific sale team
+router.get("/orders-issued-stid", async (req, res) => {
+    try {
+        const Eid = req.query.eid;
+        // Step 1: Get sales team ID (stID) for this employee
+        const [salesResult] = await db.query(
+            "SELECT stID FROM sales_team WHERE E_Id = ?",
+            [Eid]
+        );
 
-// Get all orders by status= deliverd
-router.get("/orders-deliverd", async (req, res) => {
+        if (salesResult.length === 0) {
+            return res.status(404).json({ message: "No sales team entry found for this employee." });
+        }
+
+        const stID = salesResult[0].stID;
+        // Query to fetch orders with their acceptance status from accept_orders table
+        const query = `
+            SELECT
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived,
+                ao.status AS acceptanceStatus
+            FROM Orders o
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            WHERE o.orStatus = 'Issued'  AND stID = ?
+        `;
+
+        const [orders] = await db.query(query,[stID]);
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No Issued orders found" });
+        }
+
+        // Group orders by OrID
+        const groupedOrders = {};
+
+        orders.forEach(order => {
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customer: order.c_ID,
+                    ordertype: order.ordertype,
+                    orStatus: order.orStatus,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    itemReceived: order.itemReceived,
+                    acceptanceStatus: "Complete", // Default status is Complete
+                    acceptanceStatuses: [] // Track individual item statuses
+                };
+            }
+
+            // Add each item status to the list
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
+            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
+                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
+            }
+        });
+
+        // Convert the grouped orders into an array
+        const formattedOrders = Object.values(groupedOrders);
+
+        // Send the formatted orders with their acceptance status as a JSON response
+        return res.status(200).json({
+            message: "Completed orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching completed orders:", error.message);
+        return res.status(500).json({ message: "Error fetching completed orders", error: error.message });
+    }
+});
+
+// Get all orders by status= delivered
+router.get("/orders-delivered", async (req, res) => {
     try {
         // Query to fetch orders with their acceptance status from accept_orders table
         const query = `
@@ -1799,6 +1932,89 @@ router.get("/orders-deliverd", async (req, res) => {
             FROM Orders o
                      LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             WHERE o.orStatus = 'Delivered'
+        `;
+
+        const [orders] = await db.query(query);
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No Delivered orders found" });
+        }
+
+        // Group orders by OrID
+        const groupedOrders = {};
+
+        orders.forEach(order => {
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customer: order.c_ID,
+                    ordertype: order.ordertype,
+                    orStatus: order.orStatus,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    itemReceived: order.itemReceived,
+                    acceptanceStatus: "Complete", // Default status is Complete
+                    acceptanceStatuses: [] // Track individual item statuses
+                };
+            }
+
+            // Add each item status to the list
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
+            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
+                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
+            }
+        });
+
+        // Convert the grouped orders into an array
+        const formattedOrders = Object.values(groupedOrders);
+
+        // Send the formatted orders with their acceptance status as a JSON response
+        return res.status(200).json({
+            message: "Completed orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching completed orders:", error.message);
+        return res.status(500).json({ message: "Error fetching completed orders", error: error.message });
+    }
+});
+// Get all orders by status= delivered & specific sale team
+router.get("/orders-delivered-stid", async (req, res) => {
+    try {
+        const Eid = req.query.eid;
+        // Step 1: Get sales team ID (stID) for this employee
+        const [salesResult] = await db.query(
+            "SELECT stID FROM sales_team WHERE E_Id = ?",
+            [Eid]
+        );
+
+        if (salesResult.length === 0) {
+            return res.status(404).json({ message: "No sales team entry found for this employee." });
+        }
+
+        const stID = salesResult[0].stID;
+        // Query to fetch orders with their acceptance status from accept_orders table
+        const query = `
+            SELECT
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived,
+                ao.status AS acceptanceStatus
+            FROM Orders o
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            WHERE o.orStatus = 'Delivered' AND stID = ?
         `;
 
         const [orders] = await db.query(query);
@@ -1931,6 +2147,91 @@ router.get("/orders-returned", async (req, res) => {
         return res.status(500).json({ message: "Error fetching returned orders", error: error.message });
     }
 });
+// Get all orders by status= returned & specific sale team
+router.get("/orders-returned-stid", async (req, res) => {
+    try {
+        const Eid = req.query.eid;
+        // Step 1: Get sales team ID (stID) for this employee
+        const [salesResult] = await db.query(
+            "SELECT stID FROM sales_team WHERE E_Id = ?",
+            [Eid]
+        );
+
+        if (salesResult.length === 0) {
+            return res.status(404).json({ message: "No sales team entry found for this employee." });
+        }
+
+        const stID = salesResult[0].stID;
+        // Query to fetch returned orders with their acceptance status and return reason
+        const query = `
+            SELECT
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived, ao.status AS acceptanceStatus,
+                ro.detail AS returnReason
+            FROM Orders o
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN return_orders ro ON o.OrID = ro.OrID
+            WHERE o.orStatus = 'Returned' AND stID = ?
+        `;
+
+        const [orders] = await db.query(query,[stID]);
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No returned orders found" });
+        }
+
+        // Group orders by OrID
+        const groupedOrders = {};
+
+        orders.forEach(order => {
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customer: order.c_ID,
+                    ordertype: order.ordertype,
+                    orStatus: order.orStatus,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    itemReceived: order.itemReceived,
+                    returnReason: order.returnReason || "No reason provided", // Handle null reasons
+                    acceptanceStatus: "Complete", // Default status is Complete
+                    acceptanceStatuses: [] // Track individual item statuses
+                };
+            }
+
+            // Add each item status to the list
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
+            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
+                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
+            }
+        });
+
+        // Convert the grouped orders into an array
+        const formattedOrders = Object.values(groupedOrders);
+
+        // Send the formatted orders with their acceptance status as a JSON response
+        return res.status(200).json({
+            message: "Returned orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching returned orders:", error.message);
+        return res.status(500).json({ message: "Error fetching returned orders", error: error.message });
+    }
+});
 
 // Get all orders by status= canceled
 router.get("/orders-canceled", async (req, res) => {
@@ -1946,6 +2247,91 @@ router.get("/orders-canceled", async (req, res) => {
                      LEFT JOIN accept_orders ao ON o.OrID = ao.orID
                      LEFT JOIN return_orders ro ON o.OrID = ro.OrID
             WHERE o.orStatus = 'Cancelled'
+        `;
+
+        const [orders] = await db.query(query);
+
+        // If no orders found, return a 404 status
+        if (orders.length === 0) {
+            return res.status(404).json({ message: "No returned orders found" });
+        }
+
+        // Group orders by OrID
+        const groupedOrders = {};
+
+        orders.forEach(order => {
+            if (!groupedOrders[order.OrID]) {
+                groupedOrders[order.OrID] = {
+                    OrID: order.OrID,
+                    orDate: order.orDate,
+                    customer: order.c_ID,
+                    ordertype: order.ordertype,
+                    orStatus: order.orStatus,
+                    dvStatus: order.delStatus,
+                    dvPrice: order.delPrice,
+                    disPrice: order.discount,
+                    totPrice: order.total,
+                    advance: order.advance,
+                    balance: order.balance,
+                    payStatus: order.payStatus,
+                    stID: order.stID,
+                    expectedDeliveryDate: order.expectedDeliveryDate,
+                    itemReceived: order.itemReceived,
+                    returnReason: order.returnReason || "No reason provided", // Handle null reasons
+                    acceptanceStatus: "Complete", // Default status is Complete
+                    acceptanceStatuses: [] // Track individual item statuses
+                };
+            }
+
+            // Add each item status to the list
+            groupedOrders[order.OrID].acceptanceStatuses.push(order.acceptanceStatus);
+
+            // If any items have an "In Production" or "None" status, mark as "Incomplete"
+            if (order.acceptanceStatus === "In Production" || order.acceptanceStatus === "None") {
+                groupedOrders[order.OrID].acceptanceStatus = "Incomplete";
+            }
+        });
+
+        // Convert the grouped orders into an array
+        const formattedOrders = Object.values(groupedOrders);
+
+        // Send the formatted orders with their acceptance status as a JSON response
+        return res.status(200).json({
+            message: "Returned orders found.",
+            data: formattedOrders,
+        });
+
+    } catch (error) {
+        console.error("Error fetching returned orders:", error.message);
+        return res.status(500).json({ message: "Error fetching returned orders", error: error.message });
+    }
+});
+// Get all orders by status= canceled & specific sale team
+router.get("/orders-canceled-stid", async (req, res) => {
+    try {
+        const Eid = req.query.eid;
+        // Step 1: Get sales team ID (stID) for this employee
+        const [salesResult] = await db.query(
+            "SELECT stID FROM sales_team WHERE E_Id = ?",
+            [Eid]
+        );
+
+        if (salesResult.length === 0) {
+            return res.status(404).json({ message: "No sales team entry found for this employee." });
+        }
+
+        const stID = salesResult[0].stID;
+        // Query to fetch returned orders with their acceptance status and return reason
+        const query = `
+            SELECT
+                o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
+                o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
+                ao.itemReceived, ao.status AS acceptanceStatus,
+                ro.detail AS returnReason
+            FROM Orders o
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN return_orders ro ON o.OrID = ro.OrID
+            WHERE o.orStatus = 'Cancelled' AND stID = ?
         `;
 
         const [orders] = await db.query(query);
