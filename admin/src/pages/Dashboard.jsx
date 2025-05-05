@@ -5,11 +5,12 @@ import NavBar from "../pages/Navbar";
 import Sidebar from "../pages/Sidebar";
 import "../style/Dashboard.css";
 import { Container } from "reactstrap";
+import useAuth from "../router/useAuth";
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
+    useAuth();
     return (
         <Helmet title="Dashboard">
             <div className="dashboard-container">
