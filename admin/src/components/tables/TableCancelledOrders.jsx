@@ -15,14 +15,19 @@ const TableCanceled = ({ refreshKey }) => {
     }, [refreshKey]);
 
     const fetchOrders = async () => {
+        setLoading(true);
+        const type = localStorage.getItem("type");
+        const Eid = localStorage.getItem("EID");
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-canceled");
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/orders-canceled"
+                : `http://localhost:5001/api/admin/main/orders-canceled-stid?eid=${Eid}`;
+
+
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch`);
+
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to fetch orders");
-            }
-
             setOrders(data.data);
             setFilteredOrders(data.data); // Initialize with all orders
         } catch (err) {

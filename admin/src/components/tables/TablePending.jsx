@@ -18,7 +18,6 @@ const TablePending = ({ refreshKey }) => {
         setLoading(true);
         const type = localStorage.getItem("type");
         const Eid = localStorage.getItem("EID");
-        console.log(type,Eid);
 
         try {
             const endpoint = type === "ADMIN"

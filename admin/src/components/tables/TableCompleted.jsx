@@ -15,10 +15,17 @@ const TableCompleted = ({ refreshKey }) => {
     }, [refreshKey]);
 
     const fetchOrders = async () => {
+        const type = localStorage.getItem("type");
+        const Eid = localStorage.getItem("EID");
+        setLoading(true); // <- Ensure loading starts
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-completed");
-            const data = await response.json();
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/orders-completed"
+                : `http://localhost:5001/api/admin/main/orders-completed-stid?eid=${Eid}`;
 
+            const response = await fetch(endpoint);
+
+            const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }

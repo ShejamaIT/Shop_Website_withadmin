@@ -17,12 +17,11 @@ const TableAccepting = ({ refreshKey }) => {
     const fetchOrders = async () => {
         const type = localStorage.getItem("type");
         const Eid = localStorage.getItem("EID");
-        console.log(type, Eid);
         setLoading(true); // <- Ensure loading starts
         try {
             const endpoint = type === "ADMIN"
-                ? "http://localhost:5001/api/admin/main/orders-pending"
-                : `http://localhost:5001/api/admin/main/orders-pending-stid?eid=${Eid}`;
+                ? "http://localhost:5001/api/admin/main/orders-accepting"
+                : `http://localhost:5001/api/admin/main/orders-accepting-stid?eid=${Eid}`;
 
             const response = await fetch(endpoint);
 
@@ -31,9 +30,8 @@ const TableAccepting = ({ refreshKey }) => {
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }
-
-            setOrders(data.data); // ✅ Use `data.data` based on your backend
-            setFilteredOrders(data.data);
+            setOrders(data.data.bookedOrders); // ✅ Use `data.data` based on your backend
+            setFilteredOrders(data.data.bookedOrders);
         } catch (err) {
             setError(err.message || "Something went wrong");
         } finally {

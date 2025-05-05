@@ -15,13 +15,20 @@ const TableDeliverd = ({ refreshKey }) => {
     }, [refreshKey]);
 
     const fetchOrders = async () => {
-        try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-deliverd");
-            const data = await response.json();
+        setLoading(true);
+        const type = localStorage.getItem("type");
+        const Eid = localStorage.getItem("EID");
 
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to fetch orders");
-            }
+        try {
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/orders-delivered"
+                : `http://localhost:5001/api/admin/main/orders-delivered-stid?eid=${Eid}`;
+
+
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch`);
+
+            const data = await response.json();
 
             setOrders(data.data);
             setFilteredOrders(data.data); // Initialize filtered orders

@@ -15,17 +15,26 @@ const TableAcceptingUnbooked = ({ refreshKey }) => {
     }, [refreshKey]);
 
     const fetchOrders = async () => {
+        const type = localStorage.getItem("type");
+        const Eid = localStorage.getItem("EID");
+        setLoading(true); // <- Ensure loading starts
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/orders-accept");
-            const data = await response.json();
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/orders-accepting"
+                : `http://localhost:5001/api/admin/main/orders-accepting-stid?eid=${Eid}`;
+
+            const response = await fetch(endpoint);
+
+            const data = await response.json(); // ✅ FIX: Parse response first
+
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch orders");
             }
 
-            setOrders(data.unbookedOrders);
-            setFilteredOrders(data.unbookedOrders); // Initialize filtered orders
+            setOrders(data.data.unbookedOrders); // ✅ Use `data.data` based on your backend
+            setFilteredOrders(data.data.unbookedOrders);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || "Something went wrong");
         } finally {
             setLoading(false);
         }
