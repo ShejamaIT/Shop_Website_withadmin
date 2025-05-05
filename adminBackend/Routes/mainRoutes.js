@@ -6490,7 +6490,6 @@ router.get("/monthly-hire-summary", async (req, res) => {
     }
 });
 
-
 //get year totals month by month
 router.get("/monthly-order-income", async (req, res) => {
     try {
