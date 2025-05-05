@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with logout">
-      <change afterPath="$PROJECT_DIR$/admin/src/router/useAuth.js" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with token in signin">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/CashierDashboard.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/CashierSidebar.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -13,7 +14,11 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-1.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-2.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AuthSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AuthSection.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AdminDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AdminSidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Supplier.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Supplier.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +96,7 @@
       <recent name="C:\Users\Dell\Desktop\New folder\test\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start admin">
+  <component name="RunManager" selected="npm.start adminBackend">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -330,7 +335,8 @@
       <workItem from="1746356865996" duration="2971000" />
       <workItem from="1746360148646" duration="1781000" />
       <workItem from="1746417622734" duration="1239000" />
-      <workItem from="1746418920844" duration="290000" />
+      <workItem from="1746418920844" duration="705000" />
+      <workItem from="1746420132080" duration="1404000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -675,7 +681,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="355" />
+    <option name="localTasksCounter" value="356" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -694,7 +700,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update details" />
     <MESSAGE value="update db" />
     <MESSAGE value="update with sale team order target" />
     <MESSAGE value="update salary sheet" />
@@ -719,6 +724,7 @@
     <MESSAGE value="update palce order wih customer" />
     <MESSAGE value="add login and update" />
     <MESSAGE value="update with logout" />
-    <option name="LAST_COMMIT_MESSAGE" value="update with logout" />
+    <MESSAGE value="update with token in signin" />
+    <option name="LAST_COMMIT_MESSAGE" value="update with token in signin" />
   </component>
 </project>

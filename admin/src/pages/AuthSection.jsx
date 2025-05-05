@@ -40,7 +40,15 @@ const AuthSection = () => {
             localStorage.setItem("contact", data.data.contact);
             localStorage.setItem("type", data.data.role);
             localStorage.setItem("EID", data.data.E_Id);
-            navigate("/dashboard");
+            const  userType = data.data.role;
+            if (data.data.token) {
+                // Redirect based on the user type
+                if (userType === 'ADMIN') {
+                    navigate('/admin-dashboard');
+                } else if (userType === 'CHASHIER') {
+                    navigate('/chashier-dashboard');
+                }
+            }
         } catch (error) {
             console.error("Signup error:", error);
             toast.error("An error occurred while signing up.");

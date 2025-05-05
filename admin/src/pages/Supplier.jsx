@@ -106,7 +106,7 @@ const SupplierDetails = () => {
                 specialnote: ''
             });
 
-            navigate(`/dashboard`); // Navigate to Dashboard page
+            navigate(`/dashboard`); // Navigate to AdminDashboard page
 
         } catch (error) {
             console.error("Error submitting form:", error);

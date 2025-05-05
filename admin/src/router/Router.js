@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Dashboard from "../pages/Dashboard";
+import AdminDashboard from "../pages/AdminDashboard";
+import CashierDashboard from "../pages/CashierDashboard";
 import AllOrders from "../pages/AllOrders";
 import AllProducts from "../pages/AllProducts";
 import AllCustomers from "../pages/AllCustomers";
@@ -15,7 +16,6 @@ import Login from "../pages/Login";
 import SignUp from "../pages/SignUp";
 import AuthSection from "../pages/AuthSection";
 // Details pages
-import ProductDetails from "../pages/PurchaseNoteDetails";
 import OrderDetails from "../pages/OrderDetails";
 import ItemDetails from "../pages/ItemDetails";
 import SupplierDetails from "../pages/Supplier";
@@ -39,7 +39,7 @@ const Router = () => {
             <Route path="/signUp" element={<SignUp />} />
             <Route path="/SignIn" element={<AuthSection />} />
 
-            <Route path="/dashboard" element={<Dashboard />}>
+            <Route path="/admin-dashboard" element={<AdminDashboard />}>
                 <Route index element={<HomeContent />} />
                 <Route path="customers" element={<AllCustomers />} />
                 <Route path="products" element={<AllProducts />} />
@@ -50,6 +50,11 @@ const Router = () => {
                 <Route path="employees" element={<AllEmployees />} />
                 <Route path="delivery" element={<AllDeliveryNotes />} />
                 <Route path="vehicles" element={<AllVehicles />} />
+            </Route>
+
+            <Route path="/chashier-dashboard" element={<CashierDashboard />}>
+                <Route index element={<PlaceOrder />} />
+                <Route path="orders" element={<PlaceOrder />} />
             </Route>
 
             {/* Other non-dashboard routes */}
