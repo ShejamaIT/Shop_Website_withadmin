@@ -2,11 +2,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 90px;
-    padding: 10px 30px;
+    height: 110px; /* Increased height */
+    padding: 20px 30px; /* Slightly more vertical padding */
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
 
 .sidebar-button {
     display: flex;
@@ -19,35 +20,16 @@
     font-weight: 600;
 }
 
-.search-box {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    border-radius: 8px;
-}
-
-.search-box input {
-    border: none;
-    outline: none;
-    padding: 5px;
-    font-size: 14px;
-}
-
-#searchBtn {
-    margin-left: 5px;
-    cursor: pointer;
-    font-size: 18px;
-    color: #555;
-}
-
 .profile-details {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    position: relative;
 }
 
 .profile-details img {
+    margin-top: 10px;
+    margin-bottom: 15px;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -56,4 +38,26 @@
 
 .admin_name {
     font-weight: 500;
+}
+
+/* 🔔 Notification bell with badge */
+.notification-icon {
+    position: relative;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background-color: red;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 2px 6px;
+    line-height: 1;
+    min-width: 18px;
+    text-align: center;
 }

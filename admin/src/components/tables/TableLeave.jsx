@@ -19,7 +19,7 @@ const TableLeave = ({ refreshKey }) => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "Failed to fetch leaves");
 
-            setLeaves(data.data || []); // assuming backend responds with { success, data: [] }
+            setLeaves(data.data || []);
         } catch (err) {
             setError(err.message);
         } finally {
