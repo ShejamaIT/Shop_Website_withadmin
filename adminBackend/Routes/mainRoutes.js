@@ -6692,7 +6692,7 @@ router.post("/add-leave", async (req, res) => {
 
         // Insert into Emp_leaves
         await db.query(
-            "INSERT INTO Emp_leaves (E_Id, date, type, reason) VALUES (?, ?, ?, ?)",
+            "INSERT INTO Emp_leaves (E_Id, date, leave_type,duration_type, reason,status) VALUES (?, ?, 'Uninformed', ?,?,'Applied')",
             [id, formattedDate, type, reason]
         );
 
@@ -6703,6 +6703,42 @@ router.post("/add-leave", async (req, res) => {
 
     } catch (error) {
         console.error("Error adding leave:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+// Get All Applied Leaves
+router.get("/applied-leaves", async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                el.id, el.E_Id, e.name, el.date, el.leave_type, el.duration_type, el.reason, el.status
+            FROM Emp_leaves el
+            JOIN Employee e ON el.E_Id = e.E_Id
+            WHERE el.status = 'Applied'
+            ORDER BY el.date DESC
+        `;
+
+        const [leaves] = await db.query(query);
+
+        if (leaves.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No applied leaves found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Applied leaves fetched successfully",
+            data: leaves
+        });
+    } catch (error) {
+        console.error("Error fetching applied leaves:", error.message);
         return res.status(500).json({
             success: false,
             message: "Server error",
