@@ -25,7 +25,6 @@ router.post('/login', async (req, res) => {
         }
 
         const user = rows[0];
-        console.log(user);
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
@@ -41,8 +40,6 @@ router.post('/login', async (req, res) => {
             { id: user.id, exp: expTime },
             process.env.JWT_SECRET
         );
-
-        console.log('Generated Token Exp:', new Date(expTime * 1000));
 
         await db.query(
             `INSERT INTO SessionLogs (email, Token) VALUES (?, ?)`,
