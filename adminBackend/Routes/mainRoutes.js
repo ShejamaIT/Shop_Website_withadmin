@@ -3247,7 +3247,6 @@ router.put("/update-order-items", async (req, res) => {
         }
 
         for (const item of items) {
-            console.log("Item Details:", JSON.stringify(item, null, 2));
             const { itemId, quantity, amount, originalQuantity, originalAmount } = item;
             const safePrice = amount !== undefined && amount !== null ? amount : 0;
 
@@ -3523,7 +3522,6 @@ router.get("/grouped-employees", async (req, res) => {
         const [rows] = await db.query(
             "SELECT * FROM Employee WHERE job IN ('It', 'HR', 'Admin')"
         );
-        console.log(rows);
 
         // Return all employees in a single array
         return res.status(200).json({
@@ -5917,7 +5915,6 @@ router.post("/delivery-payment", async (req, res) => {
         if (returnedItems && Array.isArray(returnedItems)) {
             for (const item of returnedItems) {
                 if (!item.itemId || !item.stockId) continue;
-                console.log(item.itemId, item.stockId, item.status);
 
                 await db.query("UPDATE p_i_detail SET status = ? WHERE I_Id = ? AND stock_Id = ?", [item.status, item.itemId, item.stockId]);
 
@@ -6559,7 +6556,6 @@ router.get("/advance&loan", async (req, res) => {
         // Define start and end of current month
         const startOfMonth = moment().startOf("month").format("YYYY-MM-DD HH:mm:ss");
         const endOfMonth = moment().endOf("month").format("YYYY-MM-DD HH:mm:ss");
-        console.log(startOfMonth,endOfMonth);
 
         // Fetch salary advances
         const [advances] = await db.query(
@@ -7429,7 +7425,6 @@ router.post("/other-hire", async (req, res) => {
         const {custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID} = req.body;
 
         const Cust_id = await generateNewId("hireCustomer", "custID", "HC");
-        console.log(Cust_id);
           // Insert into hireCustomer
         const insertCustomer = `
             INSERT INTO hireCustomer (custID, name, phoneNumber, otherNumber, balance)
@@ -7444,7 +7439,6 @@ router.post("/other-hire", async (req, res) => {
                 distance, hire, driverId, vehicleID, status,payment
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Booked',0)
         `;
-        console.log(insertHire);
         await db.query(insertHire, [
             Cust_id, date, bookingDate, pickup, destination,
             distance, hire, driverId, vehicleID
@@ -7590,8 +7584,6 @@ const parseDate = (dateStr) => {
     } else {
         return null; // Invalid format
     }
-    console.log(day,month,year);
-
     // Validate components
     if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
         return null;
