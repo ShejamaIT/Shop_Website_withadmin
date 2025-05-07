@@ -6715,26 +6715,30 @@ router.post("/add-leave", async (req, res) => {
 router.get("/applied-leaves", async (req, res) => {
     try {
         const query = `
-            SELECT 
+            SELECT
                 el.id, el.E_Id, e.name, el.date, el.leave_type, el.duration_type, el.reason, el.status
             FROM Emp_leaves el
-            JOIN Employee e ON el.E_Id = e.E_Id
+                     JOIN Employee e ON el.E_Id = e.E_Id
             WHERE el.status = 'Applied'
             ORDER BY el.date DESC
         `;
 
         const [leaves] = await db.query(query);
+        const count = leaves.length;
 
-        if (leaves.length === 0) {
+        if (count === 0) {
             return res.status(404).json({
                 success: false,
-                message: "No applied leaves found"
+                message: "No applied leaves found",
+                count: 0,
+                data: []
             });
         }
 
         return res.status(200).json({
             success: true,
             message: "Applied leaves fetched successfully",
+            count,
             data: leaves
         });
     } catch (error) {
