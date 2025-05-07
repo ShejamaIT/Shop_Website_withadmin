@@ -6751,6 +6751,73 @@ router.get("/applied-leaves", async (req, res) => {
     }
 });
 
+// Approve a leave by ID
+router.put("/approve-leave/:id", async (req, res) => {
+    try {
+        const leaveId = req.params.id;
+
+        const [result] = await db.query(
+            "UPDATE Emp_leaves SET leave_type = 'Informed', status = 'Approved' WHERE id = ?",
+            [leaveId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Leave not found or already approved",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Leave approved successfully",
+        });
+    } catch (error) {
+        console.error("Error approving leave:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+});
+
+// Get This Month's Leaves for an Employee
+router.get("/monthly-leaves/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Get first and last day of the current month
+        const startOfMonth = moment().startOf('month').format('YYYY-MM-DD');
+        const endOfMonth = moment().endOf('month').format('YYYY-MM-DD');
+
+        const query = `
+            SELECT id, E_Id, date, leave_type, duration_type, reason, status
+            FROM Emp_leaves
+            WHERE E_Id = ?
+              AND date BETWEEN ? AND ?
+            ORDER BY date DESC
+        `;
+
+        const [leaves] = await db.query(query, [id, startOfMonth, endOfMonth]);
+
+        res.status(200).json({
+            success: true,
+            message: "Monthly leaves fetched successfully",
+            data: leaves,
+            count: leaves.length
+        });
+
+    } catch (error) {
+        console.error("Error fetching monthly leaves:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
 // Save a new order target
 router.post("/order-targets", async (req, res) => {
     try {
