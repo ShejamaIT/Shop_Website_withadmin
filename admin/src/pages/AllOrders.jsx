@@ -54,7 +54,7 @@ const AllOrders = () => {
     };
 
     return (
-        <Helmet title={'Dashboard'}>
+        <Helmet title={'All-orders'}>
             <section>
                 <Container className='dashboard'>
                     {/* Main Navigation Tabs */}

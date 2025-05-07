@@ -12,7 +12,7 @@ const UserDashboard = () => {
     const location = useLocation();
     useAuth();
     return (
-        <Helmet title="AdminDashboard">
+        <Helmet title="User Dashboard">
             <div className="dashboard-container">
                 <UserSidebar onNavigate={navigate} activePage={location.pathname} />
                 <div className="main-content">

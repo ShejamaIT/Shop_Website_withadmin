@@ -12,7 +12,7 @@ const CashierDashboard = () => {
     const location = useLocation();
     useAuth();
     return (
-        <Helmet title="AdminDashboard">
+        <Helmet title="Cashier Dashboard">
             <div className="dashboard-container">
                 <CashierSidebar onNavigate={navigate} activePage={location.pathname} />
                 <div className="main-content">
