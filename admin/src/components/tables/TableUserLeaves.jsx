@@ -12,9 +12,10 @@ const TableLeave = ({ refreshKey }) => {
     }, [refreshKey]);
 
     const fetchLeaves = async () => {
+        const id = localStorage.getItem('EID');
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/applied-leaves");
+            const response = await fetch(`http://localhost:5001/api/admin/main/monthly-leaves/${id}`);
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "Failed to fetch leaves");
 
@@ -33,31 +34,10 @@ const TableLeave = ({ refreshKey }) => {
             .padStart(2, "0")}-${date.getFullYear()}`;
     };
 
-    const handleApprove = async (id) => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/approve-leave/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || "Failed to approve leave");
-
-            alert("Leave approved successfully");
-            fetchLeaves();
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } catch (err) {
-            alert("Error approving leave: " + err.message);
-        }
-    };
 
     return (
         <div className="table-container">
-            <h4 className="table-title">All Applied Leaves</h4>
+            <h4 className="table-title">Monthly Leaves</h4>
             <div className="table-wrapper">
                 <table className="styled-table">
                     <thead>
@@ -69,7 +49,6 @@ const TableLeave = ({ refreshKey }) => {
                         <th>Duration Type</th>
                         <th>Reason</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -89,20 +68,6 @@ const TableLeave = ({ refreshKey }) => {
                                 <td>{leave.duration_type}</td>
                                 <td>{leave.reason}</td>
                                 <td>{leave.status}</td>
-                                <td>
-                                    <button
-                                        className="view-btn"
-                                        onClick={() => handleApprove(leave.id)}
-                                    >
-                                        Approve
-                                    </button>
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() => handleApprove(leave.id)}
-                                    >
-                                        Rejected
-                                    </button>
-                                </td>
                             </tr>
                         ))
                     )}

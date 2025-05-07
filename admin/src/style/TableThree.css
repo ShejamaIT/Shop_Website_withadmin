@@ -116,6 +116,9 @@
     background: none;
     transition: color 0.3s ease;
 }
+.view-btn,.delete-btn {
+    background: #4A5568;
+}
 
 /* Button hover styles */
 .view-btn:hover {
