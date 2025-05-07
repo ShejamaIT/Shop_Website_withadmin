@@ -17,6 +17,8 @@ import Login from "../pages/Login";
 import SignUp from "../pages/SignUp";
 import AuthSection from "../pages/AuthSection";
 import AddNewUser from "../pages/AddNewUser";
+import Leaveform from "../pages/Leaveform";
+
 // Details pages
 import OrderDetails from "../pages/OrderDetails";
 import ItemDetails from "../pages/ItemDetails";
@@ -63,6 +65,7 @@ const Router = () => {
                 <Route index element={<HomeContent />} />
                 <Route path="product_list" element={<AllOrders />} />
                 <Route path="orders" element={<PlaceOrder />} />
+                <Route path="leave" element={<Leaveform />} />
             </Route>
 
             {/* Other non-dashboard routes */}

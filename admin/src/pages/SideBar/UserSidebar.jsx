@@ -53,6 +53,7 @@ const UserSidebar = ({ onNavigate, activePage }) => {
         {id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/user-dashboard"},
         {id: "orders", icon: "bx-cart", label: "Place Order", path: "/user-dashboard/orders"},
         {id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/user-dashboard/product_list"},
+        {id: "leave", icon: "bx-calendar-plus", label: "Apply Leave", path: "/user-dashboard/leave"},
     ];
     return (
         <div className="sidebar">

@@ -389,15 +389,6 @@ CREATE TABLE Damage_item(
     CONSTRAINT FOREIGN KEY (pid_Id) REFERENCES p_i_detail (pid_Id)
                           ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE TABLE Emp_leaves(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    E_Id VARCHAR(25),
-    date DATE,
-    type VARCHAR(25),
-    reason TEXT,
-    CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
-                             ON DELETE CASCADE ON UPDATE CASCADE
-);
 CREATE TABLE order_target_bonus(
     id INT AUTO_INCREMENT PRIMARY KEY,
     targetRate DOUBLE,
@@ -478,4 +469,15 @@ CREATE TABLE sessionlogs (
   Token varchar(255) DEFAULT NULL,
   CONSTRAINT FOREIGN KEY (user) REFERENCES user(id)
               ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE Emp_leaves (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    E_Id VARCHAR(25),
+    date DATE,
+    leave_type VARCHAR(20),
+    duration_type VARCHAR(10),
+    reason TEXT,
+    status VARCHAR(20) NOT NULL,
+    CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );

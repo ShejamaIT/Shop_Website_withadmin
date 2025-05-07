@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="change folders">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/AddNewUser.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update leave form">
+      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableLeave.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -13,8 +13,12 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-1.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-2.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllEmployees.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllEmployees.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Leaveform.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Leaveform.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SideBar/UserSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SideBar/UserSidebar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +63,7 @@
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;js.last.introduce.type&quot;: &quot;CONST&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/shejama/Shop_Website_withadmin/admin/src/pages&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/shejama/Shop_Website_withadmin/admin/src/components/tables&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -78,8 +82,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\pages" />
       <recent name="D:\shejama\Shop_Website_withadmin\admin\src\components\tables" />
+      <recent name="D:\shejama\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\LENOVO\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Website_withadmin\admin\src\pages" />
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\pages" />
@@ -92,7 +96,7 @@
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start adminBackend">
+  <component name="RunManager" selected="npm.start admin">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -333,7 +337,12 @@
       <workItem from="1746417622734" duration="1239000" />
       <workItem from="1746418920844" duration="705000" />
       <workItem from="1746420132080" duration="8495000" />
-      <workItem from="1746429951424" duration="8470000" />
+      <workItem from="1746429951424" duration="8918000" />
+      <workItem from="1746512980920" duration="331000" />
+      <workItem from="1746538842856" duration="610000" />
+      <workItem from="1746588673174" duration="3722000" />
+      <workItem from="1746594073002" duration="1995000" />
+      <workItem from="1746596969589" duration="476000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -678,7 +687,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="362" />
+    <option name="localTasksCounter" value="363" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -697,8 +706,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update apis" />
-    <MESSAGE value="update homecontent with api" />
     <MESSAGE value="update homecontent view" />
     <MESSAGE value="update homecontent with year sales" />
     <MESSAGE value="add graphs view" />
@@ -722,6 +729,8 @@
     <MESSAGE value="update tables with sale team" />
     <MESSAGE value="update order tables with logins" />
     <MESSAGE value="change folders" />
-    <option name="LAST_COMMIT_MESSAGE" value="change folders" />
+    <MESSAGE value="add and update add new user view" />
+    <MESSAGE value="update leave form" />
+    <option name="LAST_COMMIT_MESSAGE" value="update leave form" />
   </component>
 </project>

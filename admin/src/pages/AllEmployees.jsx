@@ -10,6 +10,7 @@ import LoanPayment from "./LoanPayment";
 import Salarysheet from "./Salarysheet";
 import Leaveform from "./Leaveform";
 import AddOrderTargets from "./AddorderTargets";
+import TableLeave from "../components/tables/TableLeave";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -329,7 +330,7 @@ const AllEmployees = () => {
                                     <LoanPayment />
                                 </TabPane>
                                 <TabPane tabId="leave">
-                                    <Leaveform />
+                                    <TableLeave />
                                 </TabPane>
                                 <TabPane tabId="target">
                                     <AddOrderTargets />
