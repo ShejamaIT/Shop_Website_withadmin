@@ -462,7 +462,7 @@ CREATE TABLE user (
                   ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE sessionlogs (
-  SessionID int(11) NOT NULL,
+  SessionID INT AUTO_INCREMENT PRIMARY KEY,
   user INT NOT NULL,
   LoginTime datetime DEFAULT current_timestamp(),
   LogoutTime datetime DEFAULT NULL,
