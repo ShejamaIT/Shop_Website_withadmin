@@ -18,7 +18,6 @@ const AuthSection = () => {
             password
         };
 
-        console.log("Login Data:", loginData);
         try {
             const response = await fetch("http://localhost:5001/api/auth/emp/login", {
                 method: "POST",
@@ -69,7 +68,6 @@ const AuthSection = () => {
             contactNumber
         };
 
-        console.log("Sign Up Data:", signUpData);
 
         try {
             const response = await fetch("http://localhost:5001/api/auth/emp/signup", {

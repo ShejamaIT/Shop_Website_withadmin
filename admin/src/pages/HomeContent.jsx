@@ -140,7 +140,6 @@ const HomeContent = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/monthly-issued-material-prices");
             const data = await response.json();
-            console.log(data.MDF)
             if (data.success) {
                 setMDF(data.MDF);
                 setMM(data.MM);
@@ -155,7 +154,7 @@ const HomeContent = () => {
         try {
             const response = await fetch('http://localhost:5001/api/admin/main/monthly-net-total-summary');
             const data = await response.json();
-            console.log(data);
+
             if (data.success) {
                 setWalkingTotalThisMonth(data.walking.thisMonthTotal);
                 setWalkingComparison(data.walking.compare.increased);

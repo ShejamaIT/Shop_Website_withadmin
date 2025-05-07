@@ -15,7 +15,6 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
 
     // Filter orders with balance
     useEffect(() => {
-        console.log(selectedOrders);
         const ordersWithBalance = selectedOrders.filter(order => order.balance > 0);
         setOrdersWithBalance(ordersWithBalance);
     }, [selectedOrders]);

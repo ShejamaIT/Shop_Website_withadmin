@@ -189,67 +189,6 @@ const DeliveryNoteDetails = () => {
         setSelectedOrderId(null);
         setShowStockModal1(false); // Close modal
     };
-    // const handlePayment = async () => {
-    //     try {
-    //         let CustBalance = parseFloat(CustomerBalance) || 0;
-    //         let DrivBalance = parseFloat(DriverBalance) || 0;
-    //         const orderId = selectedOrderId;
-    //
-    //         // Customer balance confirmation
-    //         if (CustBalance !== 0) {
-    //             const result = await Swal.fire({
-    //                 title: "<strong>Customer <u>Balance</u></strong>",
-    //                 icon: "info",
-    //                 html: `There is <b>Rs.${CustBalance}</b> balance by customer.`,
-    //                 showCloseButton: true,
-    //                 showCancelButton: true,
-    //                 confirmButtonText: "👍 Pass!",
-    //                 cancelButtonText: "👎",
-    //             });
-    //             if (result.dismiss === Swal.DismissReason.cancel) {
-    //                 CustBalance = 0;
-    //             }
-    //         }
-    //
-    //         // Driver balance confirmation
-    //         if (DrivBalance !== 0) {
-    //             const result = await Swal.fire({
-    //                 title: "<strong>Driver <u>Balance</u></strong>",
-    //                 icon: "info",
-    //                 html: `There is <b>Rs.${DrivBalance}</b> balance by driver.`,
-    //                 showCloseButton: true,
-    //                 showCancelButton: true,
-    //                 confirmButtonText: "👍 Pass!",
-    //                 cancelButtonText: "👎",
-    //             });
-    //
-    //             if (result.dismiss === Swal.DismissReason.cancel) {
-    //                 DrivBalance = 0;
-    //             }
-    //         }
-    //
-    //         // ✅ Construct payment data
-    //         const paymentData = {
-    //             orderid: orderId,
-    //             payment: parseFloat(selectedBalance) || 0,
-    //             driver: deliveryNote?.driverName || "",
-    //             driverId: deliveryNote?.devID || "",
-    //             RPayment: parseFloat(Rpayment) || 0,
-    //             driverbalance: DrivBalance,
-    //             customerbalance: CustBalance,
-    //             profitOrLoss: CustomerBalance - CustBalance,
-    //         };
-    //
-    //         console.log("✅ Payment Data Saved in State:", paymentData);
-    //
-    //         // ✅ Save payment data to state (triggers useEffect)
-    //         setPayment(paymentData);
-    //
-    //     } catch (error) {
-    //         console.error("❌ Payment Handling Error:", error);
-    //         toast.error("An error occurred while processing payment.");
-    //     }
-    // };
     const handlePayment = async () => {
         let CustBalance = parseFloat(CustomerBalance);
         let DrivBalance = parseFloat(DriverBalance);
@@ -303,8 +242,6 @@ const DeliveryNoteDetails = () => {
                     customerbalance: CustBalance,          // Updated customer's current balance
                     profitOrLoss: profitOrLoss,            // Stores original balance if canceled
                 };
-
-                console.log("✅ Payment Data Saved in State:", paymentData);
 
                 // Save payment data to state (triggers useEffect)
                 setPayment(paymentData);

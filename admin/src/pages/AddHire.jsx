@@ -36,7 +36,6 @@ const AddVehicle = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/drivers");
             const data = await response.json();
-            console.log(data.data);
             setDrivers(data.data || []);
         } catch (error) {
             toast.error("Error fetching drivers.");

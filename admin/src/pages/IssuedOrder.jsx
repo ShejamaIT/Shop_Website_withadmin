@@ -23,7 +23,6 @@ const IssuedOrderDetails = () => {
             if (!response.ok) throw new Error("Failed to fetch order details.");
 
             const data = await response.json();
-            console.log(data);
             setOrder(data.order);
             setLoading(false);
         } catch (err) {

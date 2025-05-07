@@ -163,7 +163,6 @@ const OrderDetails = () => {
         const updatedItemTotal = calculateItemTotal();
         const updatedBalance = calculateBalance(updatedTotal,formData.advance);
         const updatedData = { ...formData, totalPrice: updatedTotal , balance:updatedBalance , netTotal:updatedItemTotal};
-        console.log(updatedData);
         let updatedGeneralOrder = null;
         try {
             // Step 1: Update order general details only if changed
@@ -401,11 +400,9 @@ const OrderDetails = () => {
     };
     const ReservedItem = async (selectedItems) => {
         if (!selectedItems || selectedItems.length === 0) {
-            console.log("No items selected for reservation");
             return;
         }
         if (!order || !order.orderId) {
-            console.log("Order ID is not available");
             return;
         }
 
@@ -507,7 +504,6 @@ const OrderDetails = () => {
             }
 
             const data = await response.json();
-            console.log(data.stockDetails);
             setItemDetails(data.stockDetails || []);
             if (!data.stockDetails?.length) {
                 toast.error("No stock details found.");

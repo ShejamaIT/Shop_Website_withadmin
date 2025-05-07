@@ -67,7 +67,7 @@ const IncomeGraphs = () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/daily-order-income");
             const data = await response.json();
-            console.log(data.month);
+
             if (data.success) {
                 setDailyData(data.totalIncome);
                 setWalkingData1(data.walkingIncome);

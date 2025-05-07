@@ -22,7 +22,6 @@ const TableHire = ({ refreshKey }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/other-hires");
             const data = await response.json();
-            console.log(data);
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch hires");
             }
@@ -44,7 +43,6 @@ const TableHire = ({ refreshKey }) => {
     };
 
     const handleView = (hire) => {
-        console.log(hire);
         setSelectedHire(hire);
         setShowModal(true);
     };
@@ -62,8 +60,6 @@ const TableHire = ({ refreshKey }) => {
         setFilteredHires(filteredData);
     };
     const handleSubmit2 = async (formData) => {
-        console.log("Submitting payment data:", formData);
-
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/other-hire/payment`, {
                 method: "PUT",

@@ -13,8 +13,6 @@ import AllDeliveryNotes from "../pages/AllDeliveryNotes";
 import PlaceOrder from "../pages/Placeorder";
 import Orders from "../pages/OrderManagement";
 import HomeContent from "../pages/HomeContent";
-import Login from "../pages/Login";
-import SignUp from "../pages/SignUp";
 import AuthSection from "../pages/AuthSection";
 import AddNewUser from "../pages/AddNewUser";
 import AllLeaves from "../pages/AllLeaves";
@@ -39,8 +37,6 @@ const Router = () => {
     return (
         <Routes>
             <Route path="/" element={<Navigate to="/SignIn" />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signUp" element={<SignUp />} />
             <Route path="/SignIn" element={<AuthSection />} />
 
             <Route path="/admin-dashboard" element={<AdminDashboard />}>

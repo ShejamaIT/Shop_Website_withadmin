@@ -202,8 +202,6 @@ const SupplierDetails = ({ supplier }) => {
             amountPaid: paymentAmount, // Balance isn't needed if API recalculates it
         };
 
-        console.log("Sending Payment Data:", paymentData);
-
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/settle-payment", {
                 method: "POST",
