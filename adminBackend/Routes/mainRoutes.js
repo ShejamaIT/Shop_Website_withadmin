@@ -652,9 +652,11 @@ router.get("/customer/check-customer", async (req, res) => {
     }
 
     try {
+        const likePhone = `%${phone}%`; // Add wildcard for partial matching
+
         const [customer] = await db.query(
-            `SELECT * FROM Customer WHERE contact1 = ? OR contact2 = ?`,
-            [phone, phone]
+            `SELECT * FROM Customer WHERE contact1 LIKE ? OR contact2 LIKE ?`,
+            [likePhone, likePhone]
         );
 
         if (customer.length > 0) {
@@ -847,7 +849,7 @@ router.get("/issued-order-details", async (req, res) => {
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.orStatus, o.delStatus, o.delPrice, o.discount, o.netTotal, o.total,
                 o.advance, o.balance, o.payStatus, o.stID, o.expectedDate, o.specialNote, o.ordertype,o.specialdic,
-                c.title, c.FtName, c.SrName, c.email, c.contact1, c.contact2, c.balance AS customerBalance,
+                c.title, c.FtName, c.SrName, c.contact1, c.contact2, c.balance AS customerBalance,
                 c.category, c.type, c.t_name, c.occupation, c.workPlace
             FROM Orders o
                      LEFT JOIN Customer c ON o.c_ID = c.c_ID
@@ -900,7 +902,6 @@ router.get("/issued-order-details", async (req, res) => {
             orderDate: formatDate(orderData.orDate),
             customerId: orderData.c_ID,
             customerName: customerName,
-            customerEmail: orderData.email,
             customerPhone: orderData.contact1,
             customerOptionalPhone: orderData.contact2,
             customerBalance: orderData.customerBalance,
