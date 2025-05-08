@@ -11,6 +11,10 @@ const SalarySheet = () => {
     const [uninformedLeaves ,setUninformedLeaves]= useState(0);
     const [attdanceBouns , setAttdanceBouns] = useState(0);
     const [deduction , setDeduction] = useState(0);
+    const [monthlyDeliveryTotal , setMonthlyDeliveryTotal] = useState(0);
+    const [monthlyHireTotal , setMonthlyHireTotal] = useState(0);
+    const [monthlyTargetBouns , setMonthlyTargetBouns] = useState(0);
+    const [dailyTargetBouns , setDailyTargetBouns] = useState(0);
     const [formData, setFormData] = useState({
         id: "", name: "", job: "",
         informedLeave:"", uninformedLeave:"",
@@ -34,15 +38,20 @@ const SalarySheet = () => {
         const totalAdvance = advancePayments.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
         const totalLoan = loanPayments.reduce((sum, l) => sum + parseFloat(l.installment || 0), 0);
 
-        const totalSalary =
-            basic + attendance - totalAdvance - totalLoan - saving - other;
+        const s_total = basic + attendance - totalAdvance - totalLoan - saving - other;
+
+        // Use let instead of const here
+        let totalSalary = s_total;
+
+        if (formData.job === 'Driver') {
+            totalSalary += monthlyTargetBouns + dailyTargetBouns;
+        }
 
         setFormData((prev) => ({
             ...prev,
             total: totalSalary.toFixed(2),
         }));
-    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments]);
-
+    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments, monthlyTargetBouns, dailyTargetBouns]);
 
     const fetchEmployees = async () => {
         try {
@@ -61,9 +70,13 @@ const SalarySheet = () => {
     const handleEmployeeSelect = (e) => {
         const selectedId = e.target.value;
         const selectedEmployee = employees.find(emp => emp.E_Id === selectedId);
-
+        console.log(selectedEmployee);
         fetchSalaryPayments(selectedId); // Keep this as-is
         fetchLeaveCount(selectedId, selectedEmployee); // Now passes employee to update formData inside
+        if (selectedEmployee.job=== 'Driver'){
+            fetchDriverHireSummary(selectedId);
+        }
+
     };
     const fetchSalaryPayments = async (eid) => {
         try {
@@ -121,6 +134,24 @@ const SalarySheet = () => {
         } catch (err) {
             console.error("Error fetching leave counts:", err);
             // Optional: set fallback values or show toast
+        }
+    };
+    const fetchDriverHireSummary = async (eid) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/hire-summary?eid=${eid}`);
+            const data = await response.json();
+            console.log(data);
+
+            setMonthlyDeliveryTotal(data.lastMonthDeliveryTotal || 0.0);
+            setMonthlyHireTotal(data.lastMonthHireTotal || 0.0);
+            setMonthlyTargetBouns(data.monthlyBonus?.bonus || 0.0);
+
+            // Calculate total daily bonus
+            const totalDailyBonus = (data.dailySummary || []).reduce((sum, day) => sum + (day.bonus || 0), 0);
+            setDailyTargetBouns(totalDailyBonus);
+
+        } catch (err) {
+            console.error("Error fetching salary payments:", err);
         }
     };
     const handleSubmit = async (e) => {
@@ -200,8 +231,35 @@ const SalarySheet = () => {
                                         </tbody>
                                     </Table>
                                 </div>
-                                <div className="salesteam-details">
-                                    <Label>Advance Payments</Label>
+                                {formData.job === "Driver" && (
+                                    <div className="p-3 border rounded shadow-sm bg-light mt-3">
+                                        <h5 className="fw-bold mb-4">Hire Commission</h5>
+                                        <Table bordered className="member-table">
+                                            <tbody>
+                                            <tr>
+                                                <td><strong>Total Delivery Hire</strong></td>
+                                                <td>Rs. {(monthlyDeliveryTotal).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Total Other Hire</strong></td>
+                                                <td>Rs. {(monthlyHireTotal).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Monthly Target Bouns</strong></td>
+                                                <td>Rs. {(monthlyTargetBouns).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Daily Target Bouns</strong></td>
+                                                <td>Rs. {(dailyTargetBouns).toFixed(2)}</td>
+                                            </tr>
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                )}
+
+
+                                <div className="p-3 border rounded shadow-sm bg-light mt-3">
+                                <h5 className="fw-bold mb-4">Advance Payments</h5>
                                     <Table bordered>
                                         <thead>
                                         <tr>
@@ -236,8 +294,8 @@ const SalarySheet = () => {
                                         </tbody>
                                     </Table>
                                 </div>
-                                <div className="salesteam-details">
-                                    <Label className="fw-bold mb-3">Loan Payments</Label>
+                                <div className="p-3 border rounded shadow-sm bg-light mt-3">
+                                    <h5 className="fw-bold mb-4">Loan Payments</h5>
 
                                     {loanPayments.length > 0 ? (
                                         <div className="d-flex flex-column gap-3">
@@ -267,9 +325,8 @@ const SalarySheet = () => {
                                         <div className="text-muted">No loan payments</div>
                                     )}
                                 </div>
-
-                                <div className="salesteam-details">
-                                    <Label>Other Payments</Label>
+                                <div className="p-3 border rounded shadow-sm bg-light mt-3">
+                                    <h5 className="fw-bold mb-4">Other Payments</h5>
                                     <Table bordered className="member-table">
                                         <tbody>
                                         <tr>
@@ -313,29 +370,29 @@ const SalarySheet = () => {
                                         </tbody>
                                     </Table>
                                 </div>
-                                <div className="salesteam-details">
-                                    <Label>Total salary</Label>
+                                <div className="p-3 border rounded shadow-sm bg-light mt-3">
+                                    <h5 className="fw-bold mb-4">Total salary</h5>
                                     <Table bordered className="member-table">
                                         <tbody>
-                                            <tr>
-                                                <td><strong>Total salary in hand</strong></td>
-                                                <td>{formData.total}</td>
-                                            </tr>
+                                        <tr>
+                                            <td><strong>Total salary in hand</strong></td>
+                                            <td>{formData.total}</td>
+                                        </tr>
                                         </tbody>
                                     </Table>
                                 </div>
-                                        <Row>
-                                            <Col md="6">
+                                <Row>
+                                    <Col md="6">
                                                 <Button type="submit" color="primary" block>
                                                     Pay
                                                 </Button>
                                             </Col>
-                                            <Col md="6">
+                                    <Col md="6">
                                                 <Button type="button" color="danger" block>
                                                     Clear
                                                 </Button>
                                             </Col>
-                                        </Row>
+                                </Row>
                             </Form>
                         </Col>
                     </Row>
