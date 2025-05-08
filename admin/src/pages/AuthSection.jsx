@@ -136,11 +136,10 @@ const AuthSection = () => {
                                 </button>
                             </div>
                             <div className="toggle-panel toggle-right-panel">
-                                <h1>Hello, Officer!</h1>
-                                <p>Register now for a personalized experience with HelloShoes Poss Management
-                                    System!</p>
-                                <button className="" id="signUpToggle" onClick={() => setIsSignUp(true)}>Sign Up
-                                </button>
+                                <h1 className='text-red-300'>Hello, Officer!</h1>
+                                <p className='text-white'>If you want to register to the shejama system please contact the admin!</p>
+                                {/*<button className="" id="signUpToggle" onClick={() => setIsSignUp(true)}>Sign Up*/}
+                                {/*</button>*/}
                             </div>
                         </div>
                     </div>
