@@ -413,7 +413,27 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         } else {
             setIsNewCustomer(false);
         }
-        handleClear(); // Call handleClear when switching customer type
+        // handleClear(); // Call handleClear when switching customer type
+    };
+    const handlePhoneNumberBlur = async (phoneNumber) => {
+        if (!phoneNumber) return;
+
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/customer/check-customer?phone=${phoneNumber}`);
+            const data = await response.json();
+
+            if (data.exists) {
+                toast.info(`Customer already exists: ${data.customerName}`);
+                setCustomer("Previous");
+                handleSelectCustomer(data.data);
+            } else {
+                toast.success("Customer does not exist, continue creating order.");
+                setCustomer("New");
+            }
+        } catch (error) {
+            console.error("Error checking customer:", error.message);
+            toast.error("Failed to check customer.");
+        }
     };
     const handleButtonClick = () => {
         setShowModal(true);
@@ -493,24 +513,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             alert("Failed to add coupon. Please try again.");
         }
     };
-    const handlePhoneNumberBlur = async (phoneNumber) => {
-        if (!phoneNumber) return;
 
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/customer/check-customer?phone=${phoneNumber}`);
-            const data = await response.json();
-
-            if (data.exists) {
-                toast.info(`Customer already exists: ${data.customerName}`);
-                // Optionally populate form data
-            } else {
-                toast.success("Customer does not exist, continue creating order.");
-            }
-        } catch (error) {
-            console.error("Error checking customer:", error.message);
-            toast.error("Failed to check customer.");
-        }
-    };
 
     return (
         <Helmet title="Place order">
@@ -549,52 +552,34 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                         <h2 className="text-l font-bold mb-2 mt-2">Customer Details</h2>
                         <hr/>
                         <Row>
-                            <Label className="block text-sm font-medium text-gray-700">Select Customer Type</Label>
-                            <div className="d-flex gap-3">
-                                <div>
-                                    <Input
-                                        type="radio"
-                                        name="customerType"
-                                        checked={isNewCustomer}
-                                        onChange={() => setCustomer("New")}
-                                    /> New Customer
-                                </div>
-                                <div>
-                                    <Input
-                                        type="radio"
-                                        name="customerType"
-                                        checked={!isNewCustomer}
-                                        onChange={() => setCustomer("Previous")}
-                                    /> Previous Customer
-                                </div>
-                            </div>
-                        </Row>
-                        {!isNewCustomer && (
-                            <>
+                            <Col md={6}>
                                 <FormGroup>
-                                    <Label className="fw-bold">Search Customer</Label>
+                                    <Label className="fw-bold">Phone Number</Label>
                                     <Input
                                         type="text"
-                                        placeholder="Search by name, NIC, or contact"
-                                        value={searchTerm}
-                                        onChange={handleSearchChange1}
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber}
+                                        onChange={handleChange}
+                                        onBlur={() => handlePhoneNumberBlur(formData.phoneNumber)}
+                                        required
                                     />
-                                    {searchTerm && filteredCustomers.length > 0 && (
-                                        <div className="dropdown">
-                                            {filteredCustomers.map((customer) => (
-                                                <div
-                                                    key={customer.id}
-                                                    onClick={() => handleSelectCustomer(customer)}
-                                                    className="dropdown-item"
-                                                >
-                                                    {customer.FtName} {customer.SrName} ({customer.id})
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
                                 </FormGroup>
-                            </>
-                        )}
+                            </Col>
+
+                            <Col md={6}>
+                                <FormGroup>
+                                    <Label className="fw-bold">Optional Number</Label>
+                                    <Input
+                                        type="text"
+                                        name="otherNumber"
+                                        value={formData.otherNumber}
+                                        onChange={handleChange}
+                                        onBlur={() => handlePhoneNumberBlur(formData.otherNumber)}
+                                    />
+                                </FormGroup>
+                            </Col>
+
+                        </Row>
                         <Row>
                             <Col md={3}>
                                 <FormGroup className="mt-2">
@@ -625,35 +610,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 </FormGroup>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col md={6}>
-                                <FormGroup>
-                                    <Label className="fw-bold">Phone Number</Label>
-                                    <Input
-                                        type="text"
-                                        name="phoneNumber"
-                                        value={formData.phoneNumber}
-                                        onChange={handleChange}
-                                        onBlur={() => handlePhoneNumberBlur(formData.phoneNumber)}
-                                        required
-                                    />
-                                </FormGroup>
-                            </Col>
 
-                            <Col md={6}>
-                                <FormGroup>
-                                    <Label className="fw-bold">Optional Number</Label>
-                                    <Input
-                                        type="text"
-                                        name="otherNumber"
-                                        value={formData.otherNumber}
-                                        onChange={handleChange}
-                                        onBlur={() => handlePhoneNumberBlur(formData.otherNumber)}
-                                    />
-                                </FormGroup>
-                            </Col>
-
-                        </Row>
                         <Row>
                             <Col md={6}>
                                 <FormGroup>
@@ -992,7 +949,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                 <FormGroup>
                                     <Label className="fw-bold">Address</Label>
                                     <Input type="text" name="address" value={formData.address} onChange={handleChange}
-                                           required/>
+                                           readOnly/>
                                 </FormGroup>
                                 <FormGroup check>
                                     <Label check>

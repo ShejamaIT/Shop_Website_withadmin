@@ -97,7 +97,7 @@ const TableDeliverd = ({ refreshKey }) => {
                         </tr>
                     ) : error ? (
                         <tr>
-                            <td colSpan="10" className="error-text text-center">{error}</td>
+                            <td colSpan="10" className="error-text text-center">No Delivered orders found</td>
                         </tr>
                     ) : filteredOrders.length === 0 ? (
                         <tr>

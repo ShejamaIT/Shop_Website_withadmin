@@ -165,6 +165,28 @@ const IssuedOrderDetails = () => {
                                 <Button color="primary" onClick={handlePrintPaymentHistory}>
                                     Print Payment History
                                 </Button>
+                                <Button
+                                    color="secondary"
+                                    className="ms-3"
+                                    onClick={() => {
+                                        const userType = localStorage.getItem("type");
+                                         if (order.orderStatus === "Delivered") {
+                                             if (userType === "ADMIN") {
+                                                 navigate("/admin-dashboard/product_list?tab=Delivered%20Orders");
+                                             } else {
+                                                 navigate("/user-dashboard/product-list?tab=Delivered%20Orders");
+                                             }
+                                         }else if (order.orderStatus === "Issued") {
+                                             if (userType === "ADMIN") {
+                                                 navigate("/admin-dashboard/product_list?tab=Issued%20Orders");
+                                             } else {
+                                                 navigate("/user-dashboard/product-list?tab=Issued%20Orders");
+                                             }
+                                         }
+                                    }}
+                                >
+                                    <i className="bx bx-home-alt-2"></i>
+                                </Button>
                             </div>
                         </Col>
                     </Row>

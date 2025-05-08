@@ -23,6 +23,7 @@ const OrderDetails = () => {
     const [filteredItems, setFilteredItems] = useState([]);
     const [selectedItems, setSelectedItems] = useState([]);
 
+
     useEffect(() => {
         fetchOrder();
     }, [id]);
@@ -544,21 +545,7 @@ const OrderDetails = () => {
                                             <p><strong>Item Total:</strong> Rs. {order.netTotal}</p>
                                         </Col>
                                         <Col md="3">
-                                            <p><strong>Discount
-                                                Price:</strong> Rs. {formData.discount ?? order.discount}</p>
-                                            {/*{!isEditing ? (*/}
-                                            {/*    <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>*/}
-                                            {/*) : (*/}
-                                            {/*    <FormGroup>*/}
-                                            {/*        <Label><strong>Discount Price:</strong></Label>*/}
-                                            {/*        <Input*/}
-                                            {/*            type="text"*/}
-                                            {/*            name="discount"*/}
-                                            {/*            value={formData.discount ?? order.discount}*/}
-                                            {/*            onChange={handleChange}*/}
-                                            {/*        />*/}
-                                            {/*    </FormGroup>*/}
-                                            {/*)}*/}
+                                            <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>
                                         </Col>
 
                                         <Col md="3">
@@ -603,7 +590,25 @@ const OrderDetails = () => {
 
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
-                                        <Button color="primary" onClick={() => setIsEditing(true)}>Edit Order</Button>
+                                        <>
+                                            <Button color="primary" onClick={() => setIsEditing(true)}>
+                                                Edit Order
+                                            </Button>
+                                            <Button
+                                                color="secondary"
+                                                className="ms-3"
+                                                onClick={() => {
+                                                    const userType = localStorage.getItem("type");
+                                                    if (userType === "ADMIN") {
+                                                        navigate("/admin-dashboard/product_list?tab=Pending%20Orders");
+                                                    } else {
+                                                        navigate("/user-dashboard/product-list?tab=Pending%20Orders");
+                                                    }
+                                                }}
+                                            >
+                                                <i className="bx bx-home-alt-2"></i>
+                                            </Button>
+                                        </>
                                     ) : (
                                         <>
                                             <Button color="success" onClick={handleSave}>Save Changes</Button>

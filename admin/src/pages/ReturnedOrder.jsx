@@ -197,9 +197,34 @@ const ReturnedOrderDetails = () => {
                                     {/* Buttons */}
                                     <div className="text-center mt-4">
                                         {!isEditing ? (
-                                            <Button color="primary" onClick={() => setIsEditing(true)} disabled={loading}>
-                                                {loading ? "Loading..." : "Edit Order"}
-                                            </Button>
+                                            <>
+                                                <Button color="primary" onClick={() => setIsEditing(true)} disabled={loading}>
+                                                    {loading ? "Loading..." : "Edit Order"}
+                                                </Button>
+                                                <Button
+                                                    color="secondary"
+                                                    className="ms-3"
+                                                    onClick={() => {
+                                                        const userType = localStorage.getItem("type");
+                                                        if (order.orderStatus === "Returned") {
+                                                            if (userType === "ADMIN") {
+                                                                navigate("/admin-dashboard/product_list?tab=Returned%20Orders");
+                                                            } else {
+                                                                navigate("/user-dashboard/product-list?tab=Returned%20Orders");
+                                                            }
+                                                        }else if (order.orderStatus === "Cancelled") {
+                                                            if (userType === "ADMIN") {
+                                                                navigate("/admin-dashboard/product_list?tab=Cancel%20Orders");
+                                                            } else {
+                                                                navigate("/user-dashboard/product-list?tab=Cancel%20Orders");
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <i className="bx bx-home-alt-2"></i>
+                                                </Button>
+                                            </>
+
                                         ) : (
                                             <>
                                                 <Button color="success" onClick={handleSave} disabled={loading}>

@@ -723,21 +723,7 @@ const OrderDetails = () => {
                                             <p><strong>Item Total:</strong> Rs. {order.netTotal}</p>
                                         </Col>
                                         <Col md="3">
-                                            <p><strong>Discount
-                                                Price:</strong> Rs. {formData.discount ?? order.discount}</p>
-                                            {/*{!isEditing ? (*/}
-                                            {/*    <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>*/}
-                                            {/*) : (*/}
-                                            {/*    <FormGroup>*/}
-                                            {/*        <Label><strong>Discount Price:</strong></Label>*/}
-                                            {/*        <Input*/}
-                                            {/*            type="text"*/}
-                                            {/*            name="discount"*/}
-                                            {/*            value={formData.discount ?? order.discount}*/}
-                                            {/*            onChange={handleChange}*/}
-                                            {/*        />*/}
-                                            {/*    </FormGroup>*/}
-                                            {/*)}*/}
+                                            <p><strong>Discount Price:</strong> Rs. {formData.discount ?? order.discount}</p>
                                         </Col>
 
                                         <Col md="3">
@@ -792,6 +778,20 @@ const OrderDetails = () => {
                                             <Button color="success" className="ms-3"
                                                     onClick={() => handleEditClick(order)} disabled={loading}>
                                                 Payment
+                                            </Button>
+                                            <Button
+                                                color="secondary"
+                                                className="ms-3"
+                                                onClick={() => {
+                                                    const userType = localStorage.getItem("type");
+                                                    if (userType === "ADMIN") {
+                                                        navigate("/admin-dashboard/product_list?tab=Accepted%20Orders");
+                                                    } else {
+                                                        navigate("/user-dashboard/product-list?tab=Accepted%20Orders");
+                                                    }
+                                                }}
+                                            >
+                                                <i className="bx bx-home-alt-2"></i>
                                             </Button>
                                         </>
                                     ) : (
