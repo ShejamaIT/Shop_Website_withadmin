@@ -4,7 +4,7 @@ import "../../style/TableThree.css";
 import ChangeQty from "../../pages/changeQty";
 import HirePayment from "../../pages/hirePayment";
 
-const TableHire = ({ refreshKey }) => {
+const TableDoneHires = ({ refreshKey }) => {
     const [hires, setHires] = useState([]);
     const [filteredHires, setFilteredHires] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -26,8 +26,8 @@ const TableHire = ({ refreshKey }) => {
                 throw new Error(data.message || "Failed to fetch hires");
             }
 
-            setHires(data.data);
-            setFilteredHires(data.data);
+            setHires(data.done);
+            setFilteredHires(data.done);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -96,7 +96,7 @@ const TableHire = ({ refreshKey }) => {
 
     return (
         <div className="table-container">
-            <h4 className="table-title">All Other Hires</h4>
+            <h4 className="table-title">All Done Hires</h4>
             <input
                 type="text"
                 placeholder="Search by Customer Name, ID, or Phone..."
@@ -119,7 +119,6 @@ const TableHire = ({ refreshKey }) => {
                         <th>Driver</th>
                         <th>Vehicle</th>
                         <th>Status</th>
-                        <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -142,14 +141,6 @@ const TableHire = ({ refreshKey }) => {
                                 <td>{hire.driverName }</td>
                                 <td>{hire.registration_no }</td>
                                 <td>{hire.status}</td>
-                                <td>
-                                    <button
-                                        className="view-btn"
-                                        onClick={() => handleView(hire)}
-                                    >
-                                        👁️
-                                    </button>
-                                </td>
                             </tr>
                         ))
                     )}
@@ -168,4 +159,4 @@ const TableHire = ({ refreshKey }) => {
     );
 };
 
-export default TableHire;
+export default TableDoneHires;

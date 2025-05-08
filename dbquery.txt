@@ -445,7 +445,7 @@ CREATE TABLE otherHire (
     vehicleID INT,
     status VARCHAR(20),
     payment DOUBLE,
-    CONSTRAINT FOREIGN KEY (customer) REFERENCES hireCustomer(custID)
+    CONSTRAINT FOREIGN KEY (customer) REFERENCES Customer(c_ID)
             ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (vehicleID) REFERENCES vehicle(id)
         ON DELETE CASCADE ON UPDATE CASCADE,

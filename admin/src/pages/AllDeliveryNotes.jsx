@@ -8,8 +8,9 @@ import DeliveryNotes from "./DeliveryNotes";
 import TableAllDeliveryNotes from "../components/tables/TableAllDeliveryNotes";
 import AddDeliveryShedule from "./AddDeliveryShedule";
 import AddHire from "./AddHire";
-import Tablehire from "../components/tables/Tablehire";
-import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked";
+import TableBookedHires from "../components/tables/TableBookedHires";
+import TableDoneHires from "../components/tables/TableDoneHires";
+
 
 const AllDeliveryNotes = () => {
     const [activeTab, setActiveTab] = useState("Create Delivery Note"); // Default tab
@@ -87,7 +88,16 @@ const AllDeliveryNotes = () => {
                                         onClick={() => setNestedActiveTab("2")}
                                         style={{ cursor: "pointer" }}
                                     >
-                                        All Hires
+                                        All Booked Hires
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        className={classnames({ active: nestedActiveTab === "3" })}
+                                        onClick={() => setNestedActiveTab("3")}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        All Done Hires
                                     </NavLink>
                                 </NavItem>
                             </Nav>
@@ -100,7 +110,12 @@ const AllDeliveryNotes = () => {
                                 </TabPane>
                                 <TabPane tabId="2" key={refreshKey}>
                                     <Row>
-                                        <Tablehire />
+                                        <TableBookedHires />
+                                    </Row>
+                                </TabPane>
+                                <TabPane tabId="3" key={refreshKey}>
+                                    <Row>
+                                        <TableDoneHires />
                                     </Row>
                                 </TabPane>
                             </TabContent>
