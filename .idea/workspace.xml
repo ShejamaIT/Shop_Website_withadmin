@@ -4,16 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update hire view with db and api">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update driver detail view with api">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-14.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-1.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteDetails.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DriverDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -341,7 +342,7 @@
       <workItem from="1746596969589" duration="5123000" />
       <workItem from="1746608287230" duration="169000" />
       <workItem from="1746675916670" duration="4070000" />
-      <workItem from="1746680630717" duration="8014000" />
+      <workItem from="1746680630717" duration="10778000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -686,7 +687,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="369" />
+    <option name="localTasksCounter" value="370" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -705,7 +706,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update view" />
     <MESSAGE value="update income graphs view" />
     <MESSAGE value="add vehicle and update" />
     <MESSAGE value="add all vehicle and update" />
@@ -730,6 +730,7 @@
     <MESSAGE value="update order detail views" />
     <MESSAGE value="remove sign up from login page" />
     <MESSAGE value="update hire view with db and api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update hire view with db and api" />
+    <MESSAGE value="update driver detail view with api" />
+    <option name="LAST_COMMIT_MESSAGE" value="update driver detail view with api" />
   </component>
 </project>

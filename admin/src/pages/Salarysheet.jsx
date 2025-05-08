@@ -35,7 +35,7 @@ const SalarySheet = () => {
         const totalLoan = loanPayments.reduce((sum, l) => sum + parseFloat(l.installment || 0), 0);
 
         const totalSalary =
-            basic + attendance - deduction - totalAdvance - totalLoan - saving - other;
+            basic + attendance - totalAdvance - totalLoan - saving - other;
 
         setFormData((prev) => ({
             ...prev,
@@ -90,13 +90,22 @@ const SalarySheet = () => {
 
             const informed = data.success ? data.informedLeave || 0 : 0;
             const uninformed = data.success ? data.uninformedLeave || 0 : 0;
-            const attendanceBonus = data.success ? data.attendanceBonus || 0 : 0;
+            const totalLeave = data.success ? data.totalLeave || 0 : 0;
             const attendanceDeduction = data.success ? data.attendanceDeduction || 0 : 0;
+
+            // Calculate bonus (you can cap the bonus here or elsewhere if needed)
+            let attendanceBonus = 0;
+            if (totalLeave > 4) {
+                attendanceBonus = 0;
+            } else {
+                attendanceBonus = 4000 - attendanceDeduction;
+            }
 
             setInformedLeaves(informed);
             setUninformedLeaves(uninformed);
             setAttdanceBouns(attendanceBonus);
             setDeduction(attendanceDeduction);
+
             if (selectedEmployee) {
                 setFormData({
                     id: selectedEmployee.E_Id,
@@ -111,7 +120,7 @@ const SalarySheet = () => {
             }
         } catch (err) {
             console.error("Error fetching leave counts:", err);
-            // Optional fallback to clear formData on error
+            // Optional: set fallback values or show toast
         }
     };
     const handleSubmit = async (e) => {
