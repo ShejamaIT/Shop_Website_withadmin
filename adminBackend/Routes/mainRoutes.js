@@ -6622,45 +6622,39 @@ router.get("/leave-count", async (req, res) => {
             return res.status(400).json({ success: false, message: "Employee ID (eid) is required" });
         }
 
-        const startOfMonth = moment().startOf("month").format("YYYY-MM-DD HH:mm:ss");
-        const endOfMonth = moment().endOf("month").format("YYYY-MM-DD HH:mm:ss");
+        // Define last month's start and end dates
+        const startOfLastMonth = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
+        const endOfLastMonth = moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
 
+        // Query leave counts grouped by leave_type
         const [leaveCounts] = await db.query(
-            `SELECT type, COUNT(*) AS count 
+            `SELECT leave_type, COUNT(*) AS count 
              FROM emp_leaves 
              WHERE E_Id = ? AND date BETWEEN ? AND ?
-             GROUP BY type`,
-            [eid, startOfMonth, endOfMonth]
+             GROUP BY leave_type`,
+            [eid, startOfLastMonth, endOfLastMonth]
         );
 
         let informedCount = 0;
         let uninformedCount = 0;
 
         leaveCounts.forEach(leave => {
-            if (leave.type === "Informed") {
+            if (leave.leave_type === "Informed") {
                 informedCount = leave.count;
-            } else if (leave.type === "Uninformed") {
+            } else if (leave.leave_type === "Uninformed") {
                 uninformedCount = leave.count;
             }
         });
 
-        const totalLeaves = informedCount + uninformedCount;
-
-        let bonus = 0;
-        let deduction = 0;
-
-        if (totalLeaves < 4) {
-            bonus = (4 - totalLeaves) * 1000;
-        } else if (totalLeaves > 4) {
-            deduction = (totalLeaves - 4) * 2000;
-        }
+        const totalLeave = informedCount + uninformedCount;
+        const deduction = (informedCount * 1000) + (uninformedCount * 2000);
 
         return res.status(200).json({
             success: true,
             informedLeave: informedCount,
             uninformedLeave: uninformedCount,
-            attendanceBonus: bonus,
-            attendanceDeduction: deduction,
+            totalLeave,
+            attendanceDeduction: deduction
         });
 
     } catch (error) {
