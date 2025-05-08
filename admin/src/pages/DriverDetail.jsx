@@ -7,12 +7,19 @@ const DriverDetail = ({ driver }) => {
     const [driverDetails, setDriverDetails] = useState(null);
     const [deliveryCharges, setDeliveryCharges] = useState(null);
     const [thisMonthNotes, setThisMonthNotes] = useState([]);
+    const [thisMonthHires, setThisMonthHires] = useState([]);
+    const [lastMonthHires, setLastMonthHires] = useState([]);
     const [lastMonthNotes, setLastMonthNotes] = useState([]);
     const [advancedetails , setAdanceDetails] = useState([]);
+    const [loandetails , setLoanDetails] = useState([]);
     const [dailyditects , setDailyDitects] = useState([]);
     const [monthlyditects , setMonthlyDitects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [thismonthDelValue, setthismothdelValue] = useState(0);
+    const [thismonthHireValue, setthismothHireValue] = useState(0);
+    const [lastmonthDelValue, setlastmothdelValue] = useState(0);
+    const [lastmonthHireValue, setlastmothHireValue] = useState(0);
 
     useEffect(() => {
         if (!driver.devID) {
@@ -37,10 +44,17 @@ const DriverDetail = ({ driver }) => {
             setDriverDetails(data.data || {});
             setDeliveryCharges(data.data.deliveryCharges || {});
             setThisMonthNotes(data.data.deliveryNotes.thisMonth || []);
+            setThisMonthHires(data.data.hires.thisMonth || []);
             setLastMonthNotes(data.data.deliveryNotes.lastMonth || []);
+            setLastMonthHires(data.data.hires.lastMonth || []);
             setAdanceDetails(data.data.advanceDetails  || []);
             setDailyDitects(data.data.deliveryCharges.dailyCharges || []);
             setMonthlyDitects(data.data.deliveryCharges.monthlyCharges || []);
+            setthismothdelValue(data.data.deliveryNotes.thisMonthNoteHireTotal || 0);
+            setlastmothdelValue(data.data.deliveryNotes.lastMonthNoteHireTotal || 0);
+            setthismothHireValue(data.data.hires.thisMonthHireTotal);
+            setlastmothHireValue(data.data.hires.lastMonthHireTotal);
+            setLoanDetails(data.data.loans || []);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -75,42 +89,57 @@ const DriverDetail = ({ driver }) => {
                                         <h4 className="sub-title">Driver Information</h4>
                                         <Table bordered className="driver-table">
                                             <tbody>
-                                            <tr><td><strong>Employee Name</strong></td><td>{driverDetails.name}</td></tr>
-                                            <tr><td><strong>Employee ID</strong></td><td>{driverDetails.devID}</td></tr>
-                                            <tr><td><strong>Phone</strong></td><td>{driverDetails.contact}</td></tr>
-                                            <tr><td><strong>NIC</strong></td><td>{driverDetails.nic}</td></tr>
-                                            <tr><td><strong>Dept Balance</strong></td><td>Rs. {driverDetails.balance}</td></tr>
-                                            <tr><td><strong>Advance</strong></td><td>Rs. {driverDetails.totalAdvance}</td></tr>
+                                            <tr>
+                                                <td><strong>Employee ID</strong></td>
+                                                <td>{driverDetails.devID}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Employee Name</strong></td>
+                                                <td>{driverDetails.name}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Phone</strong></td>
+                                                <td>{driverDetails.contact}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>NIC</strong></td>
+                                                <td>{driverDetails.nic}</td>
+                                            </tr>
+                                            </tbody>
+                                        </Table>
+
+                                        <Table bordered className="driver-table">
+                                            <tbody>
+                                            <tr>
+                                                <td><strong>This Month Delivery</strong></td>
+                                                <td>Rs. {thismonthDelValue.toFixed(2)}</td>
+                                                <td><strong>Dept Balance</strong></td>
+                                                <td>Rs. {(driverDetails.balance).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>This month Hire</strong></td>
+                                                <td>Rs. {thismonthHireValue.toFixed(2)}</td>
+                                                <td><strong>Advance</strong></td>
+                                                <td>Rs. {(driverDetails.totalAdvance).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Last Month Delivery</strong></td>
+                                                <td>Rs. {lastmonthDelValue.toFixed(2)}</td>
+                                                <td><strong>Loan Amount</strong></td>
+                                                <td>Rs. {(loandetails[0].amount).toFixed(2) || 0.00}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Last month Hire</strong></td>
+                                                <td>Rs. {lastmonthHireValue.toFixed(2)}</td>
+                                                <td><strong>Installment</strong></td>
+                                                <td>Rs. {(loandetails[0].installment).toFixed(2) || 0.00}</td>
+                                            </tr>
                                             </tbody>
                                         </Table>
                                     </div>
                                     <div className="coupon-detail">
                                         <Row>
                                             <Col lg={6}>
-                                                {/*<h4 className="sub-title">Daily Dept</h4>*/}
-                                                {/*<Table bordered className="coupon-table">*/}
-                                                {/*    <thead>*/}
-                                                {/*    <tr>*/}
-                                                {/*        <th>Delivery ID</th>*/}
-                                                {/*        <th>Direct Amount (Rs.)</th>*/}
-                                                {/*    </tr>*/}
-                                                {/*    </thead>*/}
-                                                {/*    <tbody>*/}
-                                                {/*    {dailyditects.length > 0 ? (*/}
-                                                {/*        dailyditects.map((dd, index) => (*/}
-                                                {/*            <tr key={index}>*/}
-                                                {/*                <td>{dd.deliveryId}</td>*/}
-                                                {/*                <td>Rs. {dd.amount}</td>*/}
-                                                {/*            </tr>*/}
-                                                {/*        ))*/}
-                                                {/*    ) : (*/}
-                                                {/*        <tr>*/}
-                                                {/*            <td colSpan="2" className="no-coupon-text">No Direct Amount.</td>*/}
-                                                {/*        </tr>*/}
-                                                {/*    )}*/}
-                                                {/*    </tbody>*/}
-                                                {/*</Table>*/}
-
                                                 <h4 className="sub-title">Monthly Dept</h4>
                                                 <Table bordered className="coupon-table">
                                                     <thead>
@@ -192,20 +221,20 @@ const DriverDetail = ({ driver }) => {
                                                 </Table>
                                             </Col>
                                             <Col lg={6}>
-                                                <h4 className="sub-title">Delivery Notes - Last Month</h4>
+                                                <h4 className="sub-title">Other Hires - This Month</h4>
                                                 <Table striped bordered className="items-table">
                                                     <thead>
                                                     <tr>
-                                                        <th>Delivery Note ID</th>
-                                                        <th>District</th>
+                                                        <th>Hire ID</th>
+                                                        <th>Date</th>
                                                         <th>Hire</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    {lastMonthNotes.length > 0 ? lastMonthNotes.map(note => (
-                                                        <tr key={note.delNoID}>
-                                                            <td>{note.delNoID}</td>
-                                                            <td>{note.district}</td>
+                                                    {thisMonthHires.length > 0 ? thisMonthHires.map(note => (
+                                                        <tr key={note.id}>
+                                                            <td>{note.id}</td>
+                                                            <td>{formatDate(note.date)}</td>
                                                             <td>Rs. {note.hire}</td>
                                                         </tr>
                                                     )) : <tr><td colSpan="3">No records found</td></tr>}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {Container, Row, Col, Button, FormGroup, Label, Input, Spinner, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
 import NavBar from "../pages/Navbar";
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import '../style/DeliveryNoteDetails.css';
 import {toast} from "react-toastify";
 import Swal from 'sweetalert2';
@@ -10,6 +10,7 @@ import { FaArrowRight } from "react-icons/fa";
 
 const DeliveryNoteDetails = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [deliveryNote, setDeliveryNote] = useState(null);
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -577,7 +578,19 @@ const DeliveryNoteDetails = () => {
                                 </div>
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
-                                        <Button color="primary" onClick={() => setIsEditing(true)}>Edit Delivery Note</Button>
+                                        <>
+                                            <Button color="primary" onClick={() => setIsEditing(true)}>Edit Delivery Note</Button>
+                                            <Button
+                                                color="secondary"
+                                                className="ms-3"
+                                                onClick={() => {
+                                                    navigate("/admin-dashboard/delivery?tab=All%20Delivery%20Notes");
+                                                }}
+                                            >
+                                                <i className="bx bx-home-alt-2"></i>
+                                            </Button>
+                                        </>
+
                                     ) : (
                                         <>
                                             <Button color="success" onClick={handleSave}>Save Changes</Button>
