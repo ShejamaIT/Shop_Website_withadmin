@@ -4080,8 +4080,6 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
             fs.writeFileSync(savePath, imageFile.buffer);
             imagePath = `/uploads/images/${imageName}`;
         }
-        // const formattedDate = format(parse(date, 'dd/MM/yyyy', new Date()), 'yyyy-MM-dd');
-        // const formattedDate = moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
         const formattedDate = moment(date, ['D/M/YYYY', 'M/D/YYYY']).format('YYYY-MM-DD');
         const insertQuery = `
             INSERT INTO purchase (pc_Id, s_ID, rDate, total, pay, balance, deliveryCharge, invoiceId)
@@ -6667,6 +6665,107 @@ router.get("/leave-count", async (req, res) => {
     }
 });
 
+// Get driver hire summary
+router.get("/hire-summary", async (req, res) => {
+    try {
+        const { eid } = req.query;
+
+        if (!eid) {
+            return res.status(400).json({ success: false, message: "Employee ID (eid) is required" });
+        }
+
+        const [driverResult] = await db.query("SELECT devID FROM driver WHERE E_ID = ?", [eid]);
+        if (!driverResult.length) {
+            return res.status(404).json({ success: false, message: "Driver not found for given E_ID" });
+        }
+
+        const devID = driverResult[0].devID;
+
+        const startOfLastMonth = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
+        const endOfLastMonth = moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
+
+        const [hireRows] = await db.query(
+            `SELECT date, SUM(hire) AS total
+             FROM otherHire
+             WHERE driverId = ? AND date BETWEEN ? AND ?
+             GROUP BY date`,
+            [devID, startOfLastMonth, endOfLastMonth]
+        );
+
+        const [deliveryRows] = await db.query(
+            `SELECT date, SUM(hire) AS total
+             FROM delivery_note
+             WHERE devID = ? AND date BETWEEN ? AND ?
+             GROUP BY date`,
+            [devID, startOfLastMonth, endOfLastMonth]
+        );
+
+        const [bonusRates] = await db.query(
+            `SELECT targetRate, bonus, type FROM delivery_target_bonus`
+        );
+
+        let lastMonthHireTotal = 0;
+        let lastMonthDeliveryTotal = 0;
+        const dailyMap = {};
+
+        hireRows.forEach(row => {
+            const day = new Date(row.date).getDate();
+            const total = parseFloat(row.total || 0);
+            lastMonthHireTotal += total;
+            dailyMap[day] = (dailyMap[day] || 0) + total;
+        });
+
+        deliveryRows.forEach(row => {
+            const day = new Date(row.date).getDate();
+            const total = parseFloat(row.total || 0);
+            lastMonthDeliveryTotal += total;
+            dailyMap[day] = (dailyMap[day] || 0) + total;
+        });
+
+        // Daily Summary with bonus
+        const dailySummary = Object.entries(dailyMap).map(([day, total]) => {
+            const totalNum = parseFloat(total.toFixed(2));
+            const dailyBonus = bonusRates
+                .filter(rate => rate.type === "Daily" && totalNum >= rate.targetRate)
+                .sort((a, b) => b.targetRate - a.targetRate)[0];
+
+            return {
+                day: parseInt(day),
+                total: totalNum,
+                bonus: dailyBonus ? dailyBonus.bonus : 0
+            };
+        }).sort((a, b) => a.day - b.day);
+
+        const totalMonthlyEarnings = lastMonthHireTotal + lastMonthDeliveryTotal;
+
+        // Monthly bonus
+        const monthlyBonus = bonusRates
+            .filter(rate => rate.type === "Monthly" && totalMonthlyEarnings >= rate.targetRate)
+            .sort((a, b) => b.targetRate - a.targetRate)[0];
+
+        return res.status(200).json({
+            success: true,
+            devID,
+            lastMonthHireTotal: parseFloat(lastMonthHireTotal.toFixed(2)),
+            lastMonthDeliveryTotal: parseFloat(lastMonthDeliveryTotal.toFixed(2)),
+            totalMonthlyEarnings: parseFloat(totalMonthlyEarnings.toFixed(2)),
+            monthlyBonus: monthlyBonus ? {
+                targetRate: monthlyBonus.targetRate,
+                bonus: monthlyBonus.bonus
+            } : null,
+            dailySummary
+        });
+
+    } catch (error) {
+        console.error("Error generating hire summary:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
 //  Get Sales Team Targets
 router.get("/sales-team-targets", async (req, res) => {
     try {
@@ -6712,7 +6811,6 @@ router.get("/drivers-targets", async (req, res) => {
         });
     }
 });
-
 
 // Save leave form
 router.post("/add-leave", async (req, res) => {
@@ -6946,7 +7044,6 @@ router.get("/delivery-targets", async (req, res) => {
         });
     }
 });
-
 
 // Update sale team target values
 router.put("/update-sales-target", async (req, res) => {
