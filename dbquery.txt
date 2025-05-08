@@ -425,13 +425,6 @@ CREATE TABLE vehicle (
     size VARCHAR(25),
     status ENUM('Active', 'Inactive', 'Sold'),
 );
-CREATE TABLE hireCustomer(
-    custID VARCHAR(25) PRIMARY KEY,
-    name text,
-    phoneNumber VARCHAR(10),
-    otherNumber VARCHAR(10),
-    balance DOUBLE
-);
 CREATE TABLE otherHire (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer VARCHAR(50),
@@ -481,3 +474,13 @@ CREATE TABLE Emp_leaves (
     CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE delivery_target_bonus(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    targetRate DOUBLE,
+    bonus DOUBLE,
+    type VARCHAR(10)
+);
+ALTER TABLE driver
+ADD COLUMN dailyTarget DOUBLE NOT NULL DEFAULT 0;
+ALTER TABLE driver
+ADD COLUMN monthlyTarget DOUBLE NOT NULL DEFAULT 0;

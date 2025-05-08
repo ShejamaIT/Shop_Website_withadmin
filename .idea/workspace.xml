@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update driver detail view with api">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update salary sheet view with api">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -14,8 +14,9 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-3.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,7 +94,7 @@
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start admin">
+  <component name="RunManager" selected="npm.start adminBackend">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -342,7 +343,8 @@
       <workItem from="1746596969589" duration="5123000" />
       <workItem from="1746608287230" duration="169000" />
       <workItem from="1746675916670" duration="4070000" />
-      <workItem from="1746680630717" duration="10778000" />
+      <workItem from="1746680630717" duration="12261000" />
+      <workItem from="1746693364284" duration="2814000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -687,7 +689,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="370" />
+    <option name="localTasksCounter" value="371" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -706,7 +708,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update income graphs view" />
     <MESSAGE value="add vehicle and update" />
     <MESSAGE value="add all vehicle and update" />
     <MESSAGE value="add new hire and update" />
@@ -731,6 +732,7 @@
     <MESSAGE value="remove sign up from login page" />
     <MESSAGE value="update hire view with db and api" />
     <MESSAGE value="update driver detail view with api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update driver detail view with api" />
+    <MESSAGE value="update salary sheet view with api" />
+    <option name="LAST_COMMIT_MESSAGE" value="update salary sheet view with api" />
   </component>
 </project>
