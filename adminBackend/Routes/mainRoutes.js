@@ -7423,25 +7423,35 @@ router.get("/vehicles", async (req, res) => {
 // POST: Create a new hire
 router.post("/other-hire", async (req, res) => {
     try {
-        const {custname, phoneNumber, otherNumber, date, bookingDate, pickup, destination, distance, hire, driverId, vehicleID} = req.body;
+        const { title, FtName, SrName, phoneNumber, otherNumber, date, pickup, destination, distance, hire, driverId, vehicleID } = req.body;
 
-        const Cust_id = await generateNewId("hireCustomer", "custID", "HC");
-          // Insert into hireCustomer
-        const insertCustomer = `
-            INSERT INTO hireCustomer (custID, name, phoneNumber, otherNumber, balance)
-            VALUES (?, ?, ?, ?, 0)
-        `;
-        await db.query(insertCustomer, [Cust_id, custname, phoneNumber, otherNumber]);
+        const Cust_id = await generateNewId("Customer", "c_ID", "Cus");
+        const trimmedPhone = phoneNumber.trim();
+        const trimmedOther = otherNumber.trim();
+
+        // ✅ Set bookingDate to current system date
+        const placeDate = moment().format("YYYY-MM-DD");
+
+        const sqlInsertCustomer = `
+            INSERT INTO Customer (c_ID, title, FtName, SrName, address, contact1, contact2, id, balance, type, category, t_name, occupation, workPlace)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        const valuesCustomer = [
+            Cust_id, title, FtName, SrName, '', trimmedPhone || "-", trimmedOther || "-", '', 0, "Transport", '', '', '', ''
+        ];
+
+        await db.query(sqlInsertCustomer, valuesCustomer);
 
         // Insert into otherHire
         const insertHire = `
             INSERT INTO otherHire (
                 customer, date, bookingDate, pickup, destination,
-                distance, hire, driverId, vehicleID, status,payment
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Booked',0)
+                distance, hire, driverId, vehicleID, status, payment
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Booked', 0)
         `;
+
         await db.query(insertHire, [
-            Cust_id, date, bookingDate, pickup, destination,
+            Cust_id, placeDate, date, pickup, destination,
             distance, hire, driverId, vehicleID
         ]);
 
@@ -7466,25 +7476,30 @@ router.get("/other-hires", async (req, res) => {
         const sql = `
             SELECT
                 oh.*,
-                hc.name AS custname,
-                hc.phoneNumber,
-                hc.otherNumber,
-                hc.balance AS customerBalance,
+                CONCAT(c.title, ' ', c.FtName) AS custname,
+                c.contact1 AS phoneNumber,
+                c.contact2 AS otherNumber,
+                c.balance AS customerBalance,
                 v.registration_no,
                 e.name AS driverName
             FROM otherHire oh
-            LEFT JOIN hireCustomer hc ON oh.customer = hc.custID
-            LEFT JOIN vehicle v ON oh.vehicleID = v.id
-            LEFT JOIN driver d ON oh.driverId = d.devID
-            LEFT JOIN Employee e ON d.E_ID = e.E_Id
+                     LEFT JOIN Customer c ON oh.customer = c.c_ID
+                     LEFT JOIN vehicle v ON oh.vehicleID = v.id
+                     LEFT JOIN driver d ON oh.driverId = d.devID
+                     LEFT JOIN Employee e ON d.E_ID = e.E_Id
             ORDER BY oh.date DESC
         `;
 
         const [rows] = await db.query(sql);
 
+        // Separate into two arrays based on status
+        const booked = rows.filter(item => item.status === 'Booked');
+        const done = rows.filter(item => item.status === 'Done');
+
         return res.status(200).json({
             success: true,
-            data: rows
+            booked,
+            done
         });
 
     } catch (err) {
