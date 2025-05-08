@@ -6690,6 +6690,30 @@ router.get("/sales-team-targets", async (req, res) => {
     }
 });
 
+// Get Driver's Targets
+router.get("/drivers-targets", async (req, res) => {
+    try {
+        const [results] = await db.query(`
+            SELECT d.devID, d.E_ID, emp.name, d.dailyTarget, d.monthlyTarget
+            FROM driver d
+            JOIN Employee emp ON d.E_ID = emp.E_Id
+        `);
+
+        return res.status(200).json({
+            success: true,
+            drivers: results
+        });
+    } catch (error) {
+        console.error("Error fetching driver targets:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+
 // Save leave form
 router.post("/add-leave", async (req, res) => {
     try {
@@ -6858,6 +6882,31 @@ router.post("/order-targets", async (req, res) => {
     }
 });
 
+// Save a new delivery target
+router.post("/delivery-target", async (req, res) => {
+    try {
+        const { target, bonus, type } = req.body;
+
+        if (!target || !bonus || !type) {
+            return res.status(400).json({ success: false, message: "Target, bonus, and type are required" });
+        }
+
+        await db.query(
+            "INSERT INTO delivery_target_bonus (targetRate, bonus, type) VALUES (?, ?, ?)",
+            [parseFloat(target), parseFloat(bonus), type]
+        );
+
+        return res.status(200).json({ success: true, message: "Delivery target bonus added successfully" });
+    } catch (error) {
+        console.error("Error saving delivery target bonus:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
 //Get all order targets bonus
 router.get("/order-targets", async (req, res) => {
     try {
@@ -6876,6 +6925,28 @@ router.get("/order-targets", async (req, res) => {
         });
     }
 });
+
+// GEt all delivery target bonus
+router.get("/delivery-targets", async (req, res) => {
+    try {
+        const [targets] = await db.query(
+            "SELECT id, targetRate AS target, bonus, type FROM delivery_target_bonus"
+        );
+
+        return res.status(200).json({
+            success: true,
+            targets
+        });
+    } catch (error) {
+        console.error("Error fetching delivery targets:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
 
 // Update sale team target values
 router.put("/update-sales-target", async (req, res) => {
@@ -6901,6 +6972,47 @@ router.put("/update-sales-target", async (req, res) => {
 
     } catch (err) {
         console.error("Error updating sales target:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: err.message
+        });
+    }
+});
+
+// Update driver target values
+router.put("/update-driver-target", async (req, res) => {
+    try {
+        const { devID, dailyTarget, monthlyTarget } = req.body;
+
+        if (!devID || dailyTarget == null || monthlyTarget == null) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields"
+            });
+        }
+
+        const [result] = await db.query(
+            `UPDATE driver
+             SET dailyTarget = ?, monthlyTarget = ?
+             WHERE devID = ?`,
+            [parseFloat(dailyTarget), parseFloat(monthlyTarget), devID]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Driver not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Driver target updated successfully"
+        });
+
+    } catch (err) {
+        console.error("Error updating driver target:", err.message);
         return res.status(500).json({
             success: false,
             message: "Server error",
