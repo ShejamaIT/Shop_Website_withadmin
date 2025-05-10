@@ -3539,16 +3539,9 @@ router.get("/drivers", async (req, res) => {
         // Query the database to fetch all drivers and their related employee details
         const [drivers] = await db.query(`
             SELECT
-                d.devID,
-                d.balance,
-                e.E_Id,
-                e.name AS employeeName,
-                e.address,
-                e.nic,
-                e.dob,
-                e.contact,
-                e.job,
-                e.basic
+                d.devID,d.balance,e.E_Id,
+                e.name AS employeeName,e.address,
+                e.nic,e.dob,e.contact,e.job,e.basic
             FROM driver d
                      JOIN Employee e ON d.E_ID = e.E_Id;
         `);
