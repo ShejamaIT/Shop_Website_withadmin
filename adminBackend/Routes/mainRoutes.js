@@ -555,6 +555,43 @@ router.get("/alldeliverynotes", async (req, res) => {
         return res.status(500).json({ message: "Error fetching deliveries" });
     }
 });
+// Get all delivery notes for spefic driver
+router.get("/alldeliverynotes-stid", async (req, res) => {
+    try {
+        const { eid } = req.query;
+        let query = `
+            SELECT dn.delNoID, dn.driverName, dn.date, dn.status, dn.district
+            FROM delivery_note dn
+            JOIN driver d ON dn.devID = d.devID
+        `;
+
+        const params = [];
+
+        if (eid) {
+            query += ` WHERE d.E_ID = ?`;
+            params.push(eid);
+        }
+
+        const [deliveryNotes] = await db.query(query, params);
+
+        if (deliveryNotes.length === 0) {
+            return res.status(404).json({ message: "No deliveries found" });
+        }
+
+        const formattedDeliveryNotes = deliveryNotes.map(deliverynote => ({
+            delNoID: deliverynote.delNoID,
+            driverName: deliverynote.driverName,
+            date: deliverynote.date,
+            status: deliverynote.status,
+            district: deliverynote.district
+        }));
+
+        return res.status(200).json(formattedDeliveryNotes);
+    } catch (error) {
+        console.error("Error fetching deliveries:", error.message);
+        return res.status(500).json({ message: "Error fetching deliveries" });
+    }
+});
 
 // Get all deliveries
 router.get("/alldeliveries", async (req, res) => {
@@ -7932,6 +7969,55 @@ router.get("/other-hires", async (req, res) => {
         const [rows] = await db.query(sql);
 
         // Separate into two arrays based on status
+        const booked = rows.filter(item => item.status === 'Booked');
+        const done = rows.filter(item => item.status === 'Done');
+
+        return res.status(200).json({
+            success: true,
+            booked,
+            done
+        });
+
+    } catch (err) {
+        console.error("❌ Error fetching hires:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to retrieve hire entries.",
+            error: err.message
+        });
+    }
+});
+// Get all hire for specific employee
+router.get("/other-hires-stid", async (req, res) => {
+    try {
+        const { eid } = req.query;
+        let sql = `
+            SELECT
+                oh.*,
+                CONCAT(c.title, ' ', c.FtName) AS custname,
+                c.contact1 AS phoneNumber,
+                c.contact2 AS otherNumber,
+                c.balance AS customerBalance,
+                v.registration_no,
+                e.name AS driverName
+            FROM otherHire oh
+            LEFT JOIN Customer c ON oh.customer = c.c_ID
+            LEFT JOIN vehicle v ON oh.vehicleID = v.id
+            LEFT JOIN driver d ON oh.driverId = d.devID
+            LEFT JOIN Employee e ON d.E_ID = e.E_Id
+        `;
+
+        const params = [];
+
+        if (eid) {
+            sql += ` WHERE d.E_ID = ?`;
+            params.push(eid);
+        }
+
+        sql += ` ORDER BY oh.date DESC`;
+
+        const [rows] = await db.query(sql, params);
+
         const booked = rows.filter(item => item.status === 'Booked');
         const done = rows.filter(item => item.status === 'Done');
 
