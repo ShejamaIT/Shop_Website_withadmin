@@ -299,6 +299,37 @@ router.post("/orders", async (req, res) => {
 
         await db.query(orderQuery, orderParams);
 
+        if (stID) {
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.toLocaleString("default", { month: "long" }); // e.g., "May"
+
+            const netTotal = parseFloat(totalItemPrice) || 0;
+
+            const checkReviewQuery = `
+        SELECT * FROM ST_order_review WHERE stID = ? AND year = ? AND month = ?
+    `;
+            const [reviewResult] = await db.query(checkReviewQuery, [stID, currentYear, currentMonth]);
+
+            if (reviewResult.length > 0) {
+                // Record exists → update totalOrder
+                const updateReviewQuery = `
+            UPDATE ST_order_review 
+            SET totalOrder = totalOrder + ? 
+            WHERE stID = ? AND year = ? AND month = ?
+        `;
+                await db.query(updateReviewQuery, [netTotal, stID, currentYear, currentMonth]);
+            } else {
+                // Record does not exist → insert new row
+                const insertReviewQuery = `
+            INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued)
+            VALUES (?, ?, ?, ?, 0)
+        `;
+                await db.query(insertReviewQuery, [stID, currentYear, currentMonth, netTotal]);
+            }
+        }
+
+
         const orderDetailValues = items.map(item => [
             orID, item.I_Id, item.qty, parseFloat(item.price),parseFloat(item.discount),item.material
         ]);
@@ -6059,6 +6090,33 @@ router.post("/delivery-payment", async (req, res) => {
 
         if (orderStatus === "Delivered") {
             await db.query("UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?", [advance1 - deliveryCharge, stID]);
+
+            // 🧮 Extract year and month from deliveryDate (or current date if missing)
+            const dateObj = deliveryDate ? new Date(deliveryDate) : new Date();
+            const year = dateObj.getFullYear();
+            const month = dateObj.toLocaleString('default', { month: 'long' }); // e.g., 'May'
+
+            const netValue = (advance1 - deliveryCharge) - Loss;
+
+            // 📌 Check if ST_order_review row exists
+            const [reviewRows] = await db.query(
+                "SELECT * FROM ST_order_review WHERE stID = ? AND year = ? AND month = ?",
+                [stID, year, month]
+            );
+
+            if (reviewRows.length > 0) {
+                // ✅ Update existing totalIssued
+                await db.query(
+                    "UPDATE ST_order_review SET totalIssued = totalIssued + ? WHERE stID = ? AND year = ? AND month = ?",
+                    [netValue, stID, year, month]
+                );
+            } else {
+                // 🆕 Insert new row
+                await db.query(
+                    "INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued) VALUES (?, ?, ?, 0, ?)",
+                    [stID, year, month, netValue]
+                );
+            }
         }
 
         if (Loss !== 0) {
@@ -6791,6 +6849,7 @@ router.get("/hire-summary", async (req, res) => {
         });
     }
 });
+
 //  Get Sales Team Targets
 router.get("/sales-team-targets", async (req, res) => {
     try {
@@ -6991,6 +7050,31 @@ router.post("/order-targets", async (req, res) => {
 
         await db.query(
             "INSERT INTO order_target_bonus (targetRate, bonus) VALUES (?, ?)",
+            [target, bonus]
+        );
+
+        return res.status(200).json({ success: true, message: "Target added successfully" });
+    } catch (error) {
+        console.error("Error saving target:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+// Save a new sale target
+router.post("/sale-targets", async (req, res) => {
+    try {
+        const { target, bonus } = req.body;
+
+        if (!target || !bonus) {
+            return res.status(400).json({ success: false, message: "Target and bonus are required" });
+        }
+
+        await db.query(
+            "INSERT INTO sale_target (targetType, bonus) VALUES (?, ?)",
             [target, bonus]
         );
 
