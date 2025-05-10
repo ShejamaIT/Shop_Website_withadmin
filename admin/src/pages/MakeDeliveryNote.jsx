@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import "../style/deleiverynote.css";
 import { toast } from "react-toastify";
-import { Input } from "reactstrap";
 
 const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }) => {
     const [vehicleId, setVehicleId] = useState("");
     const [driverName, setDriverName] = useState("");
     const [driverId, setDriverId] = useState("");  // New: Stores the selected driver ID (devID)
+    const [vehicle, setVehicle] = useState("");  // New: Stores the selected driver ID (devID)
     const [drivers, setDrivers] = useState([]);
+    const [vehicles, setVehicles] = useState([]);
     const [hire, setHire] = useState("");
     const [balanceToCollect, setBalanceToCollect] = useState(0);
     const [ordersWithBalance, setOrdersWithBalance] = useState([]);
     const [filteredDriver, setFilteredDriver] = useState([]);
+    const [filteredVehicle, setFilteredVehicle] = useState([]);
 
     // Filter orders with balance
     useEffect(() => {
@@ -29,18 +31,27 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
         setHire(totalDeliveryCharge.toString());
     }, [selectedOrders]);
 
-
-    // Fetch drivers
+    const fetchDrivers = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/drivers");
+            const data = await response.json();
+            setDrivers(data.data || []);
+        } catch (error) {
+            toast.error("Error fetching drivers.");
+        }
+    };
+    const fetchVehicles = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/vehicles");
+            const data = await response.json();
+            setVehicles(data.data || []);
+        } catch (error) {
+            toast.error("Error fetching vehicles.");
+        }
+    };
+    // Fetch drivers , vehicles
     useEffect(() => {
-        const fetchDrivers = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/drivers");
-                const data = await response.json();
-                setDrivers(data.data || []);
-            } catch (error) {
-                toast.error("Error fetching drivers.");
-            }
-        };
+        fetchVehicles();
         fetchDrivers();
     }, []);
 
@@ -59,7 +70,6 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
             balanceToCollect,
         });
     };
-
     // Handle driver search
     const handleSearchChange = (e) => {
         const value = e.target.value;
@@ -74,12 +84,28 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
             setFilteredDriver(filtered);
         }
     };
+    const handleSearchChange1 = (e) => {
+        const value = e.target.value;
+        setVehicleId(value);
 
-    // Select driver from dropdown
+        if (!value.trim()) {
+            setFilteredVehicle([]);
+        } else {
+            const filtered = vehicles.filter((vehicle) =>
+                vehicle.registration_no?.toLowerCase().includes(value.toLowerCase())
+            );
+            setFilteredVehicle(filtered);
+        }
+    };
+
     const handleSelectDriver = (driver) => {
         setDriverId(driver.devID);   // Store driver ID (devID)
         setDriverName(driver.employeeName);  // Store driver name
         setFilteredDriver([]);  // Hide dropdown
+    };
+    const handleSelectVehicle = (vehicle) => {
+        setVehicle(vehicle.registration_no);
+        setFilteredVehicle([]);  // Hide dropdown
     };
 
     return (
@@ -126,22 +152,36 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                             <label><strong>Vehicle ID:</strong></label>
                             <input
                                 type="text"
-                                value={vehicleId}
-                                onChange={(e) => setVehicleId(e.target.value)}
-                                placeholder="Enter vehicle ID"
+                                placeholder="Search vehicle ID"
+                                value={vehicle}
+                                onChange={handleSearchChange1}
                             />
+                            {vehicleId && filteredVehicle.length > 0 && (
+                                <div className="dropdown">
+                                    {filteredVehicle.map((vehicle) => (
+                                        <div
+                                            key={vehicle.registration_no}
+                                            onClick={() => handleSelectVehicle(vehicle)}
+                                            className="dropdown-item"
+                                        >
+                                            {vehicle.registration_no} - {vehicle.brand} {vehicle.model}
+                                        </div>
+                                    ))}
+
+                                </div>
+                            )}
                         </div>
 
                         {/* Driver Selection */}
                         <div className="driver-info">
-                            <label><strong>Driver Name:</strong></label>
-                            <Input
+                        <label><strong>Driver Name:</strong></label>
+                            <input
                                 type="text"
                                 placeholder="Search driver"
                                 value={driverName}
                                 onChange={handleSearchChange}
                             />
-                            {driverName && filteredDriver.length > 0 && (
+                            {vehicleId && filteredDriver.length > 0 && (
                                 <div className="dropdown">
                                     {filteredDriver.map((driver) => (
                                         <div
