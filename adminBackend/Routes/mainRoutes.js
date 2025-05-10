@@ -6850,6 +6850,109 @@ router.get("/hire-summary", async (req, res) => {
     }
 });
 
+// Get sale-team order payment summary
+router.get("/sales-summary", async (req, res) => {
+    try {
+        const { eid } = req.query;
+        if (!eid) {
+            return res.status(400).json({ success: false, message: "eid is required" });
+        }
+
+        // 1. Get stID and targets from sales_team
+        const [teamRows] = await db.query(
+            `SELECT stID, orderTarget, issuedTarget FROM sales_team WHERE E_Id = ?`,
+            [eid]
+        );
+
+        if (teamRows.length === 0) {
+            return res.status(404).json({ success: false, message: "Sales team member not found for given eid" });
+        }
+
+        const { stID, orderTarget, issuedTarget } = teamRows[0];
+
+        // 2. Get last month year + name
+        const now = moment();
+        const lastMonthYear = now.subtract(1, 'month').year();
+        const lastMonthName = now.format("MMMM");
+
+        // 3. Get order review data
+        const [reviewRows] = await db.query(
+            `SELECT totalOrder, totalIssued FROM ST_order_review WHERE stID = ? AND year = ? AND month = ?`,
+            [stID, lastMonthYear, lastMonthName]
+        );
+
+        if (reviewRows.length === 0) {
+            return res.status(404).json({ success: false, message: "No order review found for last month" });
+        }
+
+        const { totalOrder, totalIssued } = reviewRows[0];
+
+        // 4. Get OrdersIn Target bonus
+        let orderBonus = 0;
+        if (totalOrder > orderTarget) {
+            const [bonusRow] = await db.query(
+                `SELECT bonus FROM sale_target WHERE targetType = 'OrdersIn Target' LIMIT 1`
+            );
+            if (bonusRow.length) {
+                orderBonus = bonusRow[0].bonus;
+            }
+        }
+
+        // 5. Get Issued Target bonus from order_target_bonus
+        let issuedBonus = 0;
+        const [issuedBonusRows] = await db.query(
+            `SELECT bonus FROM order_target_bonus WHERE targetRate <= ? ORDER BY targetRate DESC LIMIT 1`,
+            [totalIssued]
+        );
+        if (issuedBonusRows.length > 0) {
+            issuedBonus = issuedBonusRows[0].bonus;
+        }
+
+        // 6. Check if this user has highest issued among all STs that month
+        const [allIssuedRows] = await db.query(
+            `SELECT stID, totalIssued FROM ST_order_review WHERE year = ? AND month = ?`,
+            [lastMonthYear, lastMonthName]
+        );
+
+        const maxIssued = Math.max(...allIssuedRows.map(row => row.totalIssued));
+        let highestBonus = 0;
+        if (totalIssued === maxIssued) {
+            const [highBonusRows] = await db.query(
+                `SELECT bonus FROM sale_target WHERE targetType = 'Highest Target' LIMIT 1`
+            );
+            if (highBonusRows.length > 0) {
+                highestBonus = highBonusRows[0].bonus;
+            }
+        }
+
+        // Total Bonus
+        const totalBonus = parseFloat((orderBonus + issuedBonus + highestBonus).toFixed(2));
+
+        // 7. Final Response
+        return res.status(200).json({
+            success: true,
+            eid,
+            stID,
+            year: lastMonthYear,
+            month: lastMonthName,
+            totalOrder: parseFloat(totalOrder.toFixed(2)),
+            totalIssued: parseFloat(totalIssued.toFixed(2)),
+            orderTarget,
+            issuedTarget,
+            bonuses: {
+                orderBonus,
+                issuedBonus,
+                highestBonus,
+                totalBonus
+            }
+        });
+
+    } catch (err) {
+        console.error("Sales summary error:", err.message);
+        return res.status(500).json({ success: false, message: "Server error", error: err.message });
+    }
+});
+
 //  Get Sales Team Targets
 router.get("/sales-team-targets", async (req, res) => {
     try {
