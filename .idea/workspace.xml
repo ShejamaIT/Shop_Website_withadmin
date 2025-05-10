@@ -15,7 +15,7 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/MakeDeliveryNote.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/MakeDeliveryNote.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
     </list>
@@ -350,7 +350,7 @@
       <workItem from="1746792161260" duration="608000" />
       <workItem from="1746849026805" duration="13718000" />
       <workItem from="1746865894937" duration="6273000" />
-      <workItem from="1746872903349" duration="891000" />
+      <workItem from="1746872903349" duration="2476000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -695,7 +695,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="380" />
+    <option name="localTasksCounter" value="381" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

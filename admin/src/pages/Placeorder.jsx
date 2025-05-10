@@ -11,7 +11,7 @@ import Helmet from "../components/Helmet/Helmet";
 
 const PlaceOrder = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",
-        otherNumber: "", address: "", city: "", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
+        otherNumber: "", address: "", city: "",orderDate:"", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [quantity, setQuantity] = useState("");
@@ -356,31 +356,10 @@ const PlaceOrder = ({ onPlaceOrder }) => {
             toast.error("Error submitting order data. Please try again.");
         }
     };
-
-
     const handleClear = () => {
         setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
             city: "", district: "",specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",type:"",category:"",balance:"",advance:""});
         setSelectedItems([]);setSearchTerm("");setDeliveryPrice(0);setDiscountAmount(0);setTotalItemPrice(0);setTotalBillPrice(0);setAdvance(0);
-    };
-    const handleSearchChange1 = (e) => {
-        const value = e.target.value;
-        setSearchTerm(value);
-        if (!value.trim()) {
-            setFilteredCustomers([]);
-            setShowDropdown(false);
-        } else {
-            const filtered = customers.filter(
-                (customer) =>
-                    customer.SrName.toLowerCase().includes(value.toLowerCase()) ||
-                    customer.FtName.toLowerCase().includes(value.toLowerCase()) ||
-                    customer.id.toLowerCase().includes(value) ||
-                    customer.contact1.toLowerCase().includes(value)||
-                    customer.contact2.toLowerCase().includes(value)
-            );
-            setFilteredCustomers(filtered);
-            setShowDropdown(filtered.length > 0);
-        }
     };
     const handleSelectCustomer = (customer) => {
         setFormData((prevData) => ({
@@ -518,36 +497,50 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     return (
         <Helmet title="Place order">
             <div id="order" className="order-container mx-auto p-4">
-
                 <h1 className="text-2xl font-bold mb-4">Place Order</h1>
                 <Form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className='order-details'>
                         <h2 className="text-xl font-bold mb-2">Order Type</h2>
                         <hr/>
                         <Row>
-                            <Label className="block text-sm font-medium text-gray-700">Select Order Type</Label>
-                            <div className="d-flex gap-3">
-                                <div>
-                                    <Input
-                                        type="radio"
-                                        name="orderType"
-                                        value="On-site"
-                                        checked={orderType === "On-site"} // Check if this radio button is selected
-                                        onChange={() => setOrderType("On-site")} // Update the state when selected
-                                    />{" "}
-                                    On-Site
+                            <Col md={6}>
+                                <Label className="block text-sm font-medium text-gray-700">Select Order Type</Label>
+                                <div className="d-flex gap-3">
+                                    <div>
+                                        <Input
+                                            type="radio"
+                                            name="orderType"
+                                            value="On-site"
+                                            checked={orderType === "On-site"} // Check if this radio button is selected
+                                            onChange={() => setOrderType("On-site")} // Update the state when selected
+                                        />{" "}
+                                        On-Site
+                                    </div>
+                                    <div>
+                                        <Input
+                                            type="radio"
+                                            name="orderType"
+                                            value="Walking"
+                                            checked={orderType === "Walking"} // Check if this radio button is selected
+                                            onChange={() => setOrderType("Walking")} // Update the state when selected
+                                        />{" "}
+                                        Walking
+                                    </div>
                                 </div>
+                            </Col>
+                            <Col md={6}>
                                 <div>
+                                    <label>Placing Date</label>
                                     <Input
-                                        type="radio"
-                                        name="orderType"
-                                        value="Walking"
-                                        checked={orderType === "Walking"} // Check if this radio button is selected
-                                        onChange={() => setOrderType("Walking")} // Update the state when selected
-                                    />{" "}
-                                    Walking
+                                        type="date"
+                                        name="orderDate"
+                                        value={formData.orderDate}
+                                        onChange={handleChange}
+                                    />
                                 </div>
-                            </div>
+                            </Col>
+
+
                         </Row>
                         <h2 className="text-l font-bold mb-2 mt-2">Customer Details</h2>
                         <hr/>
