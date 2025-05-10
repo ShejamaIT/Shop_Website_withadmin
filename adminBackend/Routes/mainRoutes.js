@@ -7508,6 +7508,61 @@ router.get("/monthly-net-total-summary", async (req, res) => {
     }
 });
 
+// Get sales team monthly order summary for current year
+router.get("/sales-team-monthly-summary", async (req, res) => {
+    try {
+        const currentYear = new Date().getFullYear();
+
+        const sql = `
+            SELECT
+                s.stID,
+                e.name AS employeeName,
+                sr.month,
+                sr.totalOrder,
+                sr.totalIssued
+            FROM ST_order_review sr
+            INNER JOIN sales_team s ON sr.stID = s.stID
+            INNER JOIN Employee e ON s.E_Id = e.E_Id
+            WHERE sr.year = ?
+            ORDER BY s.stID, sr.month
+        `;
+
+        const [rows] = await db.query(sql, [currentYear]);
+
+        // Group by sales team member
+        const result = {};
+
+        rows.forEach(row => {
+            if (!result[row.stID]) {
+                result[row.stID] = {
+                    employeeName: row.employeeName,
+                    stID: row.stID,
+                    monthlyData: []
+                };
+            }
+            result[row.stID].monthlyData.push({
+                month: row.month,
+                totalOrder: row.totalOrder,
+                totalIssued: row.totalIssued
+            });
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Monthly summary of orders and issues for each sales team member",
+            data: Object.values(result)
+        });
+
+    } catch (err) {
+        console.error("❌ Error fetching sales team monthly summary:", err.message);
+        return res.status(500).json({
+            success: false,
+            message: "Database error while fetching sales team monthly data",
+            error: err.message
+        });
+    }
+});
+
 // Get Total hire daily & monthly
 router.get("/monthly-hire-summary", async (req, res) => {
     try {
