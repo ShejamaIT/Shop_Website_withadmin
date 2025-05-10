@@ -15,10 +15,11 @@ const SalarySheet = () => {
     const [monthlyHireTotal , setMonthlyHireTotal] = useState(0);
     const [monthlyTargetBouns , setMonthlyTargetBouns] = useState(0);
     const [dailyTargetBouns , setDailyTargetBouns] = useState(0);
+    const [monthlyDeptBalance , setMonthlyDeptBalance] = useState(0);
     const [formData, setFormData] = useState({
         id: "", name: "", job: "",
         informedLeave:"", uninformedLeave:"",
-        basic: "", loan: "",
+        basic: "", loan: "",advance:"",
         attendance:"",leaveDeduction:"",
         saving:"",otherpay:"",total :"",
     });
@@ -36,22 +37,37 @@ const SalarySheet = () => {
         const other = parseFloat(formData.otherpay) || 0;
 
         const totalAdvance = advancePayments.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
-        const totalLoan = loanPayments.reduce((sum, l) => sum + parseFloat(l.installment || 0), 0);
+        const totalLoan = loanPayments ? parseFloat(loanPayments.installment || 0) : 0;
 
-        const s_total = basic + attendance - totalAdvance - totalLoan - saving - other;
+        let s_total = basic + attendance - totalAdvance - totalLoan - saving - other;
 
-        // Use let instead of const here
-        let totalSalary = s_total;
-
+        // Include extra driver-related bonuses/adjustments
         if (formData.job === 'Driver') {
-            totalSalary += monthlyTargetBouns + dailyTargetBouns;
+            s_total += monthlyTargetBouns + dailyTargetBouns - monthlyDeptBalance;
         }
 
-        setFormData((prev) => ({
-            ...prev,
-            total: totalSalary.toFixed(2),
-        }));
-    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments, monthlyTargetBouns, dailyTargetBouns]);
+        // Construct updated form data
+        const updatedData = {
+            ...formData,
+            total: s_total.toFixed(2)
+        };
+
+        // Conditionally add loanDate if available
+        if (loanPayments && loanPayments.date) {
+            updatedData.loanDate = loanPayments.date;
+        }
+
+        // If job is Driver, include additional values
+        if (formData.job === 'Driver') {
+            updatedData.monthlyTargetBouns = monthlyTargetBouns;
+            updatedData.dailyTargetBouns = dailyTargetBouns;
+            updatedData.monthlyDeptBalance = monthlyDeptBalance;
+            updatedData.loan = totalLoan.toFixed(2); // Optional
+        }
+
+
+        setFormData(updatedData);
+    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments, monthlyTargetBouns, dailyTargetBouns, monthlyDeptBalance]);
 
     const fetchEmployees = async () => {
         try {
@@ -67,75 +83,85 @@ const SalarySheet = () => {
             setEmployees([]); // Default to empty array on error
         }
     };
-    const handleEmployeeSelect = (e) => {
+    const handleEmployeeSelect = async (e) => {
         const selectedId = e.target.value;
         const selectedEmployee = employees.find(emp => emp.E_Id === selectedId);
         console.log(selectedEmployee);
-        fetchSalaryPayments(selectedId); // Keep this as-is
-        fetchLeaveCount(selectedId, selectedEmployee); // Now passes employee to update formData inside
-        if (selectedEmployee.job=== 'Driver'){
-            fetchDriverHireSummary(selectedId);
-        }
 
+        if (selectedEmployee) {
+            const [advanceList, loanData] = await fetchSalaryPayments(selectedId); // Wait and get both
+            const leaveData = await fetchLeaveCount(selectedId); // Get leave counts
+
+            // Compute values
+            const totalAdvance = advanceList.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
+            const totalLoan = loanData ? parseFloat(loanData.installment || 0) : 0;
+            const attendanceBonus = leaveData.totalLeave > 4 ? 0 : 4000 - leaveData.attendanceDeduction;
+
+            // Set form data now that everything is available
+            setFormData({
+                id: selectedEmployee.E_Id,
+                name: selectedEmployee.name,
+                job: selectedEmployee.job,
+                basic: selectedEmployee.basic,
+                informedLeave: leaveData.informedLeave,
+                uninformedLeave: leaveData.uninformedLeave,
+                attendance: attendanceBonus,
+                leaveDeduction: leaveData.attendanceDeduction,
+                advance: totalAdvance.toFixed(2),
+                loan: totalLoan.toFixed(2),
+                saving: "", otherpay: "", total: ""
+            });
+
+            if (selectedEmployee.job === 'Driver') {
+                fetchDriverHireSummary(selectedId);
+            }
+        }
     };
+
     const fetchSalaryPayments = async (eid) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/advance&loan?eid=${eid}`);
             const data = await response.json();
-
             if (data.success) {
-                setAdvancePayments(data.advancePayments || []);
-                setLoanPayments(data.loanPayments || []);
+                const advances = data.advancePayments || [];
+                const loan = data.lastMonthUnpaidInstallment || null;
+                setAdvancePayments(advances);
+                setLoanPayments(loan);
+                return [advances, loan]; // return both
             } else {
                 setAdvancePayments([]);
-                setLoanPayments([]);
+                setLoanPayments(null);
+                return [[], null];
             }
         } catch (err) {
             console.error("Error fetching salary payments:", err);
             setAdvancePayments([]);
-            setLoanPayments([]);
+            setLoanPayments(null);
+            return [[], null];
         }
     };
-    const fetchLeaveCount = async (eid, selectedEmployee) => {
+
+    const fetchLeaveCount = async (eid) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/leave-count?eid=${eid}`);
             const data = await response.json();
-
-            const informed = data.success ? data.informedLeave || 0 : 0;
-            const uninformed = data.success ? data.uninformedLeave || 0 : 0;
-            const totalLeave = data.success ? data.totalLeave || 0 : 0;
-            const attendanceDeduction = data.success ? data.attendanceDeduction || 0 : 0;
-
-            // Calculate bonus (you can cap the bonus here or elsewhere if needed)
-            let attendanceBonus = 0;
-            if (totalLeave > 4) {
-                attendanceBonus = 0;
-            } else {
-                attendanceBonus = 4000 - attendanceDeduction;
-            }
-
-            setInformedLeaves(informed);
-            setUninformedLeaves(uninformed);
-            setAttdanceBouns(attendanceBonus);
-            setDeduction(attendanceDeduction);
-
-            if (selectedEmployee) {
-                setFormData({
-                    id: selectedEmployee.E_Id,
-                    name: selectedEmployee.name,
-                    job: selectedEmployee.job,
-                    basic: selectedEmployee.basic,
-                    informedLeave: informed,
-                    uninformedLeave: uninformed,
-                    attendance: attendanceBonus,
-                    leaveDeduction: attendanceDeduction,
-                });
-            }
+            return {
+                informedLeave: data.success ? data.informedLeave || 0 : 0,
+                uninformedLeave: data.success ? data.uninformedLeave || 0 : 0,
+                totalLeave: data.success ? data.totalLeave || 0 : 0,
+                attendanceDeduction: data.success ? data.attendanceDeduction || 0 : 0
+            };
         } catch (err) {
             console.error("Error fetching leave counts:", err);
-            // Optional: set fallback values or show toast
+            return {
+                informedLeave: 0,
+                uninformedLeave: 0,
+                totalLeave: 0,
+                attendanceDeduction: 0
+            };
         }
     };
+
     const fetchDriverHireSummary = async (eid) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/hire-summary?eid=${eid}`);
@@ -145,6 +171,7 @@ const SalarySheet = () => {
             setMonthlyDeliveryTotal(data.lastMonthDeliveryTotal || 0.0);
             setMonthlyHireTotal(data.lastMonthHireTotal || 0.0);
             setMonthlyTargetBouns(data.monthlyBonus?.bonus || 0.0);
+            setMonthlyDeptBalance(data.balance|| 0.0);
 
             // Calculate total daily bonus
             const totalDailyBonus = (data.dailySummary || []).reduce((sum, day) => sum + (day.bonus || 0), 0);
@@ -196,31 +223,9 @@ const SalarySheet = () => {
                                         </tr>
                                         <tr>
                                             <td><strong>Informed Leave</strong></td>
-                                            <td>
-                                                <input
-                                                    type="text"
-                                                    name="informedLeave"
-                                                    value={formData.informedLeave}
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        informedLeave: e.target.value
-                                                    })}
-                                                    className="form-control"
-                                                />
-                                            </td>
+                                            <td>{formData.informedLeave}</td>
                                             <td><strong>Uninformed Leave</strong></td>
-                                            <td>
-                                                <input
-                                                    type="text"
-                                                    name="uninformedLeave"
-                                                    value={formData.uninformedLeave}
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        uninformedLeave: e.target.value
-                                                    })}
-                                                    className="form-control"
-                                                />
-                                            </td>
+                                            <td>{formData.uninformedLeave}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Attendance bonus</strong></td>
@@ -252,11 +257,14 @@ const SalarySheet = () => {
                                                 <td><strong>Daily Target Bouns</strong></td>
                                                 <td>Rs. {(dailyTargetBouns).toFixed(2)}</td>
                                             </tr>
+                                            <tr>
+                                                <td><strong>Monthly Dept Balance</strong></td>
+                                                <td>Rs. {(monthlyDeptBalance).toFixed(2)}</td>
+                                            </tr>
                                             </tbody>
                                         </Table>
                                     </div>
                                 )}
-
 
                                 <div className="p-3 border rounded shadow-sm bg-light mt-3">
                                 <h5 className="fw-bold mb-4">Advance Payments</h5>
@@ -297,27 +305,25 @@ const SalarySheet = () => {
                                 <div className="p-3 border rounded shadow-sm bg-light mt-3">
                                     <h5 className="fw-bold mb-4">Loan Payments</h5>
 
-                                    {loanPayments.length > 0 ? (
+                                    {loanPayments ? (
                                         <div className="d-flex flex-column gap-3">
-                                            {loanPayments.map((payment, index) => (
-                                                <div key={index}
-                                                     className="border rounded p-3 shadow-sm d-flex justify-content-between align-items-center">
+                                            <div
+                                                className="border rounded p-3 shadow-sm d-flex justify-content-between align-items-center">
+                                                <div>
                                                     <div>
-                                                        <div>
-                                                            <strong>Date:</strong> {new Date(payment.dateTime).toLocaleDateString()}
-                                                        </div>
-                                                        <div><strong>Payment:</strong> Rs. {payment.installment}</div>
+                                                        <strong>Date:</strong> {new Date(loanPayments.date).toLocaleDateString()}
                                                     </div>
-                                                    <Button color="success">Pass</Button>
+                                                    <div><strong>Payment:</strong> Rs. {loanPayments.installment}</div>
+                                                    <div><strong>Skip Count:</strong> {loanPayments.skip}</div>
                                                 </div>
-                                            ))}
+                                                <Button color="success">Pass</Button>
+                                            </div>
 
                                             {/* Total Section */}
                                             <div className="border-top pt-3 mt-2 d-flex justify-content-between">
                                                 <strong>Total</strong>
                                                 <strong>
-                                                    Rs.{" "}
-                                                    {loanPayments.reduce((total, p) => total + Number(p.installment), 0).toFixed(2)}
+                                                    Rs. {Number(loanPayments.installment).toFixed(2)}
                                                 </strong>
                                             </div>
                                         </div>
@@ -325,6 +331,7 @@ const SalarySheet = () => {
                                         <div className="text-muted">No loan payments</div>
                                     )}
                                 </div>
+
                                 <div className="p-3 border rounded shadow-sm bg-light mt-3">
                                     <h5 className="fw-bold mb-4">Other Payments</h5>
                                     <Table bordered className="member-table">
@@ -383,15 +390,15 @@ const SalarySheet = () => {
                                 </div>
                                 <Row>
                                     <Col md="6">
-                                                <Button type="submit" color="primary" block>
-                                                    Pay
-                                                </Button>
-                                            </Col>
+                                        <Button type="submit" color="primary" block>
+                                            Pay
+                                        </Button>
+                                    </Col>
                                     <Col md="6">
-                                                <Button type="button" color="danger" block>
-                                                    Clear
-                                                </Button>
-                                            </Col>
+                                        <Button type="button" color="danger" block>
+                                            Clear
+                                        </Button>
+                                    </Col>
                                 </Row>
                             </Form>
                         </Col>
