@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 const AddOrderTargets = () => {
     const [orderTarget, setOrderTarget] = useState({ target: "", bonus: "" });
     const [deliveryTarget, setDeliveryTarget] = useState({ target: "", bonus: "" ,type:""});
+    const [saleTarget, setSaleTarget] = useState({ target: "", bonus: "" });
     const [dbRates, setDbRates] = useState([]);
     const [dbtargets, setDbtargets] = useState([]);
     const [salesTeam, setSalesTeam] = useState([]);
@@ -24,6 +25,13 @@ const AddOrderTargets = () => {
     const handleRateChange1 = (e) => {
         const { name, value } = e.target;
         setDeliveryTarget((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+    const handleRateChange2 = (e) => {
+        const { name, value } = e.target;
+        setSaleTarget((prev) => ({
             ...prev,
             [name]: value
         }));
@@ -52,6 +60,37 @@ const AddOrderTargets = () => {
                 toast.success("Target added successfully!");
                 setOrderTarget({ target: "", bonus: "" });
                 fetchTargets(); // Refresh list
+            } else {
+                toast.error("Failed to add target.");
+            }
+        } catch (err) {
+            console.error("Error adding target:", err);
+            toast.error("Server error.");
+        }
+    };
+    const handleSubmitSaleTarget = async () => {
+        const { target, bonus } = saleTarget;
+
+        if (!target || !bonus) {
+            toast.error("Please fill in both target and bonus.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/sale-targets", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ target, bonus })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                toast.success("Target added successfully!");
+                setSaleTarget({ target: "", bonus: "" });
+                // fetchTargets(); // Refresh list
             } else {
                 toast.error("Failed to add target.");
             }
@@ -195,12 +234,18 @@ const AddOrderTargets = () => {
             const data = await response.json();
 
             if (data.success) {
-                setDbtargets(data.targets || []);
+                const sortedTargets = (data.targets || []).sort((a, b) => {
+                    if (a.type === "Daily" && b.type === "Monthly") return -1;
+                    if (a.type === "Monthly" && b.type === "Daily") return 1;
+                    return 0;
+                });
+                setDbtargets(sortedTargets);
             }
         } catch (err) {
             console.error("Error fetching targets:", err);
         }
     };
+
     const fetchSalesTeam = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/sales-team-targets");
@@ -325,10 +370,9 @@ const AddOrderTargets = () => {
                         />
                         <Button color="primary" onClick={handleSubmitOrderTarget}>Save Target</Button>
                     </div>
-
                     {/* Target List Section */}
                     <div className="p-3 border rounded shadow-sm">
-                    <Label className="fw-bold">Order Targets</Label>
+                        <Label className="fw-bold">Order Complete Targets</Label>
                         <Table bordered size="sm" className="mt-2">
                             <thead className="custom-table-header">
                             <tr>
@@ -351,6 +395,31 @@ const AddOrderTargets = () => {
                             )}
                             </tbody>
                         </Table>
+                    </div>
+                    {/* Add Target type Section */}
+                    <div className="p-3 border rounded shadow-sm">
+                        <Label className="fw-bold">Add Target Rates</Label>
+
+                        <select
+                            className="form-select mb-2"
+                            name="target"
+                            value={saleTarget.target}
+                            onChange={handleRateChange2}
+                        >
+                            <option value="">Select Target Type</option>
+                            <option value="Highest Target">Highest Target</option>
+                            <option value="OrdersIn Target">OrdersIn Target</option>
+                        </select>
+
+                        <Input
+                            type="text"
+                            placeholder="Enter Bonus value"
+                            className="mb-2"
+                            name="bonus"
+                            value={saleTarget.bonus}
+                            onChange={handleRateChange2}
+                        />
+                        <Button color="primary" onClick={handleSubmitSaleTarget}>Save Target</Button>
                     </div>
                 </Col>
                 <Col lg="6" className="d-flex flex-column gap-4">

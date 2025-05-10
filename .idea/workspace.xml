@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update driver salary with api">
-      <change afterPath="$PROJECT_DIR$/admin/src/components/tables/TableItemPriceList.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="add new view">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -14,12 +13,12 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-2.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-3.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllEmployees.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllEmployees.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -350,7 +349,7 @@
       <workItem from="1746693364284" duration="5390000" />
       <workItem from="1746699673344" duration="2302000" />
       <workItem from="1746792161260" duration="608000" />
-      <workItem from="1746849026805" duration="8209000" />
+      <workItem from="1746849026805" duration="13718000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -695,7 +694,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="373" />
+    <option name="localTasksCounter" value="375" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -714,8 +713,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add new hire and update" />
-    <MESSAGE value="add all hire and update" />
     <MESSAGE value="update all hire" />
     <MESSAGE value="update all hire with payment" />
     <MESSAGE value="update all hireview" />
@@ -739,6 +736,8 @@
     <MESSAGE value="update salary sheet view with api" />
     <MESSAGE value="update target view with api" />
     <MESSAGE value="update driver salary with api" />
-    <option name="LAST_COMMIT_MESSAGE" value="update driver salary with api" />
+    <MESSAGE value="update all employee view" />
+    <MESSAGE value="add new view" />
+    <option name="LAST_COMMIT_MESSAGE" value="add new view" />
   </component>
 </project>
