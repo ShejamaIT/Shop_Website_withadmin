@@ -49,6 +49,8 @@ const AuthSection = () => {
                     navigate('/chashier-dashboard');
                 } else if (userType === 'USER') {
                     navigate('/user-dashboard');
+                } else if (userType === 'DRIVER') {
+                    navigate('/driver-dashboard');
                 }
             }
         } catch (error) {
@@ -138,8 +140,6 @@ const AuthSection = () => {
                             <div className="toggle-panel toggle-right-panel">
                                 <h1 className='text-red-300'>Hello, Officer!</h1>
                                 <p className='text-white'>If you want to register to the shejama system please contact the admin!</p>
-                                {/*<button className="" id="signUpToggle" onClick={() => setIsSignUp(true)}>Sign Up*/}
-                                {/*</button>*/}
                             </div>
                         </div>
                     </div>

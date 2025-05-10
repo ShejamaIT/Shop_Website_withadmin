@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AdminDashboard from "../pages/Dashboard/AdminDashboard";
 import CashierDashboard from "../pages/Dashboard/CashierDashboard";
 import UserDashboard from "../pages/Dashboard/UserDashboard";
+import DriverDashboard from "../pages/Dashboard/DriverDashboard";
 import AllOrders from "../pages/AllOrders";
 import AllProducts from "../pages/AllProducts";
 import AllCustomers from "../pages/AllCustomers";
@@ -63,6 +64,11 @@ const Router = () => {
                 <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="product_list" element={<AllOrders />} />
                 <Route path="orders" element={<PlaceOrder />} />
+                <Route path="leave" element={<AllLeaves />} />
+            </Route>
+            <Route path="/driver-dashboard" element={<DriverDashboard />}>
+                <Route index element={<HomeContent />} />
+                <Route path="delivery" element={<AllDeliveryNotes />} />
                 <Route path="leave" element={<AllLeaves />} />
             </Route>
 
