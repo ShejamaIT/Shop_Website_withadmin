@@ -111,6 +111,7 @@ const AddNewUser = () => {
                                 <option value="" disabled>Select Role</option>
                                 <option value="ADMIN">Admin</option>
                                 <option value="USER">User</option>
+                                <option value="DRIVER">Driver</option>
                                 <option value="CHASHIER">Cashier</option>
                             </Input>
                         </FormGroup>
