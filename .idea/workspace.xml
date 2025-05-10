@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update with driver apies">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update place order">
+      <change afterPath="$PROJECT_DIR$/admin/src/pages/SaleTeamGraphs.jsx" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -15,6 +16,7 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AllGraphs.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AllGraphs.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Placeorder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
@@ -350,7 +352,7 @@
       <workItem from="1746792161260" duration="608000" />
       <workItem from="1746849026805" duration="13718000" />
       <workItem from="1746865894937" duration="6273000" />
-      <workItem from="1746872903349" duration="2476000" />
+      <workItem from="1746872903349" duration="6372000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -695,7 +697,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="381" />
+    <option name="localTasksCounter" value="382" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -714,7 +716,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add login and update" />
     <MESSAGE value="update with logout" />
     <MESSAGE value="update with token in signin" />
     <MESSAGE value="add cashier dashboard,sidebar" />
@@ -739,6 +740,7 @@
     <MESSAGE value="update salary sheet with saleteam" />
     <MESSAGE value="add new Dashboard &amp; sidebar (DRIVER)" />
     <MESSAGE value="update with driver apies" />
-    <option name="LAST_COMMIT_MESSAGE" value="update with driver apies" />
+    <MESSAGE value="update place order" />
+    <option name="LAST_COMMIT_MESSAGE" value="update place order" />
   </component>
 </project>

@@ -6,6 +6,7 @@ import Helmet from "../components/Helmet/Helmet";
 
 import IncomeGraphs from "./IncomeGraphs"; // Placeholder for all three — can be split later
 import ItemGraphs from "./ItemGraphs";
+import SaleTeamGraphs from "./SaleTeamGraphs";
 
 // import "../style/allProducts.css";
 
@@ -75,7 +76,7 @@ const AllGraphs = () => {
 
                         <TabPane tabId="sale-team-performance">
                             <Row>
-                                <IncomeGraphs />
+                                <SaleTeamGraphs />
                             </Row>
                         </TabPane>
                     </TabContent>

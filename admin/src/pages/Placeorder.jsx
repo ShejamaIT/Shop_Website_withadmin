@@ -273,7 +273,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         updatedItems.splice(index, 1); // Remove 1 item at the given index
         setSelectedItems(updatedItems);
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -493,7 +492,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
         }
     };
 
-
     return (
         <Helmet title="Place order">
             <div id="order" className="order-container mx-auto p-4">
@@ -571,7 +569,6 @@ const PlaceOrder = ({ onPlaceOrder }) => {
                                     />
                                 </FormGroup>
                             </Col>
-
                         </Row>
                         <Row>
                             <Col md={3}>
