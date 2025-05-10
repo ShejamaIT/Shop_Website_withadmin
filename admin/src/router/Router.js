@@ -27,11 +27,13 @@ import CompleteOrderDetails from "../pages/CompletedOrders";
 import SaleteamDetail from "../pages/SaleteamDetail";
 import IssuedOrderDetails from "../pages/IssuedOrder";
 import DeliveryNoteDetails from "../pages/DeliveryNoteDetails";
+import DeliveryNoteDetailsDrive from "../pages/DeliveryNoteDetailsDrive";
 import DeliveryNotes from "../pages/DeliveryNotes";
 import ReturnedOrderDetails from "../pages/ReturnedOrder";
 import AdvancePayment from "../pages/AdancePayment";
 import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
 import AllGrahps from "../pages/AllGraphs";
+import AllDeliveryNotesDrive from "../pages/AllDeliveryNotesDriver";
 import TableItemPriceList from "../components/tables/TableItemPriceList";
 
 const Router = () => {
@@ -68,7 +70,7 @@ const Router = () => {
             </Route>
             <Route path="/driver-dashboard" element={<DriverDashboard />}>
                 <Route index element={<HomeContent />} />
-                <Route path="delivery" element={<AllDeliveryNotes />} />
+                <Route path="delivery" element={<AllDeliveryNotesDrive />} />
                 <Route path="leave" element={<AllLeaves />} />
             </Route>
 
@@ -80,6 +82,7 @@ const Router = () => {
             <Route path="accept-order-detail/:id" element={<AccepetOrderDetails />} />
             <Route path="issued-order-detail/:id" element={<IssuedOrderDetails />} />
             <Route path="deliveryNote-detail/:id" element={<DeliveryNoteDetails />} />
+            <Route path="deliveryNote-detail-drive/:id" element={<DeliveryNoteDetailsDrive />} />
             <Route path="complete-order-detail/:id" element={<CompleteOrderDetails />} />
             <Route path="retruned-order-detail/:id" element={<ReturnedOrderDetails />} />
             <Route path="item-detail/:id" element={<ItemDetails />} />

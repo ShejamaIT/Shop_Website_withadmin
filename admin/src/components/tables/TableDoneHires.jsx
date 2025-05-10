@@ -13,6 +13,8 @@ const TableDoneHires = ({ refreshKey }) => {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [selectedHire, setSelectedHire] = useState(null);
+    const type = localStorage.getItem("type");
+    const Eid = localStorage.getItem("EID");
 
     useEffect(() => {
         fetchHires();
@@ -20,8 +22,12 @@ const TableDoneHires = ({ refreshKey }) => {
 
     const fetchHires = async () => {
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/other-hires");
-            const data = await response.json();
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/other-hires"
+                : `http://localhost:5001/api/admin/main/other-hires-stid?eid=${Eid}`;
+
+            const response = await fetch(endpoint);
+            const data = await response.json(); // ✅ FIX: Parse response first
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch hires");
             }

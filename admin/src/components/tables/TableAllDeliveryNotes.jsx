@@ -7,18 +7,25 @@ const TableAllDeliveryNotes= () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate(); // Initialize navigate
-
+    const type = localStorage.getItem("type");
+    const Eid = localStorage.getItem("EID");
     useEffect(() => {
         fetchNotes();
     }, []);
 
     // Fetch all items from API
     const fetchNotes = async () => {
-        setLoading(true); // Start loading state
 
+        setLoading(true); // <- Ensure loading starts
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/alldeliverynotes");
-            const data = await response.json();
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/alldeliverynotes"
+                : `http://localhost:5001/api/admin/main/alldeliverynotes-stid?eid=${Eid}`;
+
+            const response = await fetch(endpoint);
+
+            const data = await response.json(); // ✅ FIX: Parse response first
+
             console.log(data);
             if (data.length > 0) {
                 setDeliverynotes(data); // Store fetched items
@@ -41,7 +48,12 @@ const TableAllDeliveryNotes= () => {
             .padStart(2, "0")}-${date.getFullYear()}`;
     };
     const handleView = (delNoID) => {
-        navigate(`/deliveryNote-detail/${delNoID}`); // Navigate to OrderDetails page
+        if (type === "ADMIN"){
+            navigate(`/deliveryNote-detail/${delNoID}`); // Navigate to OrderDetails page
+        } else if (type === "DRIVER"){
+            navigate(`/deliveryNote-detail-drive/${delNoID}`); // Navigate to OrderDetails page
+        }
+
     };
     return (
         <div className="table-container">

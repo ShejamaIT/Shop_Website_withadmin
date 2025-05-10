@@ -13,6 +13,8 @@ const TableBookedHires = ({ refreshKey }) => {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [selectedHire, setSelectedHire] = useState(null);
+    const type = localStorage.getItem("type");
+    const Eid = localStorage.getItem("EID");
 
     useEffect(() => {
         fetchHires();
@@ -20,8 +22,13 @@ const TableBookedHires = ({ refreshKey }) => {
 
     const fetchHires = async () => {
         try {
-            const response = await fetch("http://localhost:5001/api/admin/main/other-hires");
-            const data = await response.json();
+            const endpoint = type === "ADMIN"
+                ? "http://localhost:5001/api/admin/main/other-hires"
+                : `http://localhost:5001/api/admin/main/other-hires-stid?eid=${Eid}`;
+
+            const response = await fetch(endpoint);
+
+            const data = await response.json(); // ✅ FIX: Parse response first
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch hires");
             }
@@ -119,7 +126,9 @@ const TableBookedHires = ({ refreshKey }) => {
                         <th>Driver</th>
                         <th>Vehicle</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        {type === "ADMIN" && (
+                            <th>Actions</th>
+                        )}
                     </tr>
                     </thead>
                     <tbody>
@@ -142,14 +151,17 @@ const TableBookedHires = ({ refreshKey }) => {
                                 <td>{hire.driverName }</td>
                                 <td>{hire.registration_no }</td>
                                 <td>{hire.status}</td>
-                                <td>
-                                    <button
-                                        className="view-btn"
-                                        onClick={() => handleView(hire)}
-                                    >
-                                        👁️
-                                    </button>
-                                </td>
+                                {type === "ADMIN" && (
+                                    <td>
+                                        <button
+                                            className="view-btn"
+                                            onClick={() => handleView(hire)}
+                                        >
+                                            👁️
+                                        </button>
+                                    </td>
+                                )}
+
                             </tr>
                         ))
                     )}
