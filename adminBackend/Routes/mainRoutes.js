@@ -193,7 +193,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 router.post("/orders", async (req, res) => {
     const {
         FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,
-        couponCode, deliveryPrice, discountAmount, district, dvStatus,
+        couponCode, deliveryPrice, discountAmount, district, dvStatus,orderDate,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
         phoneNumber = "", specialNote, title, totalItemPrice,
         dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
@@ -265,7 +265,6 @@ router.post("/orders", async (req, res) => {
         const TotalOrder = parseFloat(totalItemPrice) + parseFloat(deliveryPrice);
 
         const orID = `ORD_${Date.now()}`;
-        const orderDate = new Date().toISOString().split("T")[0];
 
         if (couponCode) {
             const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
