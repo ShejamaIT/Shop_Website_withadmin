@@ -52,6 +52,8 @@ const CashierSidebar = ({ onNavigate, activePage }) => {
 
     const menuItems = [
         {id: "orders", icon: "bx-cart", label: "Place Order", path: "/chashier-dashboard/orders"},
+        {id: "price_list", icon: "bx-cabinet", label: "Item Price List", path: "/chashier-dashboard/item_prices"},
+
     ];
     return (
         <div className="sidebar">

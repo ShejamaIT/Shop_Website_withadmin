@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="add new view">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="add new view to user and cashier dashborads">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -15,9 +15,11 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddorderTargets.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/Salarysheet.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SideBar/CashierSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SideBar/CashierSidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SideBar/UserSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SideBar/UserSidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -96,7 +98,7 @@
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start adminBackend">
+  <component name="RunManager" selected="npm.start admin">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -350,6 +352,7 @@
       <workItem from="1746699673344" duration="2302000" />
       <workItem from="1746792161260" duration="608000" />
       <workItem from="1746849026805" duration="13718000" />
+      <workItem from="1746865894937" duration="273000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -713,7 +716,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update all hire" />
     <MESSAGE value="update all hire with payment" />
     <MESSAGE value="update all hireview" />
     <MESSAGE value="update palce order wih customer" />
@@ -738,6 +740,7 @@
     <MESSAGE value="update driver salary with api" />
     <MESSAGE value="update all employee view" />
     <MESSAGE value="add new view" />
-    <option name="LAST_COMMIT_MESSAGE" value="add new view" />
+    <MESSAGE value="add new view to user and cashier dashborads" />
+    <option name="LAST_COMMIT_MESSAGE" value="add new view to user and cashier dashborads" />
   </component>
 </project>

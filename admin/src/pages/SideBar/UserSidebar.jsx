@@ -51,6 +51,7 @@ const UserSidebar = ({ onNavigate, activePage }) => {
 
     const menuItems = [
         {id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/user-dashboard"},
+        {id: "price_list", icon: "bx-cabinet", label: "Item Price List", path: "/user-dashboard/item_prices"},
         {id: "orders", icon: "bx-cart", label: "Place Order", path: "/user-dashboard/orders"},
         {id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/user-dashboard/product_list"},
         {id: "leave", icon: "bx-calendar-plus", label: "Leaves", path: "/user-dashboard/leave"},

@@ -55,10 +55,12 @@ const Router = () => {
 
             <Route path="/chashier-dashboard" element={<CashierDashboard />}>
                 <Route index element={<PlaceOrder />} />
+                <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="orders" element={<PlaceOrder />} />
             </Route>
             <Route path="/user-dashboard" element={<UserDashboard />}>
                 <Route index element={<HomeContent />} />
+                <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="product_list" element={<AllOrders />} />
                 <Route path="orders" element={<PlaceOrder />} />
                 <Route path="leave" element={<AllLeaves />} />
