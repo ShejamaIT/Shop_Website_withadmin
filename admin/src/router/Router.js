@@ -14,7 +14,6 @@ import PlaceOrder from "../pages/Placeorder";
 import Orders from "../pages/OrderManagement";
 import HomeContent from "../pages/HomeContent";
 import AuthSection from "../pages/AuthSection";
-import AddNewUser from "../pages/AddNewUser";
 import AllLeaves from "../pages/AllLeaves";
 
 // Details pages
@@ -32,6 +31,7 @@ import ReturnedOrderDetails from "../pages/ReturnedOrder";
 import AdvancePayment from "../pages/AdancePayment";
 import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
 import AllGrahps from "../pages/AllGraphs";
+import TableItemPriceList from "../components/tables/TableItemPriceList";
 
 const Router = () => {
     return (
@@ -41,6 +41,7 @@ const Router = () => {
 
             <Route path="/admin-dashboard" element={<AdminDashboard />}>
                 <Route index element={<HomeContent />} />
+                <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="customers" element={<AllCustomers />} />
                 <Route path="products" element={<AllProducts />} />
                 <Route path="orders" element={<PlaceOrder />} />
@@ -48,7 +49,6 @@ const Router = () => {
                 <Route path="graphs" element={<AllGrahps />} />
                 <Route path="suppliers" element={<AllSuppliers />} />
                 <Route path="employees" element={<AllEmployees />} />
-                <Route path="users" element={<AddNewUser />} />
                 <Route path="delivery" element={<AllDeliveryNotes />} />
                 <Route path="vehicles" element={<AllVehicles />} />
             </Route>

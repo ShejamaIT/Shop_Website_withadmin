@@ -11,6 +11,7 @@ import Salarysheet from "./Salarysheet";
 import Leaveform from "./Leaveform";
 import AddOrderTargets from "./AddorderTargets";
 import TableLeave from "../components/tables/TableLeave";
+import AddNewUser from "./AddNewUser";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -22,6 +23,7 @@ const AllEmployees = () => {
     const [admin, setAdmin] = useState([]);
     const [other, setOther] = useState([]);
     const [paymentSubTab, setPaymentSubTab] = useState("advance");
+    const [userSubTab, setUserSubTab] = useState("AddNewUser");
     const location = useLocation();
     const navigate = useNavigate();
     // Update both main tab and sub-tab from URL query parameters
@@ -141,6 +143,10 @@ const AllEmployees = () => {
         setPaymentSubTab(subTabName);
         navigate(`?tab=payment&paySubTab=${subTabName}`);
     };
+    const handleUserSubTabChange = (subTabName) => {
+        setUserSubTab(subTabName);
+        navigate(`?tab=userAccounts&paySubTab=${subTabName}`);
+    };
 
     return (
         <Helmet title="All-Employee">
@@ -186,6 +192,14 @@ const AllEmployees = () => {
                                 onClick={() => handleMainTabChange("payment")}
                             >
                                 Payments
+                            </NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink
+                                className={mainTab === "userAccounts" ? "active" : ""}
+                                onClick={() => handleMainTabChange("userAccounts")}
+                            >
+                                User Accounts
                             </NavLink>
                         </NavItem>
                     </Nav>
@@ -337,6 +351,30 @@ const AllEmployees = () => {
                                 </TabPane>
                                 <TabPane tabId="salary">
                                     <Salarysheet />
+                                </TabPane>
+                            </TabContent>
+                        </TabPane>
+
+                        <TabPane tabId="userAccounts">
+                            <Nav tabs className="mt-3">
+                                <NavItem>
+                                    <NavLink className={userSubTab === "AddNewUser" ? "active" : ""} onClick={() => handleUserSubTabChange("AddNewUser")}>
+                                        Add New user
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className={userSubTab === "AllUsers" ? "active" : ""} onClick={() => handleUserSubTabChange("AllUsers")}>
+                                        All Users
+                                    </NavLink>
+                                </NavItem>
+
+                            </Nav>
+                            <TabContent activeTab={userSubTab} className="mt-3">
+                                <TabPane tabId="AddNewUser">
+                                    <AddNewUser />
+                                </TabPane>
+                                <TabPane tabId="AllUsers">
+                                    {/*<LoanPayment />*/}
                                 </TabPane>
                             </TabContent>
                         </TabPane>

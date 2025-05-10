@@ -51,6 +51,7 @@ const AdminSidebar = ({ onNavigate, activePage }) => {
 
     const menuItems = [
         {id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/admin-dashboard"},
+        {id: "price_list", icon: "bx-cabinet", label: "Item Price List", path: "/admin-dashboard/item_prices"},
         {id: "stock", icon: "bx-line-chart-down", label: "Graphs", path: "/admin-dashboard/graphs"},
         {id: "products", icon: "bx-box", label: "Product", path: "/admin-dashboard/products"},
         {id: "customers", icon: "bx-user", label: "Customer", path: "/admin-dashboard/customers"},
@@ -58,7 +59,6 @@ const AdminSidebar = ({ onNavigate, activePage }) => {
         {id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/admin-dashboard/product_list"},
         {id: "deliveries", icon: "bxs-truck", label: "Deliveries", path: "/admin-dashboard/delivery"},
         {id: "employees", icon: "bx-user-circle", label: "Employee", path: "/admin-dashboard/employees"},
-        {id: "accounts", icon: "bxs-user-account", label: "User Account", path: "/admin-dashboard/users"},
         {id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/admin-dashboard/suppliers"},
         {id: "vehicles", icon: "bx-bus-school", label: "Vehicles", path: "/admin-dashboard/vehicles"},
     ];
