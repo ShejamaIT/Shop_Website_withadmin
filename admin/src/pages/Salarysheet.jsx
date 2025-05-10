@@ -16,12 +16,13 @@ const SalarySheet = () => {
     const [monthlyTargetBouns , setMonthlyTargetBouns] = useState(0);
     const [dailyTargetBouns , setDailyTargetBouns] = useState(0);
     const [monthlyDeptBalance , setMonthlyDeptBalance] = useState(0);
+    const [totalInOrders , setMonthlyTotalInOrders] = useState(0);
+    const [totalOutOrders , setMonthlyTotalOutOrders] = useState(0);
+    const [inOrderBonus , setInOrderBonus] = useState(0);
+    const [outOrderBonus , setOutOderBonus] = useState(0);
+    const [highestSaleBonus , setHighestSaleBonus] = useState(0);
     const [formData, setFormData] = useState({
-        id: "", name: "", job: "",
-        informedLeave:"", uninformedLeave:"",
-        basic: "", loan: "",advance:"",
-        attendance:"",leaveDeduction:"",
-        saving:"",otherpay:"",total :"",
+        id: "", name: "", job: "", informedLeave:"", uninformedLeave:"", basic: "", loan: "",advance:"", attendance:"",leaveDeduction:"", saving:"",otherpay:"",total :"",
     });
     // Fetch Employees
     useEffect(() => {
@@ -45,6 +46,10 @@ const SalarySheet = () => {
         if (formData.job === 'Driver') {
             s_total += monthlyTargetBouns + dailyTargetBouns - monthlyDeptBalance;
         }
+        // Include extra saleteam-related bonuses/adjustments
+        if (formData.job === 'Sales') {
+            s_total += inOrderBonus + outOrderBonus + highestSaleBonus;
+        }
 
         // Construct updated form data
         const updatedData = {
@@ -64,10 +69,18 @@ const SalarySheet = () => {
             updatedData.monthlyDeptBalance = monthlyDeptBalance;
             updatedData.loan = totalLoan.toFixed(2); // Optional
         }
+        // If job is Sales, include additional values
+        if (formData.job === 'Sales') {
+            updatedData.inOrderBonus = inOrderBonus;
+            updatedData.outOrderBonus = outOrderBonus;
+            updatedData.highestSaleBonus = highestSaleBonus;
+            updatedData.loan = totalLoan.toFixed(2); // Optional
+        }
 
 
         setFormData(updatedData);
-    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments, monthlyTargetBouns, dailyTargetBouns, monthlyDeptBalance]);
+    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments,
+        monthlyTargetBouns, dailyTargetBouns, monthlyDeptBalance,inOrderBonus,outOrderBonus,highestSaleBonus]);
 
     const fetchEmployees = async () => {
         try {
@@ -115,9 +128,11 @@ const SalarySheet = () => {
             if (selectedEmployee.job === 'Driver') {
                 fetchDriverHireSummary(selectedId);
             }
+            if (selectedEmployee.job === 'Sales'){
+                fetchSaleTeamOrderSummary(selectedId);
+            }
         }
     };
-
     const fetchSalaryPayments = async (eid) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/advance&loan?eid=${eid}`);
@@ -140,7 +155,6 @@ const SalarySheet = () => {
             return [[], null];
         }
     };
-
     const fetchLeaveCount = async (eid) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/leave-count?eid=${eid}`);
@@ -161,7 +175,6 @@ const SalarySheet = () => {
             };
         }
     };
-
     const fetchDriverHireSummary = async (eid) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/hire-summary?eid=${eid}`);
@@ -176,6 +189,21 @@ const SalarySheet = () => {
             // Calculate total daily bonus
             const totalDailyBonus = (data.dailySummary || []).reduce((sum, day) => sum + (day.bonus || 0), 0);
             setDailyTargetBouns(totalDailyBonus);
+
+        } catch (err) {
+            console.error("Error fetching salary payments:", err);
+        }
+    };
+    const fetchSaleTeamOrderSummary = async (eid) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/sales-summary?eid=${eid}`);
+            const data = await response.json();
+            console.log(data);
+            setMonthlyTotalInOrders(data.totalOrder || 0.0);
+            setMonthlyTotalOutOrders(data.totalIssued || 0.0);
+            setInOrderBonus(data.bonuses.orderBonus || 0.0);
+            setOutOderBonus(data.bonuses.issuedBonus || 0.0);
+            setHighestSaleBonus(data.bonuses.highestBonus || 0.0);
 
         } catch (err) {
             console.error("Error fetching salary payments:", err);
@@ -260,6 +288,35 @@ const SalarySheet = () => {
                                             <tr>
                                                 <td><strong>Monthly Dept Balance</strong></td>
                                                 <td>Rs. {(monthlyDeptBalance).toFixed(2)}</td>
+                                            </tr>
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                )}
+                                {formData.job === "Sales" && (
+                                    <div className="p-3 border rounded shadow-sm bg-light mt-3">
+                                        <h5 className="fw-bold mb-4">Order Commission</h5>
+                                        <Table bordered className="member-table">
+                                            <tbody>
+                                            <tr>
+                                                <td><strong>Total InOrders</strong></td>
+                                                <td>Rs. {(totalInOrders).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Total OutOrders</strong></td>
+                                                <td>Rs. {(totalOutOrders).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>InOrders Target Bouns</strong></td>
+                                                <td>Rs. {(inOrderBonus).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>OutOrders Target Bouns</strong></td>
+                                                <td>Rs. {(outOrderBonus).toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Highest Sale Target</strong></td>
+                                                <td>Rs. {(highestSaleBonus).toFixed(2)}</td>
                                             </tr>
                                             </tbody>
                                         </Table>
