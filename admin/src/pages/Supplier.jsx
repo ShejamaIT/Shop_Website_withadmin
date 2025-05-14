@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Card, CardBody, CardTitle, CardText, Form, FormGroup, Label, Input } from "reactstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import NavBar from "../pages/Navbar";
+import NavBar from "./NavBar/Navbar";
 import "../style/suppierDetail.css";
 
 const SupplierDetails = () => {
@@ -106,7 +106,7 @@ const SupplierDetails = () => {
                 specialnote: ''
             });
 
-            navigate(`/dashboard`); // Navigate to AdminDashboard page
+            navigate(`/dashboard`); // Navigate to AdminHome page
 
         } catch (error) {
             console.error("Error submitting form:", error);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {Container, Row, Col, Button, FormGroup, Label, Input, Spinner, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../pages/Navbar";
+import NavBar from "./NavBar/Navbar";
 import {useNavigate, useParams} from "react-router-dom";
 import '../style/DeliveryNoteDetails.css';
 import {toast} from "react-toastify";

@@ -4,7 +4,7 @@ import { Container, Row, Col, Table } from "reactstrap";
 import "../style/productDetails.css";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import NavBar from "../pages/Navbar";
+import NavBar from "./NavBar/Navbar";
 
 const PurchaseNoteDetails = () => {
     const { id } = useParams(); // Get pc_Id from URL

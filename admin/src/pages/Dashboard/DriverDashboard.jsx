@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Helmet from "../../components/Helmet/Helmet";
-import NavBar from "../Navbar";
+import NavBar from "../NavBar/Navbar";
 import DriverSidebar from "../SideBar/DriverSidebar";
 import "../../style/Dashboard.css";
 import { Container } from "reactstrap";

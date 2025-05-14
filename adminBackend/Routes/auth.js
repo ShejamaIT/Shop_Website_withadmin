@@ -94,14 +94,14 @@ router.post('/emp/signup', async (req, res) => {
 
     try {
         // 1️⃣ Validate input
-        if ( !password || !role || !contactNumber) {
+        if (!password || !role || !contactNumber) {
             return res.status(400).json({
                 success: false,
                 message: 'All fields are required.'
             });
         }
 
-        // 2️⃣ Find Employee by contact number
+        // 2️⃣ Check if employee exists with contact number
         const [empRows] = await db.query(
             `SELECT * FROM Employee WHERE contact = ?`,
             [contactNumber]
@@ -116,7 +116,7 @@ router.post('/emp/signup', async (req, res) => {
 
         const employee = empRows[0];
 
-        // 3️⃣ Check if user already exists for this employee
+        // 3️⃣ Check if user already registered
         const [userExists] = await db.query(
             `SELECT * FROM user WHERE E_Id = ?`,
             [employee.E_Id]
@@ -129,14 +129,11 @@ router.post('/emp/signup', async (req, res) => {
             });
         }
 
-        // 4️⃣ Hash password
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        // 5️⃣ Insert user record
+        // 4️⃣ Insert new user
         await db.query(
             `INSERT INTO user (contact, password, type, E_Id)
              VALUES (?, ?, ?, ?)`,
-            [contactNumber, hashedPassword, role, employee.E_Id]
+            [contactNumber, password, role, employee.E_Id]
         );
 
         return res.status(201).json({
@@ -148,13 +145,12 @@ router.post('/emp/signup', async (req, res) => {
         console.error("Error during sign-up:", err.message);
         return res.status(500).json({
             success: false,
-            message: 'Internal server error.',
-            error: err.message
+            message: 'Internal server error.'
         });
     }
 });
 
-// EMployee Sign in
+// Employee Sign in
 router.post('/emp/login', async (req, res) => {
     const { contact, password } = req.body;
 
@@ -183,7 +179,7 @@ router.post('/emp/login', async (req, res) => {
         const user = userRows[0];
 
         // 3️⃣ Compare password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = password === user.password;
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
@@ -198,13 +194,14 @@ router.post('/emp/login', async (req, res) => {
             process.env.JWT_SECRET
         );
 
-        // 5️⃣ Log the session in sessionlogs table
-        const [result] = await db.query(
-            `INSERT INTO sessionlogs (user, LoginTime, Token) VALUES (?, ?, ?)`,
+        // 5️⃣ Insert session log
+        await db.query(
+            `INSERT INTO sessionlogs (user, LoginTime, Token)
+             VALUES (?, ?, ?)`,
             [user.id, new Date(), token]
         );
 
-        // 6️⃣ Return success with the token
+        // 6️⃣ Return token and user info
         return res.status(200).json({
             success: true,
             message: 'Login successful.',
@@ -220,11 +217,11 @@ router.post('/emp/login', async (req, res) => {
         console.error("Error during login:", err.message);
         return res.status(500).json({
             success: false,
-            message: 'Internal server error.',
-            error: err.message
+            message: 'Internal server error.'
         });
     }
 });
+
 
 
 export default router;

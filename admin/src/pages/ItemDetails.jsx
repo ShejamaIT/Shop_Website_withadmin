@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import Helmet from "../components/Helmet/Helmet";
 import { Container, Row, Col, Button, Input, FormGroup, Label, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { useParams } from "react-router-dom";
-import NavBar from "../pages/Navbar";
+import NavBar from "./NavBar/Navbar";
 import "../style/ItemDetails.css";
 const ItemDetails = () => {
     const { id } = useParams(); // Get item ID from URL

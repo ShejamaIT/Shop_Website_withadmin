@@ -10,7 +10,7 @@
 //     Tooltip,
 //     Legend,
 // } from 'chart.js';
-// import '../style/HomeContent.css';
+// import '../style/AdminHome.css';
 //
 // ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 //

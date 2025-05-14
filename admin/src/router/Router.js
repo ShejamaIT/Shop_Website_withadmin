@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminDashboard from "../pages/Dashboard/AdminDashboard";
 import CashierDashboard from "../pages/Dashboard/CashierDashboard";
-import UserDashboard from "../pages/Dashboard/UserDashboard";
+import SaleTeamDashboard from "../pages/Dashboard/SaleTeamDashboard";
 import DriverDashboard from "../pages/Dashboard/DriverDashboard";
 import AllOrders from "../pages/AllOrders";
 import AllProducts from "../pages/AllProducts";
@@ -13,7 +13,7 @@ import AllVehicles from "../pages/AllVehicles";
 import AllDeliveryNotes from "../pages/AllDeliveryNotes";
 import PlaceOrder from "../pages/Placeorder";
 import Orders from "../pages/OrderManagement";
-import HomeContent from "../pages/HomeContent";
+import AdminHome from "../pages/AdminHome";
 import AuthSection from "../pages/AuthSection";
 import AllLeaves from "../pages/AllLeaves";
 
@@ -43,9 +43,12 @@ const Router = () => {
             <Route path="/SignIn" element={<AuthSection />} />
 
             <Route path="/admin-dashboard" element={<AdminDashboard />}>
-                <Route index element={<HomeContent />} />
+                <Route index element={<AdminHome />} />
                 <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="customers" element={<AllCustomers />} />
+                <Route path="itDept" element={<AllCustomers />} />
+ {/*{id: "it_dept", icon: "bx-grid-alt", label: "ITDEPARTMENT", path: "/admin-dashboard/itDept"},*/}
+
                 <Route path="products" element={<AllProducts />} />
                 <Route path="orders" element={<PlaceOrder />} />
                 <Route path="product_list" element={<AllOrders />} />
@@ -61,15 +64,15 @@ const Router = () => {
                 <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="orders" element={<PlaceOrder />} />
             </Route>
-            <Route path="/user-dashboard" element={<UserDashboard />}>
-                <Route index element={<HomeContent />} />
+            <Route path="/user-dashboard" element={<SaleTeamDashboard />}>
+                <Route index element={<AdminHome />} />
                 <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="product_list" element={<AllOrders />} />
                 <Route path="orders" element={<PlaceOrder />} />
                 <Route path="leave" element={<AllLeaves />} />
             </Route>
             <Route path="/driver-dashboard" element={<DriverDashboard />}>
-                <Route index element={<HomeContent />} />
+                <Route index element={<AdminHome />} />
                 <Route path="delivery" element={<AllDeliveryNotesDrive />} />
                 <Route path="leave" element={<AllLeaves />} />
             </Route>

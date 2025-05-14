@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate for redire
 import Helmet from "../components/Helmet/Helmet";
 import {Container, Row, Col, Button, Input, FormGroup, Label, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
 import { useParams } from "react-router-dom";
-import NavBar from "../pages/Navbar";
+import NavBar from "./NavBar/Navbar";
 import "../style/orderDetails.css";
 import BillInvoice from "./AccpetBillInvoice";
 import ChangeQty from "./changeQty";
@@ -831,6 +831,7 @@ const OrderDetails = () => {
                                             <Col md={4}><Label>{item.I_name} - Rs.{item.price}</Label></Col>
                                             <Col md={4}><Input type="number" value={item.qty}
                                                                onChange={(e) => handleQtyChange(e, item.I_Id)}/></Col>
+
                                             <Col md={2}><Button color="danger"
                                                                 onClick={() => handleRemoveItem1(item.I_Id)}>Remove</Button></Col>
                                         </Row>

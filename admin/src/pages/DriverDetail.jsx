@@ -20,6 +20,8 @@ const DriverDetail = ({ driver }) => {
     const [thismonthHireValue, setthismothHireValue] = useState(0);
     const [lastmonthDelValue, setlastmothdelValue] = useState(0);
     const [lastmonthHireValue, setlastmothHireValue] = useState(0);
+    const [loanAmount , setLoanAmount] = useState(0);
+    const [installment , setInstallment] = useState(0);
 
     useEffect(() => {
         if (!driver.devID) {
@@ -54,6 +56,8 @@ const DriverDetail = ({ driver }) => {
             setthismothHireValue(data.data.hires.thisMonthHireTotal);
             setlastmothHireValue(data.data.hires.lastMonthHireTotal);
             setLoanDetails(data.data.loans || []);
+            // setLoanAmount(loandetails[0].amount);
+            // setInstallment(loandetails[0].installment);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -125,13 +129,15 @@ const DriverDetail = ({ driver }) => {
                                                 <td><strong>Last Month Delivery</strong></td>
                                                 <td>Rs. {lastmonthDelValue.toFixed(2)}</td>
                                                 <td><strong>Loan Amount</strong></td>
-                                                <td>Rs. {(loandetails[0].amount).toFixed(2) || 0.00}</td>
+                                                <td><strong>Loan Amount</strong></td>
+                                                {/*<td>Rs. {(loanAmount).toFixed(2) || 0.00}</td>*/}
                                             </tr>
                                             <tr>
                                                 <td><strong>Last month Hire</strong></td>
                                                 <td>Rs. {lastmonthHireValue.toFixed(2)}</td>
                                                 <td><strong>Installment</strong></td>
-                                                <td>Rs. {(loandetails[0].installment).toFixed(2) || 0.00}</td>
+                                                <td><strong>Installment</strong></td>
+                                                {/*<td>Rs. {(installment).toFixed(2) || 0.00}</td>*/}
                                             </tr>
                                             </tbody>
                                         </Table>

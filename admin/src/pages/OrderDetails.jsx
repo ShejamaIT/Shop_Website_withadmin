@@ -3,7 +3,7 @@ import {toast} from 'react-toastify';
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Col, Container, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row} from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
-import NavBar from "../pages/Navbar";
+import NavBar from "./NavBar/Navbar";
 import "../style/orderDetails.css";
 import ChangeQty from "./changeQty";
 

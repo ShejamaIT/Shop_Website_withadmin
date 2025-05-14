@@ -3,7 +3,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 import '../../style/Sidebar.css';
 import Swal from "sweetalert2";
 
-const UserSidebar = ({ onNavigate, activePage }) => {
+const SaleTeamSidebar = ({ onNavigate, activePage }) => {
     const location = useLocation();
     const navigate = useNavigate()
     const handleLogout = async () => {
@@ -93,4 +93,4 @@ const UserSidebar = ({ onNavigate, activePage }) => {
     );
 };
 
-export default UserSidebar;
+export default SaleTeamSidebar;

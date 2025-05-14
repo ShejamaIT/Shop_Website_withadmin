@@ -3,7 +3,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 import '../../style/Sidebar.css';
 import Swal from "sweetalert2";
 
-const AdminSidebar = ({ onNavigate, activePage }) => {
+const DriverSidebar = ({ onNavigate, activePage }) => {
     const location = useLocation();
     const navigate = useNavigate()
     const handleLogout = async () => {
@@ -49,32 +49,10 @@ const AdminSidebar = ({ onNavigate, activePage }) => {
         }
     };
 
-    const menuItems = [    //sidebarcontent
-        {id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/admin-dashboard"},
-        //link with Router.js
-        //     {id: "vehicles", icon: "bx-bus-school", label: "Vehicles", path: "/admin-dashboard/vehicles"}
-        // id is button id
-        //path:  --selects path from Router.js
-        //  {id: "dashboard", icon: "bx-grid-alt", label: "itdept", path: "/admin-dashboard"},
-        // {id: "dashboard", icon: "bx-grid-alt", label: "itdept", path: "/admin-dashboard"},
-        // {id: "itDept" route path = ""
-        //label: "ITDEPARTMENT" display text
-        // path: "/admin-dashboard/itDept" router.js eke path eka match karagannawa
-
-        {id: "it_dept", icon: "bx-grid-alt", label: "ITDEPARTMENT", path: "/admin-dashboard/itDept"},
-        {id: "price_list", icon: "bx-cabinet", label: "Item Price List", path: "/admin-dashboard/item_prices"},
-        {id: "stock", icon: "bx-line-chart-down", label: "Graphs", path: "/admin-dashboard/graphs"},
-        {id: "products", icon: "bx-box", label: "Product", path: "/admin-dashboard/products"},
-        {id: "customers", icon: "bx-user", label: "Customer", path: "/admin-dashboard/customers"},
-        {id: "orders", icon: "bx-cart", label: "Place Order", path: "/admin-dashboard/orders"},
-        {id: "product_list", icon: "bx-list-ul", label: "Orders", path: "/admin-dashboard/product_list"},
-        {id: "deliveries", icon: "bxs-truck", label: "Deliveries", path: "/admin-dashboard/delivery"},
-        {id: "employees", icon: "bx-user-circle", label: "Employee", path: "/admin-dashboard/employees"},
-        {id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/admin-dashboard/suppliers"},
-        {id: "vehicles", icon: "bx-bus-school", label: "Vehicles", path: "/admin-dashboard/vehicles"},
-
-
-
+    const menuItems = [
+        {id: "dashboard", icon: "bx-grid-alt", label: "Dashboard", path: "/driver-dashboard"},
+        {id: "deliveries", icon: "bxs-truck", label: "Deliveries", path: "/driver-dashboard/delivery"},
+        {id: "leave", icon: "bx-calendar-plus", label: "Leaves", path: "/driver-dashboard/leave"},
     ];
     return (
         <div className="sidebar">
@@ -113,4 +91,4 @@ const AdminSidebar = ({ onNavigate, activePage }) => {
     );
 };
 
-export default AdminSidebar;
+export default DriverSidebar;

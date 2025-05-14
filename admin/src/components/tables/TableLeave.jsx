@@ -8,7 +8,7 @@ const TableLeave = ({ refreshKey }) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchLeaves();
+         fetchLeaves();
     }, [refreshKey]);
 
     const fetchLeaves = async () => {
