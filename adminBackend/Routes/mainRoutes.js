@@ -5874,6 +5874,41 @@ router.post("/save-loan", async (req, res) => {
     }
 });
 
+// POST: Create a new request
+router.post('/request', async (req, res) => {
+    const { E_Id, reason, status } = req.body;
+
+    // ✅ Validation
+    if (!E_Id || !reason || !status) {
+        return res.status(400).json({
+            success: false,
+            message: 'All fields (E_Id, reason, status) are required.'
+        });
+    }
+
+    try {
+        const sql = `
+            INSERT INTO Request (E_Id, reason, status)
+            VALUES (?, ?, ?)
+        `;
+
+        const [result] = await db.query(sql, [E_Id, reason, status]);
+
+        res.status(201).json({
+            success: true,
+            message: 'Request submitted successfully.',
+            data: { id: result.insertId, E_Id, reason, status }
+        });
+    } catch (error) {
+        console.error('Error inserting request:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error.',
+            error: error.message
+        });
+    }
+});
+
 // Save New Promotion
 router.post("/promotion", upload.single('img'), async (req, res) => {
     const sql = `INSERT INTO Promotion (img, date ) VALUES (?, ?)`;
@@ -6363,6 +6398,40 @@ router.get("/sales/count", async (req, res) => {
     } catch (error) {
         console.error("Error fetching sales total:", error.message);
         return res.status(500).json({ message: "Error fetching sales total." });
+    }
+});
+
+// Get E_Id by contact number
+router.post('/get-eid-by-contact', async (req, res) => {
+    const { contact } = req.body;
+
+    if (!contact) {
+        return res.status(400).json({
+            success: false,
+            message: "Contact number is required.",
+        });
+    }
+
+    try {
+        const [rows] = await db.query(`SELECT E_Id FROM user WHERE contact = ?`, [contact]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No user found with this contact number.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            E_Id: rows[0].E_Id,
+        });
+    } catch (err) {
+        console.error("Error fetching E_Id by contact:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error.",
+        });
     }
 });
 
@@ -7096,6 +7165,56 @@ router.get("/applied-leaves", async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching applied leaves:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+});
+
+// Get Applied Leaves and Pending Requests
+router.get("/applied-leaves-and-requests", async (req, res) => {
+    try {
+        // Fetch Applied Leaves
+        const leavesQuery = `
+            SELECT
+                el.id, el.E_Id, e.name, el.date, el.leave_type, el.duration_type, el.reason, el.status
+            FROM Emp_leaves el
+            JOIN Employee e ON el.E_Id = e.E_Id
+            WHERE el.status = 'Applied'
+            ORDER BY el.date DESC
+        `;
+
+        const [appliedLeaves] = await db.query(leavesQuery);
+
+        // Fetch Pending Requests
+        const requestsQuery = `
+            SELECT
+                r.id, r.E_Id, e.name, r.reason, r.status
+            FROM Request r
+            JOIN Employee e ON r.E_Id = e.E_Id
+            WHERE r.status = 'Pending'
+            ORDER BY r.id DESC
+        `;
+
+        const [pendingRequests] = await db.query(requestsQuery);
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched applied leaves and pending requests",
+            data: {
+                appliedLeaves,
+                pendingRequests
+            },
+            counts: {
+                appliedLeaves: appliedLeaves.length,
+                pendingRequests: pendingRequests.length
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching applied leaves and pending requests:", error.message);
         return res.status(500).json({
             success: false,
             message: "Server error",
