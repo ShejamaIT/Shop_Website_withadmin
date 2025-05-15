@@ -14,7 +14,7 @@ import AllDeliveryNotes from "../pages/AllDeliveryNotes";
 import PlaceOrder from "../pages/Placeorder";
 import Orders from "../pages/OrderManagement";
 import AdminHome from "../pages/AdminHome";
-import AuthSection from "../pages/AuthSection";
+import LoginPage from "../pages/LoginPage";
 import AllLeaves from "../pages/AllLeaves";
 
 // Details pages
@@ -40,7 +40,7 @@ const Router = () => {
     return (
         <Routes>
             <Route path="/" element={<Navigate to="/SignIn" />} />
-            <Route path="/SignIn" element={<AuthSection />} />
+            <Route path="/SignIn" element={<LoginPage />} />
 
             <Route path="/admin-dashboard" element={<AdminDashboard />}>
                 <Route index element={<AdminHome />} />

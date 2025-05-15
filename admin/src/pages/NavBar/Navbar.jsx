@@ -4,8 +4,12 @@ import { BiMenu } from 'react-icons/bi';
 import userIcon from '../../assets/images/user-icon.png';
 
 const Navbar = () => {
-    const [empName, setEmpName] = useState("");
-    const [leaveCount, setLeaveCount] = useState(0);
+    const [empName, setEmpName] = useState('');
+    const [appliedLeaves, setAppliedLeaves] = useState([]);
+    const [pendingRequests, setPendingRequests] = useState([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const totalNotifications = appliedLeaves.length + pendingRequests.length;
 
     useEffect(() => {
         const eid = localStorage.getItem('EID');
@@ -13,36 +17,44 @@ const Navbar = () => {
 
         const fetchEmployees = async () => {
             try {
-                const response = await fetch("http://localhost:5001/api/admin/main/employees");
+                const response = await fetch('http://localhost:5001/api/admin/main/employees');
                 const data = await response.json();
-
                 if (data.success && Array.isArray(data.employees)) {
                     const currentEmp = data.employees.find(emp => emp.E_Id.toString() === eid);
-                    if (currentEmp) {
-                        setEmpName(currentEmp.name);
-                    }
+                    if (currentEmp) setEmpName(currentEmp.name);
                 }
             } catch (err) {
-                console.error("Error fetching employees:", err);
+                console.error('Error fetching employees:', err);
             }
         };
 
         const fetchLeaveCounts = async () => {
             try {
-                const response = await fetch("http://localhost:5001/api/admin/main/applied-leaves");
+                const response = await fetch('http://localhost:5001/api/admin/main/applied-leaves-and-requests');
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || "Failed to fetch leaves");
-                setLeaveCount(data.count || 0);
+                if (data.success) {
+                    setAppliedLeaves(data.data.appliedLeaves || []);
+                    setPendingRequests(data.data.pendingRequests || []);
+                }
             } catch (err) {
-                console.error("Error fetching leave counts:", err);
+                console.error('Error fetching leave counts:', err);
             }
         };
 
         fetchEmployees();
-        if (type === 'ADMIN') {
-            fetchLeaveCounts();
-        }
+        if (type === 'ADMIN') fetchLeaveCounts();
     }, []);
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}-${date.getFullYear()}`;
+    };
+
+    const toggleDropdown = () => {
+        setDropdownOpen(prev => !prev);
+    };
 
     return (
         <nav className="navbar">
@@ -50,11 +62,41 @@ const Navbar = () => {
                 <BiMenu className="sidebarBtn" />
                 <span className="dashboard">Dashboard</span>
             </div>
+
             <div className="profile-details">
-                <div className="notification-icon">
+                <div className="notification-icon" onClick={toggleDropdown} style={{ cursor: 'pointer', position: 'relative' }}>
                     <i className='bx bx-bell'></i>
-                    {leaveCount > 0 && <span className="notification-badge">{leaveCount}</span>}
+                    {totalNotifications > 0 && (
+                        <span className="notification-badge">{totalNotifications}</span>
+                    )}
+
+                    {dropdownOpen && (
+                        <div className="notification-dropdown">
+                            <strong>Applied Leaves</strong>
+                            {appliedLeaves.length > 0 ? (
+                                appliedLeaves.map((leave, idx) => (
+                                    <div key={idx} className="notification-item">
+                                        <p><strong>{leave.name}</strong> ({formatDate(leave.date)})</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="notification-item">No applied leaves</div>
+                            )}
+
+                            <strong>Pending Requests</strong>
+                            {pendingRequests.length > 0 ? (
+                                pendingRequests.map((req, idx) => (
+                                    <div key={idx} className="notification-item">
+                                        <p><strong>{req.name}</strong> - {req.reason}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="notification-item">No pending requests</div>
+                            )}
+                        </div>
+                    )}
                 </div>
+
                 <img src={userIcon} alt="Profile" />
                 <span className="admin_name">{empName || "User"}</span>
             </div>

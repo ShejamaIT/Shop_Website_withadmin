@@ -489,3 +489,11 @@ CREATE TABLE sale_target(
     targetType TEXT,
     bonus DOUBLE
 );
+CREATE TABLE Request(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    E_Id VARCHAR(25),
+    reason TEXT,
+    status VARCHAR(25),
+        CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE
+);
