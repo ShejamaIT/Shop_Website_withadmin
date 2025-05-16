@@ -7174,9 +7174,9 @@ router.get("/applied-leaves", async (req, res) => {
 });
 
 // Get Applied Leaves and Pending Requests
-router.get("/applied-leaves-and-requests", async (req, res) => {
+router.get("/applied_leaves-and-requests-and-ordercounts", async (req, res) => {
     try {
-        // Fetch Applied Leaves
+        // 1️⃣ Applied Leaves
         const leavesQuery = `
             SELECT
                 el.id, el.E_Id, e.name, el.date, el.leave_type, el.duration_type, el.reason, el.status
@@ -7185,10 +7185,9 @@ router.get("/applied-leaves-and-requests", async (req, res) => {
             WHERE el.status = 'Applied'
             ORDER BY el.date DESC
         `;
-
         const [appliedLeaves] = await db.query(leavesQuery);
 
-        // Fetch Pending Requests
+        // 2️⃣ Pending Requests
         const requestsQuery = `
             SELECT
                 r.id, r.E_Id, e.name, r.reason, r.status
@@ -7197,24 +7196,40 @@ router.get("/applied-leaves-and-requests", async (req, res) => {
             WHERE r.status = 'Pending'
             ORDER BY r.id DESC
         `;
-
         const [pendingRequests] = await db.query(requestsQuery);
+
+        // 3️⃣ On-site Pending Orders Count per Sales Team Member
+        const onsiteOrdersQuery = `
+            SELECT
+                o.stID,
+                e.name,
+                COUNT(*) AS pendingOrderCount
+            FROM Orders o
+                     JOIN sales_team s ON o.stID = s.stID
+                     JOIN Employee e ON s.E_Id = e.E_Id
+            WHERE o.orStatus = 'Pending' AND o.ordertype = 'On-site'
+            GROUP BY o.stID, e.name;
+
+        `;
+        const [pendingOnsiteOrders] = await db.query(onsiteOrdersQuery);
 
         return res.status(200).json({
             success: true,
-            message: "Fetched applied leaves and pending requests",
+            message: "Fetched applied leaves, pending requests, and onsite pending orders",
             data: {
                 appliedLeaves,
-                pendingRequests
+                pendingRequests,
+                pendingOnsiteOrders
             },
             counts: {
                 appliedLeaves: appliedLeaves.length,
-                pendingRequests: pendingRequests.length
+                pendingRequests: pendingRequests.length,
+                pendingOnsiteOrders: pendingOnsiteOrders.length
             }
         });
 
     } catch (error) {
-        console.error("Error fetching applied leaves and pending requests:", error.message);
+        console.error("Error fetching data:", error.message);
         return res.status(500).json({
             success: false,
             message: "Server error",
