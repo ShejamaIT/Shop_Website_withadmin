@@ -7,9 +7,11 @@ const Navbar = () => {
     const [empName, setEmpName] = useState('');
     const [appliedLeaves, setAppliedLeaves] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
+    const [pendingOrders, setPendingOrders] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
-    const totalNotifications = appliedLeaves.length + pendingRequests.length;
+    const totalNotifications =
+        appliedLeaves.length + pendingRequests.length + pendingOrders.length;
 
     useEffect(() => {
         const eid = localStorage.getItem('EID');
@@ -28,21 +30,22 @@ const Navbar = () => {
             }
         };
 
-        const fetchLeaveCounts = async () => {
+        const fetchAllNotifications = async () => {
             try {
-                const response = await fetch('http://localhost:5001/api/admin/main/applied-leaves-and-requests');
+                const response = await fetch('http://localhost:5001/api/admin/main/applied_leaves-and-requests-and-ordercounts');
                 const data = await response.json();
                 if (data.success) {
                     setAppliedLeaves(data.data.appliedLeaves || []);
                     setPendingRequests(data.data.pendingRequests || []);
+                    setPendingOrders(data.data.pendingOnsiteOrders || []);
                 }
             } catch (err) {
-                console.error('Error fetching leave counts:', err);
+                console.error('Error fetching notifications:', err);
             }
         };
 
         fetchEmployees();
-        if (type === 'ADMIN') fetchLeaveCounts();
+        if (type === 'ADMIN') fetchAllNotifications();
     }, []);
 
     const formatDate = (dateString) => {
@@ -92,6 +95,17 @@ const Navbar = () => {
                                 ))
                             ) : (
                                 <div className="notification-item">No pending requests</div>
+                            )}
+
+                            <strong>Pending On-site Orders</strong>
+                            {pendingOrders.length > 0 ? (
+                                pendingOrders.map((order, idx) => (
+                                    <div key={idx} className="notification-item">
+                                        <p><strong>{order.name}</strong>: {order.pendingOrderCount} pending</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="notification-item">No pending on-site orders</div>
                             )}
                         </div>
                     )}
