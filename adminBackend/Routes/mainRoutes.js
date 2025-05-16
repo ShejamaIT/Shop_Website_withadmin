@@ -2606,7 +2606,8 @@ router.get("/supplier-items", async (req, res) => {
                 item_supplier.unit_cost,
                 Item.warrantyPeriod,
                 Item.img,
-                Item.material
+                Item.material,
+                Item.price
             FROM item_supplier
                      JOIN Item ON Item.I_Id = item_supplier.I_Id
             WHERE item_supplier.s_ID = ?
@@ -4150,7 +4151,7 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
         const stockDetails = [];
 
         for (let i = 0; i < stockCount; i++) {
-            const { I_Id, unit_price, quantity,material } = items[i];
+            const { I_Id, unit_price, quantity,material,price } = items[i];
             const totalPrice = parseFloat(unit_price) * Number(quantity);
 
             const checkUnitPriceQuery = `SELECT unit_cost FROM item_supplier WHERE I_Id = ? AND s_ID = ?`;
@@ -4177,12 +4178,12 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?)`;
             await db.query(purchaseDetailQuery, [purchase_id, I_Id, quantity, unit_price, totalPrice, ""]);
 
-            stockDetails.push({ I_Id, quantity ,material});
+            stockDetails.push({ I_Id, quantity ,material,price});
         }
 
         const insertBarcodeQuery = `
-            INSERT INTO p_i_detail (pc_Id, I_Id, stock_Id, barcode_img, status, orID, datetime,material)
-            VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
+            INSERT INTO p_i_detail (pc_Id, I_Id, stock_Id, barcode_img, status, orID, datetime,material,price)
+            VALUES (?, ?, ?, ?, ?, ?, ?,?,?)`;
 
         const barcodeFolderPath = path.join("./uploads/barcodes");
         if (!fs.existsSync(barcodeFolderPath)) {
@@ -4192,7 +4193,7 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
         const stockRanges = [];
 
         for (let i = 0; i < stockCount; i++) {
-            const { I_Id, quantity,material } = stockDetails[i];
+            const { I_Id, quantity,material,price } = stockDetails[i];
 
             const [lastStockResult] = await db.query(
                 `SELECT MAX(stock_Id) AS lastStockId FROM p_i_detail WHERE I_Id = ?`,
@@ -4213,7 +4214,7 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
 
                 // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", "",]);
                 // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "",NOW()]);
-                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", null,  mysql.raw('NOW()'),material]);
+                await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", null,  mysql.raw('NOW()'),material,price]);
 
             }
 
@@ -7174,9 +7175,9 @@ router.get("/applied-leaves", async (req, res) => {
 });
 
 // Get Applied Leaves and Pending Requests
-router.get("/applied_leaves-and-requests-and-ordercounts", async (req, res) => {
+router.get("/applied-leaves-and-requests", async (req, res) => {
     try {
-        // 1️⃣ Applied Leaves
+        // Fetch Applied Leaves
         const leavesQuery = `
             SELECT
                 el.id, el.E_Id, e.name, el.date, el.leave_type, el.duration_type, el.reason, el.status
@@ -7185,9 +7186,10 @@ router.get("/applied_leaves-and-requests-and-ordercounts", async (req, res) => {
             WHERE el.status = 'Applied'
             ORDER BY el.date DESC
         `;
+
         const [appliedLeaves] = await db.query(leavesQuery);
 
-        // 2️⃣ Pending Requests
+        // Fetch Pending Requests
         const requestsQuery = `
             SELECT
                 r.id, r.E_Id, e.name, r.reason, r.status
@@ -7196,40 +7198,24 @@ router.get("/applied_leaves-and-requests-and-ordercounts", async (req, res) => {
             WHERE r.status = 'Pending'
             ORDER BY r.id DESC
         `;
+
         const [pendingRequests] = await db.query(requestsQuery);
-
-        // 3️⃣ On-site Pending Orders Count per Sales Team Member
-        const onsiteOrdersQuery = `
-            SELECT
-                o.stID,
-                e.name,
-                COUNT(*) AS pendingOrderCount
-            FROM Orders o
-                     JOIN sales_team s ON o.stID = s.stID
-                     JOIN Employee e ON s.E_Id = e.E_Id
-            WHERE o.orStatus = 'Pending' AND o.ordertype = 'On-site'
-            GROUP BY o.stID, e.name;
-
-        `;
-        const [pendingOnsiteOrders] = await db.query(onsiteOrdersQuery);
 
         return res.status(200).json({
             success: true,
-            message: "Fetched applied leaves, pending requests, and onsite pending orders",
+            message: "Fetched applied leaves and pending requests",
             data: {
                 appliedLeaves,
-                pendingRequests,
-                pendingOnsiteOrders
+                pendingRequests
             },
             counts: {
                 appliedLeaves: appliedLeaves.length,
-                pendingRequests: pendingRequests.length,
-                pendingOnsiteOrders: pendingOnsiteOrders.length
+                pendingRequests: pendingRequests.length
             }
         });
 
     } catch (error) {
-        console.error("Error fetching data:", error.message);
+        console.error("Error fetching applied leaves and pending requests:", error.message);
         return res.status(500).json({
             success: false,
             message: "Server error",

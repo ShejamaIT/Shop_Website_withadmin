@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update admin sidebar">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update navbar">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -15,7 +15,8 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/purchaseitem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/purchaseitem.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/NavBar/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/NavBar/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/SideBar/AdminSidebar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
     </list>
@@ -351,8 +352,7 @@
       <workItem from="1746849026805" duration="13718000" />
       <workItem from="1746865894937" duration="6273000" />
       <workItem from="1746872903349" duration="6372000" />
-      <workItem from="1747367366886" duration="4094000" />
-      <workItem from="1747388312586" duration="2389000" />
+      <workItem from="1747367366886" duration="3689000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -697,7 +697,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="384" />
+    <option name="localTasksCounter" value="383" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -716,6 +716,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="update with token in signin" />
     <MESSAGE value="add cashier dashboard,sidebar" />
     <MESSAGE value="update nav bar" />
     <MESSAGE value="add userDashboard" />
@@ -740,7 +741,6 @@
     <MESSAGE value="update with driver apies" />
     <MESSAGE value="update place order" />
     <MESSAGE value="update navbar" />
-    <MESSAGE value="update admin sidebar" />
-    <option name="LAST_COMMIT_MESSAGE" value="update admin sidebar" />
+    <option name="LAST_COMMIT_MESSAGE" value="update navbar" />
   </component>
 </project>

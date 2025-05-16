@@ -274,10 +274,31 @@ const AddItem = () => {
                         </FormGroup>
 
                         <FormGroup>
-                            <Label for="price">Price</Label>
+                            <Label for="s_Id">Select Supplier</Label>
+                            <Input type="select" name="s_Id" id="s_Id" value={formData.s_Id} onChange={handleChange} required>
+                                <option value="">Select Supplier</option>
+                                {suppliers.length > 0 ? suppliers.map((supplier) => (
+                                    <option key={supplier.s_ID} value={supplier.s_ID}>
+                                        {supplier.name} ({supplier.contact})
+                                    </option>
+                                )) : <option value="">No Suppliers Available</option>}
+                            </Input>
+                        </FormGroup>
+
+                        <FormGroup>
+                            <Label for="cost">Cost</Label>
+                            <Input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} required />
+                        </FormGroup>
+
+                        <FormGroup>
+                            <Label for="price">Selling Price</Label>
                             <Input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required />
                         </FormGroup>
 
+                        <FormGroup>
+                            <Label for="minQty">Min Quantity (for production)</Label>
+                            <Input type="number" name="minQty" id="minQty" value={formData.minQty} onChange={handleChange} required />
+                        </FormGroup>
                         <FormGroup>
                             <Label for="img">Main Image (Required)</Label>
                             <Input type="file" name="img" id="img" accept="image/*" onChange={handleImageChange} required />
@@ -297,29 +318,6 @@ const AddItem = () => {
                             <Label for="img3">Additional Image 3 (Optional)</Label>
                             <Input type="file" name="img3" id="img3" accept="image/*" onChange={handleImageChange} />
                         </FormGroup>
-
-                        <FormGroup>
-                            <Label for="s_Id">Select Supplier</Label>
-                            <Input type="select" name="s_Id" id="s_Id" value={formData.s_Id} onChange={handleChange} required>
-                                <option value="">Select Supplier</option>
-                                {suppliers.length > 0 ? suppliers.map((supplier) => (
-                                    <option key={supplier.s_ID} value={supplier.s_ID}>
-                                        {supplier.name} ({supplier.contact})
-                                    </option>
-                                )) : <option value="">No Suppliers Available</option>}
-                            </Input>
-                        </FormGroup>
-
-                        <FormGroup>
-                            <Label for="cost">Cost</Label>
-                            <Input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} required />
-                        </FormGroup>
-
-                        <FormGroup>
-                            <Label for="minQty">Min Quantity (for production)</Label>
-                            <Input type="number" name="minQty" id="minQty" value={formData.minQty} onChange={handleChange} required />
-                        </FormGroup>
-
                         <Row>
                             <Col md="6">
                                 <Button type="submit" color="primary" block>
