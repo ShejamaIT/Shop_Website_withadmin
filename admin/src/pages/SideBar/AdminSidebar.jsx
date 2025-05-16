@@ -61,7 +61,7 @@ const AdminSidebar = ({ onNavigate, activePage }) => {
         //label: "ITDEPARTMENT" display text
         // path: "/admin-dashboard/itDept" router.js eke path eka match karagannawa
 
-        {id: "it_dept", icon: "bx-grid-alt", label: "ITDEPARTMENT", path: "/admin-dashboard/itDept"},
+        // {id: "it_dept", icon: "bx-grid-alt", label: "ITDEPARTMENT", path: "/admin-dashboard/itDept"},
         {id: "price_list", icon: "bx-cabinet", label: "Item Price List", path: "/admin-dashboard/item_prices"},
         {id: "stock", icon: "bx-line-chart-down", label: "Graphs", path: "/admin-dashboard/graphs"},
         {id: "products", icon: "bx-box", label: "Product", path: "/admin-dashboard/products"},
@@ -72,9 +72,6 @@ const AdminSidebar = ({ onNavigate, activePage }) => {
         {id: "employees", icon: "bx-user-circle", label: "Employee", path: "/admin-dashboard/employees"},
         {id: "suppliers", icon: "bx-coin-stack", label: "Supplier", path: "/admin-dashboard/suppliers"},
         {id: "vehicles", icon: "bx-bus-school", label: "Vehicles", path: "/admin-dashboard/vehicles"},
-
-
-
     ];
     return (
         <div className="sidebar">
