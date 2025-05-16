@@ -11,7 +11,7 @@ import AllSuppliers from "../pages/AllSuppliers";
 import AllEmployees from "../pages/AllEmployees";
 import AllVehicles from "../pages/AllVehicles";
 import AllDeliveryNotes from "../pages/AllDeliveryNotes";
-import PlaceOrder from "../pages/Placeorder";
+import OrderInvoice from "../pages/OrderInvoice";
 import Orders from "../pages/OrderManagement";
 import AdminHome from "../pages/AdminHome";
 import LoginPage from "../pages/LoginPage";
@@ -50,7 +50,7 @@ const Router = () => {
  {/*{id: "it_dept", icon: "bx-grid-alt", label: "ITDEPARTMENT", path: "/admin-dashboard/itDept"},*/}
 
                 <Route path="products" element={<AllProducts />} />
-                <Route path="orders" element={<PlaceOrder />} />
+                <Route path="orders" element={<OrderInvoice />} />
                 <Route path="product_list" element={<AllOrders />} />
                 <Route path="graphs" element={<AllGrahps />} />
                 <Route path="suppliers" element={<AllSuppliers />} />
@@ -60,15 +60,15 @@ const Router = () => {
             </Route>
 
             <Route path="/chashier-dashboard" element={<CashierDashboard />}>
-                <Route index element={<PlaceOrder />} />
+                <Route index element={<OrderInvoice />} />
                 <Route path="item_prices" element={<TableItemPriceList />} />
-                <Route path="orders" element={<PlaceOrder />} />
+                <Route path="orders" element={<OrderInvoice />} />
             </Route>
             <Route path="/user-dashboard" element={<SaleTeamDashboard />}>
                 <Route index element={<AdminHome />} />
                 <Route path="item_prices" element={<TableItemPriceList />} />
                 <Route path="product_list" element={<AllOrders />} />
-                <Route path="orders" element={<PlaceOrder />} />
+                <Route path="orders" element={<OrderInvoice />} />
                 <Route path="leave" element={<AllLeaves />} />
             </Route>
             <Route path="/driver-dashboard" element={<DriverDashboard />}>
@@ -92,7 +92,7 @@ const Router = () => {
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />
             <Route path="saleteam-detail/:id" element={<SaleteamDetail />} />
             <Route path="create-delivery-note" element={<DeliveryNotes />} />
-            <Route path="place-order" element={<PlaceOrder />} />
+            <Route path="place-order" element={<OrderInvoice />} />
             <Route path="advance" element={<AdvancePayment />} />
             <Route path="purchase-detail/:id" element={<PurchaseNoteDetails />} />
         </Routes>

@@ -9,7 +9,7 @@ import AddNewItem from "../pages/AddNewItem";
 import AddNewCoupone from "../pages/AddNewCoupone";
 import Helmet from "../components/Helmet/Helmet";
 
-const PlaceOrder = ({ onPlaceOrder }) => {
+const OrderInvoice = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",
         otherNumber: "", address: "", city: "",orderDate:"", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
     const [items, setItems] = useState([]);
@@ -495,7 +495,7 @@ const PlaceOrder = ({ onPlaceOrder }) => {
     return (
         <Helmet title="Place order">
             <div id="order" className="order-container mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-4">Place Order</h1>
+                <h1 className="text-2xl font-bold mb-4">Order Invoice</h1>
                 <Form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className='order-details'>
                         <h2 className="text-xl font-bold mb-2">Order Type</h2>
@@ -1124,4 +1124,4 @@ const PlaceOrder = ({ onPlaceOrder }) => {
 
     );
 };
-export default PlaceOrder;
+export default OrderInvoice;
