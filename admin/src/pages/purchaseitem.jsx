@@ -91,8 +91,9 @@ const PurchaseDetails = () => {
     const handleItemChange = (event) => {
         const itemId = event.target.value;
         const item = supplierItems.find((item) => item.I_Id === itemId);
+        console.log(item);
         if (item && !selectedItems.find(i => i.I_Id === item.I_Id)) {
-            setSelectedItems([...selectedItems, { ...item, quantity: 1, unitPrice: item.unit_cost }]);
+            setSelectedItems([...selectedItems, { ...item, quantity: 1, unitPrice: item.unit_cost,price:item.price }]);
         }
     };
 
@@ -142,12 +143,14 @@ const PurchaseDetails = () => {
                 material:item.material,
                 color: item.color || "N/A",
                 unit_price: item.unitPrice,
+                price:item.price,
                 quantity: item.quantity,
                 total_price: (item.unitPrice * item.quantity).toFixed(2)
             })),
         };
 
         console.log("Order Data:", orderData);
+        console.log(selectedItems);
         try {
             // Send data to the backend
             const response = await fetch("http://localhost:5001/api/admin/main/addStock", {
