@@ -205,28 +205,6 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                     </FormGroup>
 
                     <FormGroup>
-                        <Label for="price">Price</Label>
-                        <Input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required />
-                    </FormGroup>
-
-                    <FormGroup>
-                        <Label for="img">Main Image (Required)</Label>
-                        <Input type="file" name="img" id="img" accept="image/*" onChange={handleImageChange} required />
-                    </FormGroup>
-
-                    <FormGroup>
-                        <Label for="img1">Additional Image 1 (Required)</Label>
-                        <Input type="file" name="img1" id="img1" accept="image/*" onChange={handleImageChange} />
-                    </FormGroup>
-                    <FormGroup>
-                        <Label for="img2">Additional Image 2 (Optional)</Label>
-                        <Input type="file" name="img2" id="img2" accept="image/*" onChange={handleImageChange} />
-                    </FormGroup>
-                    <FormGroup>
-                        <Label for="img3">Additional Image 3 (Optional)</Label>
-                        <Input type="file" name="img3" id="img3" accept="image/*" onChange={handleImageChange} />
-                    </FormGroup>
-                    <FormGroup>
                         <Label for="s_Id" className="fw-bold">Select Supplier</Label>
                         <div className="d-flex gap-2 align-items-start">
                             {/* Dropdown - takes more space */}
@@ -259,10 +237,32 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                         <Label for="cost">Cost</Label>
                         <Input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} required />
                     </FormGroup>
+                    <FormGroup>
+                        <Label for="price">Selling Price</Label>
+                        <Input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required />
+                    </FormGroup>
+
 
                     <FormGroup>
                         <Label for="minQty">Min Quantity (for production)</Label>
                         <Input type="number" name="minQty" id="minQty" value={formData.minQty} onChange={handleChange} required />
+                    </FormGroup>
+                    <FormGroup>
+                        <Label for="img">Main Image (Required)</Label>
+                        <Input type="file" name="img" id="img" accept="image/*" onChange={handleImageChange} required />
+                    </FormGroup>
+
+                    <FormGroup>
+                        <Label for="img1">Additional Image 1 (Required)</Label>
+                        <Input type="file" name="img1" id="img1" accept="image/*" onChange={handleImageChange} />
+                    </FormGroup>
+                    <FormGroup>
+                        <Label for="img2">Additional Image 2 (Optional)</Label>
+                        <Input type="file" name="img2" id="img2" accept="image/*" onChange={handleImageChange} />
+                    </FormGroup>
+                    <FormGroup>
+                        <Label for="img3">Additional Image 3 (Optional)</Label>
+                        <Input type="file" name="img3" id="img3" accept="image/*" onChange={handleImageChange} />
                     </FormGroup>
                     <Row className="mt-3">
                         <Col md={6}>
