@@ -5,8 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update place order">
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-14.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/AddNewItem.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AddNewItem.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AuthSection.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/LoginPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/NavBar/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/NavBar/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/style/Navbar.css" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/style/Navbar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.txt" beforeDir="false" afterPath="$PROJECT_DIR$/dbquery.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +99,7 @@
       <recent name="C:\Users\Dell\Desktop\Shop_Mangement_Website\admin\src\style" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.start admin">
+  <component name="RunManager" selected="npm.start adminBackend">
     <configuration name="start admin" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/admin/package.json" />
       <command value="run" />
@@ -340,7 +355,6 @@
       <workItem from="1746849026805" duration="13718000" />
       <workItem from="1746865894937" duration="6273000" />
       <workItem from="1746872903349" duration="6372000" />
-      <workItem from="1747372555144" duration="1267000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
