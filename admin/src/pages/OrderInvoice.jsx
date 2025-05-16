@@ -8,9 +8,10 @@ import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
 import AddNewCoupone from "../pages/AddNewCoupone";
 import Helmet from "../components/Helmet/Helmet";
+import Swal from "sweetalert2";
 
 const OrderInvoice = ({ onPlaceOrder }) => {
-    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",
+    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",issuable:"",
         otherNumber: "", address: "", city: "",orderDate:"", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -36,7 +37,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [showDropdown, setShowDropdown] = useState(false); // Controls dropdown visibility
     const [isNewCustomer, setIsNewCustomer] = useState(true); // State to determine new or previous customer
     const [availableDelivery, setAvailableDelivery] = useState(null);
-    const [orderType, setOrderType] = useState("On-site");
+    const [orderType, setOrderType] = useState("Walking");
     const [showModal, setShowModal] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
     const [discount, setDiscount] = useState("0");
@@ -49,7 +50,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const fetchItems = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitems");
-            const data = await response.json();setItems(data || []);setFilteredItems(data || []);
+            const data = await response.json();
+            console.log(data);
+            setItems(data || []);
+            setFilteredItems(data || []);
         } catch (error) {
             toast.error("Error fetching items.");
         }
@@ -237,6 +241,18 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     };
     const handleAddToOrder = () => {
         if (!selectedItem) return;
+        // Check if issuable is empty
+        if (!formData.issuable || formData.issuable.trim() === "") {
+            toast.error("Please select whether the item is issuable: Now or Later.");
+            return;
+        }
+        if (formData.issuable === 'Now') {
+            if (selectedItem.availableQty < quantity) {
+                Swal.fire("There are not enough stocks for the requirement.");
+                return; // prevent further processing
+            }
+        }
+
 
         const specialDiscount = parseFloat(discount) || 0;
         const discountedPrice = selectedItem.price - specialDiscount;
@@ -264,6 +280,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                 },
             ]);
         }
+        console.log(selectedItems);
+
         setSelectedItem(null);
         setQuantity(1);
         setDiscount("");
@@ -508,21 +526,21 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                         <Input
                                             type="radio"
                                             name="orderType"
-                                            value="On-site"
-                                            checked={orderType === "On-site"} // Check if this radio button is selected
-                                            onChange={() => setOrderType("On-site")} // Update the state when selected
-                                        />{" "}
-                                        On-Site
-                                    </div>
-                                    <div>
-                                        <Input
-                                            type="radio"
-                                            name="orderType"
                                             value="Walking"
                                             checked={orderType === "Walking"} // Check if this radio button is selected
                                             onChange={() => setOrderType("Walking")} // Update the state when selected
                                         />{" "}
                                         Walking
+                                    </div>
+                                    <div>
+                                        <Input
+                                            type="radio"
+                                            name="orderType"
+                                            value="On-site"
+                                            checked={orderType === "On-site"} // Check if this radio button is selected
+                                            onChange={() => setOrderType("On-site")} // Update the state when selected
+                                        />{" "}
+                                        On-Site
                                     </div>
                                 </div>
                             </Col>
@@ -537,9 +555,21 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     />
                                 </div>
                             </Col>
-
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Label className="block text-sm font-medium text-gray-700 mb-1">Issuable</Label>
+                                
+                                <Input type="select" name="issuable" id="issuable" value={formData.issuable}
+                                       onChange={handleChange} required>
+                                    <option >--Select--</option>
+                                    <option value="Now">Now</option>
+                                    <option value="Later">Later</option>
+                                </Input>
+                            </Col>
 
                         </Row>
+
                         <h2 className="text-l font-bold mb-2 mt-2">Customer Details</h2>
                         <hr/>
                         <Row>
