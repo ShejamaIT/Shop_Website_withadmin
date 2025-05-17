@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update order invoice">
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNoteViewNow.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice1.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/admin/src/pages/MakeDeliveryNoteNow.jsx" afterDir="false" />
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update order invoice with Now issuing(delivery note )">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -19,11 +16,8 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-5.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/testdb.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/DeliveryNotes.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/FinalInvoice2.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin/src/pages/MakeDeliveryNote.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/MakeDeliveryNote.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/AccepetOrder.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderInvoice.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -363,7 +357,7 @@
       <workItem from="1747395537340" duration="5270000" />
       <workItem from="1747455263447" duration="12274000" />
       <workItem from="1747468843425" duration="5411000" />
-      <workItem from="1747475120568" duration="2006000" />
+      <workItem from="1747475120568" duration="8241000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -708,7 +702,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="385" />
+    <option name="localTasksCounter" value="386" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -727,7 +721,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update nav bar" />
     <MESSAGE value="add userDashboard" />
     <MESSAGE value="update tables with sale team" />
     <MESSAGE value="update order tables with logins" />
@@ -752,6 +745,7 @@
     <MESSAGE value="update navbar" />
     <MESSAGE value="rename place order - invoice" />
     <MESSAGE value="update order invoice" />
-    <option name="LAST_COMMIT_MESSAGE" value="update order invoice" />
+    <MESSAGE value="update order invoice with Now issuing(delivery note )" />
+    <option name="LAST_COMMIT_MESSAGE" value="update order invoice with Now issuing(delivery note )" />
   </component>
 </project>

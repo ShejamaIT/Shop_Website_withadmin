@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import { toast } from "react-toastify";
-import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap";
+import {Container, Row, Col, Form, FormGroup, Label, Input, Button, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
 import "../style/placeorder.css";
 import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
@@ -21,6 +21,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [quantity, setQuantity] = useState("");
     const [selectedItems, setSelectedItems] = useState([]);
+    const [selectedItemsQty, setSelectedItemsQTY] = useState([]);
+    const [bookedItems, setBookedItems] = useState([]);
+    const [reservedItems, setReservedItems] = useState([]);
+    const [productionItems, setProductionItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
     const [coupons, setCoupons] = useState([]);
@@ -55,6 +59,9 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [showReceiptView, setShowReceiptView] = useState(false);
     const [showDeliveryView, setShowDeliveryView] = useState(false);
     const [receiptDataD, setReceiptDataD] = useState(null);
+    const [showStockModal1, setShowStockModal1] = useState(false);
+    const [selectedItemForReserve, setSelectedItemForReserve] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -264,46 +271,59 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     };
     const handleAddToOrder = () => {
         if (!selectedItem) return;
-        // Check if issuable is empty
+
         if (!formData.issuable || formData.issuable.trim() === "") {
             toast.error("Please select whether the item is issuable: Now or Later.");
             return;
         }
+
         if (formData.issuable === 'Now') {
             if (selectedItem.availableQty < quantity) {
                 Swal.fire("There are not enough stocks for the requirement.");
-                return; // prevent further processing
+                return;
             }
         }
+
         const specialDiscount = parseFloat(discount) || 0;
         const discountedPrice = selectedItem.price - specialDiscount;
 
-        const existingItemIndex = selectedItems.findIndex(
-            (i) => i.I_Id === selectedItem.I_Id
-        );
+        // ✅ Update merged array
+        const existingIndex = selectedItems.findIndex(item => item.I_Id === selectedItem.I_Id);
 
-        if (existingItemIndex !== -1) {
-            const updatedItems = [...selectedItems];
-            updatedItems[existingItemIndex].qty += quantity;
-            updatedItems[existingItemIndex].discount = specialDiscount;
-            updatedItems[existingItemIndex].price = discountedPrice;
-            updatedItems[existingItemIndex].originalPrice = selectedItem.price;
-            setSelectedItems(updatedItems);
+        let updatedSelectedItems = [...selectedItems];
+        if (existingIndex !== -1) {
+            updatedSelectedItems[existingIndex].qty += quantity;
+            updatedSelectedItems[existingIndex].discount = specialDiscount;
+            updatedSelectedItems[existingIndex].price = discountedPrice;
+            updatedSelectedItems[existingIndex].originalPrice = selectedItem.price;
         } else {
-            setSelectedItems([
-                ...selectedItems,
-                {
-                    ...selectedItem,
-                    qty: quantity,
-                    discount: specialDiscount,
-                    price: discountedPrice,
-                    originalPrice: selectedItem.price,
-                    itemName: selectedItem.I_name,
-                    unitPrice: selectedItem.price,
-                },
-            ]);
+            updatedSelectedItems.push({
+                ...selectedItem,
+                qty: quantity,
+                discount: specialDiscount,
+                price: discountedPrice,
+                originalPrice: selectedItem.price,
+                itemName: selectedItem.I_name,
+                unitPrice: selectedItem.price,
+            });
         }
+        setSelectedItems(updatedSelectedItems);
 
+        // ✅ Update expanded array
+        const newFlatItems = Array.from({ length: quantity }, () => ({
+            ...selectedItem,
+            qty: 1,
+            discount: specialDiscount,
+            price: discountedPrice,
+            originalPrice: selectedItem.price,
+            itemName: selectedItem.I_name,
+            unitPrice: selectedItem.price,
+            status: "", // For dropdown binding
+        }));
+
+        setSelectedItemsQTY(prev => [...prev, ...newFlatItems]);
+
+        // Reset fields
         setSelectedItem(null);
         setQuantity(1);
         setDiscount("");
@@ -672,7 +692,85 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             alert("Failed to add coupon. Please try again.");
         }
     };
+    const handleStatusChange = (index, newStatus, item) => {
+        const updatedItems = [...selectedItemsQty];
+        const updatedItem = { ...updatedItems[index], status: newStatus };
 
+        // Update the main status list
+        updatedItems[index] = updatedItem;
+        setSelectedItemsQTY(updatedItems);
+
+        // Remove item from all status arrays
+        setBookedItems(prev => prev.filter(i => i !== updatedItems[index]));
+        setReservedItems(prev => prev.filter(i => i !== updatedItems[index]));
+        setProductionItems(prev => prev.filter(i => i !== updatedItems[index]));
+
+        // Add item to the correct array
+        if (newStatus === "Booked") {
+            setBookedItems(prev => [...prev, updatedItem]);
+        } else if (newStatus === "Reserved") {
+            setReservedItems(prev => [...prev, updatedItem]);
+        } else if (newStatus === "Production") {
+            setProductionItems(prev => [...prev, updatedItem]);
+        }
+    };
+    // const ReservedItem = async (selectedItems) => {
+    //     if (!selectedItems || selectedItems.length === 0) {
+    //         return;
+    //     }
+    //     if (!order || !order.orderId) {
+    //         return;
+    //     }
+    //
+    //     try {
+    //         const requestData = {
+    //             orID: order.orderId,  // Order ID from your data
+    //             selectedItems: selectedItems  // The selected items to be reserved
+    //         };
+    //
+    //         // Call the API to reserve items
+    //         const response = await fetch("http://localhost:5001/api/admin/main/special-reserved", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             },
+    //             body: JSON.stringify(requestData)
+    //         });
+    //
+    //         // Parse the response from the server
+    //         const result = await response.json();
+    //
+    //         if (response.ok) {
+    //             toast.success("Items reserved successfully", result);
+    //             setShowStockModal1(false);
+    //         } else {
+    //             toast.error( result.message);
+    //         }
+    //
+    //     } catch (error) {
+    //         // Handle any errors that occurred during the API call
+    //         console.error("API call error:", error);
+    //     }
+    // };
+    // const handleSearchChange1 = (e) => {
+    //     const term = e.target.value;
+    //     setSearchTerm(term);
+    //
+    //     const filtered = itemdetails.filter((item) =>
+    //         item.I_Id.toString().toLowerCase().includes(term.toLowerCase())
+    //     );
+    //     setFilteredItems(filtered);
+    //     setDropdownOpen(term.trim() !== "" && filtered.length > 0);
+    //
+    //     if (debounceTimeout.current) {
+    //         clearTimeout(debounceTimeout.current);
+    //     }
+    //
+    //     debounceTimeout.current = setTimeout(() => {
+    //         const itemId = selectedItemForReserve?.itemId || selectedItemForReserve?.I_Id;
+    //         fetchStockDetails(itemId);
+    //     }, 500);
+    // };
     return (
         <Helmet title="Place order">
             <div id="order" className="order-container mx-auto p-4">
@@ -872,7 +970,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 </FormGroup>
                             </>
                         )}
-
                     </div>
                     <div className='order-details'>
                         <h2 className="text-xl font-bold mb-2">Order Details</h2>
@@ -916,7 +1013,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 </div>
                             )}
                         </FormGroup>
-
                         <FormGroup className="flex flex-col mb-4">
                             {/* Row 1: Item Info */}
                             <div className="w-full px-2 mb-2">
@@ -980,8 +1076,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                         placeholder="Enter quantity"
                                     />
                                 </div>
-
-
                                 {/* Total */}
                                 <div className="flex-1 min-w-[150px]">
                                     <label className="block text-sm font-medium text-gray-700">Total</label>
@@ -1010,12 +1104,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 </div>
                             </div>
                         </FormGroup>
-                        <button
-                            type="button"
-                            id="addOrderDetail"
-                            className="bg-green-500 text-white p-2 rounded-md"
-                            onClick={handleAddToOrder}
-                        >
+                        <button type="button" id="addOrderDetail" className="bg-green-500 text-white p-2 rounded-md" onClick={handleAddToOrder}>
                             Add to Order
                         </button>
                         {/* Order Details Table */}
@@ -1070,7 +1159,43 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 </tbody>
                             </table>
                         </div>
-
+                        {formData.issuable === "Later" && (
+                            <div className="overflow-auto max-w-full">
+                                <table className="min-w-[600px] bg-white border rounded-lg shadow-md mb-6 mt-3">
+                                    <thead className="bg-blue-500 text-white">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {selectedItemsQty.length > 0 ? (
+                                        selectedItemsQty.map((item, index) => (
+                                            <tr key={index}>
+                                                <td>{item.I_name}</td>
+                                                <td>
+                                                    <select
+                                                        className="border border-gray-300 rounded p-1"
+                                                        value={item.status || ""}
+                                                        onChange={(e) => handleStatusChange(index, e.target.value,item)}
+                                                    >
+                                                        <option value="">Select Status</option>
+                                                        <option value="Booked">Booked</option>
+                                                        <option value="Reserved">Reserved</option>
+                                                        <option value="Production">Production</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="2" className="text-center text-gray-500 py-2">No items added yet.</td>
+                                        </tr>
+                                    )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                         <FormGroup>
                             <Label className="fw-bold">Coupon Code</Label>
                             <Row>
@@ -1091,7 +1216,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 </Col>
                             </Row>
                         </FormGroup>
-
                         <FormGroup>
                             <Label className="fw-bold">Special Note</Label><Input type="textarea" name="specialNote"
                                                                                   onChange={handleChange}></Input>
@@ -1327,6 +1451,84 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                         setShowDeliveryView={setShowDeliveryView}
                     />
                 )}
+                {/*<Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>*/}
+                {/*    <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Special Reserved</ModalHeader>*/}
+                {/*    <ModalBody>*/}
+                {/*        {selectedItemForReserve && (*/}
+                {/*            <div className="mb-3">*/}
+                {/*                <strong>Selected Item ID:</strong>{" "}*/}
+                {/*                {selectedItemForReserve.itemId || selectedItemForReserve.I_Id || "N/A"}*/}
+                {/*            </div>*/}
+                {/*        )}*/}
+
+                {/*        <FormGroup style={{position: "relative"}}>*/}
+                {/*            <Label>Search Item by ID</Label>*/}
+                {/*            <Input*/}
+                {/*                type="text"*/}
+                {/*                value={searchTerm}*/}
+                {/*                onChange={handleSearchChange1}*/}
+                {/*                placeholder="Type to search..."*/}
+                {/*                autoComplete="off"*/}
+                {/*            />*/}
+                {/*            {dropdownOpen && filteredItems.length > 0 && (*/}
+                {/*                <div*/}
+                {/*                    className="dropdown"*/}
+                {/*                    style={{*/}
+                {/*                        position: "absolute",*/}
+                {/*                        zIndex: 100,*/}
+                {/*                        backgroundColor: "white",*/}
+                {/*                        border: "1px solid #ddd",*/}
+                {/*                        width: "100%",*/}
+                {/*                        maxHeight: "200px",*/}
+                {/*                        overflowY: "auto",*/}
+                {/*                    }}*/}
+                {/*                >*/}
+                {/*                    {filteredItems.map((item) => (*/}
+                {/*                        <div*/}
+                {/*                            key={item.I_Id + item.stock_Id}*/}
+                {/*                            onClick={() => handleSelectItem(item)}*/}
+                {/*                            className="dropdown-item"*/}
+                {/*                            style={{ padding: "8px", cursor: "pointer" }}*/}
+                {/*                        >*/}
+                {/*                            {item.I_Id} - {item.pid_Id} - {item.stock_Id}*/}
+                {/*                        </div>*/}
+                {/*                    ))}*/}
+                {/*                </div>*/}
+                {/*            )}*/}
+                {/*        </FormGroup>*/}
+
+                {/*        <Label className="mt-3">Selected Items</Label>*/}
+                {/*        <table className="selected-items-table">*/}
+                {/*            <thead>*/}
+                {/*            <tr>*/}
+                {/*                <th>Item ID</th>*/}
+                {/*                <th>Batch ID</th>*/}
+                {/*                <th>Stock ID</th>*/}
+                {/*            </tr>*/}
+                {/*            </thead>*/}
+                {/*            <tbody>*/}
+                {/*            {selectedItems.map((item, index) => (*/}
+                {/*                <tr key={index}>*/}
+                {/*                    <td>{item.I_Id}</td>*/}
+                {/*                    <td>{item.pid_Id}</td>*/}
+                {/*                    <td>{item.stock_Id}</td>*/}
+                {/*                </tr>*/}
+                {/*            ))}*/}
+                {/*            </tbody>*/}
+                {/*        </table>*/}
+                {/*    </ModalBody>*/}
+                {/*    <ModalFooter>*/}
+                {/*        <Button*/}
+                {/*            color="primary"*/}
+                {/*            onClick={() => ReservedItem(selectedItems, selectedItemForReserve)}*/}
+                {/*        >*/}
+                {/*            Pass*/}
+                {/*        </Button>*/}
+                {/*        <Button color="secondary" onClick={() => setShowStockModal1(false)}>*/}
+                {/*            Cancel*/}
+                {/*        </Button>*/}
+                {/*    </ModalFooter>*/}
+                {/*</Modal>*/}
                 <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>
                     <div className="p-4">
                         <h4 style={{color: "red"}}>Validation Errors</h4>

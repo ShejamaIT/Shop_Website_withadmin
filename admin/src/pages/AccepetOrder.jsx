@@ -845,8 +845,7 @@ const OrderDetails = () => {
                             </Modal>
 
                             <Modal isOpen={showStockModal1} toggle={() => setShowStockModal1(!showStockModal1)}>
-                                <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Special
-                                    Reserved</ModalHeader>
+                                <ModalHeader toggle={() => setShowStockModal1(!showStockModal1)}>Special Reserved</ModalHeader>
                                 <ModalBody>
                                     {selectedItemForReserve && (
                                         <div className="mb-3">
