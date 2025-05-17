@@ -9,6 +9,10 @@ import AddNewItem from "../pages/AddNewItem";
 import AddNewCoupone from "../pages/AddNewCoupone";
 import Helmet from "../components/Helmet/Helmet";
 import Swal from "sweetalert2";
+import FinalInvoice1 from "./FinalInvoice1";
+import MakeDeliveryNoteNow from "./MakeDeliveryNoteNow";
+import ReceiptView from "./ReceiptView";
+import DeliveryNoteViewNow from "./DeliveryNoteViewNow";
 
 const OrderInvoice = ({ onPlaceOrder }) => {
     const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",issuable:"",
@@ -40,9 +44,17 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [orderType, setOrderType] = useState("Walking");
     const [showModal, setShowModal] = useState(false);
     const [showModal1, setShowModal1] = useState(false);
+    const [showModal2, setShowModal2] = useState(false);
+    const [showModal3, setShowModal3] = useState(false);
     const [discount, setDiscount] = useState("0");
     const [advance, setAdvance] = useState("0");
     const [balance, setBalance] = useState("0");
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [saleteam , setSaleTeam] = useState([]);
+    const [receiptData, setReceiptData] = useState(null);
+    const [showReceiptView, setShowReceiptView] = useState(false);
+    const [showDeliveryView, setShowDeliveryView] = useState(false);
+    const [receiptDataD, setReceiptDataD] = useState(null);
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -51,7 +63,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitems");
             const data = await response.json();
-            console.log(data);
             setItems(data || []);
             setFilteredItems(data || []);
         } catch (error) {
@@ -178,7 +189,19 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         // Handle coupon code
         if (name === "couponCode") {
             const selectedCoupon = coupons.find((c) => c.coupon_code === value);
+            // Set discount amount
             setDiscountAmount(selectedCoupon ? selectedCoupon.discount : 0);
+            // If a valid coupon is found, set the saleteam info
+            if (selectedCoupon) {
+                setSaleTeam([
+                    {
+                        id: selectedCoupon.sales_team_id,
+                        name: selectedCoupon.employee_name
+                    }
+                ]);
+            } else {
+                setSaleTeam([]); // Clear if no matching coupon
+            }
         }
     };
     const checkDeliveryAvailability = async (date) => {
@@ -252,8 +275,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                 return; // prevent further processing
             }
         }
-
-
         const specialDiscount = parseFloat(discount) || 0;
         const discountedPrice = selectedItem.price - specialDiscount;
 
@@ -277,10 +298,11 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                     discount: specialDiscount,
                     price: discountedPrice,
                     originalPrice: selectedItem.price,
+                    itemName: selectedItem.I_name,
+                    unitPrice: selectedItem.price,
                 },
             ]);
         }
-        console.log(selectedItems);
 
         setSelectedItem(null);
         setQuantity(1);
@@ -323,10 +345,27 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
             return {
                 I_Id: item.I_Id,
+                itemName:item.itemName,
                 material: item.material,
                 qty: item.qty,
-                price: netPrice.toFixed(2),
-                discount: discount.toFixed(2),
+                price: netPrice,
+                discount: discount,
+            };
+        });
+        const items = selectedItems.map(item => {
+            const unitPrice = parseFloat(item.originalPrice || item.price || 0);
+            const discount = parseFloat(item.discount || 0);
+            const grossPrice = unitPrice - discount;
+            const netPrice = grossPrice * item.qty;
+
+            return {
+                itemId: item.I_Id,
+                itemName:item.itemName,
+                color: item.color,
+                quantity: item.qty,
+                price: netPrice,
+                discount: discount,
+                unitPrice: item.unitPrice,
             };
         });
 
@@ -346,8 +385,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             specialdiscountAmount,
         };
 
-        console.log(orderData);
-
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/orders", {
                 method: "POST",
@@ -358,21 +395,147 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             });
 
             const result = await response.json();
-
+            const { orderId } = result.data;
             if (response.ok) {
                 toast.success("Order placed successfully!");
-                handleClear();
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+                // Construct selectedOrder based on response + orderData
+                if (formData.issuable === 'Now' && formData.dvStatus === "Delivery"){
+                    const newOrder = {
+                        orderId:orderId ,
+                        orderDate: new Date().toLocaleDateString(),
+                        phoneNumber: formData.phoneNumber,
+                        payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
+                        deliveryStatus: formData.dvStatus,
+                        deliveryCharge: deliveryPrice,
+                        discount: discountAmount,
+                        specialDiscount: specialdiscountAmount,
+                        advance: parseFloat(advance),
+                        items: items,
+                        balance:parseFloat(balance),
+                        totalPrice:totalBillPrice,
+                        customerName:formData.FtName+" "+formData.SrName,
+
+                    };
+                    setSelectedOrder(newOrder);
+                    // Optionally, open invoice modal here
+                    setShowModal2(true);
+                }
+
+
             } else {
                 toast.error(result.message || "Something went wrong. Please try again.");
             }
+
         } catch (error) {
             console.error("Error submitting order data:", error);
             toast.error("Error submitting order data. Please try again.");
         }
     };
+    const handleSubmit3 = async (formData) => {
+        const updatedData = {
+            orID: selectedOrder.orderId,
+            orderDate: selectedOrder.orderDate,
+            delStatus: formData.deliveryStatus,
+            delPrice: formData.delivery,
+            discount: selectedOrder.discount,
+            subtotal: formData.subtotal,
+            total: formData.billTotal,
+            advance: formData.totalAdvance,
+            payStatus: formData.paymentType,
+            stID: saleteam[0]?.id,
+            paymentAmount: formData.addedAdvance || 0,
+            selectedItems: formData.selectedItems,
+            balance: formData.billTotal - formData.totalAdvance, // assuming balance calculation
+            salesperson: saleteam[0]?.name,
+            items: selectedOrder.items,
+        };
+        try {
+            // Make API request to the /isssued-order endpoint
+            const response = await fetch('http://localhost:5001/api/admin/main/issued-items', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                toast.success("Update order Successfully");
+                setReceiptData(updatedData);  // Set data for receipt
+                setShowReceiptView(true);         // Show receipt view
+            } else {
+                console.error("Error:", result.message);
+            }
+        } catch (error) {
+            console.error("Error making API request:", error.message);
+        }
+    };
+    const handleSubmit2 = async (formData1) => {
+        const updatedReceiptData = {
+            order:{
+                orderId: selectedOrder.orderId,
+                customerName:selectedOrder.customerName,
+                balance: parseFloat(balance) || 0,
+                address:formData.address,
+                contact1:formData.phoneNumber,
+                contact2:formData.otherNumber,
+                total:totalBillPrice,
+                advance:advance,
+            },
+            vehicleId: formData1.vehicleId,
+            driverName: formData1.driverName,
+            driverId: formData1.driverId,
+            hire: formData1.hire || 0,
+            balanceToCollect: formData1.balanceToCollect || 0,
+            selectedDeliveryDate: formData.expectedDate, // Default to today's date if empty
+            district: formData.district || "Unknown",
+        };
+        try {
+            // Prepare the data for the API request
+            const deliveryNoteData = {
+                driverName: formData1.driverName,
+                driverId: formData1.driverId,
+                vehicleName: formData1.vehicleId, // Ensure correct field name
+                hire: formData1.hire || 0,
+                date: updatedReceiptData.selectedDeliveryDate,
+                order:{
+                    orderId: selectedOrder.orderId,
+                    balance: parseFloat(balance) || 0,
+                    address:formData.address,
+                    contact1:formData.phoneNumber,
+                    contact2:formData.otherNumber,
+                },
+                district: formData.district || "Unknown",
+                balanceToCollect: formData.balanceToCollect || 0,
+            };
+            //Make the API call
+            const response = await fetch("http://localhost:5001/api/admin/main/create-delivery-note-now", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(deliveryNoteData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Error creating delivery note.");
+            }
+
+            toast.success("Delivery note created successfully.");
+            setReceiptDataD(updatedReceiptData);
+            setShowModal3(false);
+            setShowDeliveryView(true);
+        } catch (error) {
+            console.error("Error while submitting delivery note:", error);
+            toast.error(error.message || "An unexpected error occurred while submitting the delivery note.");
+        }
+    };
+    const viewHandle = async (formData) => {
+        setShowModal2(false);
+        setShowModal3(true);
+    }
     const handleClear = () => {
         setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
             city: "", district: "",specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",type:"",category:"",balance:"",advance:""});
@@ -1072,8 +1235,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </>
                         )}
                     </div>
-                    <div
-                        className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
+                    <div className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
                         <div className="flex justify-between text-base text-gray-700">
                             <span>Delivery Fee</span>
                             <span>Rs.{deliveryPrice}</span>
@@ -1136,6 +1298,33 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                     <AddNewCoupone
                         setShowModal1={setShowModal1}
                         handleSubmit2={handleAddCoupon}
+                    />
+                )}
+                {showModal2 && selectedOrder && (
+                    <FinalInvoice1
+                        selectedOrder={selectedOrder}
+                        setShowModal2={setShowModal2}
+                        handlePaymentUpdate={handleSubmit3}
+                        handleDeliveryNote={viewHandle}
+                    />
+                )}
+                {showReceiptView && (
+                    <ReceiptView
+                        receiptData={receiptData}
+                        setShowReceiptView={setShowReceiptView}
+                    />
+                )}
+                {showModal3 && selectedOrder && (
+                    <MakeDeliveryNoteNow
+                        selectedOrders={selectedOrder}
+                        setShowModal={setShowModal3}
+                        handleDeliveryUpdate={handleSubmit2}
+                    />
+                )}
+                {showDeliveryView && (
+                    <DeliveryNoteViewNow
+                        receiptData={receiptDataD}
+                        setShowDeliveryView={setShowDeliveryView}
                     />
                 )}
                 <Popup open={openPopup} onClose={() => setOpenPopup(false)} modal closeOnDocumentClick>

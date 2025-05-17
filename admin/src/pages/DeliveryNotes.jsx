@@ -6,7 +6,6 @@ import MakeDeliveryNote from "./MakeDeliveryNote";
 import DeliveryNoteView from "./DeliveryNoteView";
 import ReceiptView from "./ReceiptView";
 import FinalInvoice2 from "./FinalInvoice2";
-import FinalInvoice from "./FinalInvoice";
 
 const DeliveryNotes = () => {
     const [routes, setRoutes] = useState([]);

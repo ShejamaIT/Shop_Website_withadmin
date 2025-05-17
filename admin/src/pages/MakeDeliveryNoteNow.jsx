@@ -2,34 +2,28 @@ import React, { useState, useEffect } from "react";
 import "../style/deleiverynote.css";
 import { toast } from "react-toastify";
 
-const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }) => {
+const MakeDeliveryNoteNow = ({ selectedOrders, setShowModal, handleDeliveryUpdate }) => {
+    // Ensure selectedOrders is a single object (in case passed as array)
+    const order = Array.isArray(selectedOrders) ? selectedOrders[0] : selectedOrders;
+    console.log(order);
     const [vehicleId, setVehicleId] = useState("");
     const [driverName, setDriverName] = useState("");
-    const [driverId, setDriverId] = useState("");  // New: Stores the selected driver ID (devID)
-    const [vehicle, setVehicle] = useState("");  // New: Stores the selected driver ID (devID)
+    const [driverId, setDriverId] = useState("");
+    const [vehicle, setVehicle] = useState("");
     const [drivers, setDrivers] = useState([]);
     const [vehicles, setVehicles] = useState([]);
     const [hire, setHire] = useState("");
     const [balanceToCollect, setBalanceToCollect] = useState(0);
-    const [ordersWithBalance, setOrdersWithBalance] = useState([]);
     const [filteredDriver, setFilteredDriver] = useState([]);
     const [filteredVehicle, setFilteredVehicle] = useState([]);
 
-    // Filter orders with balance
     useEffect(() => {
-        const ordersWithBalance = selectedOrders.filter(order => order.balance > 0);
-        setOrdersWithBalance(ordersWithBalance);
-    }, [selectedOrders]);
+        setBalanceToCollect(order.balance || 0);
+    }, [order]);
 
-    // Calculate total balance to collect
     useEffect(() => {
-        const totalBalance = ordersWithBalance.reduce((sum, order) => sum + order.balance, 0);
-        setBalanceToCollect(totalBalance);
-    }, [ordersWithBalance]);
-    useEffect(() => {
-        const totalDeliveryCharge = selectedOrders.reduce((sum, order) => sum + (order.deliveryCharge || 0), 0);
-        setHire(totalDeliveryCharge.toString());
-    }, [selectedOrders]);
+        setHire(order.deliveryCharge?.toString() || "0");
+    }, [order]);
 
     const fetchDrivers = async () => {
         try {
@@ -40,6 +34,7 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
             toast.error("Error fetching drivers.");
         }
     };
+
     const fetchVehicles = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/vehicles");
@@ -49,45 +44,44 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
             toast.error("Error fetching vehicles.");
         }
     };
-    // Fetch drivers , vehicles
+
     useEffect(() => {
         fetchVehicles();
         fetchDrivers();
     }, []);
 
-    // Handle submission & printing
     const handlePrintAndSubmit = () => {
         if (balanceToCollect > 0 && (vehicleId === "" || hire === "" || !driverId)) {
             toast.error("Please provide vehicle ID, hire value, and select a driver before submitting.");
             return;
         }
         handleDeliveryUpdate({
-            orders: selectedOrders,
+            orders: [order], // still sent as an array for backend compatibility
             vehicleId,
-            driverName,  // Includes selected driver name
-            driverId,    // Includes selected driver ID (devID)
+            driverName,
+            driverId,
             hire,
             balanceToCollect,
         });
     };
-    // Handle driver search
+
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setDriverName(value);
-
         if (!value.trim()) {
             setFilteredDriver([]);
         } else {
             const filtered = drivers.filter((driver) =>
-                driver.devID.toString().includes(value) || driver.employeeName.toLowerCase().includes(value.toLowerCase())
+                driver.devID.toString().includes(value) ||
+                driver.employeeName.toLowerCase().includes(value.toLowerCase())
             );
             setFilteredDriver(filtered);
         }
     };
+
     const handleSearchChange1 = (e) => {
         const value = e.target.value;
         setVehicleId(value);
-
         if (!value.trim()) {
             setFilteredVehicle([]);
         } else {
@@ -99,13 +93,14 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
     };
 
     const handleSelectDriver = (driver) => {
-        setDriverId(driver.devID);   // Store driver ID (devID)
-        setDriverName(driver.employeeName);  // Store driver name
-        setFilteredDriver([]);  // Hide dropdown
+        setDriverId(driver.devID);
+        setDriverName(driver.employeeName);
+        setFilteredDriver([]);
     };
+
     const handleSelectVehicle = (vehicle) => {
         setVehicle(vehicle.registration_no);
-        setFilteredVehicle([]);  // Hide dropdown
+        setFilteredVehicle([]);
     };
 
     return (
@@ -113,7 +108,16 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
             <div className="modal-content make-delivery-note">
                 <h2 className="invoice-title">Make Delivery Note</h2>
 
-                {/* Orders Summary */}
+                {/* Single Order Summary */}
+                {/*<div className="invoice-section">*/}
+                {/*    <div className="single-order-details">*/}
+                {/*        <p><strong>Order ID:</strong> {order.orderId}</p>*/}
+                {/*        <p><strong>Customer Name:</strong> {order.customerName}</p>*/}
+                {/*        <p><strong>Total:</strong> Rs.{order.totalPrice}</p>*/}
+                {/*        <p><strong>Advance:</strong> Rs.{order.advance}</p>*/}
+                {/*        <p><strong>Balance:</strong> Rs.{order.balance}</p>*/}
+                {/*    </div>*/}
+                {/*</div>*/}
                 <div className="invoice-section">
                     <table className="receipt-table">
                         <thead>
@@ -126,27 +130,25 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                         </tr>
                         </thead>
                         <tbody>
-                        {selectedOrders.map((order, index) => (
-                            <tr key={index}>
-                                <td>{order.orderId}</td>
-                                <td>{order.customerName}</td>
-                                <td>Rs.{order.totalPrice}</td>
-                                <td>Rs.{order.advance}</td>
-                                <td>Rs.{order.balance.toFixed(2)}</td>
-                            </tr>
-                        ))}
+                        <tr >
+                            <td>{order.orderId}</td>
+                            <td>{order.customerName}</td>
+                            <td>Rs.{order.totalPrice}</td>
+                            <td>Rs.{order.advance}</td>
+                            <td>Rs.{order.balance}</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
 
-                {/* Balance to Collect Row */}
+                {/* Balance Summary */}
                 <div className="balance-to-collect">
-                    <p><strong>Total Balance to Collect: </strong>Rs. {balanceToCollect.toFixed(2)}</p>
+                    <p><strong>Total Balance to Collect:</strong> Rs.{balanceToCollect}</p>
                 </div>
 
                 {/* Vehicle and Driver Info */}
                 <div className="delivery-details">
-                    <div className="input-group">
+                <div className="input-group">
                         {/* Vehicle ID */}
                         <div className="vehicle-info">
                             <label><strong>Vehicle ID:</strong></label>
@@ -167,7 +169,6 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
                                             {vehicle.registration_no} - {vehicle.brand} {vehicle.model}
                                         </div>
                                     ))}
-
                                 </div>
                             )}
                         </div>
@@ -219,4 +220,4 @@ const MakeDeliveryNote = ({ selectedOrders, setShowModal, handleDeliveryUpdate }
     );
 };
 
-export default MakeDeliveryNote;
+export default MakeDeliveryNoteNow;

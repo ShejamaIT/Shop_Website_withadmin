@@ -3,7 +3,7 @@ import "../style/finalInvoice.css";
 import { Button, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { toast } from "react-toastify";
 
-const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) => {
+const FinalInvoice1 = ({ selectedOrder, setShowModal2, handlePaymentUpdate,handleDeliveryNote }) => {
     const invoiceDate = new Date().toLocaleDateString();
     const [paymentType, setPaymentType] = useState(selectedOrder.payStatus);
     const [deliveryStatus, setDeliveryStatus] = useState(selectedOrder.deliveryStatus);
@@ -48,6 +48,11 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                 billTotal: netTotal, balance: balance, delivery: delivery, selectedItems: selectedItems,
             });
         }
+    };
+    const viewhandle = () =>{
+        handleDeliveryNote(
+            // setShowModal2(false)
+        );
     };
     useEffect(() => {
         const itemIds = [...new Set(selectedOrder.items.map(item => item.itemId))];
@@ -247,7 +252,7 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
                     <div className="modal-buttons">
                         <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
                         <button className="print-btn" onClick={handlePrintAndSubmit}>Save</button>
-                        <button className="close-btn" onClick={() => setShowModal2(false)}>Close</button>
+                        <button className="close-btn" onClick={viewhandle}>Get delivery Note</button>
                     </div>
                 </div>
             </div>
@@ -296,4 +301,4 @@ const FinalInvoice2 = ({ selectedOrder, setShowModal2, handlePaymentUpdate }) =>
         </div>
     );
 };
-export default FinalInvoice2;
+export default FinalInvoice1;
