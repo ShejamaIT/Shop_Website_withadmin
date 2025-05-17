@@ -363,7 +363,7 @@ router.post("/orders", async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Order placed successfully",
-            data: { orID, orderDate, expectedDate }
+            data: { orderId: orID,  orderDate, expectedDate }
         });
 
     } catch (error) {
@@ -5611,7 +5611,7 @@ router.post("/employees", async (req, res) => {
     }
 });
 
-// Save Delivery Notes
+// Save Delivery Notes with mulitiple orders
 router.post("/create-delivery-note", async (req, res) => {
     try {
 
@@ -5667,6 +5667,55 @@ router.post("/create-delivery-note", async (req, res) => {
     } catch (error) {
         console.error("Error creating delivery note:", error);
         return res.status(500).json({ message: "Error creating delivery note", details: error.message });
+    }
+});
+
+// Save delivery note with one order
+router.post("/create-delivery-note-now", async (req, res) => {
+    try {
+        const {driverName, driverId, vehicleName, hire, date, district, order, balanceToCollect} = req.body;
+
+        // Validate required fields
+        if (!driverName || !vehicleName || !date || !hire || !order || !order.orderId) {
+            return res.status(400).json({
+                message: "Driver name, vehicle name, hire, date, and a valid order are required."
+            });
+        }
+
+        const { orderId, balance = 0 } = order;
+
+        // Insert into delivery_note table
+        const [result] = await db.query(`
+            INSERT INTO delivery_note (driverName, devID, vehicalName, date, hire, district, balanceToCollect, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'Incomplete')
+        `, [driverName, driverId, vehicleName, date, hire, district, balanceToCollect]);
+
+        const delNoID = result.insertId;
+
+        // Insert the single order into delivery_note_orders
+        await db.query(`
+            INSERT INTO delivery_note_orders (delNoID, orID, balance)
+            VALUES (?, ?, ?)
+        `, [delNoID, orderId, balance]);
+
+        // Update delivery status for the order
+        await db.query(`
+            UPDATE delivery
+            SET status = 'Delivered', delivery_Date = ?
+            WHERE orID = ?
+        `, [date, orderId]);
+
+        return res.status(201).json({
+            message: "Delivery note created successfully",
+            delNoID
+        });
+
+    } catch (error) {
+        console.error("Error creating delivery note:", error);
+        return res.status(500).json({
+            message: "Error creating delivery note",
+            details: error.message
+        });
     }
 });
 
