@@ -329,12 +329,22 @@ router.post("/orders", async (req, res) => {
         }
 
 
-        const orderDetailValues = items.map(item => [
-            orID, item.I_Id, item.qty, parseFloat(item.price),parseFloat(item.discount),item.material
-        ]);
+        // Expand each item into multiple rows based on its quantity
+        const orderDetailValues = items.flatMap(item =>
+            Array.from({ length: item.qty }).map(() => [
+                orID,
+                item.I_Id,
+                1, // Save 1 per row
+                parseFloat(item.price)/item.qty,
+                parseFloat(item.discount),
+                item.material
+            ])
+        );
 
-        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice,discount,material) VALUES ?`;
+// Insert query
+        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice, discount, material) VALUES ?`;
         await db.query(orderDetailQuery, [orderDetailValues]);
+
 
         if (dvStatus === "Delivery") {
             const dvID = `DLV_${Date.now()}`;
@@ -777,7 +787,7 @@ router.get("/accept-order-details", async (req, res) => {
         // 2️⃣ Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+                od.id, od.I_Id, i.I_name, i.color, od.qty, od.tprice,
                 od.discount AS unitDiscount,
                 i.price AS unitPrice,
                 i.bookedQty, i.availableQty, i.stockQty
@@ -837,6 +847,7 @@ router.get("/accept-order-details", async (req, res) => {
                 const totalDiscountAmount = unitDiscount * qty;
                 const finalAmount = item.tprice;
                 return {
+                    id: item.id, // <-- Include the ID here
                     itemId: item.I_Id,
                     itemName: item.I_name,
                     color: item.color,
@@ -1261,7 +1272,7 @@ router.get("/order-details", async (req, res) => {
         // Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+                od.id, od.I_Id, i.I_name, i.color, od.qty, od.tprice,
                 od.discount AS unitDiscount,
                 i.price AS unitPrice,
                 i.bookedQty, i.availableQty, i.stockQty
@@ -1304,6 +1315,7 @@ router.get("/order-details", async (req, res) => {
                 const finalAmount = item.tprice;
 
                 return {
+                    id: item.id,
                     itemId: item.I_Id,
                     itemName: item.I_name,
                     color: item.color,
@@ -5241,54 +5253,15 @@ router.post("/get-stock-detail", async (req, res) => {
 
 // Special Reserved
 router.post("/special-reserved", async (req, res) => {
-    const { orID, selectedItems } = req.body;
+    const { orID, selectedItems, Oid } = req.body;
 
-    if (!orID || !selectedItems || selectedItems.length === 0) {
+    if (!orID || !selectedItems || selectedItems.length === 0 || !Oid) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
     try {
-        // Group items by I_Id and count how many times each appears in selectedItems
-        const itemCounts = {};
         for (const item of selectedItems) {
-            itemCounts[item.I_Id] = (itemCounts[item.I_Id] || 0) + 1;
-        }
-
-        for (const [I_Id, newReserveCount] of Object.entries(itemCounts)) {
-            // Get total qty allowed from Order_Detail
-            const [orderDetails] = await db.query(
-                `SELECT qty FROM Order_Detail WHERE orID = ? AND I_Id = ?`,
-                [orID, I_Id]
-            );
-
-            if (orderDetails.length === 0) {
-                return res.status(400).json({ success: false, message: `Item ${I_Id} not found in order` });
-            }
-
-            const allowedQty = orderDetails[0].qty;
-
-            // Get current reserved count in p_i_detail for this orID and I_Id
-            const [reservedCountData] = await db.query(
-                `SELECT COUNT(*) AS reservedCount
-                 FROM p_i_detail
-                 WHERE orID = ? AND I_Id = ? AND status = 'Reserved'`,
-                [orID, I_Id]
-            );
-
-            const reservedCount = reservedCountData[0].reservedCount || 0;
-            const totalAfterReserve = reservedCount + newReserveCount;
-
-            if (totalAfterReserve > allowedQty) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Cannot reserve more than ordered for Item ${I_Id}. Ordered: ${allowedQty}, Already Reserved: ${reservedCount}, Trying to Reserve: ${newReserveCount}`
-                });
-            }
-        }
-
-        // Passed checks - now reserve items and insert into Special_Reservation table
-        for (const item of selectedItems) {
-            // Update p_i_detail status to 'Reserved'
+            // ✅ Update p_i_detail status to 'Reserved' and set orID
             await db.query(
                 `UPDATE p_i_detail
                  SET status = 'Reserved', orID = ?, datetime = NOW()
@@ -5296,7 +5269,7 @@ router.post("/special-reserved", async (req, res) => {
                 [orID, item.pid_Id]
             );
 
-            // Update the Item table to adjust reservedQty and bookedQty
+            // ✅ Update Item stock: bookedQty -1, reservedQty +1
             await db.query(
                 `UPDATE Item
                  SET bookedQty = bookedQty - 1,
@@ -5305,19 +5278,34 @@ router.post("/special-reserved", async (req, res) => {
                 [item.I_Id]
             );
 
-            // Insert into Special_Reservation table
+            // ✅ Insert into Special_Reservation with orID, pid_Id, and OrderDetailId (Oid)
             await db.query(
-                `INSERT INTO Special_Reservation (orID, pid_Id)
-                 VALUES (?, ?)`,
-                [orID, item.pid_Id]
+                `INSERT INTO Special_Reservation (orID, pid_Id, orderDetailId)
+                 VALUES (?, ?, ?)`,
+                [orID, item.pid_Id, Oid]
+            );
+
+            // ✅ Update Order_Detail status to 'Reserved'
+            await db.query(
+                `UPDATE Order_Detail
+                 SET status = 'Reserved'
+                 WHERE id = ?`,
+                [Oid]
             );
         }
 
-        return res.status(200).json({ success: true, message: "Items reserved and Special_Reservation updated successfully" });
+        return res.status(200).json({
+            success: true,
+            message: "Items reserved and Special_Reservation updated successfully"
+        });
 
     } catch (error) {
         console.error("Error updating reservation:", error.message);
-        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
     }
 });
 
@@ -5325,6 +5313,7 @@ router.post("/special-reserved", async (req, res) => {
 router.post("/get-special-reserved", async (req, res) => {
     try {
         const { orID, itemIds } = req.body;
+
         if (!orID || !Array.isArray(itemIds) || itemIds.length === 0) {
             return res.status(400).json({ error: "Invalid request. Provide orID and itemIds array." });
         }
@@ -5333,7 +5322,8 @@ router.post("/get-special-reserved", async (req, res) => {
         const placeholders = itemIds.map(() => '?').join(', ');
 
         const sql = `
-            SELECT sr.srID, sr.orID, sr.pid_Id, p.*
+            SELECT 
+                sr.srID,sr.orID, sr.pid_Id,sr.orderDetailId, p.*
             FROM Special_Reservation sr
             JOIN p_i_detail p ON sr.pid_Id = p.pid_Id
             WHERE sr.orID = ?
@@ -5351,6 +5341,50 @@ router.post("/get-special-reserved", async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+router.get("/special-reserved-details", async (req, res) => {
+    const { orID } = req.query;
+
+    if (!orID) {
+        return res.status(400).json({ success: false, message: "Order ID (orID) is required" });
+    }
+
+    try {
+        const query = `
+            SELECT 
+                sr.srID,
+                sr.orID,
+                sr.orderDetailId,
+                sr.pid_Id,
+                pid.I_Id,
+                pid.status AS pi_status,
+                pid.datetime,
+                i.I_name,
+                i.color,
+                i.price
+            FROM Special_Reservation sr
+            JOIN p_i_detail pid ON sr.pid_Id = pid.pid_Id
+            LEFT JOIN Item i ON pid.I_Id = i.I_Id
+            WHERE sr.orID = ?
+        `;
+
+        const [results] = await db.query(query, [orID]);
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, message: "No special reserved items found for this order." });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Special reserved items fetched successfully",
+            data: results
+        });
+
+    } catch (error) {
+        console.error("Error fetching special reserved items:", error);
+        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+});
+
 
 // Issued order
 router.post("/issued-order", async (req, res) => {
