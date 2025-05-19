@@ -2,7 +2,21 @@ import React, {useState, useEffect, useRef} from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import { toast } from "react-toastify";
-import {Container, Row, Col, Form, FormGroup, Label, Input, Button, ModalHeader, ModalBody, ModalFooter, Modal} from "reactstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Form,
+    FormGroup,
+    Label,
+    Input,
+    Button,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Modal,
+    Card, CardBody, CardTitle, CardText
+} from "reactstrap";
 import "../style/placeorder.css";
 import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
@@ -62,11 +76,16 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [showDeliveryView, setShowDeliveryView] = useState(false);
     const [receiptDataD, setReceiptDataD] = useState(null);
     const [showStockModal1, setShowStockModal1] = useState(false);
+    const [showStockModal2, setShowStockModal2] = useState(false);
     const [selectedItemForReserve, setSelectedItemForReserve] = useState(null);
+    const [selectedItemForProduction , setSelectedItemForProduction] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const debounceTimeout = useRef(null);
     const [itemdetails, setItemDetails] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [suppliers, setSuppliers] = useState([]);
+    const [loadingSuppliers, setLoadingSuppliers] = useState(true);
+    const [productionData, setProductionData] = useState({itemId: '', supplierId: '', qty: '', expecteddate: '', specialnote: ''});
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -337,6 +356,33 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         const updatedItems = [...selectedItems];
         updatedItems.splice(index, 1); // Remove 1 item at the given index
         setSelectedItems(updatedItems);
+    };
+    const fetchSuppliers = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/item-suppliers?I_Id=${id}`);
+            if (!response.ok) throw new Error("Failed to fetch supplier details.");
+            const data = await response.json();
+            setSuppliers(data.suppliers);
+        } catch (err) {
+            console.error("Error fetching supplier details:", err);
+            setError(err.message);
+        } finally {
+            setLoadingSuppliers(false);
+        }
+    };
+    // Handle form changes
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setProductionData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value
+        }));
+    };
+    const handleSupplierCardClick = (supplierId) => {
+        setProductionData({
+            ...formData,
+            supplierId: supplierId // Update supplierId when a card is clicked
+        });
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -710,7 +756,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
         updatedItems[index] = updatedItem;
         setSelectedItemsQTY(updatedItems);
-
         // Use uid for uniqueness
         const identifier = updatedItem.uid;
 
@@ -728,7 +773,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setSelectedItemForReserve(updatedItem);
             setShowStockModal1(true);
         } else if (newStatus === "Production") {
-            setProductionItems(prev => [...removeByUid(prev), updatedItem]);
+            fetchSuppliers(updatedItem.I_Id);
+            setSelectedItemForProduction(updatedItem); // store item context
+            setShowStockModal2(true); // open modal
+            // setProductionItems(prev => [...removeByUid(prev), updatedItem]);
         }
 
         setTimeout(() => {
@@ -737,12 +785,43 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             console.log("🏭 ProductionItems:", productionItems);
         }, 200);
     };
+    const handleProduction = (e) => {
+        e.preventDefault();
+
+        if (!selectedItemForProduction) return;
+        console.log(selectedItemForProduction);
+        console.log(productionData);
+
+        const updatedItem = {
+            ItemForProduction:{...selectedItemForProduction},
+            productionData: { ...productionData }, // group all fields under a key
+            status: "Production",
+        };
+
+        console.log(updatedItem);
+        // Add to productionItems array
+        setProductionItems(prev => [...prev.filter(i => i.uid !== updatedItem.uid), updatedItem]);
+
+        // Also update selectedItemsQty to reflect changes
+        setSelectedItemsQTY(prev =>
+            prev.map(i => i.uid === updatedItem.uid ? updatedItem : i)
+        );
+
+        // Clear modal-related state
+        setSelectedItemForProduction(null);
+        setProductionData({
+            supplierId: "",
+            qty: "",
+            expectdate: "",
+            specialnote: ""
+        });
+        setShowStockModal2(false);
+    };
     const ReservedItem = async (selectedItems, selectedItemForReserve) => {
         if (!selectedItems || selectedItems.length === 0 || !selectedItemForReserve) return;
 
         // Map selected items to include pid_Id
         const reservedWithPid = selectedItems.map(item => {
-            console.log("🧾 Processing reserved item:", item);  // ✅ Log each item
             return {
                 ...selectedItemForReserve,
                 pid_Id: item.pid_Id   // Attach pid_Id from actual item
@@ -752,7 +831,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         // Update ReservedItems state with new entries
         setReservedItems(prev => {
             const updated = [...prev, ...reservedWithPid];
-            console.log("🔒 ReservedItems updated:", updated);  // ✅ Log updated reserved items
             return updated;
         });
 
@@ -1575,6 +1653,91 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             Pass
                         </Button>
                         <Button color="secondary" onClick={() => setShowStockModal1(false)}>
+                            Cancel
+                        </Button>
+                    </ModalFooter>
+                </Modal>
+                <Modal isOpen={showStockModal2} toggle={() => setShowStockModal2(!showStockModal2)}>
+                    <ModalHeader toggle={() => setShowStockModal2(!showStockModal2)}>
+                        Supplier Production
+                    </ModalHeader>
+                    <ModalBody>
+                        <Form onSubmit={handleProduction}>
+                            <FormGroup>
+                                <Label for="supplierId"><strong>Select Supplier</strong></Label>
+                                <Input
+                                    type="select"
+                                    name="supplierId"
+                                    id="supplierId"
+                                    value={productionData.supplierId}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">-- Select Supplier --</option>
+                                    {suppliers.map((supplier) => (
+                                        <option key={supplier.s_ID} value={supplier.s_ID}>
+                                            {supplier.name} (ID: {supplier.s_ID}) - {supplier.contact}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
+
+                            <Card className="supplier-order-card">
+                                <CardBody>
+                                    <Row>
+                                        <Col lg={6}>
+                                            <FormGroup>
+                                                <Label for="supplierId"><strong>Supplier ID</strong></Label>
+                                                <Input
+                                                    type="text"
+                                                    name="supplierId"
+                                                    id="supplierId"
+                                                    value={productionData.supplierId}
+                                                    disabled
+                                                />
+                                            </FormGroup>
+                                        </Col>
+                                        <Col lg={6}>
+                                            <FormGroup>
+                                                <Label for="qty"><strong>Order Quantity</strong></Label>
+                                                <Input
+                                                    type="text"
+                                                    name="qty"
+                                                    id="qty"
+                                                    value={productionData.qty}
+                                                    onChange={handleFormChange}
+                                                />
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <FormGroup>
+                                        <Label for="expectdate"><strong>Expected Date</strong></Label>
+                                        <Input
+                                            type="date"
+                                            name="expectdate"
+                                            id="expectdate"
+                                            value={productionData.expectdate}
+                                            onChange={handleFormChange}
+                                        />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label for="specialnote"><strong>Special Note</strong></Label>
+                                        <Input
+                                            type="textarea"
+                                            name="specialnote"
+                                            id="specialnote"
+                                            value={productionData.specialnote}
+                                            onChange={handleFormChange}
+                                        />
+                                    </FormGroup>
+                                </CardBody>
+                            </Card>
+                        </Form>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={handleProduction}>
+                            Pass
+                        </Button>
+                        <Button color="secondary" onClick={() => setShowStockModal2(false)}>
                             Cancel
                         </Button>
                     </ModalFooter>
