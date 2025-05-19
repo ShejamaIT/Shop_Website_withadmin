@@ -747,15 +747,12 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const handleStatusChange = (index, newStatus, item) => {
         const updatedItems = [...selectedItemsQty];
         const updatedItem = { ...updatedItems[index], status: newStatus };
-
         updatedItems[index] = updatedItem;
         setSelectedItemsQTY(updatedItems);
-        // Use uid for uniqueness
+
         const identifier = updatedItem.uid;
 
-        // Remove from all status arrays by uid
-        const removeByUid = (array) =>
-            array.filter(i => i.uid !== identifier);
+        const removeByUid = (array) => array.filter(i => i.uid !== identifier);
 
         setBookedItems(prev => removeByUid(prev));
         setReservedItems(prev => removeByUid(prev));
@@ -768,9 +765,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setShowStockModal1(true);
         } else if (newStatus === "Production") {
             fetchSuppliers(updatedItem.I_Id);
-            setSelectedItemForProduction(updatedItem); // store item context
-            setShowStockModal2(true); // open modal
-            // setProductionItems(prev => [...removeByUid(prev), updatedItem]);
+            setSelectedItemForProduction(updatedItem);
+            setShowStockModal2(true);
         }
 
         setTimeout(() => {
@@ -783,25 +779,20 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         e.preventDefault();
 
         if (!selectedItemForProduction) return;
-        console.log(selectedItemForProduction);
-        console.log(productionData);
 
         const updatedItem = {
-            ItemForProduction:{...selectedItemForProduction},
-            productionData: { ...productionData }, // group all fields under a key
+            ...selectedItemForProduction,
+            ...productionData, // flatten fields into the item
             status: "Production",
+            uid: selectedItemForProduction.uid,
         };
 
-        console.log(updatedItem);
-        // Add to productionItems array
         setProductionItems(prev => [...prev.filter(i => i.uid !== updatedItem.uid), updatedItem]);
 
-        // Also update selectedItemsQty to reflect changes
         setSelectedItemsQTY(prev =>
             prev.map(i => i.uid === updatedItem.uid ? updatedItem : i)
         );
 
-        // Clear modal-related state
         setSelectedItemForProduction(null);
         setProductionData({
             supplierId: "",
@@ -814,23 +805,17 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const ReservedItem = async (selectedItems, selectedItemForReserve) => {
         if (!selectedItems || selectedItems.length === 0 || !selectedItemForReserve) return;
 
-        // Map selected items to include pid_Id
-        const reservedWithPid = selectedItems.map(item => {
-            return {
-                ...selectedItemForReserve,
-                pid_Id: item.pid_Id   // Attach pid_Id from actual item
-            };
-        });
+        const reservedWithPid = selectedItems.map(item => ({
+            ...selectedItemForReserve,
+            pid_Id: item.pid_Id,
+            uid: selectedItemForReserve.uid,
+        }));
 
-        // Update ReservedItems state with new entries
-        setReservedItems(prev => {
-            const updated = [...prev, ...reservedWithPid];
-            return updated;
-        });
+        setReservedItems(prev => [...prev.filter(i => i.uid !== selectedItemForReserve.uid), ...reservedWithPid]);
 
-        // Close modal
         setShowStockModal1(false);
     };
+
     const handleSearchChange1 = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
