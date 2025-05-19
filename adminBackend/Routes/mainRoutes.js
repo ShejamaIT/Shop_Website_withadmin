@@ -523,20 +523,61 @@ router.post("/later-orders", async (req, res) => {
                 await db.query(insertReviewQuery, [stID, currentYear, currentMonth, netTotal]);
             }
         }
+        const allItems = [
+            ...bookedItems.map(item => ({ ...item, status: "Booked" })),
+            ...reservedItems.map(item => ({ ...item, status: "Reserved" })),
+            ...productionItems.map(item => ({ ...item, status: "Production" })),
+        ];
 
+        // Step 1: Prepare Order_Detail insert values
+        const orderDetailValues = allItems.map(item => [
+            orID,
+            item.I_Id,
+            1,
+            parseFloat(item.price) / item.qty,
+            parseFloat(item.discount),
+            item.material
+        ]);
 
-        // Expand each item into multiple rows based on its quantity
-        const orderDetailValues = items.flatMap(item =>
-            Array.from({ length: item.qty }).map(() => [
-                orID, item.I_Id, 1, parseFloat(item.price)/item.qty, parseFloat(item.discount), item.material
-            ])
-        );
+        // Step 2: Insert into Order_Detail
+        const insertDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice, discount, material) VALUES ?`;
+        const result = await db.query(insertDetailQuery, [orderDetailValues]);
 
-        // Insert query
-        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice, discount, material) VALUES ?`;
-        await db.query(orderDetailQuery, [orderDetailValues]);
+        // Step 3: Map generated IDs back to original items
+        const insertedStartId = result[0].insertId;
+        const insertedItemsWithIds = allItems.map((item, index) => ({
+            ...item,
+            orderDetailId: insertedStartId + index,
+        }));
 
+        // Step 4: Split by status
+        const booked = insertedItemsWithIds.filter(i => i.status === "Booked");
+        const reserved = insertedItemsWithIds.filter(i => i.status === "Reserved");
+        const production = insertedItemsWithIds.filter(i => i.status === "Production");
 
+        // Step 5: Insert into each respective table
+        if (booked.length > 0) {
+            const bookedQuery = `INSERT INTO Booked_Orders (orderDetailId, orID, I_Id, qty) VALUES ?`;
+            const bookedValues = booked.map(i => [i.orderDetailId, orID, i.I_Id, i.qty]);
+            await db.query(bookedQuery, [bookedValues]);
+        }
+
+        if (reserved.length > 0) {
+            const reservedQuery = `INSERT INTO Reserved_Orders (orderDetailId, orID, I_Id, qty, expected_date, note) VALUES ?`;
+            const reservedValues = reserved.map(i => [
+                i.orderDetailId, orID, i.I_Id, i.qty, i.expectdate || null, i.specialnote || ''
+            ]);
+            await db.query(reservedQuery, [reservedValues]);
+        }
+
+        if (production.length > 0) {
+            const productionQuery = `INSERT INTO Production_Orders (orderDetailId, orID, I_Id, qty, supplierId, expected_date, note) VALUES ?`;
+            const productionValues = production.map(i => [
+                i.orderDetailId, orID, i.I_Id, i.qty, i.supplierId || null, i.expectdate || null, i.specialnote || ''
+            ]);
+            await db.query(productionQuery, [productionValues]);
+        }
+        
         if (dvStatus === "Delivery") {
             const dvID = `DLV_${Date.now()}`;
             const deliveryQuery = `
@@ -566,6 +607,8 @@ router.post("/later-orders", async (req, res) => {
                 [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID]
             );
         }
+
+
 
         return res.status(201).json({
             success: true,
