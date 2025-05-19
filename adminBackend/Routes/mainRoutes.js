@@ -209,7 +209,6 @@ router.post("/orders", async (req, res) => {
         let Cust_id = c_ID;
         let Occupation = "-", WorkPlace = "-", tType = "-";
         let stID = null;
-
         if (type === 'Walking' || type === 'On-site') {
             Occupation = occupation;
             WorkPlace = workPlace;
@@ -332,16 +331,11 @@ router.post("/orders", async (req, res) => {
         // Expand each item into multiple rows based on its quantity
         const orderDetailValues = items.flatMap(item =>
             Array.from({ length: item.qty }).map(() => [
-                orID,
-                item.I_Id,
-                1, // Save 1 per row
-                parseFloat(item.price)/item.qty,
-                parseFloat(item.discount),
-                item.material
+                orID, item.I_Id, 1, parseFloat(item.price)/item.qty, parseFloat(item.discount), item.material
             ])
         );
 
-// Insert query
+        // Insert query
         const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice, discount, material) VALUES ?`;
         await db.query(orderDetailQuery, [orderDetailValues]);
 
@@ -361,13 +355,216 @@ router.post("/orders", async (req, res) => {
             const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
             await db.query(couponQuery, [ocID, orID, couponCode]);
         }
-
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
         // ✅ Insert cash balance if advance exists
         if (advance1 > 0) {
             const cashQuery = `
                 INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
                 VALUES (?, ?, 'order', NOW(), ?)`;
             await db.query(cashQuery, ['Order Advance', orID, advance1]);
+
+            await db.query(
+                `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
+                 VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
+                [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID]
+            );
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            data: { orderId: orID,  orderDate, expectedDate }
+        });
+
+    } catch (error) {
+        console.error("Error inserting order data:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error inserting data into database",
+            details: error.message
+        });
+    }
+});
+
+// Save a order(Later)
+router.post("/later-orders", async (req, res) => {
+    const {
+        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,
+        couponCode, deliveryPrice, discountAmount, district, dvStatus,orderDate,
+        expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
+        phoneNumber = "", specialNote, title, totalItemPrice,
+        dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
+        advance, balance,bookedItems,reservedItems,productionItems
+    } = req.body;
+
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ success: false, message: "Invalid or missing items." });
+    }
+
+    try {
+        let Cust_id = c_ID;
+        let Occupation = "-", WorkPlace = "-", tType = "-";
+        let stID = null;
+        if (type === 'Walking' || type === 'On-site') {
+            Occupation = occupation;
+            WorkPlace = workPlace;
+        } else {
+            tType = t_name;
+        }
+
+        const trimmedPhone = phoneNumber.trim();
+        const trimmedOther = otherNumber.trim();
+
+        // ✅ Handle New Customer
+        if (isNewCustomer) {
+            Cust_id = await generateNewId("Customer", "c_ID", "Cus");
+
+            // 🔍 Safe and flexible contact search
+            let customerSearchQuery = `SELECT c_ID FROM Customer WHERE `;
+            let searchParams = [];
+
+            if (trimmedPhone && trimmedOther) {
+                customerSearchQuery += `(contact1 = ? OR contact2 = ? OR contact1 = ? OR contact2 = ?) LIMIT 1`;
+                searchParams = [trimmedPhone, trimmedPhone, trimmedOther, trimmedOther];
+            } else if (trimmedPhone) {
+                customerSearchQuery += `(contact1 = ? OR contact2 = ?) LIMIT 1`;
+                searchParams = [trimmedPhone, trimmedPhone];
+            } else if (trimmedOther) {
+                customerSearchQuery += `(contact1 = ? OR contact2 = ?) LIMIT 1`;
+                searchParams = [trimmedOther, trimmedOther];
+            }
+
+            if (searchParams.length > 0) {
+                const [existingCustomer] = await db.query(customerSearchQuery, searchParams);
+                if (existingCustomer.length > 0) {
+                    return res.status(400).json({ success: false, message: "Customer already exists." });
+                }
+            }
+
+            const sqlInsertCustomer = `
+                INSERT INTO Customer (c_ID, title, FtName, SrName, address, contact1, contact2, id, balance, type, category, t_name, occupation, workPlace)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            const valuesCustomer = [
+                Cust_id, title, FtName, SrName, address,
+                trimmedPhone || "-", trimmedOther || "-", id,
+                0, type, category, tType, Occupation, WorkPlace
+            ];
+
+            await db.query(sqlInsertCustomer, valuesCustomer);
+        }
+
+        const advance1 = parseFloat(advance) || 0;
+        const balance1 = parseFloat(balance) || 0;
+        const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
+        const TotalOrder = parseFloat(totalItemPrice) + parseFloat(deliveryPrice);
+
+        const orID = `ORD_${Date.now()}`;
+
+        if (couponCode) {
+            const couponQuery = `SELECT stID FROM sales_coupon WHERE cpID = ?`;
+            const [couponResult] = await db.query(couponQuery, [couponCode]);
+
+            if (couponResult.length === 0) {
+                return res.status(400).json({ success: false, message: "Invalid coupon code." });
+            }
+
+            stID = couponResult[0].stID;
+
+            const updateSalesTeamQuery = `UPDATE sales_team SET totalOrder = totalOrder + ? WHERE stID = ?`;
+            await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
+        }
+
+        // ✅ Set order status for Walking to 'Accepted'
+        const orderStatus = productionItems && productionItems.length > 0 ? "Processing" : "Accepted";
+        const orderQuery = `
+            INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`;
+
+        const orderParams = [
+            orID, orderDate, Cust_id, orderStatus, dvStatus,
+            parseFloat(deliveryPrice) || 0,
+            parseFloat(discountAmount) || 0,
+            parseFloat(specialdiscountAmount) || 0,
+            parseFloat(totalItemPrice) || 0,
+            parseFloat(TotalOrder) || 0,
+            stID, expectedDate, specialNote, orderType, advance1, balance1
+        ];
+
+        await db.query(orderQuery, orderParams);
+
+        if (stID) {
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.toLocaleString("default", { month: "long" }); // e.g., "May"
+
+            const netTotal = parseFloat(totalItemPrice) || 0;
+
+            const checkReviewQuery = `
+        SELECT * FROM ST_order_review WHERE stID = ? AND year = ? AND month = ?
+    `;
+            const [reviewResult] = await db.query(checkReviewQuery, [stID, currentYear, currentMonth]);
+
+            if (reviewResult.length > 0) {
+                // Record exists → update totalOrder
+                const updateReviewQuery = `
+            UPDATE ST_order_review 
+            SET totalOrder = totalOrder + ? 
+            WHERE stID = ? AND year = ? AND month = ?
+        `;
+                await db.query(updateReviewQuery, [netTotal, stID, currentYear, currentMonth]);
+            } else {
+                // Record does not exist → insert new row
+                const insertReviewQuery = `
+            INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued)
+            VALUES (?, ?, ?, ?, 0)
+        `;
+                await db.query(insertReviewQuery, [stID, currentYear, currentMonth, netTotal]);
+            }
+        }
+
+
+        // Expand each item into multiple rows based on its quantity
+        const orderDetailValues = items.flatMap(item =>
+            Array.from({ length: item.qty }).map(() => [
+                orID, item.I_Id, 1, parseFloat(item.price)/item.qty, parseFloat(item.discount), item.material
+            ])
+        );
+
+        // Insert query
+        const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice, discount, material) VALUES ?`;
+        await db.query(orderDetailQuery, [orderDetailValues]);
+
+
+        if (dvStatus === "Delivery") {
+            const dvID = `DLV_${Date.now()}`;
+            const deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date, type, driverBalance)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?, ?, 0)`;
+
+            const addressToUse = isAddressChanged ? newAddress : address;
+            await db.query(deliveryQuery, [dvID, orID, addressToUse, district, Cust_id, expectedDate, dvtype]);
+        }
+
+        if (couponCode) {
+            const ocID = `OCP_${Date.now()}`;
+            const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
+            await db.query(couponQuery, [ocID, orID, couponCode]);
+        }
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
+        // ✅ Insert cash balance if advance exists
+        if (advance1 > 0) {
+            const cashQuery = `
+                INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+                VALUES (?, ?, 'order', NOW(), ?)`;
+            await db.query(cashQuery, ['Order Advance', orID, advance1]);
+
+            await db.query(
+                `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
+                 VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
+                [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID]
+            );
         }
 
         return res.status(201).json({
@@ -805,6 +1002,7 @@ router.get("/accept-order-details", async (req, res) => {
             WHERE bi.orID = ?`;
 
         const [bookedItemsResult] = await db.query(bookedItemsQuery, [orID]);
+        console.log(bookedItemsResult);
 
         // 4️⃣ Fetch Accepted Orders
         const acceptedOrdersQuery = `
