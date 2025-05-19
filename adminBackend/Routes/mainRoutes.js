@@ -209,7 +209,6 @@ router.post("/orders", async (req, res) => {
         let Cust_id = c_ID;
         let Occupation = "-", WorkPlace = "-", tType = "-";
         let stID = null;
-
         if (type === 'Walking' || type === 'On-site') {
             Occupation = occupation;
             WorkPlace = workPlace;
@@ -332,16 +331,11 @@ router.post("/orders", async (req, res) => {
         // Expand each item into multiple rows based on its quantity
         const orderDetailValues = items.flatMap(item =>
             Array.from({ length: item.qty }).map(() => [
-                orID,
-                item.I_Id,
-                1, // Save 1 per row
-                parseFloat(item.price)/item.qty,
-                parseFloat(item.discount),
-                item.material
+                orID, item.I_Id, 1, parseFloat(item.price)/item.qty, parseFloat(item.discount), item.material
             ])
         );
 
-// Insert query
+        // Insert query
         const orderDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice, discount, material) VALUES ?`;
         await db.query(orderDetailQuery, [orderDetailValues]);
 
@@ -361,13 +355,19 @@ router.post("/orders", async (req, res) => {
             const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
             await db.query(couponQuery, [ocID, orID, couponCode]);
         }
-
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
         // ✅ Insert cash balance if advance exists
         if (advance1 > 0) {
             const cashQuery = `
                 INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
                 VALUES (?, ?, 'order', NOW(), ?)`;
             await db.query(cashQuery, ['Order Advance', orID, advance1]);
+
+            await db.query(
+                `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
+                 VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
+                [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID]
+            );
         }
 
         return res.status(201).json({
