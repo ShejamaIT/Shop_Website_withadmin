@@ -378,12 +378,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             [name]: value
         }));
     };
-    const handleSupplierCardClick = (supplierId) => {
-        setProductionData({
-            ...formData,
-            supplierId: supplierId // Update supplierId when a card is clicked
-        });
-    };
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -928,7 +922,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                             checked={orderType === "On-site"} // Check if this radio button is selected
                                             onChange={() => setOrderType("On-site")} // Update the state when selected
                                         />{" "}
-                                        On-Site
+                                        On-Line
                                     </div>
                                 </div>
                             </Col>

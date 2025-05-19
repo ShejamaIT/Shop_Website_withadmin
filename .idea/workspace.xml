@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update accept and complete order view">
+    <list default="true" id="1668d6f8-a283-4394-b710-4811e83b129f" name="Changes" comment="update order invoice with later option">
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-11.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-12.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_KT3DP-13.png" afterDir="false" />
@@ -16,6 +16,8 @@
       <change afterPath="$PROJECT_DIR$/adminBackend/uploads/barcodes/barcode_kt2d-5.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/admin/src/pages/OrderInvoice.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/pages/OrderInvoice.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/src/router/Router.js" beforeDir="false" afterPath="$PROJECT_DIR$/admin/src/router/Router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" beforeDir="false" afterPath="$PROJECT_DIR$/adminBackend/Routes/mainRoutes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -358,7 +360,10 @@
       <workItem from="1747475120568" duration="8585000" />
       <workItem from="1747485565210" duration="146000" />
       <workItem from="1747540416085" duration="9281000" />
-      <workItem from="1747550285390" duration="10973000" />
+      <workItem from="1747550285390" duration="12443000" />
+      <workItem from="1747626435484" duration="30000" />
+      <workItem from="1747626501344" duration="6148000" />
+      <workItem from="1747634156282" duration="11410000" />
     </task>
     <task id="LOCAL-00155" summary="update invoice">
       <created>1739100350083</created>
@@ -703,7 +708,7 @@
       <option name="project" value="LOCAL" />
       <updated>1739959764374</updated>
     </task>
-    <option name="localTasksCounter" value="388" />
+    <option name="localTasksCounter" value="390" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -722,7 +727,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update order tables with logins" />
     <MESSAGE value="change folders" />
     <MESSAGE value="add and update add new user view" />
     <MESSAGE value="update leave form" />
@@ -747,6 +751,7 @@
     <MESSAGE value="update order invoice with Now issuing(delivery note )" />
     <MESSAGE value="update order invoice with Later (save to item in array)" />
     <MESSAGE value="update accept and complete order view" />
-    <option name="LAST_COMMIT_MESSAGE" value="update accept and complete order view" />
+    <MESSAGE value="update order invoice with later option" />
+    <option name="LAST_COMMIT_MESSAGE" value="update order invoice with later option" />
   </component>
 </project>

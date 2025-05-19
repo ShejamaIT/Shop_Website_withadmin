@@ -16,7 +16,6 @@ import Orders from "../pages/OrderManagement";
 import AdminHome from "../pages/AdminHome";
 import LoginPage from "../pages/LoginPage";
 import AllLeaves from "../pages/AllLeaves";
-
 // Details pages
 import OrderDetails from "../pages/OrderDetails";
 import ItemDetails from "../pages/ItemDetails";
@@ -48,7 +47,6 @@ const Router = () => {
                 <Route path="customers" element={<AllCustomers />} />
                 <Route path="itDept" element={<AllCustomers />} />
  {/*{id: "it_dept", icon: "bx-grid-alt", label: "ITDEPARTMENT", path: "/admin-dashboard/itDept"},*/}
-
                 <Route path="products" element={<AllProducts />} />
                 <Route path="orders" element={<OrderInvoice />} />
                 <Route path="product_list" element={<AllOrders />} />
