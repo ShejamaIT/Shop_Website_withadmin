@@ -3,20 +3,7 @@ import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import { toast } from "react-toastify";
 import {
-    Container,
-    Row,
-    Col,
-    Form,
-    FormGroup,
-    Label,
-    Input,
-    Button,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Modal,
-    Card, CardBody, CardTitle, CardText
-} from "reactstrap";
+    Container, Row, Col, Form, FormGroup, Label, Input, Button, ModalHeader, ModalBody, ModalFooter, Modal, Card, CardBody, CardTitle, CardText} from "reactstrap";
 import "../style/placeorder.css";
 import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
@@ -378,7 +365,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             [name]: value
         }));
     };
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Basic validation
@@ -451,52 +438,81 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         };
 
         try {
-            if (formData.issuable === 'Later'){
-                console.log(orderData);
-                console.log("📦 BookedItems:", bookedItems);
-                console.log("🔒 ReservedItems:", reservedItems);
-                console.log("🏭 ProductionItems:", productionItems);
-
+            if (formData.issuable === 'Later') {
+                try {
+                    const fullOrderData = {
+                        ...orderData,
+                        bookedItems,
+                        reservedItems,
+                        productionItems,
+                    };
+            
+                    console.log("📝 Sending Full Order Data:", fullOrderData);
+            
+                    const response = await fetch("http://localhost:5001/api/admin/main/later-orders", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(fullOrderData),
+                    });
+            
+                    const result = await response.json();
+            
+                    if (response.ok && result.success) {
+                        const { orderId, orderDate, expectedDate } = result.data;
+                        toast.success(`Order placed successfully! Order ID: ${orderId}`);
+                        console.log("✅ Order Success:", { orderId, orderDate, expectedDate });
+                    } else {
+                        toast.error(result.message || "Failed to place the order.");
+                        console.error("❌ Order Error:", result.message || result);
+                    }
+            
+                } catch (error) {
+                    toast.error("An error occurred while placing the order.");
+                    console.error("❌ Network/Server Error:", error);
+                }
+            } else if (formData.issuable === 'Now'){
+                const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(orderData),
+                });
+                
+                const result = await response.json();
+                const { orderId } = result.data;
+                if (response.ok) {
+                    toast.success("Order placed successfully!");
+                    // Construct selectedOrder based on response + orderData
+                    if (formData.issuable === 'Now' && formData.dvStatus === "Delivery"){
+                        const newOrder = {
+                            orderId:orderId ,
+                            orderDate: new Date().toLocaleDateString(),
+                            phoneNumber: formData.phoneNumber,
+                            payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
+                            deliveryStatus: formData.dvStatus,
+                            deliveryCharge: deliveryPrice,
+                            discount: discountAmount,
+                            specialDiscount: specialdiscountAmount,
+                            advance: parseFloat(advance),
+                            items: items,
+                            balance:parseFloat(balance),
+                            totalPrice:totalBillPrice,
+                            customerName:formData.FtName+" "+formData.SrName,
+                
+                        };
+                        setSelectedOrder(newOrder);
+                        // Optionally, open invoice modal here
+                        setShowModal2(true);
+                    }
+                
+                
+                } else {
+                    toast.error(result.message || "Something went wrong. Please try again.");
+                }
             }
-            // const response = await fetch("http://localhost:5001/api/admin/main/orders", {
-            //     method: "POST",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: JSON.stringify(orderData),
-            // });
-            //
-            // const result = await response.json();
-            // const { orderId } = result.data;
-            // if (response.ok) {
-            //     toast.success("Order placed successfully!");
-            //     // Construct selectedOrder based on response + orderData
-            //     if (formData.issuable === 'Now' && formData.dvStatus === "Delivery"){
-            //         const newOrder = {
-            //             orderId:orderId ,
-            //             orderDate: new Date().toLocaleDateString(),
-            //             phoneNumber: formData.phoneNumber,
-            //             payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
-            //             deliveryStatus: formData.dvStatus,
-            //             deliveryCharge: deliveryPrice,
-            //             discount: discountAmount,
-            //             specialDiscount: specialdiscountAmount,
-            //             advance: parseFloat(advance),
-            //             items: items,
-            //             balance:parseFloat(balance),
-            //             totalPrice:totalBillPrice,
-            //             customerName:formData.FtName+" "+formData.SrName,
-            //
-            //         };
-            //         setSelectedOrder(newOrder);
-            //         // Optionally, open invoice modal here
-            //         setShowModal2(true);
-            //     }
-            //
-            //
-            // } else {
-            //     toast.error(result.message || "Something went wrong. Please try again.");
-            // }
 
         } catch (error) {
             console.error("Error submitting order data:", error);
@@ -747,12 +763,15 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const handleStatusChange = (index, newStatus, item) => {
         const updatedItems = [...selectedItemsQty];
         const updatedItem = { ...updatedItems[index], status: newStatus };
+
         updatedItems[index] = updatedItem;
         setSelectedItemsQTY(updatedItems);
-
+        // Use uid for uniqueness
         const identifier = updatedItem.uid;
 
-        const removeByUid = (array) => array.filter(i => i.uid !== identifier);
+        // Remove from all status arrays by uid
+        const removeByUid = (array) =>
+            array.filter(i => i.uid !== identifier);
 
         setBookedItems(prev => removeByUid(prev));
         setReservedItems(prev => removeByUid(prev));
@@ -765,8 +784,9 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setShowStockModal1(true);
         } else if (newStatus === "Production") {
             fetchSuppliers(updatedItem.I_Id);
-            setSelectedItemForProduction(updatedItem);
-            setShowStockModal2(true);
+            setSelectedItemForProduction(updatedItem); // store item context
+            setShowStockModal2(true); // open modal
+            // setProductionItems(prev => [...removeByUid(prev), updatedItem]);
         }
 
         setTimeout(() => {
@@ -779,20 +799,25 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         e.preventDefault();
 
         if (!selectedItemForProduction) return;
+        console.log(selectedItemForProduction);
+        console.log(productionData);
 
         const updatedItem = {
-            ...selectedItemForProduction,
-            ...productionData, // flatten fields into the item
+            ItemForProduction:{...selectedItemForProduction},
+            productionData: { ...productionData }, // group all fields under a key
             status: "Production",
-            uid: selectedItemForProduction.uid,
         };
 
+        console.log(updatedItem);
+        // Add to productionItems array
         setProductionItems(prev => [...prev.filter(i => i.uid !== updatedItem.uid), updatedItem]);
 
+        // Also update selectedItemsQty to reflect changes
         setSelectedItemsQTY(prev =>
             prev.map(i => i.uid === updatedItem.uid ? updatedItem : i)
         );
 
+        // Clear modal-related state
         setSelectedItemForProduction(null);
         setProductionData({
             supplierId: "",
@@ -805,17 +830,23 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const ReservedItem = async (selectedItems, selectedItemForReserve) => {
         if (!selectedItems || selectedItems.length === 0 || !selectedItemForReserve) return;
 
-        const reservedWithPid = selectedItems.map(item => ({
-            ...selectedItemForReserve,
-            pid_Id: item.pid_Id,
-            uid: selectedItemForReserve.uid,
-        }));
+        // Map selected items to include pid_Id
+        const reservedWithPid = selectedItems.map(item => {
+            return {
+                ...selectedItemForReserve,
+                pid_Id: item.pid_Id   // Attach pid_Id from actual item
+            };
+        });
 
-        setReservedItems(prev => [...prev.filter(i => i.uid !== selectedItemForReserve.uid), ...reservedWithPid]);
+        // Update ReservedItems state with new entries
+        setReservedItems(prev => {
+            const updated = [...prev, ...reservedWithPid];
+            return updated;
+        });
 
+        // Close modal
         setShowStockModal1(false);
     };
-
     const handleSearchChange1 = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
