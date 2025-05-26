@@ -528,17 +528,17 @@ router.post("/later-orders", async (req, res) => {
             ...reservedItems.map(item => ({ ...item, status: "Reserved" })),
             ...productionItems.map(item => ({ ...item, status: "Production" })),
         ];
-
         // Step 1: Prepare Order_Detail insert values
         const orderDetailValues = allItems.map(item => [
             orID,
             item.I_Id,
-            1,
-            parseFloat(item.price) / item.qty,
+            item.qty,
+            parseFloat(item.unitPrice),
             parseFloat(item.discount),
             item.material
         ]);
-
+        console.log(orderDetailValues)
+        
         // Step 2: Insert into Order_Detail
         const insertDetailQuery = `INSERT INTO Order_Detail (orID, I_Id, qty, tprice, discount, material) VALUES ?`;
         const result = await db.query(insertDetailQuery, [orderDetailValues]);
@@ -546,7 +546,8 @@ router.post("/later-orders", async (req, res) => {
         // Step 3: Map generated IDs back to original items
         const insertedStartId = result[0].insertId;
         const insertedItemsWithIds = allItems.map((item, index) => ({
-            ...item,
+            status:item.status,
+            uuid: item.uid,
             orderDetailId: insertedStartId + index,
         }));
 
@@ -555,60 +556,60 @@ router.post("/later-orders", async (req, res) => {
         const reserved = insertedItemsWithIds.filter(i => i.status === "Reserved");
         const production = insertedItemsWithIds.filter(i => i.status === "Production");
 
-        // Step 5: Insert into each respective table
-        if (booked.length > 0) {
-            const bookedQuery = `INSERT INTO Booked_Orders (orderDetailId, orID, I_Id, qty) VALUES ?`;
-            const bookedValues = booked.map(i => [i.orderDetailId, orID, i.I_Id, i.qty]);
-            await db.query(bookedQuery, [bookedValues]);
-        }
+        console.log(booked,reserved,production);
 
-        if (reserved.length > 0) {
-            const reservedQuery = `INSERT INTO Reserved_Orders (orderDetailId, orID, I_Id, qty, expected_date, note) VALUES ?`;
-            const reservedValues = reserved.map(i => [
-                i.orderDetailId, orID, i.I_Id, i.qty, i.expectdate || null, i.specialnote || ''
-            ]);
-            await db.query(reservedQuery, [reservedValues]);
-        }
+                // Step 5: Insert into each respective table
+        // if (booked.length > 0) {
+        //     const bookedQuery = `INSERT INTO Booked_Orders (orderDetailId, orID, I_Id, qty) VALUES ?`;
+        //     const bookedValues = booked.map(i => [i.orderDetailId, orID, i.I_Id, i.qty]);
+        //     await db.query(bookedQuery, [bookedValues]);
+        // }
 
-        if (production.length > 0) {
-            const productionQuery = `INSERT INTO Production_Orders (orderDetailId, orID, I_Id, qty, supplierId, expected_date, note) VALUES ?`;
-            const productionValues = production.map(i => [
-                i.orderDetailId, orID, i.I_Id, i.qty, i.supplierId || null, i.expectdate || null, i.specialnote || ''
-            ]);
-            await db.query(productionQuery, [productionValues]);
-        }
+        // if (reserved.length > 0) {
+        //     const reservedQuery = `INSERT INTO Reserved_Orders (orderDetailId, orID, I_Id, qty, expected_date, note) VALUES ?`;
+        //     const reservedValues = reserved.map(i => [
+        //         i.orderDetailId, orID, i.I_Id, i.qty, i.expectdate || null, i.specialnote || ''
+        //     ]);
+        //     await db.query(reservedQuery, [reservedValues]);
+        // }
+
+        // if (production.length > 0) {
+        //     const productionQuery = `INSERT INTO Production_Orders (orderDetailId, orID, I_Id, qty, supplierId, expected_date, note) VALUES ?`;
+        //     const productionValues = production.map(i => [
+        //         i.orderDetailId, orID, i.I_Id, i.qty, i.supplierId || null, i.expectdate || null, i.specialnote || ''
+        //     ]);
+        //     await db.query(productionQuery, [productionValues]);
+        // }
         
-        if (dvStatus === "Delivery") {
-            const dvID = `DLV_${Date.now()}`;
-            const deliveryQuery = `
-                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date, type, driverBalance)
-                VALUES (?, ?, ?, ?, ?, 'Pending', ?, ?, 0)`;
+        // if (dvStatus === "Delivery") {
+        //     const dvID = `DLV_${Date.now()}`;
+        //     const deliveryQuery = `
+        //         INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date, type, driverBalance)
+        //         VALUES (?, ?, ?, ?, ?, 'Pending', ?, ?, 0)`;
 
-            const addressToUse = isAddressChanged ? newAddress : address;
-            await db.query(deliveryQuery, [dvID, orID, addressToUse, district, Cust_id, expectedDate, dvtype]);
-        }
+        //     const addressToUse = isAddressChanged ? newAddress : address;
+        //     await db.query(deliveryQuery, [dvID, orID, addressToUse, district, Cust_id, expectedDate, dvtype]);
+        // }
 
-        if (couponCode) {
-            const ocID = `OCP_${Date.now()}`;
-            const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
-            await db.query(couponQuery, [ocID, orID, couponCode]);
-        }
-        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
-        // ✅ Insert cash balance if advance exists
-        if (advance1 > 0) {
-            const cashQuery = `
-                INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
-                VALUES (?, ?, 'order', NOW(), ?)`;
-            await db.query(cashQuery, ['Order Advance', orID, advance1]);
+        // if (couponCode) {
+        //     const ocID = `OCP_${Date.now()}`;
+        //     const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
+        //     await db.query(couponQuery, [ocID, orID, couponCode]);
+        // }
+        // const op_ID = await generateNewId("order_payment", "op_ID", "OP");
+        // // ✅ Insert cash balance if advance exists
+        // if (advance1 > 0) {
+        //     const cashQuery = `
+        //         INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+        //         VALUES (?, ?, 'order', NOW(), ?)`;
+        //     await db.query(cashQuery, ['Order Advance', orID, advance1]);
 
-            await db.query(
-                `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
-                 VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
-                [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID]
-            );
-        }
-
-
+        //     await db.query(
+        //         `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
+        //          VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
+        //         [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID]
+        //     );
+        // }
 
         return res.status(201).json({
             success: true,
@@ -999,6 +1000,161 @@ router.get("/customer/check-customer", async (req, res) => {
 });
 
 // Get one accept order in-detail
+// router.get("/accept-order-details", async (req, res) => {
+//     try {
+//         const { orID } = req.query;
+//         if (!orID) {
+//             return res.status(400).json({ success: false, message: "Order ID is required" });
+//         }
+
+//         // 1️⃣ Fetch Order Info with Customer and Sales Team Details
+//         const orderQuery = `
+//             SELECT
+//                 o.OrID, o.orDate, o.c_ID, c.title, c.FtName, c.SrName, c.address, c.contact1, c.contact2,o.netTotal,
+//                 o.advance, o.balance, o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total,o.specialdic,
+//                 o.ordertype, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
+//             FROM Orders o
+//                      LEFT JOIN Customer c ON o.c_ID = c.c_ID
+//                      LEFT JOIN sales_team s ON o.stID = s.stID
+//                      LEFT JOIN Employee e ON s.E_Id = e.E_Id
+//             WHERE o.OrID = ?`;
+
+//         const [orderResult] = await db.query(orderQuery, [orID]);
+//         if (orderResult.length === 0) {
+//             return res.status(404).json({ success: false, message: "Order not found" });
+//         }
+//         const orderData = orderResult[0];
+
+//         // 2️⃣ Fetch Ordered Items
+//         const itemsQuery = `
+//             SELECT
+//                 od.id, od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+//                 od.discount AS unitDiscount,
+//                 i.price AS unitPrice,
+//                 i.bookedQty, i.availableQty, i.stockQty
+//             FROM Order_Detail od
+//                      JOIN Item i ON od.I_Id = i.I_Id
+//             WHERE od.orID = ?`;
+
+//         const [itemsResult] = await db.query(itemsQuery, [orID]);
+
+//         // 3️⃣ Fetch Booked Items
+//         const bookedItemsQuery = `
+//             SELECT bi.I_Id, i.I_name, bi.qty
+//             FROM booked_item bi
+//                      JOIN Item i ON bi.I_Id = i.I_Id
+//             WHERE bi.orID = ?`;
+
+//         const [bookedItemsResult] = await db.query(bookedItemsQuery, [orID]);
+//         console.log(bookedItemsResult);
+
+//         // 4️⃣ Fetch Accepted Orders
+//         const acceptedOrdersQuery = `
+//             SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
+//             FROM accept_orders ao
+//                      JOIN Item i ON ao.I_Id = i.I_Id
+//             WHERE ao.orID = ?`;
+
+//         const [acceptedOrdersResult] = await db.query(acceptedOrdersQuery, [orID]);
+
+//         // 5️⃣ Format Customer Name with Title
+//         const customerName = [orderData.title, orderData.FtName, orderData.SrName].filter(Boolean).join(" ");
+
+//         // 6️⃣ Initialize Response Object
+//         const orderResponse = {
+//             orderId: orderData.OrID,
+//             orderDate:formatDate(orderData.orDate),
+//             customerId: orderData.c_ID,
+//             customerName: customerName,
+//             address: orderData.address,
+//             ordertype: orderData.ordertype,
+//             phoneNumber: orderData.contact1,
+//             optionalNumber: orderData.contact2,
+//             orderStatus: orderData.orStatus,
+//             deliveryStatus: orderData.delStatus,
+//             deliveryCharge: orderData.delPrice,
+//             discount: orderData.discount,
+//             specialdiscount: orderData.specialdic,
+//             totalPrice: orderData.total,
+//             netTotal: orderData.netTotal,
+//             advance: orderData.advance,
+//             balance: orderData.balance,
+//             payStatus: orderData.payStatus,
+//             expectedDeliveryDate: formatDate(orderData.expectedDate),
+//             specialNote: orderData.specialNote,
+//             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
+//             items: itemsResult.map(item => {
+//                 const { qty, unitPrice, unitDiscount } = item;
+//                 const amountBeforeDiscount = unitPrice * qty;
+//                 const totalDiscountAmount = unitDiscount * qty;
+//                 const finalAmount = item.tprice;
+//                 return {
+//                     id: item.id, // <-- Include the ID here
+//                     itemId: item.I_Id,
+//                     itemName: item.I_name,
+//                     color: item.color,
+//                     quantity: qty,
+//                     unitPrice: unitPrice,
+//                     discount: unitDiscount,
+//                     amountBeforeDiscount: amountBeforeDiscount,
+//                     totalDiscountAmount: totalDiscountAmount,
+//                     amount: finalAmount,
+//                     booked: item.bookedQty > 0,
+//                     bookedQuantity: item.bookedQty,
+//                     availableQuantity: item.availableQty,
+//                     stockQuantity: item.stockQty
+//                 };
+//             }),
+//             bookedItems: bookedItemsResult.map(item => ({
+//                 itemId: item.I_Id,
+//                 itemName: item.I_name,
+//                 quantity: item.qty
+//             })),
+//             acceptedOrders: acceptedOrdersResult.map(item => ({
+//                 itemId: item.I_Id,
+//                 itemName: item.I_name,
+//                 itemReceived: item.itemReceived,
+//                 status: item.status
+//             }))
+//         };
+
+//         // 7️⃣ Fetch Delivery Info If Order is for Delivery
+//         if (orderData.delStatus === "Delivery") {
+//             const deliveryQuery = `
+//                 SELECT dv_id, address, district, status, schedule_Date, delivery_Date
+//                 FROM delivery
+//                 WHERE orID = ?`;
+
+//             const [deliveryResult] = await db.query(deliveryQuery, [orID]);
+
+//             if (deliveryResult.length > 0) {
+//                 const deliveryData = deliveryResult[0];
+//                 orderResponse.deliveryInfo = {
+//                     deliveryId: deliveryData.dv_id,
+//                     address: deliveryData.address,
+//                     district: deliveryData.district,
+//                     status: deliveryData.status,
+//                     scheduleDate: formatDate(deliveryData.schedule_Date),
+//                     deliveryDate: deliveryData.delivery_Date ? formatDate(deliveryData.delivery_Date) : null
+//                 };
+//             }
+//         }
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Order details fetched successfully",
+//             order: orderResponse
+//         });
+
+//     } catch (error) {
+//         console.error("Error fetching order details:", error.message);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Error fetching order details",
+//             details: error.message
+//         });
+//     }
+// });
 router.get("/accept-order-details", async (req, res) => {
     try {
         const { orID } = req.query;
@@ -1027,7 +1183,7 @@ router.get("/accept-order-details", async (req, res) => {
         // 2️⃣ Fetch Ordered Items
         const itemsQuery = `
             SELECT
-                od.id, od.I_Id, i.I_name, i.color, od.qty, od.tprice,
+                od.id,od.I_Id, i.I_name, i.color, od.qty, od.tprice,
                 od.discount AS unitDiscount,
                 i.price AS unitPrice,
                 i.bookedQty, i.availableQty, i.stockQty
@@ -1036,7 +1192,7 @@ router.get("/accept-order-details", async (req, res) => {
             WHERE od.orID = ?`;
 
         const [itemsResult] = await db.query(itemsQuery, [orID]);
-
+        console.log(itemsResult);
         // 3️⃣ Fetch Booked Items
         const bookedItemsQuery = `
             SELECT bi.I_Id, i.I_name, bi.qty
@@ -1045,7 +1201,6 @@ router.get("/accept-order-details", async (req, res) => {
             WHERE bi.orID = ?`;
 
         const [bookedItemsResult] = await db.query(bookedItemsQuery, [orID]);
-        console.log(bookedItemsResult);
 
         // 4️⃣ Fetch Accepted Orders
         const acceptedOrdersQuery = `
@@ -1088,7 +1243,7 @@ router.get("/accept-order-details", async (req, res) => {
                 const totalDiscountAmount = unitDiscount * qty;
                 const finalAmount = item.tprice;
                 return {
-                    id: item.id, // <-- Include the ID here
+                    id:item.id,
                     itemId: item.I_Id,
                     itemName: item.I_name,
                     color: item.color,
