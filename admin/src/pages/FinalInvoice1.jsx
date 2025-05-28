@@ -54,6 +54,13 @@ const FinalInvoice1 = ({ selectedOrder, setShowModal2, handlePaymentUpdate,handl
             // setShowModal2(false)
         );
     };
+    const viewhandle1 = () => {
+        setShowModal2(false);
+        setTimeout(() => {
+            window.location.reload(); // Refresh after closing modal
+        }, 300); // Slight delay gives smoother UX
+    };
+    
     useEffect(() => {
         const itemIds = [...new Set(selectedOrder.items.map(item => item.itemId))];
         const fetchReservedAndUnreserved = async () => {
@@ -252,8 +259,17 @@ const FinalInvoice1 = ({ selectedOrder, setShowModal2, handlePaymentUpdate,handl
                     <div className="modal-buttons">
                         <button className="scan-btn" onClick={() => setShowStockModal(true)}>Scan</button>
                         <button className="print-btn" onClick={handlePrintAndSubmit}>Save</button>
-                        <button className="close-btn" onClick={viewhandle}>Get delivery Note</button>
+
+                        {selectedOrder?.deliveryStatus === "Pickup" && (
+                            <button className="close-btn" onClick={viewhandle1}>Close</button>
+                        )}
+
+                        {selectedOrder?.deliveryStatus === "Delivery" && (
+                            <button className="close-btn" onClick={viewhandle}>Get delivery Note</button>
+                        )}
                     </div>
+
+
                 </div>
             </div>
             {/* Stock Modal */}
