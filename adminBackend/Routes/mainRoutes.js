@@ -281,6 +281,7 @@ router.post("/orders", async (req, res) => {
 
         // ✅ Set order status for Walking to 'Accepted'
         const orderStatus = dvStatus === "Delivery" ?  "Deliverd" : "Issued";
+        console.log(dvStatus,orderStatus);
         // const orderStatus = orderType === "Walking" ? "Accepted" : "Pending";
         const orderQuery = `
             INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
@@ -5671,59 +5672,80 @@ router.post("/issued-order", async (req, res) => {
 
 // Issued Orders items
 router.post("/issued-items", async (req, res) => {
-    const { orID, payStatus, selectedItems } = req.body;
+    const { orID, payStatus, selectedItems, deliveryStatus } = req.body;
 
     if (!orID || !payStatus || !selectedItems || selectedItems.length === 0) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
     try {
-        // 1. Update Orders table
-        await db.query(
-            `UPDATE Orders SET orStatus = 'Delivered', payStatus = ? WHERE OrID = ?`,
-            [payStatus, orID]
-        );
+        // 1. Update Orders table only if it's a Delivery
+        if (deliveryStatus === "Delivery") {
+            await db.query(
+                `UPDATE Orders SET orStatus = 'Delivered', payStatus = ? WHERE OrID = ?`,
+                [payStatus, orID]
+            );
+        } else {
+            await db.query(
+                `UPDATE Orders SET payStatus = ? WHERE OrID = ?`,
+                [payStatus, orID]
+            );
+        }
 
-        // 2. Update p_i_detail table (Mark selected items as issued)
+        // 2. Update p_i_detail and issued_items
+        const itemStatus = deliveryStatus === "Delivery" ? "Dispatched" : "Issued";
+
         for (const item of selectedItems) {
             await db.query(
                 `UPDATE p_i_detail
-                 SET status = 'Dispatched', orID = ?, datetime = NOW(),price = ?
+                 SET status = ?, orID = ?, datetime = NOW(), price = ?
                  WHERE pid_Id = ?`,
-                [orID,item.price, item.pid_Id]
+                [itemStatus, orID, item.price, item.pid_Id]
             );
+
             await db.query(
-                `INSERT INTO issued_items (orID, pid_Id, status, date) VALUES (?, ?, 'Dispatched', NOW())`,
-                [orID, item.pid_Id]
+                `INSERT INTO issued_items (orID, pid_Id, status, date)
+                 VALUES (?, ?, ?, NOW())`,
+                [orID, item.pid_Id, itemStatus]
             );
         }
 
-        // 3. Update Item stock quantities using Order_Detail table
-        const [orderItems] = await db.query(
-            `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
-            [orID]
-        );
-
-        for (const item of orderItems) {
-            await db.query(
-                `UPDATE Item
-                 SET bookedQty = bookedQty - ?, dispatchedQty = dispatchedQty + ?
-                 WHERE I_Id = ?`,
-                [item.qty, item.qty, item.I_Id]
+        if (!deliveryStatus === "Delivery") {
+             // 3. Update Item stock quantities
+            const [orderItems] = await db.query(
+                `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
+                [orID]
             );
+    
+            for (const item of orderItems) {
+                await db.query(
+                    `UPDATE Item
+                     SET bookedQty = bookedQty - ?, dispatchedQty = dispatchedQty + ?
+                     WHERE I_Id = ?`,
+                    [item.qty, item.qty, item.I_Id]
+                );
+            }
+    
+            // 4. Cleanup
+            await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
+            await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
+    
         }
-
-        // 4. Delete from booked_item & accept_orders
-        await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
-        await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
-
-        return res.status(200).json({ success: true, message: "Order updated successfully" });
+        return res.status(200).json({
+            success: true,
+            message: `Order processed as ${itemStatus}`,
+        });
 
     } catch (error) {
         console.error("Error updating order:", error.message);
-        return res.status(500).json({ success: false, message: "Server error", error: error.message });
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
     }
 });
+
 
 // Save new Delivery Rate
 router.post("/delivery-rates", async (req, res) => {
