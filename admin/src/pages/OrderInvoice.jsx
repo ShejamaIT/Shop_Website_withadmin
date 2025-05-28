@@ -485,28 +485,25 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                 const { orderId } = result.data;
                 if (response.ok) {
                     toast.success("Order placed successfully!");
-                    // Construct selectedOrder based on response + orderData
-                    if (formData.issuable === 'Now' && formData.dvStatus === "Delivery"){
-                        const newOrder = {
-                            orderId:orderId ,
-                            orderDate: new Date().toLocaleDateString(),
-                            phoneNumber: formData.phoneNumber,
-                            payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
-                            deliveryStatus: formData.dvStatus,
-                            deliveryCharge: deliveryPrice,
-                            discount: discountAmount,
-                            specialDiscount: specialdiscountAmount,
-                            advance: parseFloat(advance),
-                            items: items,
-                            balance:parseFloat(balance),
-                            totalPrice:totalBillPrice,
-                            customerName:formData.FtName+" "+formData.SrName,
-                
-                        };
-                        setSelectedOrder(newOrder);
-                        // Optionally, open invoice modal here
-                        setShowModal2(true);
-                    }
+                    const newOrder = {
+                        orderId:orderId ,
+                        orderDate: new Date().toLocaleDateString(),
+                        phoneNumber: formData.phoneNumber,
+                        payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
+                        deliveryStatus: formData.dvStatus,
+                        deliveryCharge: deliveryPrice,
+                        discount: discountAmount,
+                        specialDiscount: specialdiscountAmount,
+                        advance: parseFloat(advance),
+                        items: items,
+                        balance:parseFloat(balance),
+                        totalPrice:totalBillPrice,
+                        customerName:formData.FtName+" "+formData.SrName,
+            
+                    };
+                    setSelectedOrder(newOrder);
+                    // Optionally, open invoice modal here
+                    setShowModal2(true);
                 
                 
                 } else {
@@ -525,6 +522,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             orderDate: selectedOrder.orderDate,
             delStatus: formData.deliveryStatus,
             delPrice: formData.delivery,
+            deliveryStatus: formData.deliveryStatus,
             discount: selectedOrder.discount,
             subtotal: formData.subtotal,
             total: formData.billTotal,
