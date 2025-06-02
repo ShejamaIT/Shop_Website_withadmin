@@ -18,8 +18,6 @@ app.use(cors({
     credentials: true,
 }));
 
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true })); // Handles form data
 app.use(bodyParser.json({ limit: "20mb" }));
 app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
 
