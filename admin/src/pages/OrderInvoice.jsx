@@ -73,6 +73,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [suppliers, setSuppliers] = useState([]);
     const [loadingSuppliers, setLoadingSuppliers] = useState(true);
     const [productionData, setProductionData] = useState({itemId: '', supplierId: '', qty: '', expecteddate: '', specialnote: ''});
+    const [processedItems, setProcessedItems] = useState([]);
+
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -97,27 +99,32 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         }
     };
     const fetchCustomers = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/allcustomers`);
-            const data = await response.json();
+    setLoading(true);
+    try {
+        const response = await fetch(`http://localhost:5001/api/admin/main/allcustomers`);
+        const data = await response.json();
 
-            if (response.ok) {
-                setCustomers(data);
-                setFilteredCustomers(data); // Initialize filtered list
-            } else {
-                setCustomers([]);
-                setFilteredCustomers([]);
-                setError(data.message || "No customers available.");
-            }
-        } catch (error) {
+        if (response.ok) {
+            // If the response is OK, assume data is either an array or empty
+            setCustomers(data || []);
+            setFilteredCustomers(data || []);
+            setError(""); // Clear any previous error
+        } else {
+            // Only show error if backend explicitly says something went wrong (e.g., 500)
             setCustomers([]);
             setFilteredCustomers([]);
-            setError("Error fetching customers.");
-        } finally {
-            setLoading(false);
+            setError(data.message || "Something went wrong.");
         }
-    };
+    } catch (error) {
+        // Network or unexpected error
+        setCustomers([]);
+        setFilteredCustomers([]);
+        setError("Error fetching customers.");
+    } finally {
+        setLoading(false);
+    }
+};
+
     useEffect(() => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount,advance,balance]); // Recalculate when dependencies change
@@ -436,20 +443,19 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             totalBillPrice: totalBillPrice.toFixed(2),
             specialdiscountAmount,
         };
+        console.log(formData.issuable);
 
         try {
             if (formData.issuable === 'Later') {
                 try {
                     const fullOrderData = {
                         ...orderData,
-                        bookedItems,
-                        reservedItems,
-                        productionItems,
+                        processedItems,
                     };
             
                     console.log("📝 Sending Full Order Data:", fullOrderData);
             
-                    const response = await fetch("http://localhost:5001/api/admin/main/later-orders", {
+                    const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -758,64 +764,69 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             alert("Failed to add coupon. Please try again.");
         }
     };
-    const handleStatusChange = (index, newStatus, item) => {
+   const handleStatusChange = (index, newStatus, item) => {
         const updatedItems = [...selectedItemsQty];
         const updatedItem = { ...updatedItems[index], status: newStatus };
-
         updatedItems[index] = updatedItem;
         setSelectedItemsQTY(updatedItems);
-        // Use uid for uniqueness
+
         const identifier = updatedItem.uid;
 
-        // Remove from all status arrays by uid
-        const removeByUid = (array) =>
-            array.filter(i => i.uid !== identifier);
+        const removeByUid = (array) => array.filter(i => i.uid !== identifier);
 
-        setBookedItems(prev => removeByUid(prev));
-        setReservedItems(prev => removeByUid(prev));
-        setProductionItems(prev => removeByUid(prev));
+        setProcessedItems(prev => removeByUid(prev)); // clear from any status
 
         if (newStatus === "Booked") {
-            setBookedItems(prev => [...removeByUid(prev), updatedItem]);
+            const strippedItem = {
+                I_Id: updatedItem.I_Id,
+                material: updatedItem.material,
+                uid: updatedItem.uid,
+                unitPrice: updatedItem.unitPrice,
+                discount: updatedItem.discount || 0,
+                status: "Booked"
+            };
+            setProcessedItems(prev => [...prev, strippedItem]);
         } else if (newStatus === "Reserved") {
             setSelectedItemForReserve(updatedItem);
             setShowStockModal1(true);
         } else if (newStatus === "Production") {
             fetchSuppliers(updatedItem.I_Id);
-            setSelectedItemForProduction(updatedItem); // store item context
-            setShowStockModal2(true); // open modal
-            // setProductionItems(prev => [...removeByUid(prev), updatedItem]);
+            setSelectedItemForProduction(updatedItem);
+            setShowStockModal2(true);
         }
 
         setTimeout(() => {
-            console.log("📦 BookedItems:", bookedItems);
-            console.log("🔒 ReservedItems:", reservedItems);
-            console.log("🏭 ProductionItems:", productionItems);
+            console.log("📦 All Processed Items:", processedItems);
+            console.log("🔒 Reserved:", processedItems.filter(i => i.status === "Reserved"));
+            console.log("🏭 Production:", processedItems.filter(i => i.status === "Production"));
+            console.log("📦 Booked:", processedItems.filter(i => i.status === "Booked"));
         }, 200);
     };
+
     const handleProduction = (e) => {
         e.preventDefault();
 
         if (!selectedItemForProduction) return;
-        console.log(selectedItemForProduction);
-        console.log(productionData);
 
         const updatedItem = {
-            ItemForProduction:{...selectedItemForProduction},
-            productionData: { ...productionData }, // group all fields under a key
-            status: "Production",
+            I_Id: selectedItemForProduction.I_Id,
+            material: selectedItemForProduction.material,
+            uid: selectedItemForProduction.uid,
+            unitPrice: selectedItemForProduction.unitPrice,
+            discount: selectedItemForProduction.discount || 0,
+            productionData: { ...productionData },
+            status: "Production"
         };
 
-        console.log(updatedItem);
-        // Add to productionItems array
-        setProductionItems(prev => [...prev.filter(i => i.uid !== updatedItem.uid), updatedItem]);
+        setProcessedItems(prev => [
+            ...prev.filter(i => i.uid !== updatedItem.uid),
+            updatedItem
+        ]);
 
-        // Also update selectedItemsQty to reflect changes
         setSelectedItemsQTY(prev =>
-            prev.map(i => i.uid === updatedItem.uid ? updatedItem : i)
+            prev.map(i => i.uid === updatedItem.uid ? { ...i, status: "Production" } : i)
         );
 
-        // Clear modal-related state
         setSelectedItemForProduction(null);
         setProductionData({
             supplierId: "",
@@ -825,26 +836,29 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         });
         setShowStockModal2(false);
     };
-    const ReservedItem = async (selectedItems, selectedItemForReserve) => {
+
+   const ReservedItem = async (selectedItems, selectedItemForReserve) => {
         if (!selectedItems || selectedItems.length === 0 || !selectedItemForReserve) return;
 
-        // Map selected items to include pid_Id
-        const reservedWithPid = selectedItems.map(item => {
-            return {
-                ...selectedItemForReserve,
-                pid_Id: item.pid_Id   // Attach pid_Id from actual item
-            };
-        });
+        const reservedWithPid = selectedItems.map(item => ({
+            I_Id: selectedItemForReserve.I_Id,
+            material: selectedItemForReserve.material,
+            uid: selectedItemForReserve.uid,
+            unitPrice: selectedItemForReserve.unitPrice,
+            discount: selectedItemForReserve.discount || 0,
+            pid_Id: item.pid_Id,
+            status: "Reserved"
+        }));
 
-        // Update ReservedItems state with new entries
-        setReservedItems(prev => {
-            const updated = [...prev, ...reservedWithPid];
-            return updated;
-        });
+        setProcessedItems(prev => [
+            ...prev.filter(i => !reservedWithPid.find(r => r.uid === i.uid)),
+            ...reservedWithPid
+        ]);
 
-        // Close modal
         setShowStockModal1(false);
     };
+
+
     const handleSearchChange1 = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
