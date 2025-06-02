@@ -12,9 +12,10 @@ import TableAcceptingUnbooked from "../components/tables/TableAcceptingUnbooked"
 import TableReturned from "../components/tables/TableReturnedOrders";
 import TableCancled from "../components/tables/TableCancelledOrders";
 import TableDeliverd from "../components/tables/TableDeliverdOrders";
+import TableProcessing from "../components/tables/TableProcessing";
 
 const AllOrders = () => {
-    const [activeTab, setActiveTab] = useState("Pending Orders");
+    const [activeTab, setActiveTab] = useState("Pending");
     const [nestedActiveTab, setNestedActiveTab] = useState("1");
     const [refreshKey, setRefreshKey] = useState(0); // For forcing re-render
 
@@ -23,14 +24,14 @@ const AllOrders = () => {
 
     // List of tab names corresponding to the tabs
     const tabNames = [
-        "Pending Orders",
-        "Accepted Orders",
+        "Pending",
+        "Accepted",
         "Production",
-        "Completed Orders",
-        "Delivered Orders",
-        "Issued Orders",
-        "Returned Orders",
-        "Cancel Orders"
+        "Completed",
+        "Delivered",
+        "Issued",
+        "Returned",
+        "Cancel"
     ];
 
     // Read the active tab from the URL query parameter (using `tab`)
@@ -74,14 +75,14 @@ const AllOrders = () => {
 
                     {/* Main Tab Content */}
                     <TabContent activeTab={activeTab}>
-                        <TabPane tabId="Pending Orders" key={refreshKey}>
+                        <TabPane tabId="Pending" key={refreshKey}>
                             <Row>
                                 <TablePending />
                             </Row>
                         </TabPane>
 
                         {/* Accepted Orders with Nested Tabs */}
-                        <TabPane tabId="Accepted Orders" key={refreshKey}>
+                        <TabPane tabId="Accepted" key={refreshKey}>
                             <Nav tabs className="mb-3">
                                 <NavItem>
                                     <NavLink
@@ -119,34 +120,35 @@ const AllOrders = () => {
 
                         <TabPane tabId="Production" key={refreshKey}>
                             <Row>
-                                <Tableforproduction />
+                                {/* <Tableforproduction /> */}
+                                <TableProcessing />
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="Completed Orders" key={refreshKey}>
+                        <TabPane tabId="Completed" key={refreshKey}>
                             <Row>
                                 <TableCompleted />
                             </Row>
                         </TabPane>
-                        <TabPane tabId="Delivered Orders" key={refreshKey}>
+                        <TabPane tabId="Delivered" key={refreshKey}>
                             <Row>
                                 <TableDeliverd />
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="Issued Orders" key={refreshKey}>
+                        <TabPane tabId="Issued" key={refreshKey}>
                             <Row>
                                 <TableIssued />
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="Returned Orders" key={refreshKey}>
+                        <TabPane tabId="Returned" key={refreshKey}>
                             <Row>
                                 <TableReturned />
                             </Row>
                         </TabPane>
 
-                        <TabPane tabId="Cancel Orders" key={refreshKey}>
+                        <TabPane tabId="Cancel" key={refreshKey}>
                             <Row>
                                 <TableCancled />
                             </Row>
