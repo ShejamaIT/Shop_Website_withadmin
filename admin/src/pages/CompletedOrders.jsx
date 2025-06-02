@@ -73,32 +73,45 @@ const CompleteOrderDetails = () => {
         }));
     };
     const fetchOrder = async () => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`);
-            const response1 = await fetch(`http://localhost:5001/api/admin/main/special-reserved-details?orID=${id}`);
-            if (!response.ok) throw new Error("Failed to fetch order details.");
-            if (!response1.ok) throw new Error("Failed to fetch order details.");
+    try {
+        // Fetch both endpoints in parallel
+        const [response, response1] = await Promise.all([
+            fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`),
+            fetch(`http://localhost:5001/api/admin/main/special-reserved-details?orID=${id}`)
+        ]);
 
-            const data = await response.json();
+        // Check if the main order fetch is successful
+        if (!response.ok) throw new Error("Failed to fetch main order details.");
+
+        const data = await response.json();
+
+        // Safely handle optional special reserved items
+        let specialItems = [];
+        if (response1.ok) {
             const data1 = await response1.json();
-            setSpecialReservedItems(data1.data);
-
-            // Ensure `isBooked` updates correctly
-            const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);
-            const updatedItems = data.order.items.map((item) => ({
-                ...item,
-                booked: bookedItems.includes(item.itemId),
-            }));
-
-            setOrder({ ...data.order, items: updatedItems });
-            setFormData({ ...data.order, items: updatedItems });
-
-            setLoading(false);
-        } catch (err) {
-            console.error("Error fetching order details:", err);
-            setError(err.message);
-            setLoading(false);
+            specialItems = data1.data || [];
+        } else {
+            console.warn("Special reserved items not found or could not be fetched.");
         }
+
+        setSpecialReservedItems(specialItems);
+
+        // Map booking status to items
+        const bookedItems = data.order.bookedItems.map(booked => booked.itemId);
+        const updatedItems = data.order.items.map(item => ({
+            ...item,
+            booked: bookedItems.includes(item.itemId),
+        }));
+
+        setOrder({ ...data.order, items: updatedItems });
+        setFormData({ ...data.order, items: updatedItems });
+
+        setLoading(false);
+    } catch (err) {
+        console.error("Error fetching order details:", err);
+        setError(err.message);
+        setLoading(false);
+    }
     };
     const calculateTotal = () => {
         const items = formData.items || [];
@@ -262,7 +275,6 @@ const CompleteOrderDetails = () => {
         return updatedData.deliveryStatus !== order.deliveryStatus ||
             updatedData.deliveryInfo !== order.deliveryInfo;
     };
-
     const handleEditClick = (order) => {
         if (!order) return;
         setSelectedOrder(order);
@@ -273,7 +285,6 @@ const CompleteOrderDetails = () => {
         setSelectedOrder(order);
         setShowModal2(true);
     };
-
     const handleEditClick2 = (item,order) => {
         if (!item) return; // Prevent issues if item is undefined
         const updatedItem = {
@@ -283,7 +294,6 @@ const CompleteOrderDetails = () => {
         setSelectedItem(updatedItem);
         setShowModal(true);
     };
-
     const handleSubmit2 = async (formData) => {
         try {
             const response = await fetch(`http://localhost:5001/api/admin/main/change-quantity`, {
@@ -314,7 +324,6 @@ const CompleteOrderDetails = () => {
             alert(`Error updating quantity: ${error.message}`);
         }
     }
-
     const handleSubmit3 = async (formData) => {
         setShowModal2(false);
         const updatedData = {
@@ -361,7 +370,6 @@ const CompleteOrderDetails = () => {
             // Handle network error, show error message to the user
         }
     };
-
     const handleSubmit = async (formData) => {
         // Destructure the necessary fields from formData
         const { orID,
@@ -443,7 +451,6 @@ const CompleteOrderDetails = () => {
         handleAddItem(selectedItems);
         setShowStockModal(false);
     };
-
     const handleAddItem = (selectedItems) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -464,7 +471,6 @@ const CompleteOrderDetails = () => {
             ],
         }));
     };
-
     const ReservedItem = async (selectedItems,selectedItemForReserve) => {
         if (!selectedItems || selectedItems.length === 0) {
             return;
@@ -504,7 +510,6 @@ const CompleteOrderDetails = () => {
             console.error("API call error:", error);
         }
     };
-
     // Fetch stock when modal opens or selectedItemForReserve changes
     useEffect(() => {
         if (selectedItemForReserve?.itemId || selectedItemForReserve?.I_Id) {
