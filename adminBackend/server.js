@@ -18,8 +18,11 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); // Handles form data
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true })); // Handles form data
+app.use(bodyParser.json({ limit: "20mb" }));
+app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
+
 
 // Serve static files (if needed, e.g., images, barcodes)
 app.use('/uploads', express.static(path.resolve('uploads')));
