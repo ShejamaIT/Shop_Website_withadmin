@@ -23,6 +23,7 @@ import SupplierDetails from "../pages/Supplier";
 import User from "../pages/User";
 import AccepetOrderDetails from "../pages/AccepetOrder";
 import CompleteOrderDetails from "../pages/CompletedOrders";
+import ProdutionOrderDetails from "../pages/ProcessingOrders";
 import SaleteamDetail from "../pages/SaleteamDetail";
 import IssuedOrderDetails from "../pages/IssuedOrder";
 import DeliveryNoteDetails from "../pages/DeliveryNoteDetails";
@@ -85,6 +86,7 @@ const Router = () => {
             <Route path="deliveryNote-detail/:id" element={<DeliveryNoteDetails />} />
             <Route path="deliveryNote-detail-drive/:id" element={<DeliveryNoteDetailsDrive />} />
             <Route path="complete-order-detail/:id" element={<CompleteOrderDetails />} />
+            <Route path="prodution-order-detail/:id" element={<ProdutionOrderDetails />} />
             <Route path="retruned-order-detail/:id" element={<ReturnedOrderDetails />} />
             <Route path="item-detail/:id" element={<ItemDetails />} />
             <Route path="supplier-detail/:id" element={<SupplierDetails />} />
