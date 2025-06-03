@@ -1,10 +1,8 @@
-
 import React, {useState, useEffect, useRef} from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import { toast } from "react-toastify";
-import {
-    Container, Row, Col, Form, FormGroup, Label, Input, Button, ModalHeader, ModalBody, ModalFooter, Modal, Card, CardBody, CardTitle, CardText} from "reactstrap";
+import { Container, Row, Col, Form, FormGroup, Label, Input, Button, ModalHeader, ModalBody, ModalFooter, Modal, Card, CardBody, CardTitle, CardText} from "reactstrap";
 import "../style/placeorder.css";
 import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
