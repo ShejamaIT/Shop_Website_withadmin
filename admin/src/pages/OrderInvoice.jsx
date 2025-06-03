@@ -18,7 +18,7 @@ import DeliveryNoteViewNow from "./DeliveryNoteViewNow";
 import { v4 as uuidv4 } from 'uuid';
 
 const OrderInvoice = ({ onPlaceOrder }) => {
-    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",issuable:"",
+    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",issuable:"",payment:"",
         otherNumber: "", address: "", city: "",orderDate:"", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -26,9 +26,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [selectedItems1, setSelectedItems1] = useState([]);
     const [selectedItemsQty, setSelectedItemsQTY] = useState([]);
-    const [bookedItems, setBookedItems] = useState([]);
-    const [reservedItems, setReservedItems] = useState([]);
-    const [productionItems, setProductionItems] = useState([]);
+    const [interestValue , setInterestValue] = useState(0);
+    const [rate , setRate] = useState(0);
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
     const [coupons, setCoupons] = useState([]);
@@ -1538,28 +1537,122 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             <span>Total Bill Price</span>
                             <span>Rs.{totalBillPrice}</span>
                         </div>
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Advance </span>
-                            <span>
-                            <Input
-                                type="text"
-                                name="advance"
-                                value={advance}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    // Allow only numbers and a single dot
-                                    if (/^\d*\.?\d*$/.test(val)) {
-                                        setAdvance(val);
-                                    }
-                                }}
-                                required
-                            />
-                        </span>
-                        </div>
+                    </div>
+
+                    <div className="order-details">
+                        <h5 className="text-center underline">Payment Methods</h5>
+                        <hr/>
+                        <FormGroup>
+                            <Label className="fw-bold">Payment Method</Label>
+                            <Input type="select" name="payment" id="payment" value={formData.payment}
+                                    onChange={handleChange} required>
+                                <option value="">Select Payment Option</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Card">Card</option>
+                                <option value="Cash&Card">Cash & Card</option>
+                                <option value="Transfer">Transfer</option>
+                                <option value="Credit">Credit</option>
+                            </Input>
+                        </FormGroup>
+                        {formData.payment === "Cash" && (
+                            <>
+                                <div className="flex justify-between text-base text-gray-700">
+                                    <span>Amount Of Payment </span>
+                                    <span>
+                                    <Input
+                                        type="text"
+                                        name="advance"
+                                        value={advance}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            // Allow only numbers and a single dot
+                                            if (/^\d*\.?\d*$/.test(val)) {
+                                                setAdvance(val);
+                                            }
+                                        }}
+                                        required
+                                    />
+                                </span>
+                                </div>
+                            </>
+                        )}
+                        {formData.payment === "Card" && (
+                            <>
+                                <div className="flex justify-between text-base text-gray-700">
+                                    <span>Amount Of Payment </span>
+                                    <span>
+                                    <Input
+                                        type="text"
+                                        name="advance"
+                                        value={advance}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            // Allow only numbers and a single dot
+                                            if (/^\d*\.?\d*$/.test(val)) {
+                                                setAdvance(val);
+                                            }
+                                        }}
+                                        required
+                                    />
+                                </span>
+                                </div>
+                                <div className="flex justify-between text-base text-gray-700">
+                                    <span>Interest Rate (%)</span>
+                                    <span>
+                                        <Input
+                                            type="text"
+                                            name="rate"
+                                            value={rate}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                // Allow only numbers and a single dot
+                                                if (/^\d*\.?\d*$/.test(val)) {
+                                                     setRate(val);
+                                                    const numericAdvance = parseFloat(advance) || 0;
+                                                    const numericRate = parseFloat(val) || 0;
+                                                    const value = numericAdvance * (numericRate / 100); // treat as %
+                                                    setInterestValue(value);
+                                                }
+                                            }}
+                                            required
+                                        />
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-base text-gray-700">
+                                    <span>Interest Value</span>
+                                    <span>Rs.{interestValue}</span>
+                                </div>
+                            </>
+                        )}
+
+                        {formData.payment === "Transfer" && (
+                            <>
+                                <div className="flex justify-between text-base text-gray-700">
+                                    <span>Amount Of Transfer </span>
+                                    <span>
+                                    <Input
+                                        type="text"
+                                        name="advance"
+                                        value={advance}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            // Allow only numbers and a single dot
+                                            if (/^\d*\.?\d*$/.test(val)) {
+                                                setAdvance(val);
+                                            }
+                                        }}
+                                        required
+                                    />
+                                </span>
+                                </div>
+                            </>
+                        )}
+                        
                         <div className="flex justify-between text-base text-gray-700">
                             <span>Balance</span>
                             <span>Rs.{balance}</span>
                         </div>
+
                     </div>
                     <Row>
                         <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
