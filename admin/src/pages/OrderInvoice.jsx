@@ -1,3 +1,4 @@
+
 import React, {useState, useEffect, useRef} from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
@@ -99,31 +100,31 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         }
     };
     const fetchCustomers = async () => {
-    setLoading(true);
-    try {
-        const response = await fetch(`http://localhost:5001/api/admin/main/allcustomers`);
-        const data = await response.json();
+        setLoading(true);
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/allcustomers`);
+            const data = await response.json();
 
-        if (response.ok) {
-            // If the response is OK, assume data is either an array or empty
-            setCustomers(data || []);
-            setFilteredCustomers(data || []);
-            setError(""); // Clear any previous error
-        } else {
-            // Only show error if backend explicitly says something went wrong (e.g., 500)
+            if (response.ok) {
+                // If the response is OK, assume data is either an array or empty
+                setCustomers(data || []);
+                setFilteredCustomers(data || []);
+                setError(""); // Clear any previous error
+            } else {
+                // Only show error if backend explicitly says something went wrong (e.g., 500)
+                setCustomers([]);
+                setFilteredCustomers([]);
+                setError(data.message || "Something went wrong.");
+            }
+        } catch (error) {
+            // Network or unexpected error
             setCustomers([]);
             setFilteredCustomers([]);
-            setError(data.message || "Something went wrong.");
+            setError("Error fetching customers.");
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        // Network or unexpected error
-        setCustomers([]);
-        setFilteredCustomers([]);
-        setError("Error fetching customers.");
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     useEffect(() => {
         calculateTotalPrice();
@@ -348,8 +349,14 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     };
     const handleRemoveItem = (index) => {
         const updatedItems = [...selectedItems];
-        updatedItems.splice(index, 1); // Remove 1 item at the given index
+        const removedItem = updatedItems.splice(index, 1)[0]; // Remove and capture the item
+
         setSelectedItems(updatedItems);
+
+        // Remove all entries in selectedItemsQTY with the same I_Id
+        setSelectedItemsQTY(prev =>
+            prev.filter(item => item.I_Id !== removedItem.I_Id)
+        );
     };
     const fetchSuppliers = async (id) => {
         try {
@@ -372,7 +379,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             [name]: value
         }));
     };
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Basic validation
@@ -858,7 +865,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         setShowStockModal1(false);
     };
 
-
     const handleSearchChange1 = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
@@ -919,7 +925,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     };
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
-    // if (!order) return <p>Order not found</p>;
+
     return (
         <Helmet title="Place order">
             <div id="order" className="order-container mx-auto p-4">
@@ -1120,6 +1126,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </>
                         )}
                     </div>
+
                     <div className='order-details'>
                         <h2 className="text-xl font-bold mb-2">Order Details</h2>
                         <hr/>
@@ -1367,8 +1374,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </Row>
                         </FormGroup>
                         <FormGroup>
-                            <Label className="fw-bold">Special Note</Label><Input type="textarea" name="specialNote"
-                                                                                  onChange={handleChange}></Input>
+                            <Label className="fw-bold">Special Note</Label>
+                            <Input type="textarea" name="specialNote" onChange={handleChange}></Input>
                         </FormGroup>
                     </div>
                     <div className="order-details">
