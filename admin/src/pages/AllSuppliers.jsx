@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Nav,
+  NavItem,
+  NavLink,
+  TabContent,
+  TabPane,
+  Input,
+  Label,
+} from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
 import { useNavigate } from "react-router-dom";
 import SupplierDetails from "./SupplierDetails";
@@ -7,85 +18,108 @@ import { toast } from "react-toastify";
 import AddSupplier from "./AddSupplier";
 
 const AllSuppliers = () => {
-    const [activeTab, setActiveTab] = useState("");
-    const [suppliers, setSuppliers] = useState([]);
-    const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("addSupplier");
+  const [suppliers, setSuppliers] = useState([]);
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
+  const navigate = useNavigate();
 
-    // Function to fetch suppliers
-    const fetchSuppliers = async () => {
-        try {
-            const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
-            const data = await response.json();
-            if (data.suppliers && data.suppliers.length > 0) {
-                setSuppliers(data.suppliers);
-                setActiveTab(data.suppliers[0].s_ID); // Set the first supplier as the default active tab
-            } else {
-                setActiveTab("addSupplier"); // Default to Add Supplier if no suppliers are present
-            }
-        } catch (error) {
-            console.error("Error fetching suppliers:", error);
-            toast.error("Error fetching suppliers.");
-        }
-    };
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch("http://localhost:5001/api/admin/main/suppliers");
+      const data = await response.json();
+      if (data.suppliers && data.suppliers.length > 0) {
+        setSuppliers(data.suppliers);
+      }
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      toast.error("Error fetching suppliers.");
+    }
+  };
 
-    // Fetch suppliers when the component mounts or after adding a supplier
-    useEffect(() => {
-        fetchSuppliers();
-    }, []); // Run only once when component mounts
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
 
-    // Function to handle adding a new supplier
-    const handleAddSupplier = (newSupplier) => {
-        setSuppliers((prevSuppliers) => [...prevSuppliers, newSupplier]); // Add new supplier to the list
-        setActiveTab(newSupplier.s_ID); // Set the new supplier as the active tab
-    };
+  const handleAddSupplier = (newSupplier) => {
+    setSuppliers((prev) => [...prev, newSupplier]);
+    setActiveTab("supplierDetails");
+    setSelectedSupplierId(newSupplier.s_ID);
+  };
 
-    return (
-        <Helmet title={'All-Suppliers'}>
-            <section>
-                <Container className="dashboard">
-                    {/* Tab Navigation */}
-                    <Nav tabs>
-                        {/* Add Supplier Tab */}
-                        <NavItem>
-                            <NavLink
-                                className={activeTab === "addSupplier" ? "active" : ""}
-                                onClick={() => setActiveTab("addSupplier")}
-                            >
-                                Add New Supplier
-                            </NavLink>
-                        </NavItem>
-                        {suppliers.map((supplier) => (
-                            <NavItem key={supplier.s_ID}>
-                                <NavLink
-                                    className={activeTab === supplier.s_ID ? "active" : ""}
-                                    onClick={() => setActiveTab(supplier.s_ID)}
-                                >
-                                    {supplier.name} {/* Displaying supplier's name */}
-                                </NavLink>
-                            </NavItem>
-                        ))}
-                    </Nav>
+  const handleSupplierSelect = (e) => {
+    setSelectedSupplierId(e.target.value);
+    setActiveTab("supplierDetails");
+  };
 
-                    {/* Tab Content */}
-                    <TabContent activeTab={activeTab}>
-                        {/* Add Supplier Tab Content */}
-                        <TabPane tabId="addSupplier">
-                            <Row>
-                                <Col>
-                                    <AddSupplier onAddSupplier={handleAddSupplier} />
-                                </Col>
-                            </Row>
-                        </TabPane>
-                        {suppliers.map((supplier) => (
-                            <TabPane tabId={supplier.s_ID} key={supplier.s_ID}>
-                                <SupplierDetails supplier={supplier} />
-                            </TabPane>
-                        ))}
-                    </TabContent>
-                </Container>
-            </section>
-        </Helmet>
-    );
+  const selectedSupplier = suppliers.find(s => s.s_ID === selectedSupplierId);
+
+  return (
+    <Helmet title={"All-Suppliers"}>
+      <section>
+        <Container className="dashboard">
+          <Nav tabs>
+            <NavItem>
+              <NavLink
+                className={activeTab === "addSupplier" ? "active" : ""}
+                onClick={() => setActiveTab("addSupplier")}
+              >
+                Add New Supplier
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                className={activeTab === "supplierDetails" ? "active" : ""}
+                onClick={() => setActiveTab("supplierDetails")}
+              >
+                View Supplier Details
+              </NavLink>
+            </NavItem>
+          </Nav>
+
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId="addSupplier">
+              <Row>
+                <Col>
+                  <AddSupplier onAddSupplier={handleAddSupplier} />
+                </Col>
+              </Row>
+            </TabPane>
+
+            <TabPane tabId="supplierDetails">
+              <Row className="mb-3">
+                <Col md="4">
+                  <Label for="supplierSelect">Select Supplier</Label>
+                  <Input
+                    id="supplierSelect"
+                    type="select"
+                    value={selectedSupplierId}
+                    onChange={handleSupplierSelect}
+                  >
+                    <option value="">-- Select Supplier --</option>
+                    {suppliers.map((supplier) => (
+                      <option key={supplier.s_ID} value={supplier.s_ID}>
+                        {supplier.name}
+                      </option>
+                    ))}
+                  </Input>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col>
+                  {selectedSupplier ? (
+                    <SupplierDetails supplier={selectedSupplier} />
+                  ) : (
+                    <p>Please select a supplier to view details.</p>
+                  )}
+                </Col>
+              </Row>
+            </TabPane>
+          </TabContent>
+        </Container>
+      </section>
+    </Helmet>
+  );
 };
 
 export default AllSuppliers;
