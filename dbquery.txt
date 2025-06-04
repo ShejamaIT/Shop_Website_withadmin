@@ -84,7 +84,6 @@ CREATE TABLE sales_team(
         CONSTRAINT FOREIGN KEY (E_Id) REFERENCES Employee (E_Id)
                                    ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 CREATE TABLE sales_coupon(
     cpID VARCHAR(25) PRIMARY KEY,
     stID VARCHAR(25),
@@ -423,7 +422,7 @@ CREATE TABLE vehicle (
     insurance_Date DATE,
     fuel_type VARCHAR(25),
     size VARCHAR(25),
-    status ENUM('Active', 'Inactive', 'Sold'),
+    status ENUM('Active', 'Inactive', 'Sold')
 );
 CREATE TABLE otherHire (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -509,3 +508,43 @@ ALTER TABLE Special_Reservation
 ADD CONSTRAINT FK_OrderDetailID
 FOREIGN KEY (orderDetailId) REFERENCES Order_Detail(id)
 ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE ord_Pay_type(
+    optId INT AUTO_INCREMENT PRIMARY KEY,
+    orID VARCHAR(25),
+    type VARCHAR(25),
+    subType VARCHAR(25),
+    CONSTRAINT FOREIGN KEY (orID) REFERENCES Orders (orID)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE ord_Card_Pay(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    optId INT,
+    type VARCHAR(25),
+    amount DOUBLE,
+    intrestValue DOUBLE,
+    CONSTRAINT FOREIGN KEY (optId) REFERENCES ord_Pay_type (optId)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE ord_Cheque_Pay(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    optId INT,
+    amount DOUBLE,
+    bank TEXT,
+    branch TEXT,
+    accountNumber INT,
+    chequeNumber TEXT,
+    date DATE,
+    CONSTRAINT FOREIGN KEY (optId) REFERENCES ord_Pay_type (optId)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE ord_Credit_Pay(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    optId INT,
+    amount DOUBLE,
+    c_ID VARCHAR(15),
+    CONSTRAINT FOREIGN KEY (customer) REFERENCES Customer(c_ID)
+            ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (optId) REFERENCES ord_Pay_type (optId)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
+);
