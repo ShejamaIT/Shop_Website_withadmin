@@ -178,6 +178,75 @@ button[type="button"].clear-btn {
 button[type="button"].clear-btn:hover {
     background-color: #c82333;
 }
+.custom-order-details {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    max-width: 400px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.custom-line-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.custom-line-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 0.25rem;
+    font-size: 1rem;
+    color: #374151;
+}
+
+.custom-label {
+    flex: 1;
+    text-align: left;
+}
+
+.custom-value {
+    flex: 1;
+    text-align: right;
+}
+
+.custom-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    border-top: 2px solid #d1d5db;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+}
+.custom-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    color: #374151; /* Tailwind's gray-700 */
+    padding: 0.4rem 0;
+}
+
+.custom-info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.custom-info-label {
+  font-weight: 500;
+  flex: 1;
+}
+
+.custom-info-value {
+  text-align: right;
+  flex: 1;
+}
+
+
 
 @media (max-width: 767px) {
     .place-order-container {
