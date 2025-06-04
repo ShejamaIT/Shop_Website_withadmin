@@ -33,6 +33,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [chequeNumber , setChequeNumber] = useState("");
     const [accountNumber , setAccountNumber] = useState("");
     const [chequeDate , setChequeDate] = useState("");
+    const [combinedCardBalance , setCombinedCardBalance] = useState(0);
+    const [cardPortion, setCardPortion] = useState(0);
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
     const [coupons, setCoupons] = useState([]);
@@ -140,26 +142,46 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount,advance,balance]); // Recalculate when dependencies change
     useEffect(() => {
-        const isCardPayment = formData.payment === "Card" && 
+        const isCardPayment = formData.payment === "Card" &&
             (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card");
 
+        const isCombinedCashCard = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Card";
+
+        const fixedRate = 2.5;
+        const numericBill = parseFloat(totalBillPrice) || 0;
+
         if (isCardPayment) {
-            const fixedRate = 2.5;
-            const numericBill = parseFloat(totalBillPrice) || 0;
             const interest = (numericBill * fixedRate) / 100;
             const net = numericBill + interest;
 
             setRate(fixedRate);
             setInterestValue(interest);
             setNetAmount(net);
-            setAdvance(numericBill);
+            setAdvance(numericBill); // Card = full advance
+            setBalance(0);
+        } else if (isCombinedCashCard) {
+            const cashAmount = parseFloat(combinedCardBalance) || 0;
+            const cardAmount = numericBill - cashAmount;
+            const interest = (cardAmount * fixedRate) / 100;
+            const net = cardAmount + interest;
+
+            setRate(fixedRate);
+            setInterestValue(interest);
+            setNetAmount(net);
+            setCardPortion(cardAmount);
+            setAdvance(cashAmount); // Advance = cash part
+            setBalance(cardAmount); // Card balance
         } else {
-            // Clear values when not card payment
+            // Reset everything if not applicable
             setRate(0);
             setInterestValue(0);
             setNetAmount(0);
+            setCardPortion(0);
         }
-    }, [formData.payment, formData.subPayment, totalBillPrice]);
+    }, [formData.payment, formData.subPayment, totalBillPrice, combinedCardBalance]);
+
+
     const calculateTotalPrice = () => {
         // Calculate the total special discount for all selected items
         const totalSpecialDiscount = selectedItems.reduce((total, item) => {
@@ -438,6 +460,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
         let cardPayment = null;
         let chequePayment = null;
+        let cashCardPayment = null;
 
         if (formData.payment === "Cheque") {
             chequePayment = {
@@ -460,13 +483,23 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             };
         }
 
+        if (formData.payment === 'Combined' && formData.subPayment === 'Cash & Card') {
+            cashCardPayment = {
+                cardBalance: parseFloat(cardPortion).toFixed(2),
+                interestValue: parseFloat(interestValue).toFixed(2),
+                type: formData.subPayment,
+                netAmount: parseFloat(netAmount).toFixed(2),
+                rate: parseFloat(rate).toFixed(2),
+            };
+        }
+
         // ✅ Assemble and clean the final form data
         const updatedFormData = {
             ...formData,
             advance: parseFloat(advance || 0).toFixed(2),
             balance: parseFloat(balance || 0).toFixed(2),
             city: formData.address,
-            cardPayment, chequePayment,
+            cardPayment, chequePayment,cashCardPayment,
         };
 
 
@@ -1797,8 +1830,47 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 </span>
                                 </div>
                             </>
-                            )}
+                        )}
 
+                        {formData.payment === "Combined" && (formData.subPayment === "Cash & Card") && (
+                            <>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Payment Amount</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="text"
+                                            name="advance"
+                                            value={combinedCardBalance}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                // Allow only numbers and a single dot
+                                                if (/^\d*\.?\d*$/.test(val)) {
+                                                    setCombinedCardBalance(val);
+                                                }
+                                            }}
+                                            required
+                                            className="w-full text-right" // Optional: Align input text to the right
+                                        />
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Payment Amount</span>
+                                    <span className="custom-info-value">Rs.{parseFloat(cardPortion).toFixed(2)}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Interest Rate (%)</span>
+                                    <span className="custom-info-value">{rate}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Interest Value</span>
+                                    <span className="custom-info-value">Rs.{interestValue.toFixed(2)}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Net Amount</span>
+                                    <span className="custom-info-value">Rs.{netAmount.toFixed(2)}</span>
+                                </div>
+                            </>
+                        )}
                     </div>
                     <Row>
                         <Col md="6"><Button type="submit" color="primary" block>Place Order</Button></Col>
