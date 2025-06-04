@@ -16,7 +16,7 @@ import DeliveryNoteViewNow from "./DeliveryNoteViewNow";
 import { v4 as uuidv4 } from 'uuid';
 
 const OrderInvoice = ({ onPlaceOrder }) => {
-    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",issuable:"",payment:"",
+    const [formData, setFormData] = useState({c_ID:"",title:"",FtName: "", SrName: "", phoneNumber: "",occupation:"",workPlace:"",issuable:"",payment:"", subPayment: '',
         otherNumber: "", address: "", city: "",orderDate:"", district: "", specialNote: "", dvStatus: "", expectedDate: "", couponCode: "",balance:"",advance:""});
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -26,6 +26,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [selectedItemsQty, setSelectedItemsQTY] = useState([]);
     const [interestValue , setInterestValue] = useState(0);
     const [rate , setRate] = useState(0);
+    const [netAmount , setNetAmount] = useState(0);
+    const [chequeAmount , setChequeAmount] = useState(0);
+    const [bank , setBank] = useState("");
+    const [branch , setBranch] = useState("");
+    const [chequeNumber , setChequeNumber] = useState("");
+    const [accountNumber , setAccountNumber] = useState("");
+    const [chequeDate , setChequeDate] = useState("");
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
     const [coupons, setCoupons] = useState([]);
@@ -72,7 +79,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [loadingSuppliers, setLoadingSuppliers] = useState(true);
     const [productionData, setProductionData] = useState({itemId: '', supplierId: '', qty: '', expecteddate: '', specialnote: ''});
     const [processedItems, setProcessedItems] = useState([]);
-
+    const subPaymentOptions = {
+            Cash: ['Cash', 'Transfer'],
+            Card: ['Debit Card', 'Credit Card'],
+            // Cheque: ['Bank Cheque', 'Post-dated Cheque'],
+            // Credit: ['30 Days', '60 Days'],
+            Combined: ['Cash & Card','Cash & Cheque','Cash & Credit','Cash & Transfer']
+    };
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -126,6 +139,27 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     useEffect(() => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount,advance,balance]); // Recalculate when dependencies change
+    useEffect(() => {
+        const isCardPayment = formData.payment === "Card" && 
+            (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card");
+
+        if (isCardPayment) {
+            const fixedRate = 2.5;
+            const numericBill = parseFloat(totalBillPrice) || 0;
+            const interest = (numericBill * fixedRate) / 100;
+            const net = numericBill + interest;
+
+            setRate(fixedRate);
+            setInterestValue(interest);
+            setNetAmount(net);
+            setAdvance(numericBill);
+        } else {
+            // Clear values when not card payment
+            setRate(0);
+            setInterestValue(0);
+            setNetAmount(0);
+        }
+    }, [formData.payment, formData.subPayment, totalBillPrice]);
     const calculateTotalPrice = () => {
         // Calculate the total special discount for all selected items
         const totalSpecialDiscount = selectedItems.reduce((total, item) => {
@@ -227,6 +261,17 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             }
         }
     };
+    const handleChange1 = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+            // Reset subPayment when payment changes
+            ...(name === 'payment' && { subPayment: '' })
+        }));
+    };
+
+    const secondOptions = subPaymentOptions[formData.payment] || [];
     const checkDeliveryAvailability = async (date) => {
         try {
             // Mock API call to check delivery availability (Replace with real API)
@@ -391,13 +436,39 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             return;
         }
 
-        // ✅ Add advance and balance
+        let cardPayment = null;
+        let chequePayment = null;
+
+        if (formData.payment === "Cheque") {
+            chequePayment = {
+                amount: parseFloat(chequeAmount).toFixed(2),
+                chequeNumber,
+                bank,
+                branch,
+                accountNumber,
+                chequeDate,
+            };
+        }
+
+        if (formData.payment === 'Card') {
+            cardPayment = {
+                // amount : parseFloat(totalBillPrice).toFixed(2),
+                interestValue: parseFloat(interestValue).toFixed(2),
+                type: formData.subPayment,
+                netAmount: parseFloat(netAmount).toFixed(2),
+                rate: parseFloat(rate).toFixed(2),
+            };
+        }
+
+        // ✅ Assemble and clean the final form data
         const updatedFormData = {
             ...formData,
-            advance: parseFloat(advance).toFixed(2),
-            balance: parseFloat(balance).toFixed(2),
+            advance: parseFloat(advance || 0).toFixed(2),
+            balance: parseFloat(balance || 0).toFixed(2),
             city: formData.address,
+            cardPayment, chequePayment,
         };
+
 
         // ✅ Calculate totals correctly
         const itemList = selectedItems.map(item => {
@@ -448,6 +519,11 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             specialdiscountAmount,
         };
         console.log(formData.issuable);
+        const fullOrderData = {
+            ...orderData,
+            processedItems,
+        };
+        console.log(fullOrderData);
 
         try {
             if (formData.issuable === 'Later') {
@@ -631,7 +707,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const viewHandle = async (formData) => {
         setShowModal2(false);
         setShowModal3(true);
-    }
+    };
+
     const handleClear = () => {
         setFormData({c_ID:"",title:"",FtName: "",id:"" ,SrName: "", phoneNumber: "", otherNumber: "", address: "",occupation:"",workPlace:"",
             city: "", district: "",specialNote: "", expectedDate: "", couponCode: "", dvStatus: "",type:"",category:"",balance:"",advance:""});
@@ -1513,143 +1590,214 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </>
                         )}
                     </div>
-                    <div className="order-details mt-4 space-y-2 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Delivery Fee</span>
-                            <span>Rs.{deliveryPrice}</span>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Special Discount</span>
-                            <span>Rs.{specialdiscountAmount}</span>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Coupon Discount</span>
-                            <span>Rs.{discountAmount}</span>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Total Item Price</span>
-                            <span>Rs.{totalItemPrice}</span>
-                        </div>
-                        <div
-                            className="flex justify-between text-lg font-semibold text-gray-900 border-t pt-2 mt-2">
-                            <span>Total Bill Price</span>
-                            <span>Rs.{totalBillPrice}</span>
+                    <div className="order-details mt-4 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
+                        <div className="custom-line-items space-y-2">
+                            {[
+                                { label: 'Total Item Price', value: totalItemPrice },
+                                { label: 'Delivery Fee', value: deliveryPrice },
+                                { label: 'Special Discount', value: specialdiscountAmount },
+                                { label: 'Coupon Discount', value: discountAmount },
+                            ].map((item, index) => (
+                                <div key={index} className="custom-line-item flex justify-between border-b pb-1">
+                                    <span className="custom-label">{item.label}</span>
+                                    <span className="custom-value">Rs.{item.value}</span>
+                                </div>
+                            ))}
+
+                            <div className="custom-total flex justify-between font-semibold border-t pt-3 mt-3">
+                                <span className="custom-label">Gross Amount</span>
+                                <span className="custom-value">Rs.{totalBillPrice}</span>
+                            </div>
                         </div>
                     </div>
+
 
                     <div className="order-details">
                         <h5 className="text-center underline">Payment Methods</h5>
                         <hr/>
-                        <FormGroup>
+                        <Row>
                             <Label className="fw-bold">Payment Method</Label>
-                            <Input type="select" name="payment" id="payment" value={formData.payment}
-                                    onChange={handleChange} required>
-                                <option value="">Select Payment Option</option>
-                                <option value="Cash">Cash</option>
-                                <option value="Card">Card</option>
-                                <option value="Cash&Card">Cash & Card</option>
-                                <option value="Transfer">Transfer</option>
-                                <option value="Credit">Credit</option>
-                            </Input>
-                        </FormGroup>
-                        {formData.payment === "Cash" && (
-                            <>
-                                <div className="flex justify-between text-base text-gray-700">
-                                    <span>Amount Of Payment </span>
-                                    <span>
+                            <Col md={6}>
+                                <FormGroup>
                                     <Input
-                                        type="text"
-                                        name="advance"
-                                        value={advance}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            // Allow only numbers and a single dot
-                                            if (/^\d*\.?\d*$/.test(val)) {
-                                                setAdvance(val);
-                                            }
-                                        }}
+                                        type="select"
+                                        name="payment"
+                                        id="payment"
+                                        value={formData.payment}
+                                        onChange={handleChange}
                                         required
-                                    />
-                                </span>
-                                </div>
-                            </>
-                        )}
-                        {formData.payment === "Card" && (
-                            <>
-                                <div className="flex justify-between text-base text-gray-700">
-                                    <span>Amount Of Payment </span>
-                                    <span>
+                                    >
+                                        <option value="">Select Payment Option</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Card">Card</option>
+                                        <option value="Cheque">Cheque</option>
+                                        <option value="Credit">Credit</option>
+                                        <option value="Combined">Combined</option>
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                            <Col md={6}>
+                                <FormGroup>
                                     <Input
-                                        type="text"
-                                        name="advance"
-                                        value={advance}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            // Allow only numbers and a single dot
-                                            if (/^\d*\.?\d*$/.test(val)) {
-                                                setAdvance(val);
-                                            }
-                                        }}
+                                        type="select"
+                                        name="subPayment"
+                                        id="subPayment"
+                                        value={formData.subPayment}
+                                        onChange={handleChange1}
                                         required
-                                    />
-                                </span>
-                                </div>
-                                <div className="flex justify-between text-base text-gray-700">
-                                    <span>Interest Rate (%)</span>
-                                    <span>
+                                        disabled={!formData.payment}
+                                    >
+                                        <option value="">Select Sub Option</option>
+                                        {secondOptions.map((opt) => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
+                                    </Input>
+                                </FormGroup>
+                            </Col>
+                        </Row>
+                        
+                        {formData.payment === "Cash" && (formData.subPayment === "Cash" || formData.subPayment === "Transfer") && (
+                            <>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Payment Amount</span>
+                                    <span className="custom-info-value">
                                         <Input
                                             type="text"
-                                            name="rate"
-                                            value={rate}
+                                            name="advance"
+                                            value={advance}
                                             onChange={(e) => {
                                                 const val = e.target.value;
                                                 // Allow only numbers and a single dot
                                                 if (/^\d*\.?\d*$/.test(val)) {
-                                                     setRate(val);
-                                                    const numericAdvance = parseFloat(advance) || 0;
-                                                    const numericRate = parseFloat(val) || 0;
-                                                    const value = numericAdvance * (numericRate / 100); // treat as %
-                                                    setInterestValue(value);
+                                                    setAdvance(val);
                                                 }
                                             }}
                                             required
+                                            className="w-full text-right" // Optional: Align input text to the right
                                         />
                                     </span>
                                 </div>
-                                <div className="flex justify-between text-base text-gray-700">
-                                    <span>Interest Value</span>
-                                    <span>Rs.{interestValue}</span>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
                             </>
                         )}
 
-                        {formData.payment === "Transfer" && (
+                        {formData.payment === "Card" && (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card") && (
                             <>
-                                <div className="flex justify-between text-base text-gray-700">
-                                    <span>Amount Of Transfer </span>
-                                    <span>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Payment Amount</span>
+                                    <span className="custom-info-value">Rs.{parseFloat(totalBillPrice).toFixed(2)}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Interest Rate (%)</span>
+                                    <span className="custom-info-value">{rate}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Interest Value</span>
+                                    <span className="custom-info-value">Rs.{interestValue.toFixed(2)}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Net Amount</span>
+                                    <span className="custom-info-value">Rs.{netAmount.toFixed(2)}</span>
+                                </div>
+                            </>
+                        )}
+
+                        {formData.payment === "Cheque" && (
+                            <>
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Payment Amount</span>
+                                <span className="custom-info-value">
                                     <Input
-                                        type="text"
-                                        name="advance"
-                                        value={advance}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            // Allow only numbers and a single dot
-                                            if (/^\d*\.?\d*$/.test(val)) {
-                                                setAdvance(val);
-                                            }
-                                        }}
-                                        required
+                                    type="text"
+                                    name="amount"
+                                    value={chequeAmount}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d*\.?\d*$/.test(val)) {
+                                        setChequeAmount(val);
+                                        setAdvance(val); // Reflect in general payment state
+                                        }
+                                    }}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Cheque Number</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="chequeNumber"
+                                    value={chequeNumber}
+                                    onChange={(e) => setChequeNumber(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Bank</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="bank"
+                                    value={bank}
+                                    onChange={(e) => setBank(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Branch</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="branch"
+                                    value={branch}
+                                    onChange={(e) => setBranch(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Account Number</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="accountNumber"
+                                    value={accountNumber}
+                                    onChange={(e) => setAccountNumber(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Cheque Date</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="date"
+                                    name="chequeDate"
+                                    value={chequeDate}
+                                    onChange={(e) => setChequeDate(e.target.value)}
+                                    required
+                                    className="w-full text-right"
                                     />
                                 </span>
                                 </div>
                             </>
-                        )}
-                        
-                        <div className="flex justify-between text-base text-gray-700">
-                            <span>Balance</span>
-                            <span>Rs.{balance}</span>
-                        </div>
+                            )}
 
                     </div>
                     <Row>
