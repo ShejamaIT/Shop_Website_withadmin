@@ -199,7 +199,7 @@ router.post("/orders", async (req, res) => {
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
         phoneNumber = "", specialNote, title, totalItemPrice,issuable,
         dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
-        advance, balance ,processedItems = []
+        advance, balance ,payment,subPayment,cardPayment={},chequePayment={}
     } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -361,17 +361,61 @@ router.post("/orders", async (req, res) => {
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
         // ✅ Insert cash balance if advance exists
         if (advance1 > 0) {
+            // Insert into cash_balance
             const cashQuery = `
                 INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
                 VALUES (?, ?, 'order', NOW(), ?)`;
             await db.query(cashQuery, ['Order Advance', orID, advance1]);
 
+            // Insert into order_payment
             await db.query(
                 `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
-                 VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
+                VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
                 [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID]
             );
+
+            // Additional insert for Card payment
+            if (payment === 'Card' && cardPayment) {
+                // Insert into ord_Pay_type
+                const [typeResult] = await db.query(
+                    `INSERT INTO ord_Pay_type (orID, type, subType) VALUES (?, ?, ?)`,
+                    [orID, payment, subPayment]
+                );
+                const optId = typeResult.insertId;
+
+                // Insert into ord_Card_Pay
+                await db.query(
+                    `INSERT INTO ord_Card_Pay (optId, type, amount, intrestValue)
+                    VALUES (?, ?, ?, ?)`,
+                    [optId, cardPayment.type, advance1, cardPayment.interestValue || 0]
+                );
+            }
+            if (payment === 'Cheque' && chequePayment) {
+                // Step 1: Insert into ord_Pay_type
+                const [chequeTypeResult] = await db.query(
+                    `INSERT INTO ord_Pay_type (orID, type, subType) VALUES (?, ?, ?)`,
+                    [orID, payment, subPayment] 
+                );
+                const chequeOptId = chequeTypeResult.insertId;
+
+                // Step 2: Insert into ord_Cheque_Pay
+                await db.query(
+                    `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        chequeOptId,
+                        chequePayment.chequeAmount || 0,
+                        chequePayment.bank || '',
+                        chequePayment.branch || '',
+                        chequePayment.accountNumber || '',
+                        chequePayment.chequeNumber || '',
+                        chequePayment.chequeDate || null
+                    ]
+                );
+            }
+
         }
+
 
         return res.status(201).json({
             success: true,
