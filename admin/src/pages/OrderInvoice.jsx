@@ -27,6 +27,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [interestValue , setInterestValue] = useState(0);
     const [rate , setRate] = useState(0);
     const [netAmount , setNetAmount] = useState(0);
+    const [transferBank , setTranferBank] = useState("");
     const [chequeAmount , setChequeAmount] = useState(0);
     const [bank , setBank] = useState("");
     const [branch , setBranch] = useState("");
@@ -34,7 +35,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [accountNumber , setAccountNumber] = useState("");
     const [chequeDate , setChequeDate] = useState("");
     const [combinedCardBalance , setCombinedCardBalance] = useState(0);
+    const [combinedChequeBalance , setCombinedChequeBalance] = useState(0);
+    const [combinedCreditBalance , setCombinedCreditBalance] = useState(0);
+    const [combinedTransferBalance , setCombinedTranferBalance] = useState(0);
     const [cardPortion, setCardPortion] = useState(0);
+    const [chequePortion, setChequePortion] = useState(0);
+    const [creditPortion , setCreditPortion] = useState(0);
+    const [transferPortion , setTransferPortion] = useState(0);
     const [filteredItems, setFilteredItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState(""); // Fixed: should be a string
     const [coupons, setCoupons] = useState([]);
@@ -46,6 +53,9 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [specialdiscountAmount, setSpecialDiscountAmount] = useState(0);
     const [totalItemPrice, setTotalItemPrice] = useState(0);
     const [totalBillPrice, setTotalBillPrice] = useState(0);
+    const [fulltotalPay , setFullTotalPay] = useState(0);
+    const [creditAmount , setCreditAmount] = useState(0);
+    const [creditExpectedDate , setCreditExpectedDate] = useState('');
     const [customers, setCustomers] = useState([]);
     const [filteredCustomers, setFilteredCustomers] = useState([]); // Stores search results
     const [errors, setErrors] = useState([]);
@@ -142,14 +152,30 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         calculateTotalPrice();
     }, [selectedItems, deliveryPrice, discountAmount,advance,balance]); // Recalculate when dependencies change
     useEffect(() => {
+        const fixedRate = 2.5;
+        const numericBill = parseFloat(totalBillPrice) || 0;
+        const cashAmount = parseFloat(combinedCardBalance) || 0;
+        const chequeAmount = parseFloat(combinedChequeBalance) || 0;
+        const creditAdvance = parseFloat(creditAmount) || 0;
+        const transferAdvance = parseFloat(combinedTransferBalance) || 0;
+
+
         const isCardPayment = formData.payment === "Card" &&
             (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card");
 
         const isCombinedCashCard = formData.payment === "Combined" &&
             formData.subPayment === "Cash & Card";
 
-        const fixedRate = 2.5;
-        const numericBill = parseFloat(totalBillPrice) || 0;
+        const isCombinedCashCheque = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Cheque";
+
+        const isCombinedCashCredit = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Credit";    
+
+        const isCombinedCashTransfer = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Transfer"; 
+
+        const isCreditPayment = formData.payment === "Credit";
 
         if (isCardPayment) {
             const interest = (numericBill * fixedRate) / 100;
@@ -158,29 +184,62 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setRate(fixedRate);
             setInterestValue(interest);
             setNetAmount(net);
-            setAdvance(numericBill); // Card = full advance
+            setAdvance(numericBill);
             setBalance(0);
+            setCardPortion(numericBill);
+            setFullTotalPay(net);
         } else if (isCombinedCashCard) {
-            const cashAmount = parseFloat(combinedCardBalance) || 0;
             const cardAmount = numericBill - cashAmount;
             const interest = (cardAmount * fixedRate) / 100;
-            const net = cardAmount + interest;
+            const cardTotal = cardAmount + interest;
+            const fullPaid = cashAmount + cardAmount;
+            const fullTotal = cashAmount + cardTotal;
 
             setRate(fixedRate);
             setInterestValue(interest);
-            setNetAmount(net);
+            setNetAmount(cardTotal);
             setCardPortion(cardAmount);
-            setAdvance(cashAmount); // Advance = cash part
-            setBalance(cardAmount); // Card balance
-        } else {
-            // Reset everything if not applicable
+            setAdvance(fullPaid);
+            setBalance(0);
+            setFullTotalPay(fullTotal);
+        }  else if (isCombinedCashCheque) {
+            const chequePart = numericBill - chequeAmount;
+            const fullPaid = chequeAmount + chequePart;
+
+            setChequePortion(chequePart);
+            setAdvance(fullPaid); // Total amount paid via cash + cheque
+            setBalance(0);
+            setFullTotalPay(fullPaid); // No interest logic for cheque
+        } else if (isCreditPayment) {
+            const balance = numericBill - creditAdvance;
+            setAdvance(creditAdvance);
+            setBalance(balance > 0 ? balance : 0);
+        } else if (isCombinedCashCredit) {
+            const creditPart = numericBill - combinedCreditBalance;
+            const fullPaid = combinedCreditBalance;
+
+            setCreditPortion(creditPart);
+            setAdvance(fullPaid); // Cash paid
+            setBalance(creditPart > 0 ? creditPart : 0); // Credit portion is the remaining
+            setFullTotalPay(numericBill); // No interest
+        } else if (isCombinedCashTransfer) {
+            const transferPart = numericBill - combinedTransferBalance;
+            const fullpaid = parseFloat(transferPart) + parseFloat(combinedTransferBalance);
+
+            setTransferPortion(transferPart);
+            setAdvance(fullpaid); // Cash part
+            setBalance(transferPart > 0 ? transferPart : 0); // Transfer part
+            setFullTotalPay(numericBill); // No interest
+        }else {
             setRate(0);
             setInterestValue(0);
             setNetAmount(0);
             setCardPortion(0);
+            setAdvance(0);
+            setBalance(0);
+            setFullTotalPay(0);
         }
-    }, [formData.payment, formData.subPayment, totalBillPrice, combinedCardBalance]);
-
+    }, [formData.payment, formData.subPayment, totalBillPrice, combinedCardBalance,combinedTransferBalance,combinedChequeBalance, creditAmount]);
 
     const calculateTotalPrice = () => {
         // Calculate the total special discount for all selected items
@@ -459,8 +518,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         }
 
         let cardPayment = null;
+        let tranferPayment = null;
         let chequePayment = null;
         let cashCardPayment = null;
+        let creditPayment = null;
+        let combinedChequePayment = null;
+        let combinedCreditPayment = null;
+        let combinedTransferPayment = null;
 
         if (formData.payment === "Cheque") {
             chequePayment = {
@@ -472,7 +536,11 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                 chequeDate,
             };
         }
-
+        if (formData.payment === "Cash" && formData.subPayment === 'Transfer') {
+            tranferPayment = {
+               bank : transferBank, 
+            };
+        }
         if (formData.payment === 'Card') {
             cardPayment = {
                 // amount : parseFloat(totalBillPrice).toFixed(2),
@@ -482,7 +550,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                 rate: parseFloat(rate).toFixed(2),
             };
         }
-
+        if (formData.payment === "Credit") {
+            creditPayment = {
+                amount: parseFloat(creditAmount).toFixed(2),
+                balance : parseFloat(balance).toFixed(2),
+                expectdate: creditExpectedDate,
+            };
+        }
         if (formData.payment === 'Combined' && formData.subPayment === 'Cash & Card') {
             cashCardPayment = {
                 cardBalance: parseFloat(cardPortion).toFixed(2),
@@ -490,8 +564,33 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                 type: formData.subPayment,
                 netAmount: parseFloat(netAmount).toFixed(2),
                 rate: parseFloat(rate).toFixed(2),
+                fullpaidAmount : parseFloat(fulltotalPay),
             };
         }
+        if (formData.payment === 'Combined' && formData.subPayment === 'Cash & Cheque') {
+            combinedChequePayment = {
+                chequeBalance: parseFloat(chequePortion).toFixed(2),
+                cashBalance: parseFloat(combinedChequeBalance).toFixed(2),
+                type: formData.subPayment,
+                chequeNumber,bank, branch,accountNumber,chequeDate,
+            };
+        }
+        if (formData.payment === 'Combined' && formData.subPayment === 'Cash & Credit') {
+            combinedCreditPayment = {
+                creditBalance: parseFloat(creditPortion).toFixed(2),
+                cashBalance: parseFloat(combinedCreditBalance).toFixed(2),
+                type: formData.subPayment,
+                expectedDate: creditExpectedDate
+            };
+        }
+        if (formData.payment === 'Combined' && formData.subPayment === 'Cash & Transfer') {
+            combinedTransferPayment = {
+                cashAmount: parseFloat(combinedTransferBalance) || 0,
+                transferAmount: parseFloat(transferPortion) || 0,
+                bank: transferBank || '',
+            };
+        }
+
 
         // ✅ Assemble and clean the final form data
         const updatedFormData = {
@@ -499,9 +598,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             advance: parseFloat(advance || 0).toFixed(2),
             balance: parseFloat(balance || 0).toFixed(2),
             city: formData.address,
-            cardPayment, chequePayment,cashCardPayment,
+            cardPayment, chequePayment,cashCardPayment,tranferPayment,creditPayment,combinedChequePayment,combinedCreditPayment,combinedTransferPayment,
         };
-
 
         // ✅ Calculate totals correctly
         const itemList = selectedItems.map(item => {
@@ -1644,7 +1742,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                         </div>
                     </div>
 
-
                     <div className="order-details">
                         <h5 className="text-center underline">Payment Methods</h5>
                         <hr/>
@@ -1677,7 +1774,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                         id="subPayment"
                                         value={formData.subPayment}
                                         onChange={handleChange1}
-                                        required
+                                       
                                         disabled={!formData.payment}
                                     >
                                         <option value="">Select Sub Option</option>
@@ -1689,7 +1786,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </Col>
                         </Row>
                         
-                        {formData.payment === "Cash" && (formData.subPayment === "Cash" || formData.subPayment === "Transfer") && (
+                        {formData.payment === "Cash" && (formData.subPayment === "Cash") && (
                             <>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Payment Amount</span>
@@ -1704,6 +1801,51 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                                 if (/^\d*\.?\d*$/.test(val)) {
                                                     setAdvance(val);
                                                 }
+                                            }}
+                                            required
+                                            className="w-full text-right" // Optional: Align input text to the right
+                                        />
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
+                                </div>
+                            </>
+                        )}
+
+                        {formData.payment === "Cash" && (formData.subPayment === "Transfer") && (
+                            <>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Payment Amount</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="text"
+                                            name="advance"
+                                            value={advance}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                // Allow only numbers and a single dot
+                                                if (/^\d*\.?\d*$/.test(val)) {
+                                                    setAdvance(val);
+                                                }
+                                            }}
+                                            required
+                                            className="w-full text-right" // Optional: Align input text to the right
+                                        />
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Bank</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="text"
+                                            name="bank"
+                                            value={transferBank}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setTranferBank(val);
+                                                
                                             }}
                                             required
                                             className="w-full text-right" // Optional: Align input text to the right
@@ -1832,10 +1974,52 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </>
                         )}
 
+                        {formData.payment === "Credit" && (
+                            <>
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Payment Amount</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="amount"
+                                    value={creditAmount}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d*\.?\d*$/.test(val)) {
+                                        setCreditAmount(val);
+                                        setAdvance(val); // Reflect in general payment state
+                                        }
+                                    }}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Expected Date</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="date"
+                                    name="expectedDate"
+                                    value={creditExpectedDate}
+                                    onChange={(e) => setCreditExpectedDate(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
+                                </div>
+                            </>
+                        )}
+
                         {formData.payment === "Combined" && (formData.subPayment === "Cash & Card") && (
                             <>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Payment Amount</span>
+                                    <span className="custom-info-label">Cash Amount</span>
                                     <span className="custom-info-value">
                                         <Input
                                             type="text"
@@ -1854,7 +2038,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     </span>
                                 </div>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Payment Amount</span>
+                                    <span className="custom-info-label">Card Balance</span>
                                     <span className="custom-info-value">Rs.{parseFloat(cardPortion).toFixed(2)}</span>
                                 </div>
                                 <div className="custom-info-row">
@@ -1868,6 +2052,190 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Net Amount</span>
                                     <span className="custom-info-value">Rs.{netAmount.toFixed(2)}</span>
+                                </div>
+                            </>
+                        )}
+
+                        {formData.payment === "Combined" && (formData.subPayment === "Cash & Cheque") && (
+                            <>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Cash Amount</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="text"
+                                            name="advance"
+                                            value={combinedChequeBalance}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                // Allow only numbers and a single dot
+                                                if (/^\d*\.?\d*$/.test(val)) {
+                                                    setCombinedChequeBalance(val);
+                                                }
+                                            }}
+                                            required
+                                            className="w-full text-right" // Optional: Align input text to the right
+                                        />
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Cheque Balance</span>
+                                    <span className="custom-info-value">Rs.{parseFloat(chequePortion).toFixed(2)}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Cheque Number</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="chequeNumber"
+                                    value={chequeNumber}
+                                    onChange={(e) => setChequeNumber(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Bank</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="bank"
+                                    value={bank}
+                                    onChange={(e) => setBank(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Branch</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="branch"
+                                    value={branch}
+                                    onChange={(e) => setBranch(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Account Number</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="text"
+                                    name="accountNumber"
+                                    value={accountNumber}
+                                    onChange={(e) => setAccountNumber(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+
+                                <div className="custom-info-row">
+                                <span className="custom-info-label">Cheque Date</span>
+                                <span className="custom-info-value">
+                                    <Input
+                                    type="date"
+                                    name="chequeDate"
+                                    value={chequeDate}
+                                    onChange={(e) => setChequeDate(e.target.value)}
+                                    required
+                                    className="w-full text-right"
+                                    />
+                                </span>
+                                </div>
+                            </>
+                        )}
+
+                        {formData.payment === "Combined" && formData.subPayment === "Cash & Credit" && (
+                            <>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Cash Amount</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="text"
+                                            name="advance"
+                                            value={combinedCreditBalance}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (/^\d*\.?\d*$/.test(val)) {
+                                                    setCombinedCreditBalance(val);
+                                                }
+                                            }}
+                                            required
+                                            className="w-full text-right"
+                                        />
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Credit Balance</span>
+                                    <span className="custom-info-value">
+                                        Rs.{parseFloat(creditPortion).toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Expected Date</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="date"
+                                            name="expectedDate"
+                                            value={creditExpectedDate}
+                                            onChange={(e) => setCreditExpectedDate(e.target.value)}
+                                            required
+                                            className="w-full text-right"
+                                        />
+                                    </span>
+                                </div>
+                            </>
+                        )}
+
+                        {formData.payment === "Combined" && formData.subPayment === "Cash & Transfer" && (
+                            <>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Cash Amount</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="text"
+                                            name="advance"
+                                            value={combinedTransferBalance}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (/^\d*\.?\d*$/.test(val)) {
+                                                    setCombinedTranferBalance(val); // ✅ make sure you're using the correct setter
+                                                }
+                                            }}
+                                            required
+                                            className="w-full text-right"
+                                        />
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Transfer Balance</span>
+                                    <span className="custom-info-value">
+                                        Rs.{parseFloat(transferPortion).toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Bank</span>
+                                    <span className="custom-info-value">
+                                        <Input
+                                            type="text"
+                                            name="bank"
+                                            value={transferBank}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setTranferBank(val);
+                                            }}
+                                            required
+                                            className="w-full text-right"
+                                        />
+                                    </span>
                                 </div>
                             </>
                         )}
