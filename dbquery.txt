@@ -543,8 +543,23 @@ CREATE TABLE ord_Credit_Pay(
     optId INT,
     amount DOUBLE,
     c_ID VARCHAR(15),
-    CONSTRAINT FOREIGN KEY (customer) REFERENCES Customer(c_ID)
+    expectedDate DATE,
+    CONSTRAINT FOREIGN KEY (c_ID) REFERENCES Customer(c_ID)
             ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (optId) REFERENCES ord_Pay_type (optId)
                                  ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE ord_Transfer_Pay(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    optId INT,
+    amount DOUBLE,
+    bank TEXT,
+    CONSTRAINT FOREIGN KEY (optId) REFERENCES ord_Pay_type (optId)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
+);
+ALTER TABLE order_payment
+ADD COLUMN otherCharges DOUBLE NOT NULL DEFAULT 0,
+ADD COLUMN fullPaidAmount DOUBLE NOT NULL DEFAULT 0,
+ADD COLUMN issuable ENUM('Now', 'Later') NOT NULL DEFAULT 'Now';
+ALTER TABLE ord_Credit_Pay
+ADD COLUMN balance DOUBLE NOT NULL DEFAULT 0;
