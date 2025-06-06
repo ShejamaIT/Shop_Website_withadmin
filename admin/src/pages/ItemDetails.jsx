@@ -9,6 +9,7 @@ const ItemDetails = () => {
     const { id } = useParams(); // Get item ID from URL
     const [item, setItem] = useState(null);
     const [stock, setStock] = useState(null);
+    const [previousId, setPreviousId] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [suppliers, setSuppliers] = useState([]); // State to store supplier data
     const [suppliers1, setSuppliers1] = useState([]); // State to store supplier data
@@ -78,59 +79,9 @@ const ItemDetails = () => {
         }
     };
 
-    const handleStockChange = async (e) => {
-        const { name, value } = e.target;
-        setStockData((prev) => ({ ...prev, [name]: value }));
-
-        // Fetch cost when supplier is selected
-        if (name === "supplierId" && value) {
-            try {
-                const response = await fetch(`http://localhost:5001/api/admin/main/find-cost?s_ID=${value}&I_Id=${id}`);
-                const data = await response.json();
-                if (response.ok) {
-                    setStockData((prev) => ({
-                        ...prev,
-                        cost: data.cost.unit_cost, // Set cost from API response
-                    }));
-                } else {
-                    setStockData((prev) => ({ ...prev, cost: "" })); // Reset if not found
-                    toast.error(data.message || "Cost not found.");
-                }
-            } catch (error) {
-                console.error("Error fetching cost:", error.message);
-                toast.error("Error fetching cost.");
-            }
-        }
-    };
-
     const handleSupplierChange = (e) => {
         const { name, value } = e.target;
         setSupplierData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleAddStock = async () => {
-        try {
-            const response = await fetch("http://localhost:5001/api/admin/main/add-stock-received", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(stockData),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to add stock.");
-            }
-
-            toast.success("Stock added successfully!");
-            setStockData({itemId:id, supplierId: "", stockCount: "", date: "", cost:"", price:"", comment:""});
-            setShowStockModal(false); // Close the modal after success
-            fetchItem(); // Refresh item list or update UI
-
-        } catch (err) {
-            console.error("Error adding stock:", err.message);
-            toast.error(err.message || "Failed to add stock!");
-        }
     };
 
     const handleAddSupplier = async () => {
@@ -174,6 +125,13 @@ const ItemDetails = () => {
                     }
                 });
             }
+
+            // ✅ Add the previous ID explicitly to the FormData
+            if (previousId) {
+                formDataToSend.append("previousId", previousId);
+            }
+            console.log(formDataToSend);
+
             const updateResponse = await fetch("http://localhost:5001/api/admin/main/update-item", {
                 method: "PUT",
                 body: formDataToSend,
@@ -183,9 +141,10 @@ const ItemDetails = () => {
 
             if (updateResponse.ok && updateResult.success) {
                 toast.success("✅ Item updated successfully!");
-                fetchItem();
+                fetchItem1(updateResult.data.I_Id);
                 setIsEditing(false);
                 setFormData(updateResult.data);
+                setPreviousId(null); // Clear after successful update
             } else {
                 console.error("❌ Error updating item:", updateResult.message);
                 toast.error(updateResult.message || "Failed to update item.");
@@ -249,6 +208,25 @@ const ItemDetails = () => {
             setLoading(false);
         }
     };
+
+    const fetchItem1 = async (itemId) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/item-details?I_Id=${itemId}`);
+            if (!response.ok) throw new Error("Failed to fetch item details.");
+
+            const data = await response.json();
+            setItem(data.item);
+            setSuppliers(data.item.suppliers || []);
+            setStock(data.item.stockDetails || []);
+            setFormData(data.item);
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching item details:", err);
+            setError(err.message);
+            setLoading(false);
+        }
+    };
+
 
     const handleChange = (e, supplierId) => {
         const { name, value, type, files } = e.target;
@@ -316,6 +294,19 @@ const ItemDetails = () => {
                                         <Row>
                                             <Col>
                                                 {!isEditing ? (
+                                                    <p><strong>Item Code:</strong> {item.I_Id}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Item Code:</strong></Label>
+                                                        <Input
+                                                            type="text"
+                                                            name="I_Id"
+                                                            value={formData.I_Id}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
+                                                {!isEditing ? (
                                                     <p><strong>Item Name:</strong> {item.I_name}</p>
                                                 ) : (
                                                     <FormGroup>
@@ -328,19 +319,7 @@ const ItemDetails = () => {
                                                         />
                                                     </FormGroup>
                                                 )}
-                                                {!isEditing ? (
-                                                    <p><strong>Description:</strong> {item.descrip}</p>
-                                                ) : (
-                                                    <FormGroup>
-                                                        <Label><strong>Description:</strong></Label>
-                                                        <Input
-                                                            type="textarea"
-                                                            name="descrip"
-                                                            value={formData.descrip}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </FormGroup>
-                                                )}
+                                                
                                                 {!isEditing ? (
                                                     <p><strong>Price:</strong> Rs. {item.price}</p>
                                                 ) : (
@@ -414,6 +393,19 @@ const ItemDetails = () => {
                                         {/* Category Name */}
                                         <Row>
                                             <Col>
+                                                {!isEditing ? (
+                                                    <p><strong>Description:</strong> {item.descrip}</p>
+                                                ) : (
+                                                    <FormGroup>
+                                                        <Label><strong>Description:</strong></Label>
+                                                        <Input
+                                                            type="textarea"
+                                                            name="descrip"
+                                                            value={formData.descrip}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </FormGroup>
+                                                )}
 
                                                 {!isEditing ? (
                                                     <p><strong>Category:</strong> {item.maincategory}</p>
@@ -565,7 +557,18 @@ const ItemDetails = () => {
                                 <div className="text-center mt-4">
                                     {!isEditing ? (
                                         <>
-                                            <Button color="primary" className="ms-3" onClick={() => setIsEditing(true)}>Edit Item</Button>
+                                            <Button
+                                            color="primary"
+                                            className="ms-3"
+                                            onClick={() => {
+                                                setPreviousId(item.I_Id);     // store original ID
+                                                setFormData(item);            // populate form with item values
+                                                setIsEditing(true);           // toggle edit mode
+                                            }}
+                                            >
+                                            Edit Item
+                                            </Button>
+
                                             <Button color="secondary" className="ms-3" onClick={() => setShowSupplierModal(true)}>Add Supplier</Button>
                                             {/*<Button color="danger" className="ms-3" onClick={() => setShowStockModal(true)}>Add Stock</Button>*/}
                                         </>
