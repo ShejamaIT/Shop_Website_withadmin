@@ -26,6 +26,7 @@ import CompleteOrderDetails from "../pages/CompletedOrders";
 import ProdutionOrderDetails from "../pages/ProcessingOrders";
 import SaleteamDetail from "../pages/SaleteamDetail";
 import IssuedOrderDetails from "../pages/IssuedOrder";
+import DeliverdOrderDetails from "../pages/DeliveredOrderDetails"
 import DeliveryNoteDetails from "../pages/DeliveryNoteDetails";
 import DeliveryNoteDetailsDrive from "../pages/DeliveryNoteDetailsDrive";
 import DeliveryNotes from "../pages/DeliveryNotes";
@@ -83,6 +84,7 @@ const Router = () => {
             <Route path="order-detail/:id" element={<OrderDetails />} />
             <Route path="accept-order-detail/:id" element={<AccepetOrderDetails />} />
             <Route path="issued-order-detail/:id" element={<IssuedOrderDetails />} />
+            <Route path="deiverd-order-detail/:id" element={<DeliverdOrderDetails />}/>
             <Route path="deliveryNote-detail/:id" element={<DeliveryNoteDetails />} />
             <Route path="deliveryNote-detail-drive/:id" element={<DeliveryNoteDetailsDrive />} />
             <Route path="complete-order-detail/:id" element={<CompleteOrderDetails />} />
