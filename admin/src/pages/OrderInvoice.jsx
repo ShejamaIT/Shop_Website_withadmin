@@ -91,6 +91,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [loadingSuppliers, setLoadingSuppliers] = useState(true);
     const [productionData, setProductionData] = useState({itemId: '', supplierId: '', qty: '', expecteddate: '', specialnote: ''});
     const [processedItems, setProcessedItems] = useState([]);
+    const [PurchaseId, setPurchaseId] = useState("");
     const subPaymentOptions = {
             Cash: ['Cash', 'Transfer'],
             Card: ['Debit Card', 'Credit Card'],
@@ -98,6 +99,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             // Credit: ['30 Days', '60 Days'],
             Combined: ['Cash & Card','Cash & Cheque','Cash & Credit','Cash & Transfer']
     };
+     const currentDate = new Date().toLocaleDateString();
+    const currentTime = new Date().toLocaleTimeString();
 
     useEffect(() => {
         fetchItems();fetchCoupons();fetchCustomers();
@@ -392,6 +395,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             }
         };
         fetchDeliveryRates();
+        fetchPurchaseID();
     }, []);
     const handleSearchChange = (e) => {
         const value = e.target.value;
@@ -590,8 +594,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                 bank: transferBank || '',
             };
         }
-
-
         // ✅ Assemble and clean the final form data
         const updatedFormData = {
             ...formData,
@@ -649,12 +651,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             totalBillPrice: totalBillPrice.toFixed(2),
             specialdiscountAmount,
         };
-        console.log(formData.issuable);
         const fullOrderData = {
             ...orderData,
             processedItems,
         };
-        console.log(fullOrderData);
 
         try {
             if (formData.issuable === 'Later') {
@@ -904,10 +904,27 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const handleAddNewCoupon = () => {
         setShowModal1(true);
     };
+    const fetchPurchaseID = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/newPurchasenoteID");
+            const data = await response.json();
+            setPurchaseId(data.PurchaseID);
+        } catch (err) {
+            toast.error("Failed to load Purchase ID.");
+        }
+    };
     const handleAddItem = async (newItem) => {
         try {
+            // Resolve actual material value
             const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
 
+            // Validate required fields
+            if (!newItem.img) {
+                toast.error("Main image is required.");
+                return;
+            }
+
+            // Prepare FormData for item upload
             const formDataToSend = new FormData();
             formDataToSend.append("I_Id", newItem.I_Id);
             formDataToSend.append("I_name", newItem.I_name);
@@ -915,25 +932,47 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             formDataToSend.append("sub_one", newItem.sub_one);
             formDataToSend.append("sub_two", newItem.sub_two || "None");
             formDataToSend.append("descrip", newItem.descrip);
-            formDataToSend.append("color", newItem.color);
+            formDataToSend.append("color", newItem.color || "N/A");
             formDataToSend.append("material", materialToSend);
             formDataToSend.append("price", newItem.price);
-            formDataToSend.append("warrantyPeriod", newItem.warrantyPeriod);
+            formDataToSend.append("warrantyPeriod", newItem.warrantyPeriod || "N/A");
             formDataToSend.append("cost", newItem.cost);
             formDataToSend.append("s_Id", newItem.s_Id);
             formDataToSend.append("minQty", newItem.minQty);
 
-            if (newItem.img) {
-                formDataToSend.append("img", newItem.img);
-            } else {
-                toast.error("Main image is required.");
-                return;
-            }
-
+            // Append images
+            formDataToSend.append("img", newItem.img);
             if (newItem.img1) formDataToSend.append("img1", newItem.img1);
             if (newItem.img2) formDataToSend.append("img2", newItem.img2);
             if (newItem.img3) formDataToSend.append("img3", newItem.img3);
 
+            // Calculate total cost for initial stock
+            const cost = Number(newItem.cost);
+            const quantity = Number(newItem.startStock);
+            const ItemTotal = cost * quantity;
+
+            // Prepare order data for stock entry
+            const orderData = {
+                purchase_id: PurchaseId,
+                supplier_id: newItem.s_Id,
+                date: currentDate,
+                time: currentTime,
+                itemTotal: ItemTotal,
+                delivery: 0,
+                invoice: "-",
+                items: {
+                    I_Id: newItem.I_Id,
+                    material: materialToSend,
+                    color: newItem.color || "N/A",
+                    unit_price: newItem.price,
+                    price: cost,
+                    quantity: quantity,
+                    total_price: ItemTotal.toFixed(2),
+                },
+            };
+            console.log(orderData);
+
+            // Submit item creation
             const submitResponse = await fetch("http://localhost:5001/api/admin/main/add-item", {
                 method: "POST",
                 body: formDataToSend,
@@ -941,17 +980,36 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
             const submitData = await submitResponse.json();
 
-            if (submitResponse.ok) {
-                toast.success("✅ Item added successfully!");
-                fetchItems(); // make sure this exists in your parent component
-            } else {
+            if (!submitResponse.ok) {
                 toast.error(submitData.message || "❌ Failed to add item.");
+                return;
             }
+
+            toast.success("✅ Item added successfully!");
+
+            // Submit stock addition
+            const stockResponse = await fetch("http://localhost:5001/api/admin/main/addStock", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderData),
+            });
+
+            const stockResult = await stockResponse.json();
+
+            if (!stockResponse.ok) {
+                toast.error(stockResult.message || "❌ Failed to save purchase.");
+                return;
+            }
+
+            toast.success("✅ Purchase saved successfully!");
+            fetchItems(); // Optional chaining if fetchItems is passed from props/context
+
         } catch (error) {
             console.error("❌ Error submitting form:", error);
             toast.error("❌ An error occurred while adding the item.");
         }
     };
+
     const handleAddCoupon = async (newCoupon) => {
         const { couponCode, saleteamCode, discount } = newCoupon;
         try {
