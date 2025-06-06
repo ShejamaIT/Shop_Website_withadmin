@@ -1576,26 +1576,17 @@ router.get("/issued-order-details", async (req, res) => {
 
         // 6️⃣ Prepare Response Data
         const orderResponse = {
-            orderId: orderData.OrID,
-            orderDate: formatDate(orderData.orDate),
-            customerId: orderData.c_ID,
-            customerName: customerName,
-            customerPhone: orderData.contact1,
-            customerOptionalPhone: orderData.contact2,
+            orderId: orderData.OrID,orderDate: formatDate(orderData.orDate),
+            customerId: orderData.c_ID, customerName: customerName,
+            customerPhone: orderData.contact1,customerOptionalPhone: orderData.contact2,
             customerBalance: orderData.customerBalance,
-            customerCategory: orderData.category,
-            customerType: orderData.type,
-            customerOccupation: orderData.occupation,
-            customerWorkplace: orderData.workPlace,
+            customerCategory: orderData.category,customerType: orderData.type,
+            customerOccupation: orderData.occupation,customerWorkplace: orderData.workPlace,
             orderStatus: orderData.orStatus,
-            deliveryStatus: orderData.delStatus,
-            deliveryCharge: orderData.delPrice,
-            discount: orderData.discount,
-            specialdiscount: orderData.specialdic,
-            totalPrice: orderData.total,
-            netTotal: orderData.netTotal,
-            advance: orderData.advance,
-            balance: orderData.balance,
+            deliveryStatus: orderData.delStatus,deliveryCharge: orderData.delPrice,
+            discount: orderData.discount,specialdiscount: orderData.specialdic,
+            totalPrice: orderData.total,netTotal: orderData.netTotal,
+            advance: orderData.advance,balance: orderData.balance,
             payStatus: orderData.payStatus,
             expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
@@ -1606,33 +1597,20 @@ router.get("/issued-order-details", async (req, res) => {
                 const finalAmount = item.tprice;
 
                 return {
-                    itemId: item.I_Id,
-                    itemName: item.I_name,
-                    color: item.color,
-                    quantity: qty,
-                    unitPrice: unitPrice,
-                    discount: unitDiscount,
-                    amountBeforeDiscount: amountBeforeDiscount,
-                    totalDiscountAmount: totalDiscountAmount,
-                    amount: finalAmount,
-                    booked: item.bookedQty > 0,
-                    bookedQuantity: item.bookedQty,
-                    availableQuantity: item.availableQty,
-                    stockQuantity: item.stockQty
+                    itemId: item.I_Id,itemName: item.I_name,color: item.color,
+                    quantity: qty,unitPrice: unitPrice,
+                    discount: unitDiscount,amountBeforeDiscount: amountBeforeDiscount,
+                    totalDiscountAmount: totalDiscountAmount,amount: finalAmount,
+                    booked: item.bookedQty > 0,bookedQuantity: item.bookedQty,
+                    availableQuantity: item.availableQty, stockQuantity: item.stockQty
                 };
             }),
             issuedItems: issuedItemsResult.map(item => ({
-                pid_Id: item.pid_Id,
-                stockId: item.stock_Id,
-                BatchId: item.pc_Id,
-                // barcodeImage: item.barcode_img.toString("base64"), // Convert LONGBLOB to base64
-                status: item.status,
-                issuedDate: formatDate(item.issuedDate),
+                pid_Id: item.pid_Id, stockId: item.stock_Id,
+                BatchId: item.pc_Id,status: item.status,issuedDate: formatDate(item.issuedDate),
             })),
             paymentHistory: paymentHistoryResult.map(payment => ({
-                paymentId: payment.op_ID,
-                amount: payment.amount,
-                paymentDate: formatDate(payment.dateTime)
+                paymentId: payment.op_ID,amount: payment.amount,paymentDate: formatDate(payment.dateTime)
             }))
         };
 
@@ -1664,6 +1642,54 @@ router.get("/issued-order-details", async (req, res) => {
                 };
             }
         }
+
+        // 8️⃣ Fetch Payment Type and Sub Payment Details
+        const payTypeQuery = `SELECT * FROM ord_Pay_type WHERE orID = ?`;
+        const [payTypeResult] = await db.query(payTypeQuery, [orID]);
+
+        const paymentDetails = [];
+
+        for (const payType of payTypeResult) {
+            const { optId, type, subType } = payType;
+            const paymentInfo = { optId, type, subType };
+
+            if (type === "Card") {
+                const [cardRows] = await db.query(`SELECT * FROM ord_Card_Pay WHERE optId = ?`, [optId]);
+                paymentInfo.card = cardRows;
+            } else if (type === "Cheque") {
+                const [chequeRows] = await db.query(`SELECT * FROM ord_Cheque_Pay WHERE optId = ?`, [optId]);
+                paymentInfo.cheque = chequeRows;
+            } else if (type === "Credit") {
+                const [creditRows] = await db.query(`SELECT * FROM ord_Credit_Pay WHERE optId = ?`, [optId]);
+                paymentInfo.credit = creditRows;
+            } else if (type === "Transfer") {
+                const [transferRows] = await db.query(`SELECT * FROM ord_Transfer_Pay WHERE optId = ?`, [optId]);
+                paymentInfo.transfer = transferRows;
+            } else if (type === "Combined") {
+                // Depending on subType like "Cash & Card", fetch multiple sets
+                if (subType.includes("Card")) {
+                    const [cardRows] = await db.query(`SELECT * FROM ord_Card_Pay WHERE optId = ?`, [optId]);
+                    paymentInfo.card = cardRows;
+                }
+                if (subType.includes("Cheque")) {
+                    const [chequeRows] = await db.query(`SELECT * FROM ord_Cheque_Pay WHERE optId = ?`, [optId]);
+                    paymentInfo.cheque = chequeRows;
+                }
+                if (subType.includes("Credit")) {
+                    const [creditRows] = await db.query(`SELECT * FROM ord_Credit_Pay WHERE optId = ?`, [optId]);
+                    paymentInfo.credit = creditRows;
+                }
+                if (subType.includes("Transfer")) {
+                    const [transferRows] = await db.query(`SELECT * FROM ord_Transfer_Pay WHERE optId = ?`, [optId]);
+                    paymentInfo.transfer = transferRows;
+                }
+            }
+
+            paymentDetails.push(paymentInfo);
+        }
+
+        orderResponse.paymentDetails = paymentDetails;
+
 
         return res.status(200).json({
             success: true,
