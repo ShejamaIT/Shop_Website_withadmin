@@ -4921,12 +4921,13 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
 router.post("/addStock", upload.single("image"), async (req, res) => {
     try {
         const { purchase_id, supplier_id, date, itemTotal, delivery, invoice, items } = req.body;
+        console.log(req.body);
         const imageFile = req.file;
 
         const total = Number(itemTotal) || 0;
         const deliveryPrice = Number(delivery) || 0;
 
-        if (!supplier_id || !itemTotal || !date || !delivery || !purchase_id || !items) {
+        if (!supplier_id || !itemTotal || !date || !purchase_id || !items) {
             return res.status(400).json({ success: false, message: "All fields are required!" });
         }
 
