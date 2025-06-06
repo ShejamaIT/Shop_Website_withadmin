@@ -6,7 +6,7 @@ import {toast} from "react-toastify";
 
 const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
     const [formData, setFormData] = useState({
-        I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "",
+        I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "",startStock:"",
         material: "", warrantyPeriod: "", price: "", cost: "", minQty: "", s_Id: "", img: null, img1: null, img2: null, img3: null,});
 
     const [categories, setCategories] = useState([]);
@@ -96,7 +96,7 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
 
     const handleClear = () => {
         setFormData({
-            I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "", material: "", warrantyPeriod: "",
+            I_Id: "", I_name: "", Ca_Id: "", sub_one: "", sub_two: "", descrip: "", color: "", material: "", warrantyPeriod: "",startStock:"",
             price: "", cost: "", minQty: "", s_Id: "", img: null, img1: null, img2: null, img3: null,});
     };
     const handleAddSupplier = async (newSupplier) => {
@@ -119,7 +119,6 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
             console.error("Failed to add supplier:", err);
         }
     };
-
 
     return (
         <div className="modal-overlay">
@@ -242,17 +241,20 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                         <Input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required />
                     </FormGroup>
 
-
                     <FormGroup>
                         <Label for="minQty">Min Quantity (for production)</Label>
                         <Input type="number" name="minQty" id="minQty" value={formData.minQty} onChange={handleChange} required />
+                    </FormGroup>
+                    <FormGroup>
+                        <Label for="startStock">Avaliable Stock</Label>
+                        <Input type="number" name="startStock" id="startStock" value={formData.startStock} onChange={handleChange} required />
                     </FormGroup>
                     <FormGroup>
                         <Label for="img">Main Image (Required)</Label>
                         <Input type="file" name="img" id="img" accept="image/*" onChange={handleImageChange} required />
                     </FormGroup>
 
-                    <FormGroup>
+                    {/* <FormGroup>
                         <Label for="img1">Additional Image 1 (Required)</Label>
                         <Input type="file" name="img1" id="img1" accept="image/*" onChange={handleImageChange} />
                     </FormGroup>
@@ -263,7 +265,7 @@ const AddNewItem = ({ setShowModal, handleSubmit2 }) => {
                     <FormGroup>
                         <Label for="img3">Additional Image 3 (Optional)</Label>
                         <Input type="file" name="img3" id="img3" accept="image/*" onChange={handleImageChange} />
-                    </FormGroup>
+                    </FormGroup> */}
                     <Row className="mt-3">
                         <Col md={6}>
                             <Button type="submit" color="primary" block>
