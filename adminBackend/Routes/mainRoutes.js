@@ -405,6 +405,11 @@ router.post("/orders", async (req, res) => {
             }
             // Additional insert for Cash - Cash payment
             if (payment === 'Cash' && subPayment === 'Cash') {
+                // Insert into ord_Pay_type
+                const [payTypeResult] = await db.query(
+                    `INSERT INTO ord_Pay_type (orID, type, subType) VALUES (?, ?, ?)`,
+                    [orID, payment, subPayment]
+                );
                 // Update the correct order_payment row using op_ID or orID
                 await db.query(
                     `UPDATE order_payment SET otherCharges = 0, fullPaidAmount = ? WHERE op_ID = ?`,
@@ -601,8 +606,6 @@ router.post("/orders", async (req, res) => {
                 );
             }
         }
-
-
         return res.status(201).json({
             success: true,
             message: "Order placed successfully",
@@ -4914,8 +4917,7 @@ router.post("/add-stock-received", upload.single("image"), async (req, res) => {
     }
 });
 
-// add purchase note and add stock
-// Generate barcodes for each stock
+// add purchase note and add stock- Generate barcodes for each stock
 router.post("/addStock", upload.single("image"), async (req, res) => {
     try {
         const { purchase_id, supplier_id, date, itemTotal, delivery, invoice, items } = req.body;
