@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Label, Input, Form, Table, Button } from "reactstrap";
+import { Container, Row, Col, Label, Input, Form, Table, Button,InputGroup, InputGroupText } from "reactstrap";
+
+import { FaPlus } from 'react-icons/fa'; // FontAwesome Plus icon
 import { toast } from "react-toastify";
 import Helmet from "../components/Helmet/Helmet";
 import "../style/PurchaseDetails.css";
@@ -14,6 +16,8 @@ const PurchaseDetails = () => {
     const [ItemTotal, setItemTotal] = useState("0");
     const [Invoice, setInvoiceId] = useState("");
     const [NetTotal, setNetTotal] = useState("0");
+    const [selectedItemId, setSelectedItemId] = useState("");
+
 
     const currentDate = new Date().toLocaleDateString();
     const currentTime = new Date().toLocaleTimeString();
@@ -88,13 +92,27 @@ const PurchaseDetails = () => {
         fetchSupplierItems(supplierId);
     };
 
-    const handleItemChange = (event) => {
-        const itemId = event.target.value;
-        const item = supplierItems.find((item) => item.I_Id === itemId);
-        console.log(item);
+    const handleItemChange = () => {
+        if (!selectedItemId) return;
+
+        const item = supplierItems.find((item) => item.I_Id === selectedItemId);
+
         if (item && !selectedItems.find(i => i.I_Id === item.I_Id)) {
-            setSelectedItems([...selectedItems, { ...item, quantity: 1, unitPrice: item.unit_cost,price:item.price }]);
+            setSelectedItems([
+                ...selectedItems,
+                {
+                    ...item,
+                    quantity: 1,
+                    unitPrice: item.unit_cost,
+                    price: item.price
+                }
+            ]);
+            setSelectedItemId(""); // Optional: reset select after adding
         }
+    };
+
+    const handleItemSelect = (event) => {
+        setSelectedItemId(event.target.value);
     };
 
     const handleQuantityChange = (index, event) => {
@@ -148,9 +166,6 @@ const PurchaseDetails = () => {
                 total_price: (item.unitPrice * item.quantity).toFixed(2)
             })),
         };
-
-        console.log("Order Data:", orderData);
-        console.log(selectedItems);
         try {
             // Send data to the backend
             const response = await fetch("http://localhost:5001/api/admin/main/addStock", {
@@ -186,6 +201,10 @@ const PurchaseDetails = () => {
         setInvoiceId("");
         setItemTotal("0");
         setNetTotal("0");
+    };
+    const handleRemoveItem = (indexToRemove) => {
+        const updatedItems = selectedItems.filter((_, index) => index !== indexToRemove);
+        setSelectedItems(updatedItems);
     };
 
     return (
@@ -230,63 +249,84 @@ const PurchaseDetails = () => {
                                             <hr />
                                         </Col>
                                     </Row>
-
-                                    <Row className={'mb-3'}>
+                                    <Row className="mb-3">
                                         <Col>
                                             <Label><strong>Items:</strong></Label>
-                                            <Input type="select" onChange={handleItemChange} disabled={!selectedSupplier}>
-                                                <option value="">Select Item</option>
-                                                {supplierItems.map((item) => (
-                                                    <option key={item.I_Id} value={item.I_Id}>
-                                                        {item.I_name} - Rs.{item.unit_cost}
-                                                    </option>
-                                                ))}
-                                            </Input>
+                                            <InputGroup>
+                                                <Input
+                                                    type="select" onChange={handleItemSelect} disabled={!selectedSupplier} value={selectedItemId} 
+                                                >
+                                                    <option value="">Select Item</option>
+                                                    {supplierItems.map((item) => (
+                                                        <option key={item.I_Id} value={item.I_Id}>
+                                                            {item.I_name} - Rs.{item.unit_cost}
+                                                        </option>
+                                                    ))}
+                                                </Input>
+                                                <InputGroupText
+                                                    style={{ cursor: 'pointer' }}onClick={handleItemChange} title="Add Item" >
+                                                    <FaPlus />
+                                                </InputGroupText>
+                                            </InputGroup>
                                         </Col>
                                     </Row>
 
                                     {selectedItems.length > 0 && (
-                                        <Row className="mt-4 mb-3">
-                                            <Col>
-                                                <Table bordered>
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Item ID</th>
-                                                        <th>Item Name</th>
-                                                        <th>Color</th>
-                                                        <th>Unit Price (Rs.)</th>
-                                                        <th>Qty</th>
-                                                        <th>Total Price (Rs.)</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {selectedItems.map((item, index) => (
-                                                        <tr key={item.I_Id}>
-                                                            <td>{item.I_Id}</td>
-                                                            <td>{item.I_name}</td>
-                                                            <td>{item.color || "N/A"}</td>
-                                                            <td>
-                                                                <Input
-                                                                    type="text"
-                                                                    value={item.unitPrice}
-                                                                    onChange={(e) => handleUnitPriceChange(index, e)}
-                                                                />
-                                                            </td>
-                                                            <td>
-                                                                <Input
-                                                                    type="text"
-                                                                    value={item.quantity}
-                                                                    onChange={(e) => handleQuantityChange(index, e)}
-                                                                />
-                                                            </td>
-                                                            <td>{(item.unitPrice * item.quantity).toFixed(2)}</td>
-                                                        </tr>
-                                                    ))}
-                                                    </tbody>
-                                                </Table>
-                                            </Col>
-                                        </Row>
+                                        <div className="custom-table-wrapper">
+                                            <Row className="mt-4 mb-3">
+                                                <Col>
+                                                    <table className="custom-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Item ID</th>
+                                                                <th>Item Name</th>
+                                                                <th>Color</th>
+                                                                <th>Unit Price (Rs.)</th>
+                                                                <th>Qty</th>
+                                                                <th>Total Price (Rs.)</th>
+                                                                <th>Remove</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {selectedItems.map((item, index) => (
+                                                                <tr key={item.I_Id}>
+                                                                    <td>{item.I_Id}</td>
+                                                                    <td>{item.I_name}</td>
+                                                                    <td>{item.color || "N/A"}</td>
+                                                                    <td>{item.unitPrice}</td>
+                                                                    {/* <td>
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={item.unitPrice}
+                                                                            onChange={(e) => handleUnitPriceChange(index, e)}
+                                                                        />
+                                                                    </td> */}
+                                                                    <td>
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={item.quantity}
+                                                                            onChange={(e) => handleQuantityChange(index, e)}
+                                                                        />
+                                                                    </td>
+                                                                    <td>{(item.unitPrice * item.quantity).toFixed(2)}</td>
+                                                                    <td>
+                                                                        <button
+                                                                            onClick={() => handleRemoveItem(index)}
+                                                                            className="remove-btn"
+                                                                            title="Remove Item"
+                                                                        >
+                                                                            🗑️
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Col>
+                                            </Row>
+                                        </div>
                                     )}
+
 
                                     <Row className={'mb-3'}>
                                         <Label><strong>Delivery Charges:</strong></Label>
