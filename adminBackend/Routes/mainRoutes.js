@@ -110,14 +110,14 @@ router.post("/add-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "i
 // Update item
 router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: "img1", maxCount: 1 }, { name: "img2", maxCount: 1 }, { name: "img3", maxCount: 1 },]), async (req, res) => {
     try {
-        const {I_Id, I_name, descrip, color, material, price, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, sub_one, sub_two, suppliers,} = req.body;
+        const {previousId,I_Id, I_name, descrip, color, material, price, warrantyPeriod, stockQty, bookedQty, availableQty, maincategory, sub_one, sub_two, suppliers,} = req.body;
 
-        if (!I_Id) {
+        if (!previousId) {
             return res.status(400).json({ success: false, message: "Item ID is required." });
         }
 
         // ✅ Log received files and form data
-        const [itemCheckResult] = await db.query(`SELECT * FROM Item WHERE I_Id = ?`, [I_Id]);
+        const [itemCheckResult] = await db.query(`SELECT * FROM Item WHERE I_Id = ?`, [previousId]);
         if (itemCheckResult.length === 0) {
             return res.status(404).json({ success: false, message: "Item not found." });
         }
@@ -149,7 +149,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 
         // ✅ Dynamic field updates
         const fields = {
-            I_name, descrip, color, material, price: parsedPrice, warrantyPeriod, stockQty, bookedQty, availableQty, mn_Cat: maincategory, sb_catOne: subCatOneName, sb_catTwo: subCatTwoName, img: imgBuffer, img1: img1Buffer, img2: img2Buffer, img3: img3Buffer,
+           I_Id, I_name, descrip, color, material, price: parsedPrice, warrantyPeriod, stockQty, bookedQty, availableQty, mn_Cat: maincategory, sb_catOne: subCatOneName, sb_catTwo: subCatTwoName, img: imgBuffer, img1: img1Buffer, img2: img2Buffer, img3: img3Buffer,
         };
 
         for (const key in fields) {
@@ -161,7 +161,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
 
         if (updateFields.length > 0) {
             const updateQuery = `UPDATE Item SET ${updateFields.join(", ")} WHERE I_Id = ?`;
-            updateValues.push(I_Id);
+            updateValues.push(previousId);
             await db.query(updateQuery, updateValues);
         }
 
@@ -174,7 +174,7 @@ router.put("/update-item", upload.fields([{ name: "img", maxCount: 1 }, { name: 
                     await db.query(
                         `INSERT INTO item_supplier (I_Id, s_ID, unit_cost)
                          VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE unit_cost = VALUES(unit_cost)`,
-                        [I_Id, s_ID, parsedUnitCost]
+                        [previousId, s_ID, parsedUnitCost]
                     );
                 }
             }
