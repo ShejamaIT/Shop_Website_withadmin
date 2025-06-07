@@ -123,7 +123,9 @@ const SaleTeamGraphs = () => {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    console.log(data.data);
                     processGraphData(data.data);
+                    
                 }
             })
             .catch(err => console.error("Error loading data:", err));
@@ -141,12 +143,15 @@ const SaleTeamGraphs = () => {
 
         const issuedGraph = labelsMonthly.map((month) => {
             const obj = { name: month };
+            
             summary.forEach(member => {
                 const m = member.monthlyData.find(d => d.month === month);
                 obj[member.employeeName] = m ? m.totalIssued : 0;
             });
             return obj;
         });
+
+        // console.log()
 
         setOrderData(orderGraph);
         setIssuedData(issuedGraph);
