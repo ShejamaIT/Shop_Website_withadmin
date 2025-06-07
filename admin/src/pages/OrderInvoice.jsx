@@ -109,12 +109,16 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/allitems");
             const data = await response.json();
+            console.log(data);
             setItems(data || []);
             setFilteredItems(data || []);
+            return data;  // ✅ This ensures that fetchItems returns the data
         } catch (error) {
             toast.error("Error fetching items.");
+            return [];  // ✅ Return an empty array if there's an error
         }
     };
+
     const fetchCoupons = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/coupon-details");
@@ -398,6 +402,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         fetchPurchaseID();
     }, []);
     const handleSearchChange = (e) => {
+        fetchItems();
         const value = e.target.value;
         setSearchTerm(value);
         if (!value.trim()) {
@@ -415,65 +420,86 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         setSearchTerm("");
         setFilteredItems([]);
     };
-    const handleAddToOrder = () => {
+    const handleAddToOrder = async () => {
+        const updatedItems = await fetchItems();  // Wait for the updated items list
+
         if (!selectedItem) return;
 
+        // Use `updatedItems` to find the selected item
+        const updatedSelectedItem = updatedItems.find(item => item.I_Id === selectedItem.I_Id);
+        
+        if (!updatedSelectedItem) {
+            toast.error("Selected item not found in updated list.");
+            return;
+        }
+
+        // Check if the item is issuable: Now or Later
         if (!formData.issuable || formData.issuable.trim() === "") {
             toast.error("Please select whether the item is issuable: Now or Later.");
             return;
         }
 
+        // Stock check (if issuable is 'Now')
         if (formData.issuable === 'Now') {
-            if (selectedItem.availableQty < quantity) {
+            console.log("Latest AvailableQty:", updatedSelectedItem.availableQty, "Requested:", quantity);
+            if (updatedSelectedItem.availableQty < quantity) {
                 Swal.fire("There are not enough stocks for the requirement.");
                 return;
             }
         }
 
+        // Calculate discount and price
         const specialDiscount = parseFloat(discount) || 0;
-        const discountedPrice = selectedItem.price - specialDiscount;
+        const discountedPrice = updatedSelectedItem.price - specialDiscount;
 
-        // ✅ Update merged array
-        const existingIndex = selectedItems.findIndex(item => item.I_Id === selectedItem.I_Id);
-
+        // Update `selectedItems` array
+        const existingIndex = selectedItems.findIndex(item => item.I_Id === updatedSelectedItem.I_Id);
         let updatedSelectedItems = [...selectedItems];
+
         if (existingIndex !== -1) {
             updatedSelectedItems[existingIndex].qty += quantity;
             updatedSelectedItems[existingIndex].discount = specialDiscount;
             updatedSelectedItems[existingIndex].price = discountedPrice;
-            updatedSelectedItems[existingIndex].originalPrice = selectedItem.price;
+            updatedSelectedItems[existingIndex].originalPrice = updatedSelectedItem.price;
         } else {
             updatedSelectedItems.push({
-                ...selectedItem,
+                ...updatedSelectedItem,
                 qty: quantity,
                 discount: specialDiscount,
                 price: discountedPrice,
-                originalPrice: selectedItem.price,
-                itemName: selectedItem.I_name,
-                unitPrice: selectedItem.price,
+                originalPrice: updatedSelectedItem.price,
+                itemName: updatedSelectedItem.I_name,
+                unitPrice: updatedSelectedItem.price,
             });
         }
+
+        // Update selectedItems state
         setSelectedItems(updatedSelectedItems);
 
-        // ✅ Update expanded array with unique uids
+        // Add expanded items with unique UID
         const newFlatItems = Array.from({ length: quantity }, () => ({
-            ...selectedItem,
-            uid: uuidv4(), // 👈 Unique identifier for tracking
+            ...updatedSelectedItem,
+            uid: uuidv4(),
             qty: 1,
             discount: specialDiscount,
             price: discountedPrice,
-            originalPrice: selectedItem.price,
-            itemName: selectedItem.I_name,
-            unitPrice: selectedItem.price,
-            status: "", // For dropdown binding
+            originalPrice: updatedSelectedItem.price,
+            itemName: updatedSelectedItem.I_name,
+            unitPrice: updatedSelectedItem.price,
+            status: "",
         }));
+
+        // Update selectedItemsQTY state
         setSelectedItemsQTY(prev => [...prev, ...newFlatItems]);
 
         // Reset fields
-        setSelectedItem(null);
+        setSelectedItem(updatedSelectedItem); // Optionally set `selectedItem` to the one just added
         setQuantity(1);
         setDiscount("");
+
+        // Optionally reset `formData` or other states if needed
     };
+
     const handleRemoveItem = (index) => {
         const updatedItems = [...selectedItems];
         const removedItem = updatedItems.splice(index, 1)[0]; // Remove and capture the item
@@ -754,7 +780,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         };
         try {
             // Make API request to the /isssued-order endpoint
-            const response = await fetch('http://localhost:5001/api/admin/main/issued-items', {
+            const response = await fetch('http://localhost:5001/api/admin/main/issued-items-Now', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
