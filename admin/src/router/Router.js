@@ -36,6 +36,7 @@ import PurchaseNoteDetails from "../pages/PurchaseNoteDetails";
 import AllGrahps from "../pages/AllGraphs";
 import AllDeliveryNotesDrive from "../pages/AllDeliveryNotesDriver";
 import TableItemPriceList from "../components/tables/TableItemPriceList";
+import CustomerDetailsView from "../pages/CustomerDetailsView";
 
 const Router = () => {
     return (
@@ -97,6 +98,8 @@ const Router = () => {
             <Route path="place-order" element={<OrderInvoice />} />
             <Route path="advance" element={<AdvancePayment />} />
             <Route path="purchase-detail/:id" element={<PurchaseNoteDetails />} />
+            <Route path="/customer-details/:c_ID" element={<CustomerDetailsView />} />
+
         </Routes>
     );
 };
