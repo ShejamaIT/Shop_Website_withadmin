@@ -57,6 +57,10 @@ const TableCustomer = ({ filter, title }) => {
 
         setFilteredCustomers(filteredData);
     };
+    const handleViewCustomer = (c_ID) => {
+        console.log(c_ID);
+        navigate(`/customer-details/${c_ID}`);
+    };
 
     return (
         <div className="table-container">
@@ -115,7 +119,7 @@ const TableCustomer = ({ filter, title }) => {
                                 <td className="action-buttons">
                                     <button
                                         className="view-btn"
-                                        // onClick={() => handleViewOrder(order.OrID)}
+                                         onClick={() => handleViewCustomer(customer.c_ID)}
                                     >
                                         👁️
                                     </button>
