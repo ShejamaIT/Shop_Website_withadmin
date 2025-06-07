@@ -1319,6 +1319,74 @@ router.post("/customer", async (req, res) => {
     }
 });
 
+// Get Customer Details 
+router.get("/customer-details&orders", async (req, res) => {
+    const { c_ID } = req.query;
+    if (!c_ID) {
+        return res.status(400).json({ message: "Missing customer ID (c_ID)" });
+    }
+
+    try {
+        // Fetch customer details
+        const [customerRows] = await db.query("SELECT * FROM Customer WHERE c_ID = ?", [c_ID]);
+
+        if (customerRows.length === 0) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+
+        const customer = customerRows[0];
+
+        // Fetch order counts grouped by status
+        const [orderCounts] = await db.query(`
+            SELECT orStatus, COUNT(*) AS count
+            FROM Orders
+            WHERE c_ID = ?
+            GROUP BY orStatus
+        `, [c_ID]);
+
+        // Initialize order status counts
+        const statusCounts = {
+            Accepted: 0,
+            Pending: 0,
+            Delivered: 0,
+            Issued: 0,
+            Production: 0
+        };
+
+        // Populate status counts with actual data
+        orderCounts.forEach(row => {
+            const status = row.orStatus;
+            if (statusCounts.hasOwnProperty(status)) {
+                statusCounts[status] = row.count;
+            }
+        });
+
+        // Construct the response object
+        const response = {
+            c_ID: customer.c_ID,
+            title: customer.title,
+            FtName: customer.FtName,
+            SrName: customer.SrName,
+            id: customer.id,
+            address: customer.address,
+            contact1: customer.contact1,
+            contact2: customer.contact2,
+            balance: customer.balance,
+            category: customer.category,
+            type: customer.type,
+            t_name: customer.t_name,
+            occupation: customer.occupation,
+            workPlace: customer.workPlace,
+            orders: [statusCounts]
+        };
+
+        return res.status(200).json(response);
+    } catch (error) {
+        console.error("Error fetching customer details:", error.message);
+        return res.status(500).json({ message: "Error fetching customer details" });
+    }
+});
+
 // Check if customer exists by phone number
 router.get("/customer/check-customer", async (req, res) => {
     const { phone } = req.query;
