@@ -6303,6 +6303,7 @@ router.post("/issued-items", async (req, res) => {
             );
     
             for (const item of orderItems) {
+                console.log(item);
                 await db.query(
                     `UPDATE Item
                      SET bookedQty = bookedQty - ?, dispatchedQty = dispatchedQty + ?
@@ -6314,6 +6315,41 @@ router.post("/issued-items", async (req, res) => {
             // 4. Cleanup
             await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
             await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
+
+            // Step 2: Update ST_order_review
+            const totalIssued = selectedItems.reduce((sum, item) => sum + parseFloat(item.price || 0), 0);
+
+            // Assuming orID is linked to a sales team ID (you may adjust where to fetch stID from)
+            const [[{ stID }]] = await db.query(`SELECT stID FROM Orders WHERE OrID = ?`, [orID]);
+
+            // 🧮 Extract year and month from deliveryDate (or current date if missing)
+            const dateObj = new Date();
+            const year = dateObj.getFullYear();
+            const month = dateObj.toLocaleString('default', { month: 'long' }); // e.g., 'May'
+
+
+            // Check if record exists
+            const [[existingReview]] = await db.query(
+                `SELECT totalIssued FROM ST_order_review WHERE stID = ? AND year = ? AND month = ?`,
+                [stID, year, month]
+            );
+
+            if (existingReview) {
+                // Update totalIssued
+                await db.query(
+                    `UPDATE ST_order_review
+                    SET totalIssued = totalIssued + ?
+                    WHERE stID = ? AND year = ? AND month = ?`,
+                    [totalIssued, stID, year, month]
+                );
+            } else {
+                // Insert new row
+                await db.query(
+                    `INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued)
+                    VALUES (?, ?, ?, 0, ?)`,
+                    [stID, year, month, totalIssued]
+                );
+            }
     
         }
         return res.status(200).json({
@@ -6331,6 +6367,135 @@ router.post("/issued-items", async (req, res) => {
     }
 });
 
+// Issued item in now order
+router.post("/issued-items-Now", async (req, res) => {
+    const { orID, payStatus, selectedItems, deliveryStatus } = req.body;
+
+    if (!orID || !payStatus || !selectedItems || selectedItems.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    try {
+        // 1. Update Orders table only if it's a Delivery
+        if (deliveryStatus === "Delivery") {
+            await db.query(
+                `UPDATE Orders SET orStatus = 'Delivered', payStatus = ? WHERE OrID = ?`,
+                [payStatus, orID]
+            );
+        } else {
+            await db.query(
+                `UPDATE Orders SET payStatus = ? WHERE OrID = ?`,
+                [payStatus, orID]
+            );
+        }
+
+        // 2. Update p_i_detail and issued_items
+        const itemStatus = deliveryStatus === "Delivery" ? "Dispatched" : "Issued";
+
+        for (const item of selectedItems) {
+            await db.query(
+                `UPDATE p_i_detail
+                 SET status = ?, orID = ?, datetime = NOW(), price = ?
+                 WHERE pid_Id = ?`,
+                [itemStatus, orID, item.price, item.pid_Id]
+            );
+
+            await db.query(
+                `INSERT INTO issued_items (orID, pid_Id, status, date)
+                 VALUES (?, ?, ?, NOW())`,
+                [orID, item.pid_Id, itemStatus]
+            );
+        }
+
+        if (deliveryStatus === "Delivery") {
+             // 3. Update Item stock quantities
+            const [orderItems] = await db.query(
+                `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
+                [orID]
+            );
+    
+            for (const item of orderItems) {
+                console.log(item);
+                await db.query(
+                    `UPDATE Item
+                     SET availableQty = availableQty - ?, dispatchedQty = dispatchedQty + ?
+                     WHERE I_Id = ?`,
+                    [item.qty, item.qty, item.I_Id]
+                );
+            }
+    
+            // 4. Cleanup
+            await db.query(`DELETE FROM booked_item WHERE orID = ?`, [orID]);
+            await db.query(`DELETE FROM accept_orders WHERE orID = ?`, [orID]);
+    
+        }
+
+        if (deliveryStatus !== "Delivery") {
+        // Step 1: Update stock quantities
+        const [orderItems] = await db.query(
+            `SELECT I_Id, qty FROM Order_Detail WHERE orID = ?`,
+            [orID]
+        );
+
+        for (const item of orderItems) {
+            await db.query(
+                `UPDATE Item
+                SET availableQty = availableQty - ?, stockQty = stockQty - ?
+                WHERE I_Id = ?`,
+                [item.qty, item.qty, item.I_Id]
+            );
+        }
+
+        // Step 2: Update ST_order_review
+        const totalIssued = selectedItems.reduce((sum, item) => sum + parseFloat(item.price || 0), 0);
+
+        // Assuming orID is linked to a sales team ID (you may adjust where to fetch stID from)
+        const [[{ stID }]] = await db.query(`SELECT stID FROM Orders WHERE OrID = ?`, [orID]);
+
+        // 🧮 Extract year and month from deliveryDate (or current date if missing)
+        const dateObj = new Date();
+        const year = dateObj.getFullYear();
+        const month = dateObj.toLocaleString('default', { month: 'long' }); // e.g., 'May'
+
+
+        // Check if record exists
+        const [[existingReview]] = await db.query(
+            `SELECT totalIssued FROM ST_order_review WHERE stID = ? AND year = ? AND month = ?`,
+            [stID, year, month]
+        );
+
+        if (existingReview) {
+            // Update totalIssued
+            await db.query(
+                `UPDATE ST_order_review
+                SET totalIssued = totalIssued + ?
+                WHERE stID = ? AND year = ? AND month = ?`,
+                [totalIssued, stID, year, month]
+            );
+        } else {
+            // Insert new row
+            await db.query(
+                `INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued)
+                VALUES (?, ?, ?, 0, ?)`,
+                [stID, year, month, totalIssued]
+            );
+        }
+    }
+
+        return res.status(200).json({
+            success: true,
+            message: `Order processed as ${itemStatus}`,
+        });
+
+    } catch (error) {
+        console.error("Error updating order:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+});
 
 // Save new Delivery Rate
 router.post("/delivery-rates", async (req, res) => {
@@ -7185,6 +7350,31 @@ router.post("/delivery-update", async (req, res) => {
                 "UPDATE sales_team SET totalIssued = totalIssued + ? WHERE stID = ?",
                 [orderNetTotal, stID]
             );
+
+            // 🧮 Extract year and month from deliveryDate (or current date if missing)
+            const dateObj = deliveryDate ? new Date(deliveryDate) : new Date();
+            const year = dateObj.getFullYear();
+            const month = dateObj.toLocaleString('default', { month: 'long' }); // e.g., 'May'
+
+            // 📌 Check if ST_order_review row exists
+            const [reviewRows] = await db.query(
+                "SELECT * FROM ST_order_review WHERE stID = ? AND year = ? AND month = ?",
+                [stID, year, month]
+            );
+
+            if (reviewRows.length > 0) {
+                // ✅ Update existing totalIssued
+                await db.query(
+                    "UPDATE ST_order_review SET totalIssued = totalIssued + ? WHERE stID = ? AND year = ? AND month = ?",
+                    [orderNetTotal, stID, year, month]
+                );
+            } else {
+                // 🆕 Insert new row
+                await db.query(
+                    "INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued) VALUES (?, ?, ?, 0, ?)",
+                    [stID, year, month, orderNetTotal]
+                );
+            }
         }
 
         /** ------------------- Handle Rescheduling --------------------- */
