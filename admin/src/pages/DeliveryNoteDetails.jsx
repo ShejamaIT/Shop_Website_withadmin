@@ -303,6 +303,7 @@ const DeliveryNoteDetails = () => {
                     }) || [] : [],
                 paymentDetails: orderPayment,
             };
+            console.log(updatedOrder);
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-payment`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -354,6 +355,7 @@ const DeliveryNoteDetails = () => {
                         return { itemId, stockId, status: selectedItemStatus?.[itemKey] || "Available" };
                     }) || [] : []
             };
+            console.log(updatedOrder);
 
             const response = await fetch(`http://localhost:5001/api/admin/main/delivery-update`, {
                 method: "POST",
@@ -374,7 +376,7 @@ const DeliveryNoteDetails = () => {
             toast.error("Failed to process delivery.");
         }
     };
-
+    
 
     const setDate = (e) => {
         const routedate = e.target.value;
