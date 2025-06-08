@@ -55,10 +55,18 @@ const TableDeliverd = ({ refreshKey }) => {
         const query = event.target.value.toLowerCase();
         setSearchQuery(query);
 
-        const filteredData = orders.filter((order) =>
-            order.OrID.toString().toLowerCase().includes(query)
-        );
+        const filteredData = orders.filter((order) => {
+            // Check for undefined or null contact fields and make sure they are strings
+            const contact1 = order.contact1 ? order.contact1.toString() : "";
+            const contact2 = order.contact2 ? order.contact2.toString() : "";
 
+            // Check if query matches either contact number
+            return (
+                order.OrID.toString().toLowerCase().includes(query) ||
+                contact1.toLowerCase().includes(query) ||
+                contact2.toLowerCase().includes(query)
+            );
+        });
         setFilteredOrders(filteredData);
     };
 
