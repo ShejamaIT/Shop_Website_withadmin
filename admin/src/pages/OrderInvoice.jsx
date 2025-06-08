@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from "react";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import { toast } from "react-toastify";
-import { Container, Row, Col, Form, FormGroup, Label, Input, Button, ModalHeader, ModalBody, ModalFooter, Modal, Card, CardBody, CardTitle, CardText} from "reactstrap";
+import { Container, Row, Col, Form, FormGroup, Label,Table, Input, Button, ModalHeader, ModalBody, ModalFooter, Modal, Card, CardBody, CardTitle, CardText} from "reactstrap";
 import "../style/placeorder.css";
 import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
@@ -92,6 +92,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [productionData, setProductionData] = useState({itemId: '', supplierId: '', qty: '', expecteddate: '', specialnote: ''});
     const [processedItems, setProcessedItems] = useState([]);
     const [PurchaseId, setPurchaseId] = useState("");
+    const [cheques, setCheques] = useState([]);
+    const [ChequeBalance, setChequeBalance] = useState(0);
     const subPaymentOptions = {
             Cash: ['Cash', 'Transfer'],
             Card: ['Debit Card', 'Credit Card'],
@@ -154,6 +156,14 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setLoading(false);
         }
     };
+    useEffect(() => {
+        const total = cheques.reduce((sum, cheque) => {
+            const amount = parseFloat(cheque.amount) || 0;
+            return sum + amount;
+        }, 0);
+        setChequeBalance(total);
+    }, [cheques]);
+
 
     useEffect(() => {
         calculateTotalPrice();
@@ -165,6 +175,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         const chequeAmount = parseFloat(combinedChequeBalance) || 0;
         const creditAdvance = parseFloat(creditAmount) || 0;
         const transferAdvance = parseFloat(combinedTransferBalance) || 0;
+        const chequepay = parseFloat(ChequeBalance) || 0;
+        const totalChequeAmount = cheques.reduce((sum, chq) => sum + (parseFloat(chq.amount) || 0), 0);
 
 
         const isCardPayment = formData.payment === "Card" &&
@@ -184,6 +196,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
         const isCreditPayment = formData.payment === "Credit";
 
+        const isChequePayment = formData.payment === "Cheque";
+
         if (isCardPayment) {
             const interest = (numericBill * fixedRate) / 100;
             const net = numericBill + interest;
@@ -195,7 +209,12 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setBalance(0);
             setCardPortion(numericBill);
             setFullTotalPay(net);
-        } else if (isCombinedCashCard) {
+        } else if(isChequePayment){
+           const balance = numericBill - totalChequeAmount;
+            setAdvance(totalChequeAmount);
+            setBalance(balance > 0 ? balance : 0);
+            setFullTotalPay(numericBill);
+        }else if (isCombinedCashCard) {
             const cardAmount = numericBill - cashAmount;
             const interest = (cardAmount * fixedRate) / 100;
             const cardTotal = cardAmount + interest;
@@ -210,13 +229,14 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setBalance(0);
             setFullTotalPay(fullTotal);
         }  else if (isCombinedCashCheque) {
-            const chequePart = numericBill - chequeAmount;
-            const fullPaid = chequeAmount + chequePart;
+            const cashPortion = parseFloat(formData.cashAmount || 0); // Optional: handle cash part
+            const totalPaid = cashPortion + totalChequeAmount;
+            const balance = numericBill - totalPaid;
 
-            setChequePortion(chequePart);
-            setAdvance(fullPaid); // Total amount paid via cash + cheque
-            setBalance(0);
-            setFullTotalPay(fullPaid); // No interest logic for cheque
+            setChequePortion(totalChequeAmount);
+            setAdvance(totalPaid);
+            setBalance(balance > 0 ? balance : 0);
+            setFullTotalPay(numericBill);
         } else if (isCreditPayment) {
             const balance = numericBill - creditAdvance;
             setAdvance(creditAdvance);
@@ -246,7 +266,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setBalance(0);
             setFullTotalPay(0);
         }
-    }, [formData.payment, formData.subPayment, totalBillPrice, combinedCardBalance,combinedTransferBalance,combinedChequeBalance, creditAmount]);
+    }, [formData.payment, formData.subPayment, totalBillPrice,ChequeBalance, combinedCardBalance,combinedTransferBalance,combinedChequeBalance, creditAmount]);
 
     const calculateTotalPrice = () => {
         // Calculate the total special discount for all selected items
@@ -558,12 +578,15 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
         if (formData.payment === "Cheque") {
             chequePayment = {
-                amount: parseFloat(chequeAmount).toFixed(2),
-                chequeNumber,
-                bank,
-                branch,
-                accountNumber,
-                chequeDate,
+                total: parseFloat(ChequeBalance || 0).toFixed(2),
+                cheques: cheques.map(chq => ({
+                    amount: parseFloat(chq.amount || 0).toFixed(2),
+                    chequeNumber: chq.chequeNumber,
+                    bank: chq.bank,
+                    branch: chq.branch,
+                    accountNumber: chq.accountNumber,
+                    chequeDate: chq.chequeDate,
+                })),
             };
         }
         if (formData.payment === "Cash" && formData.subPayment === 'Transfer') {
@@ -599,10 +622,17 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         }
         if (formData.payment === 'Combined' && formData.subPayment === 'Cash & Cheque') {
             combinedChequePayment = {
-                chequeBalance: parseFloat(chequePortion).toFixed(2),
-                cashBalance: parseFloat(combinedChequeBalance).toFixed(2),
+                chequeBalance: parseFloat(chequePortion || 0).toFixed(2),
+                cashBalance: parseFloat(combinedChequeBalance || 0).toFixed(2),
                 type: formData.subPayment,
-                chequeNumber,bank, branch,accountNumber,chequeDate,
+                cheques: cheques.map(chq => ({
+                    amount: parseFloat(chq.amount || 0).toFixed(2),
+                    chequeNumber: chq.chequeNumber,
+                    bank: chq.bank,
+                    branch: chq.branch,
+                    accountNumber: chq.accountNumber,
+                    chequeDate: chq.chequeDate,
+                })),
             };
         }
         if (formData.payment === 'Combined' && formData.subPayment === 'Cash & Credit') {
@@ -681,83 +711,84 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             ...orderData,
             processedItems,
         };
+        console.log(fullOrderData);
 
-        try {
-            if (formData.issuable === 'Later') {
-                try {
-                    const fullOrderData = {
-                        ...orderData,
-                        processedItems,
-                    };
+        // try {
+        //     if (formData.issuable === 'Later') {
+        //         try {
+        //             const fullOrderData = {
+        //                 ...orderData,
+        //                 processedItems,
+        //             };
             
-                    console.log("📝 Sending Full Order Data:", fullOrderData);
+        //             console.log("📝 Sending Full Order Data:", fullOrderData);
             
-                    const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(fullOrderData),
-                    });
+        //             const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
+        //                 method: "POST",
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                 },
+        //                 body: JSON.stringify(fullOrderData),
+        //             });
             
-                    const result = await response.json();
+        //             const result = await response.json();
             
-                    if (response.ok && result.success) {
-                        const { orderId, orderDate, expectedDate } = result.data;
-                        toast.success(`Order placed successfully! Order ID: ${orderId}`);
-                        console.log("✅ Order Success:", { orderId, orderDate, expectedDate });
-                    } else {
-                        toast.error(result.message || "Failed to place the order.");
-                        console.error("❌ Order Error:", result.message || result);
-                    }
+        //             if (response.ok && result.success) {
+        //                 const { orderId, orderDate, expectedDate } = result.data;
+        //                 toast.success(`Order placed successfully! Order ID: ${orderId}`);
+        //                 console.log("✅ Order Success:", { orderId, orderDate, expectedDate });
+        //             } else {
+        //                 toast.error(result.message || "Failed to place the order.");
+        //                 console.error("❌ Order Error:", result.message || result);
+        //             }
             
-                } catch (error) {
-                    toast.error("An error occurred while placing the order.");
-                    console.error("❌ Network/Server Error:", error);
-                }
-            } else if (formData.issuable === 'Now'){
-                const response = await fetch("http://localhost:5001/api/admin/main/orders", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(orderData),
-                });
+        //         } catch (error) {
+        //             toast.error("An error occurred while placing the order.");
+        //             console.error("❌ Network/Server Error:", error);
+        //         }
+        //     } else if (formData.issuable === 'Now'){
+        //         const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+        //             method: "POST",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //             },
+        //             body: JSON.stringify(orderData),
+        //         });
                 
-                const result = await response.json();
-                const { orderId } = result.data;
-                if (response.ok) {
-                    toast.success("Order placed successfully!");
-                    const newOrder = {
-                        orderId:orderId ,
-                        orderDate: new Date().toLocaleDateString(),
-                        phoneNumber: formData.phoneNumber,
-                        payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
-                        deliveryStatus: formData.dvStatus,
-                        deliveryCharge: deliveryPrice,
-                        discount: discountAmount,
-                        specialDiscount: specialdiscountAmount,
-                        advance: parseFloat(advance),
-                        items: items,
-                        balance:parseFloat(balance),
-                        totalPrice:totalBillPrice,
-                        customerName:formData.FtName+" "+formData.SrName,
+        //         const result = await response.json();
+        //         const { orderId } = result.data;
+        //         if (response.ok) {
+        //             toast.success("Order placed successfully!");
+        //             const newOrder = {
+        //                 orderId:orderId ,
+        //                 orderDate: new Date().toLocaleDateString(),
+        //                 phoneNumber: formData.phoneNumber,
+        //                 payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
+        //                 deliveryStatus: formData.dvStatus,
+        //                 deliveryCharge: deliveryPrice,
+        //                 discount: discountAmount,
+        //                 specialDiscount: specialdiscountAmount,
+        //                 advance: parseFloat(advance),
+        //                 items: items,
+        //                 balance:parseFloat(balance),
+        //                 totalPrice:totalBillPrice,
+        //                 customerName:formData.FtName+" "+formData.SrName,
             
-                    };
-                    setSelectedOrder(newOrder);
-                    // Optionally, open invoice modal here
-                    setShowModal2(true);
+        //             };
+        //             setSelectedOrder(newOrder);
+        //             // Optionally, open invoice modal here
+        //             setShowModal2(true);
                 
                 
-                } else {
-                    toast.error(result.message || "Something went wrong. Please try again.");
-                }
-            }
+        //         } else {
+        //             toast.error(result.message || "Something went wrong. Please try again.");
+        //         }
+        //     }
 
-        } catch (error) {
-            console.error("Error submitting order data:", error);
-            toast.error("Error submitting order data. Please try again.");
-        }
+        // } catch (error) {
+        //     console.error("Error submitting order data:", error);
+        //     toast.error("Error submitting order data. Please try again.");
+        // }
     };
     const handleSubmit3 = async (formData) => {
         const updatedData = {
@@ -1212,6 +1243,38 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         setFilteredItems([]);
         setDropdownOpen(false); // Close dropdown after selection
     };
+
+   const handleCheque = () => {
+    if (!chequeAmount || !chequeNumber) return;
+
+    const newCheque = {
+        amount: parseFloat(chequeAmount),
+        chequeNumber,
+        bank,
+        branch,
+        accountNumber,
+        chequeDate
+    };
+
+    setCheques(prev => [...prev, newCheque]);
+
+    // Clear inputs
+    setChequeAmount('');
+    setChequeNumber('');
+    setBank('');
+    setBranch('');
+    setAccountNumber('');
+    setChequeDate('');
+};
+
+
+    const handleRemoveCheque = (index) => {
+        const updatedCheques = [...cheques];
+        updatedCheques.splice(index, 1);
+        setCheques(updatedCheques);
+    };
+
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
 
@@ -1980,7 +2043,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                         setAdvance(val); // Reflect in general payment state
                                         }
                                     }}
-                                    required
+                                    
                                     className="w-full text-right"
                                     />
                                 </span>
@@ -1994,7 +2057,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     name="chequeNumber"
                                     value={chequeNumber}
                                     onChange={(e) => setChequeNumber(e.target.value)}
-                                    required
+                                    
                                     className="w-full text-right"
                                     />
                                 </span>
@@ -2008,7 +2071,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     name="bank"
                                     value={bank}
                                     onChange={(e) => setBank(e.target.value)}
-                                    required
+                                    
                                     className="w-full text-right"
                                     />
                                 </span>
@@ -2022,7 +2085,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     name="branch"
                                     value={branch}
                                     onChange={(e) => setBranch(e.target.value)}
-                                    required
+                                    
                                     className="w-full text-right"
                                     />
                                 </span>
@@ -2036,7 +2099,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     name="accountNumber"
                                     value={accountNumber}
                                     onChange={(e) => setAccountNumber(e.target.value)}
-                                    required
+                                    
                                     className="w-full text-right"
                                     />
                                 </span>
@@ -2050,11 +2113,54 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     name="chequeDate"
                                     value={chequeDate}
                                     onChange={(e) => setChequeDate(e.target.value)}
-                                    required
+                                    
                                     className="w-full text-right"
                                     />
                                 </span>
                                 </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
+                                </div>
+                                <Row className="align-items-center">
+                                <Col xs="4">
+                                    <Button color="info" onClick={handleCheque}>Add Cheque</Button>
+                                </Col>
+                            </Row>
+
+                                {cheques.length > 0 && (
+                                    <Table bordered size="sm" className="mt-3">
+                                        <thead className="custom-table-header">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Cheque Number</th>
+                                                <th>Date</th>
+                                                <th>Amount</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {cheques.map((cheque, index) => (
+                                                <tr key={index}>
+                                                    <td>{index + 1}</td>
+                                                    <td>{cheque.chequeNumber}</td>
+                                                    <td>{cheque.chequeDate}</td>
+                                                    <td>{cheque.amount}</td>
+                                                    <td>
+                                                        <Button
+                                                            color="danger"
+                                                            size="sm"
+                                                            onClick={() => handleRemoveCheque(index)}
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </Table>
+                                )}
+
                             </>
                         )}
 
