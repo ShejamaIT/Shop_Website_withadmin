@@ -283,7 +283,7 @@ router.post("/orders", async (req, res) => {
         }
 
         // ✅ Set order status for Walking to 'Accepted'
-        const orderStatus = dvStatus === "Delivery" ?  "Deliverd" : "Issued";
+        const orderStatus = dvStatus === "Delivery" ?  "Delivered" : "Issued";
         console.log(dvStatus,orderStatus);
         // const orderStatus = orderType === "Walking" ? "Accepted" : "Pending";
         const orderQuery = `
@@ -5077,8 +5077,6 @@ router.post("/addStock", upload.single("image"), async (req, res) => {
 
                 fs.writeFileSync(barcodeImagePath, pngBuffer);
 
-                // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "", "",]);
-                // await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", "",NOW()]);
                 await db.query(insertBarcodeQuery, [purchase_id, I_Id, lastStockId, barcodeImagePath, "Available", null,  mysql.raw('NOW()'),material,price]);
 
             }
@@ -6635,43 +6633,52 @@ router.post("/delivery-dates", async (req, res) => {
 });
 
 // Save new employee and saleteam
-router.post("/employees", async (req, res) => {
+router.post("/employees", upload.single("lincenseimg"), async (req, res) => {
     try {
-        const { name, address, nic, dob, contact, job, basic, orderTarget , issuedTarget ,type } = req.body;
+        const {
+            name, address, nic, dob, contact, job, basic,
+            type, orderTarget, issuedTarget, lincenseDate
+        } = req.body;
 
-        if (!name || !address || !nic || !dob || !contact || !job || !basic ) {
+        const lincenseimg = req.file ? req.file.buffer : null;
+
+        if (!name || !address || !nic || !dob || !contact || !job || !basic) {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required except target and currentRate (only for Sales)."
+                message: "All fields are required except targets/license (Sales or Driver)."
             });
         }
 
-        const E_Id = await generateNewId("Employee", "E_Id", "E"); // Generate new Employee ID
+        const E_Id = await generateNewId("Employee", "E_Id", "E");
 
-        const sql = `INSERT INTO Employee (E_Id, name, address, nic, dob, contact, job, basic,type) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)`;
-        await db.query(sql, [E_Id, name, address, nic, dob, contact, job, basic,type]);
+        const sql = `INSERT INTO Employee (E_Id, name, address, nic, dob, contact, job, basic, type)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        await db.query(sql, [E_Id, name, address, nic, dob, contact, job, basic, type]);
 
-        // If job is Sales, insert into sales_team table
         let Data = null;
+
         if (job === "Sales" && orderTarget && issuedTarget) {
             const stID = await generateNewId("sales_team", "stID", "ST");
-            const sqlSales = `INSERT INTO sales_team (stID, E_Id, orderTarget,issuedTarget, totalOrder, totalIssued) VALUES (?, ?, ?,?,'0', '0')`;
-            await db.query(sqlSales,[stID, E_Id, orderTarget , issuedTarget]);
-
-            Data = { stID, orderTarget , issuedTarget };
+            const sqlSales = `INSERT INTO sales_team (stID, E_Id, orderTarget, issuedTarget, totalOrder, totalIssued)
+                              VALUES (?, ?, ?, ?, '0', '0')`;
+            await db.query(sqlSales, [stID, E_Id, orderTarget, issuedTarget]);
+            Data = { stID, orderTarget, issuedTarget };
         }
-        if ( job === "Driver"){
-            const devID = await generateNewId("driver","devID","DI");
-            const sqlDriver = `INSERT INTO driver (devID,E_ID,balance) VALUES (?,?,'0')`;
-            await db.query(sqlDriver,[devID,E_Id]);
 
-            Data = {devID,E_Id};
+        if (job === "Driver") {
+            const devID = await generateNewId("driver", "devID", "DI");
 
+            const sqlDriver = `INSERT INTO driver (devID, E_ID, balance, lincenseDate, lincense)
+                               VALUES (?, ?, '0', ?, ?)`;
+            await db.query(sqlDriver, [devID, E_Id, lincenseDate, lincenseimg]);
+
+            Data = { devID, E_Id };
         }
+
         return res.status(201).json({
             success: true,
             message: "Employee added successfully",
-            data:  {E_Id,Data},
+            data: { E_Id, ...Data },
         });
 
     } catch (err) {
