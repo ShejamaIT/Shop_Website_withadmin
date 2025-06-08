@@ -4576,26 +4576,37 @@ router.get("/drivers/details", async (req, res) => {
         const { devID } = req.query;
         if (!devID) return res.status(400).json({ message: "Missing devID parameter." });
 
-        // 1. Driver and Employee Info
+        // 1. Driver and Employee Info (now includes license-related fields)
         const driverQuery = `
-            SELECT d.devID, d.balance, e.E_Id, e.name, e.address, e.nic, e.dob, e.contact, e.job, e.basic
+            SELECT d.devID, d.balance, d.dailyTarget, d.monthlyTarget, d.lincenseDate, d.lincense,
+                   e.E_Id, e.name, e.address, e.nic, e.dob, e.contact, e.job, e.basic
             FROM driver d
             INNER JOIN Employee e ON d.E_ID = e.E_Id
             WHERE d.devID = ?;
         `;
         const [driverResults] = await db.execute(driverQuery, [devID]);
         if (driverResults.length === 0) return res.status(404).json({ message: "Driver not found." });
+
         const employeeId = driverResults[0].E_Id;
+
+        // Convert license blob to base64 if available
+        let licenseBase64 = null;
+        if (driverResults[0].lincense) {
+            licenseBase64 = Buffer.from(driverResults[0].lincense).toString("base64");
+        }
 
         // 2. Delivery Charges
         const chargeQuery = `
             SELECT dv_id AS deliveryId, delivery_Date AS date, driverBalance AS amount
             FROM delivery
             WHERE devID = ? AND driverBalance > 0
-              AND (MONTH(delivery_Date) = MONTH(CURDATE()) AND YEAR(delivery_Date) = YEAR(CURDATE())
-              OR MONTH(delivery_Date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(delivery_Date) = YEAR(CURDATE()));
+              AND (
+                (MONTH(delivery_Date) = MONTH(CURDATE()) AND YEAR(delivery_Date) = YEAR(CURDATE()))
+                OR (MONTH(delivery_Date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(delivery_Date) = YEAR(CURDATE()))
+              );
         `;
         const [chargeDetails] = await db.execute(chargeQuery, [devID]);
+
         const today = new Date().toDateString();
         const thisMonth = new Date().getMonth() + 1;
         const lastMonth = new Date().getMonth();
@@ -4606,41 +4617,49 @@ router.get("/drivers/details", async (req, res) => {
         const dailyChargeTotal = dailyCharges.reduce((sum, c) => sum + c.amount, 0);
         const monthlyChargeTotal = monthlyCharges.reduce((sum, c) => sum + c.amount, 0);
 
-        // 3. Delivery Notes with hire total
+        // 3. Delivery Notes
         const deliveryNoteQuery = `
             SELECT delNoID, district, hire, MONTH(date) AS month, YEAR(date) AS year
             FROM delivery_note
             WHERE devID = ? AND status = 'complete'
-              AND (MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())
-              OR MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE()));
+              AND (
+                (MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE()))
+                OR (MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE()))
+              );
         `;
         const [deliveryNotes] = await db.execute(deliveryNoteQuery, [devID]);
+
         const thisMonthNotes = deliveryNotes.filter(note => note.month === thisMonth);
         const lastMonthNotes = deliveryNotes.filter(note => note.month === lastMonth);
 
         const thisMonthNoteHireTotal = thisMonthNotes.reduce((sum, n) => sum + n.hire, 0);
         const lastMonthNoteHireTotal = lastMonthNotes.reduce((sum, n) => sum + n.hire, 0);
 
-        // 4. This & Last Month Other Hires
+        // 4. Other Hires
         const hireQuery = `
             SELECT id, date, hire, MONTH(date) AS month
             FROM otherHire
             WHERE driverId = ?
-              AND (MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())
-              OR MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE()));
+              AND (
+                (MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE()))
+                OR (MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE()))
+              );
         `;
         const [hires] = await db.execute(hireQuery, [devID]);
+
         const thisMonthHires = hires.filter(h => h.month === thisMonth);
         const lastMonthHires = hires.filter(h => h.month === lastMonth);
 
         const thisMonthHireTotal = thisMonthHires.reduce((sum, h) => sum + h.hire, 0);
         const lastMonthHireTotal = lastMonthHires.reduce((sum, h) => sum + h.hire, 0);
 
-        // 5. Advance
+        // 5. Advances
         const advanceQuery = `
             SELECT ad_ID AS advanceId, amount, dateTime
             FROM salary_advance
-            WHERE E_Id = ? AND MONTH(dateTime) = MONTH(CURDATE()) AND YEAR(dateTime) = YEAR(CURDATE());
+            WHERE E_Id = ?
+              AND MONTH(dateTime) = MONTH(CURDATE())
+              AND YEAR(dateTime) = YEAR(CURDATE());
         `;
         const [advanceDetails] = await db.execute(advanceQuery, [employeeId]);
         const totalAdvance = advanceDetails.reduce((sum, a) => sum + a.amount, 0);
@@ -4651,6 +4670,7 @@ router.get("/drivers/details", async (req, res) => {
 
         const responseData = {
             ...driverResults[0],
+            lincense: licenseBase64,
             deliveryCharges: {
                 dailyChargeTotal,
                 dailyCharges,
@@ -4681,6 +4701,7 @@ router.get("/drivers/details", async (req, res) => {
         return res.status(500).json({ message: "Error fetching driver details." });
     }
 });
+
 
 // Get all categories
 router.get("/categories", async (req, res) => {
