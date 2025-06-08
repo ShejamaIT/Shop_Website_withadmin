@@ -42,6 +42,7 @@ const DriverDetail = ({ driver }) => {
 
             const data = await response.json();
 
+            console.log(data.data);
             setDriverDetails(data.data || {});
             setDeliveryCharges(data.data.deliveryCharges || {});
             setThisMonthNotes(data.data.deliveryNotes.thisMonth || []);
@@ -56,8 +57,6 @@ const DriverDetail = ({ driver }) => {
             setthismothHireValue(data.data.hires.thisMonthHireTotal);
             setlastmothHireValue(data.data.hires.lastMonthHireTotal);
             setLoanDetails(data.data.loans || []);
-            // setLoanAmount(loandetails[0].amount);
-            // setInstallment(loandetails[0].installment);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -107,6 +106,10 @@ const DriverDetail = ({ driver }) => {
                                             <tr>
                                                 <td><strong>NIC</strong></td>
                                                 <td>{driverDetails.nic}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Lincense Date</strong></td>
+                                                <td>{formatDate(driverDetails.lincenseDate)}</td>
                                             </tr>
                                             </tbody>
                                         </Table>
