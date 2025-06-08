@@ -47,13 +47,15 @@ const TableCustomer = ({ filter, title }) => {
         const query = event.target.value.toLowerCase();
         setSearchQuery(query);
 
-        const filteredData = customers.filter((customer) =>
-            customer.SrName.toLowerCase().includes(query) ||
-            customer.FtName.toLowerCase().includes(query) ||
-            customer.id.toLowerCase().includes(query) ||
-            customer.contact1.toLowerCase().includes(query)||
-            customer.contact2.toLowerCase().includes(query)
-        );
+        const filteredData = customers.filter((customer) => {
+            return (
+                (customer.FtName && customer.FtName.toLowerCase().includes(query)) ||
+                (customer.SrName && customer.SrName.toLowerCase().includes(query)) ||
+                (customer.id && customer.id.toLowerCase().includes(query)) ||
+                (customer.contact1 && customer.contact1.toLowerCase().includes(query)) ||
+                (customer.contact2 && customer.contact2.toLowerCase().includes(query))
+            );
+        });
 
         setFilteredCustomers(filteredData);
     };
