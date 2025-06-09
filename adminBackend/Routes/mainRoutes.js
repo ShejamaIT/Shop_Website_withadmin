@@ -7185,6 +7185,125 @@ router.post("/coupone", async (req, res) => {
     }
 });
 
+// Save shop banks
+router.post('/shop-banks', async (req, res) => {
+    const { bank, branch } = req.body;
+
+    if (!bank || !branch) {
+        return res.status(400).json({ error: 'Bank and branch are required' });
+    }
+
+    try {
+        const [result] = await db.query(
+            'INSERT INTO shop_Banks (Bank, branch) VALUES (?, ?)',
+            [bank, branch]
+        );
+        res.status(201).json({ message: 'Bank added successfully', sbID: result.insertId });
+    } catch (error) {
+        console.error('Error inserting shop_Banks:', error);
+        res.status(500).json({ error: 'Failed to add bank' });
+    }
+});
+
+// save Account numbers 
+router.post('/account-numbers', async (req, res) => {
+    const { sbID, number } = req.body;
+
+    if (!sbID || !number) {
+        return res.status(400).json({ error: 'sbID and account number are required' });
+    }
+
+    try {
+        const [bankExists] = await db.query('SELECT sbID FROM shop_Banks WHERE sbID = ?', [sbID]);
+        if (bankExists.length === 0) {
+            return res.status(404).json({ error: 'Bank not found' });
+        }
+
+        const [result] = await db.query(
+            'INSERT INTO accountNumbers (sbID, number) VALUES (?, ?)',
+            [sbID, number]
+        );
+        res.status(201).json({ message: 'Account number added successfully', acnID: result.insertId });
+    } catch (error) {
+        console.error('Error inserting accountNumbers:', error);
+        res.status(500).json({ error: 'Failed to add account number' });
+    }
+});
+
+// Get all banks 
+router.get('/shop-banks', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM shop_Banks');
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error fetching shop_Banks:', error);
+        res.status(500).json({ error: 'Failed to fetch banks' });
+    }
+});
+
+// Get All account by sbid 
+router.post('/account-numbers/by-id', async (req, res) => {
+    const { sbID } = req.body;
+
+    try {
+        const [rows] = await db.query(
+            'SELECT * FROM accountNumbers WHERE sbID = ?',
+            [sbID]
+        );
+
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error fetching account numbers:', error);
+        res.status(500).json({ error: 'Failed to fetch account numbers' });
+    }
+});
+
+//Get All Account Numbers Grouped by sbID
+router.get('/account-numbers/grouped', async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT 
+                shop_Banks.sbID,
+                shop_Banks.Bank,
+                shop_Banks.branch,
+                accountNumbers.acnID,
+                accountNumbers.number
+            FROM 
+                shop_Banks
+            LEFT JOIN 
+                accountNumbers ON shop_Banks.sbID = accountNumbers.sbID
+            ORDER BY shop_Banks.sbID
+        `);
+
+        const grouped = {};
+
+        for (const row of rows) {
+            if (!grouped[row.sbID]) {
+                grouped[row.sbID] = {
+                    sbID: row.sbID,
+                    Bank: row.Bank,
+                    branch: row.branch,
+                    accountNumbers: []
+                };
+            }
+
+            if (row.acnID) {
+                grouped[row.sbID].accountNumbers.push({
+                    acnID: row.acnID,
+                    number: row.number
+                });
+            }
+        }
+
+        const result = Object.values(grouped);
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error('Error fetching grouped account numbers:', error);
+        res.status(500).json({ error: 'Failed to fetch grouped account numbers' });
+    }
+});
+
 // Salary-advance save
 router.post("/save-advance", async (req, res) => {
     try {
