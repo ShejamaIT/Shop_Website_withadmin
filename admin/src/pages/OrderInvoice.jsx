@@ -7,6 +7,7 @@ import "../style/placeorder.css";
 import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
 import AddNewCoupone from "../pages/AddNewCoupone";
+import AddNewBank from "../pages/AddNewBank";
 import Helmet from "../components/Helmet/Helmet";
 import Swal from "sweetalert2";
 import FinalInvoice1 from "./FinalInvoice1";
@@ -70,6 +71,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [showModal1, setShowModal1] = useState(false);
     const [showModal2, setShowModal2] = useState(false);
     const [showModal3, setShowModal3] = useState(false);
+    const [setShowBank , setSetShowBank] = useState(false);
     const [discount, setDiscount] = useState("0");
     const [advance, setAdvance] = useState("0");
     const [balance, setBalance] = useState("0");
@@ -95,6 +97,12 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [processedItems, setProcessedItems] = useState([]);
     const [PurchaseId, setPurchaseId] = useState("");
     const [cheques, setCheques] = useState([]);
+    const [Banks, setBanks] = useState([]);
+    const [accountNumbers, setAccountNumbers] = useState([]);
+    const [selectedBankId, setSelectedBankId] = useState("");
+    const [availableAccounts, setAvailableAccounts] = useState([]);
+    const [selectedAccount, setSelectedAccount] = useState("");
+
     const [ChequeBalance, setChequeBalance] = useState(0);
     const subPaymentOptions = {
             Cash: ['Cash', 'Transfer'],
@@ -107,7 +115,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const currentTime = new Date().toLocaleTimeString();
 
     useEffect(() => {
-        fetchItems();fetchCoupons();fetchCustomers();
+        fetchItems();fetchCoupons();fetchCustomers();fetchBankDetails();
     }, []);
     const fetchItems = async () => {
         try {
@@ -120,6 +128,28 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         } catch (error) {
             toast.error("Error fetching items.");
             return [];  // ✅ Return an empty array if there's an error
+        }
+    };
+
+    const fetchBankDetails = async () => {
+        try {
+            // Fetch shop banks
+            const banksResponse = await fetch("http://localhost:5001/api/admin/main/shop-banks");
+            const banksData = await banksResponse.json();
+            console.log(banksData);
+            setBanks(banksData || []);
+
+            // Fetch account numbers
+            const accResponse = await fetch("http://localhost:5001/api/admin/main/account-numbers/grouped");
+            const accData = await accResponse.json();
+            console.log(accData);
+            setAccountNumbers(accData || []);
+
+            return { banks: banksData, accounts: accData }; // optional return
+        } catch (error) {
+            console.error("Error fetching bank details:", error);
+            toast.error("Error fetching bank details.");
+            return { banks: [], accounts: [] };
         }
     };
 
@@ -165,7 +195,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         }, 0);
         setChequeBalance(total);
     }, [cheques]);
-
 
     useEffect(() => {
         calculateTotalPrice();
@@ -600,6 +629,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         }
 
         let cardPayment = null;
+        let cashPayment = null;
         let tranferPayment = null;
         let chequePayment = null;
         let cashCardPayment = null;
@@ -624,6 +654,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         if (formData.payment === "Cash" && formData.subPayment === 'Transfer') {
             tranferPayment = {
                bank : transferBank, 
+            };
+        }
+         if (formData.payment === "Cash" && formData.subPayment === 'Cash') {
+            cashPayment = {
+               type : formData.payment,
+               subtype : formData.subPayment,
+               payment : formData.advance,
             };
         }
         if (formData.payment === 'Card') {
@@ -688,7 +725,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             advance: parseFloat(advance || 0).toFixed(2),
             balance: parseFloat(balance || 0).toFixed(2),
             city: formData.address,
-            cardPayment, chequePayment,cashCardPayment,tranferPayment,creditPayment,combinedChequePayment,combinedCreditPayment,combinedTransferPayment,
+           cashPayment, cardPayment, chequePayment,cashCardPayment,tranferPayment,creditPayment,combinedChequePayment,combinedCreditPayment,combinedTransferPayment,
         };
 
         // ✅ Calculate totals correctly
@@ -768,7 +805,9 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                     if (response.ok && result.success) {
                         const { orderId, orderDate, expectedDate } = result.data;
                         toast.success(`Order placed successfully! Order ID: ${orderId}`);
-                        console.log("✅ Order Success:", { orderId, orderDate, expectedDate });
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
                         toast.error(result.message || "Failed to place the order.");
                         console.error("❌ Order Error:", result.message || result);
@@ -993,6 +1032,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const handleAddNewCoupon = () => {
         setShowModal1(true);
     };
+
+    const handleAddNewBank = () => {
+        setSetShowBank(true);
+    };
     const fetchPurchaseID = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/newPurchasenoteID");
@@ -1115,6 +1158,30 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             if (data.success) {
                 toast.success(`Coupon ${couponCode} added successfully!`);
                 fetchCoupons();
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        } catch (error) {
+            console.error("Error submitting coupon:", error);
+            alert("Failed to add coupon. Please try again.");
+        }
+    };
+    const handleAddBank = async (newBank) => {
+        const { bank, branch } = newBank;
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/shop-banks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ bank, branch }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                toast.success(`Bank added successfully!`);
+                fetchBankDetails();
             } else {
                 alert(`Error: ${data.message}`);
             }
@@ -1304,6 +1371,17 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         updatedCheques.splice(index, 1);
         setCheques(updatedCheques);
     };
+
+    const openAddBankModal = () => {
+        // Logic to open modal to add a new bank
+        // Example: setShowBankModal(true);
+    };
+
+    const openAddAccountModal = () => {
+        // Logic to open modal to add a new account number
+        // Example: setShowAccountModal(true);
+    };
+
 
 
     if (loading) return <p>Loading...</p>;
@@ -1967,7 +2045,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                         {formData.payment === "Cash" && (formData.subPayment === "Cash") && (
                             <>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Net AMount</span>
+                                    <span className="custom-info-label">Net Amount</span>
                                     <span className="custom-info-value">Rs.{grossAmount}</span>
                                 </div>
                                 <div className="custom-info-row">
@@ -1996,12 +2074,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </>
                         )}
 
-                        {formData.payment === "Cash" && (formData.subPayment === "Transfer") && (
+                        {formData.payment === "Cash" && formData.subPayment === "Transfer" && (
                             <>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Net AMount</span>
+                                    <span className="custom-info-label">Net Amount</span>
                                     <span className="custom-info-value">Rs.{grossAmount}</span>
                                 </div>
+
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Payment Amount</span>
                                     <span className="custom-info-value">
@@ -2011,33 +2090,85 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                             value={advance}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                // Allow only numbers and a single dot
                                                 if (/^\d*\.?\d*$/.test(val)) {
                                                     setAdvance(val);
                                                 }
                                             }}
                                             required
-                                            className="w-full text-right" // Optional: Align input text to the right
+                                            className="w-full text-right"
                                         />
                                     </span>
                                 </div>
+
+                                {/* 🔽 BANK DROPDOWN + Add New Button */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Bank</span>
-                                    <span className="custom-info-value">
-                                        <Input
-                                            type="text"
-                                            name="bank"
-                                            value={transferBank}
+                                    <span className="custom-info-value flex items-center gap-2">
+                                        <select
+                                            className="w-full text-right"
+                                            value={selectedBankId}
                                             onChange={(e) => {
-                                                const val = e.target.value;
-                                                setTranferBank(val);
-                                                
+                                                const bankId = e.target.value;
+                                                setSelectedBankId(bankId);
+
+                                                const matchedBank = Banks.find((b) => b.sbID === parseInt(bankId));
+                                                setTranferBank(matchedBank?.Bank || "");
+
+                                                const relatedAccounts = accountNumbers.find(acc => acc.sbID === parseInt(bankId));
+                                                setAvailableAccounts(relatedAccounts?.accountNumbers || []);
+                                                setSelectedAccount("");
                                             }}
                                             required
-                                            className="w-full text-right" // Optional: Align input text to the right
-                                        />
+                                        >
+                                            <option value="">Select Bank</option>
+                                            {Banks.map((bank) => (
+                                                <option key={bank.sbID} value={bank.sbID}>
+                                                    {bank.Bank} - {bank.branch}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {/* ➕ Add New Bank Button */}
+                                        <button
+                                            type="button"
+                                            onClick={handleAddNewBank} // ⬅️ This triggers your modal
+                                            className="text-sm text-blue-500 hover:text-blue-700 flex items-center"
+                                        >
+                                            <span className="text-xl mr-1">➕</span>
+                                        </button>
                                     </span>
                                 </div>
+
+                                {/* 🔽 ACCOUNT NUMBER DROPDOWN + Add New Button */}
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Account Number</span>
+                                    <span className="custom-info-value flex items-center gap-2">
+                                        <select
+                                            className="w-full text-right"
+                                            value={selectedAccount}
+                                            onChange={(e) => setSelectedAccount(e.target.value)}
+                                            required
+                                        >
+                                            <option value="">Select Account</option>
+                                            {availableAccounts.map((acc) => (
+                                                <option key={acc.acnID} value={acc.number}>
+                                                    {acc.number}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {/* ➕ Add New Account Number Button */}
+                                        <button
+                                            type="button"
+                                            onClick={openAddAccountModal} // ⬅️ Triggers modal for new account
+                                            className="text-sm text-blue-500 hover:text-blue-700 flex items-center"
+                                        >
+                                            <span className="text-xl mr-1">➕</span> 
+                                        </button>
+                                    </span>
+                                </div>
+
+
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
                                     <span className="custom-info-value">Rs.{balance}</span>
@@ -2047,6 +2178,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
                         {formData.payment === "Card" && (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card") && (
                             <>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Net Amount</span>
+                                    <span className="custom-info-value">Rs.{grossAmount.toFixed(2)}</span>
+                                </div>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Payment Amount</span>
                                     <span className="custom-info-value">Rs.{parseFloat(totalBillPrice).toFixed(2)}</span>
@@ -2060,16 +2195,17 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     <span className="custom-info-value">Rs.{interestValue.toFixed(2)}</span>
                                 </div>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Net Amount</span>
+                                    <span className="custom-info-label">Payable Amount</span>
                                     <span className="custom-info-value">Rs.{netAmount.toFixed(2)}</span>
                                 </div>
+                                
                             </>
                         )}
 
                         {formData.payment === "Cheque" && (
                             <>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Net AMount</span>
+                                    <span className="custom-info-label">Net Amount</span>
                                     <span className="custom-info-value">Rs.{grossAmount}</span>
                                 </div>
                                 <div className="custom-info-row">
@@ -2210,7 +2346,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                         {formData.payment === "Credit" && (
                             <>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Net AMount</span>
+                                    <span className="custom-info-label">Net Amount</span>
                                     <span className="custom-info-value">Rs.{grossAmount}</span>
                                 </div>
                                 <div className="custom-info-row">
@@ -2256,7 +2392,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                         {formData.payment === "Combined" && (formData.subPayment === "Cash & Card") && (
                             <>
                                 <div className="custom-info-row">
-                                    <span className="custom-info-label">Net AMount</span>
+                                    <span className="custom-info-label">Net Amount</span>
                                     <span className="custom-info-value">Rs.{grossAmount}</span>
                                 </div>
                                 <div className="custom-info-row">
@@ -2572,6 +2708,15 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                         handleSubmit2={handleAddCoupon}
                     />
                 )}
+
+                {setShowBank && (
+                    <AddNewBank
+                        setShowBank={setSetShowBank}
+                        handleSubmitBank={handleAddBank}
+                    />
+                )}
+
+
                 {showModal2 && selectedOrder && (
                     <FinalInvoice1
                         selectedOrder={selectedOrder}
