@@ -450,24 +450,29 @@ router.post("/orders", async (req, res) => {
             if (payment === 'Cheque' && chequePayment) {
                 const [chequeTypeResult] = await db.query(
                     `INSERT INTO ord_Pay_type (orID, type, subType) VALUES (?, ?, ?)`,
-                    [orID, payment, subPayment] 
+                    [orID, payment, subPayment]
                 );
+
                 const chequeOptId = chequeTypeResult.insertId;
 
-                await db.query(
-                    `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        chequeOptId,
-                        chequePayment.chequeAmount || 0,
-                        chequePayment.bank || '',
-                        chequePayment.branch || '',
-                        chequePayment.accountNumber || '',
-                        chequePayment.chequeNumber || '',
-                        chequePayment.chequeDate || null
-                    ]
-                );
-                // Update the correct order_payment row using op_ID or orID
+                // Insert all cheques from the array
+                for (const chq of chequePayment.cheques || []) {
+                    await db.query(
+                        `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            chequeOptId,
+                            chq.amount || 0,
+                            chq.bank || '',
+                            chq.branch || '',
+                            chq.accountNumber || '',
+                            chq.chequeNumber || '',
+                            chq.chequeDate || null
+                        ]
+                    );
+                }
+
+                // Update the order_payment table
                 await db.query(
                     `UPDATE order_payment SET otherCharges = 0, fullPaidAmount = ? WHERE op_ID = ?`,
                     [advance1, op_ID]
@@ -530,27 +535,32 @@ router.post("/orders", async (req, res) => {
             }
 
             // Additional insert for Combined (Cash & Cheque) payment
-            if (payment === 'Combined' && subPayment==='Cash & Cheque' && combinedChequePayment) {
+            if (payment === 'Combined' && subPayment === 'Cash & Cheque' && combinedChequePayment) {
                 const [chequeTypeResult] = await db.query(
                     `INSERT INTO ord_Pay_type (orID, type, subType) VALUES (?, ?, ?)`,
-                    [orID, payment, subPayment] 
+                    [orID, payment, subPayment]
                 );
+
                 const chequeOptId = chequeTypeResult.insertId;
 
-                await db.query(
-                    `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        chequeOptId,
-                        combinedChequePayment.chequeBalance || 0,
-                        combinedChequePayment.bank || '',
-                        combinedChequePayment.branch || '',
-                        combinedChequePayment.accountNumber || '',
-                        combinedChequePayment.chequeNumber || '',
-                        combinedChequePayment.chequeDate || null
-                    ]
-                );
-                // Update the correct order_payment row using op_ID or orID
+                // Insert all cheques
+                for (const chq of combinedChequePayment.cheques || []) {
+                    await db.query(
+                        `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            chequeOptId,
+                            chq.amount || 0,
+                            chq.bank || '',
+                            chq.branch || '',
+                            chq.accountNumber || '',
+                            chq.chequeNumber || '',
+                            chq.chequeDate || null
+                        ]
+                    );
+                }
+
+                // Update the order_payment row
                 await db.query(
                     `UPDATE order_payment SET otherCharges = 0, fullPaidAmount = ? WHERE op_ID = ?`,
                     [advance1, op_ID]
@@ -622,16 +632,12 @@ router.post("/orders", async (req, res) => {
     }
 });
 
-// Save a order(Later)
 router.post("/later-order", async (req, res) => {
-    console.log("Route hit");
-
     const {
-        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,
-        couponCode, deliveryPrice, discountAmount, district, dvStatus, orderDate,
-        expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
-        phoneNumber = "", specialNote, title, totalItemPrice, type, workPlace, t_name, orderType, specialdiscountAmount,
-        advance, balance, processedItems = []
+        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,couponCode, deliveryPrice, discountAmount, district, dvStatus, orderDate,
+        expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",phoneNumber = "", specialNote, title, totalItemPrice, type, workPlace, t_name, orderType, specialdiscountAmount,
+        advance, balance, processedItems = [],payment,subPayment,cardPayment={},chequePayment={},cashCardPayment={},tranferPayment={},creditPayment={},combinedChequePayment={},
+        combinedCreditPayment={},combinedTransferPayment={},issuable
     } = req.body;
 
     console.log("✅ Received Processed Items:", processedItems);
@@ -712,7 +718,7 @@ router.post("/later-order", async (req, res) => {
             const updateSalesTeamQuery = `UPDATE sales_team SET totalOrder = totalOrder + ? WHERE stID = ?`;
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
-
+        
         // ✅ Determine order status based on items
         const hasProduction = processedItems.some(item => item.status === "Production");
         const orderStatus = hasProduction ? "Processing" : "Accepted";
@@ -745,18 +751,14 @@ router.post("/later-order", async (req, res) => {
             const [reviewResult] = await db.query(checkReviewQuery, [stID, currentYear, currentMonth]);
 
             if (reviewResult.length > 0) {
-                await db.query(`
-                    UPDATE ST_order_review 
-                    SET totalOrder = totalOrder + ? 
-                    WHERE stID = ? AND year = ? AND month = ?
-                `, [netTotal, stID, currentYear, currentMonth]);
+                await db.query(` UPDATE ST_order_review   SET totalOrder = totalOrder + ? WHERE stID = ? AND year = ? AND month = ?`, [netTotal, stID, currentYear, currentMonth]);
             } else {
                 await db.query(`
-                    INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued)
-                    VALUES (?, ?, ?, ?, 0)
+                    INSERT INTO ST_order_review (stID, year, month, totalOrder, totalIssued) VALUES (?, ?, ?, ?, 0)
                 `, [stID, currentYear, currentMonth, netTotal]);
             }
         }
+        
     // Store UID and new orderDetailId pairs
         const orderDetailMap = []; // Will hold { uid, orderDetailId }
 
@@ -802,41 +804,21 @@ router.post("/later-order", async (req, res) => {
             switch (item.status) {
                case 'Booked':
                     bookedItems.push({
-                        orID,
-                        I_Id: item.I_Id,
-                        qty,
-                        unitPrice,
-                        discount,
-                        material
+                        orID, I_Id: item.I_Id,qty, unitPrice, discount, material
                     });
                     break;
 
                 case 'Reserved':
                     reservedItems.push({
-                        orID,
-                        I_Id: item.I_Id,
-                        qty,
-                        unitPrice,
-                        discount,
-                        material,
-                        pid_Id: item.pid_Id,
-                        uid: item.uid
+                        orID, I_Id: item.I_Id,qty,unitPrice,discount,material, pid_Id: item.pid_Id,uid: item.uid
                     });
                     break;
                 case 'Production':
                     const pd = item.productionData || {};
                     productionItems.push({
-                        orID,
-                        I_Id: item.I_Id,
-                        qty,
-                        unitPrice,
-                        discount,
-                        material,
-                        uid: item.uid || null,
-                        expectdate: pd.expectdate || null,
-                        itemId: pd.itemId || null,
-                        supplierId: pd.supplierId || null,
-                        specialnote: pd.specialnote || null
+                        orID,I_Id: item.I_Id, qty,unitPrice,discount, material, uid: item.uid || null,
+                        expectdate: pd.expectdate || null, itemId: pd.itemId || null,
+                        supplierId: pd.supplierId || null, specialnote: pd.specialnote || null
                     });
                     break;
                 default:
@@ -849,16 +831,11 @@ router.post("/later-order", async (req, res) => {
             const bookedItemQuery = `INSERT INTO booked_item (orID, I_Id, qty) VALUES ?`;
 
             const bookedItemValues1 = bookedItems.map(item => [
-                item.orID,
-                item.I_Id,
-                'Yes',
-                'Complete'
+                item.orID,item.I_Id,'Yes','Complete'
             ]);
 
             const bookedItemValues2 = bookedItems.map(item => [
-                item.orID,
-                item.I_Id,
-                item.qty || 1
+                item.orID,item.I_Id,item.qty || 1
             ]);
 
 
@@ -871,13 +848,7 @@ router.post("/later-order", async (req, res) => {
                 const qty = item.qty || 1;
                 const I_Id = item.I_Id;
 
-                const updateItemQuery = `
-                    UPDATE Item
-                    SET
-                        bookedQty = bookedQty + ?,
-                        availableQty = availableQty - ?
-                    WHERE I_Id = ?
-                `;
+                const updateItemQuery = `UPDATE Item SET bookedQty = bookedQty + ?, availableQty = availableQty - ? WHERE I_Id = ? `;
 
                 await db.query(updateItemQuery, [qty, qty, I_Id]);
             }
@@ -886,16 +857,11 @@ router.post("/later-order", async (req, res) => {
         if (reservedItems.length > 0) {
             // Prepare values for accept_orders and booked_item
             const acceptItemValues = reservedItems.map(item => [
-                item.orID,
-                item.I_Id,
-                'Yes',
-                'Complete'
+                item.orID, item.I_Id, 'Yes','Complete'
             ]);
 
             const bookedItemValues = reservedItems.map(item => [
-                item.orID,
-                item.I_Id,
-                item.qty || 1
+                item.orID,item.I_Id,item.qty || 1
             ]);
 
             // Insert into accept_orders
@@ -910,32 +876,23 @@ router.post("/later-order", async (req, res) => {
                 if (match) {
                     // Insert into Special_Reservation
                     await db.query(`
-                        INSERT INTO Special_Reservation (orID, pid_Id, orderDetailId)
-                        VALUES (?, ?, ?)`,
+                        INSERT INTO Special_Reservation (orID, pid_Id, orderDetailId) VALUES (?, ?, ?)`,
                         [item.orID, item.pid_Id, match.orderDetailId]
                     );
 
                     // Update p_i_detail
                     await db.query(`
-                        UPDATE p_i_detail
-                        SET status = 'Reserved', orID = ?, datetime = NOW()
-                        WHERE pid_Id = ?`,
+                        UPDATE p_i_detail SET status = 'Reserved', orID = ?, datetime = NOW() WHERE pid_Id = ?`,
                         [item.orID, item.pid_Id]
                     );
 
                     // Update Item stock
-                    await db.query(`
-                        UPDATE Item
-                        SET bookedQty = bookedQty - ?, reservedQty = reservedQty + ?
-                        WHERE I_Id = ?`,
+                    await db.query(` UPDATE Item SET bookedQty = bookedQty - ?, reservedQty = reservedQty + ? WHERE I_Id = ?`,
                         [item.qty, item.qty, item.I_Id]
                     );
 
                     // Update Order_Detail status
-                    await db.query(`
-                        UPDATE Order_Detail
-                        SET status = 'Reserved'
-                        WHERE id = ?`,
+                    await db.query(` UPDATE Order_Detail  SET status = 'Reserved' WHERE id = ?`,
                         [match.orderDetailId]
                     );
                 }
@@ -944,10 +901,7 @@ router.post("/later-order", async (req, res) => {
         if (productionItems.length > 0) {
             const acceptItemQuery = `INSERT INTO accept_orders (orID, I_Id, itemReceived, status) VALUES ?`;
             const acceptValues = productionItems.map(item => [
-                item.orID,
-                item.I_Id,
-                'No',
-                'Incomplete'
+                item.orID,item.I_Id, 'No', 'Incomplete'
             ]);
 
             // Insert into accept_orders
@@ -955,22 +909,174 @@ router.post("/later-order", async (req, res) => {
 
             // Insert into production table
             const productionInsertQuery = `
-                INSERT INTO production (p_ID, I_Id, qty, s_ID, expectedDate, specialNote, status)
-                VALUES (?, ?, ?, ?, ?, ?, 'Incomplete')`;
+                INSERT INTO production (p_ID, I_Id, qty, s_ID, expectedDate, specialNote, status) VALUES (?, ?, ?, ?, ?, ?, 'Incomplete')`;
 
             for (const item of productionItems) {
                 const p_ID = `InP_${Date.now()}`; // Unique p_ID
 
                 await db.query(productionInsertQuery, [
-                    p_ID,
-                    item.I_Id,
-                    item.qty,
-                    item.supplierId,
-                    item.expectdate,
-                    item.specialnote
+                    p_ID,item.I_Id,item.qty,item.supplierId,item.expectdate,item.specialnote
                 ]);
             }
         }
+        if (couponCode) {
+            const ocID = `OCP_${Date.now()}`;
+            const couponQuery = `INSERT INTO order_coupon (ocID, orID, cpID) VALUES (?, ?, ?)`;
+            await db.query(couponQuery, [ocID, orID, couponCode]);
+        }
+
+        const op_ID = await generateNewId("order_payment", "op_ID", "OP");
+
+        if (advance1 > 0) {
+            // Insert into cash_balance
+            const [cashResult] = await db.query(
+                `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+                VALUES (?, ?, 'order', NOW(), ?)`,
+                ['Order Advance', orID, advance1]
+            );
+            const cashId = cashResult.insertId;
+
+            // Insert into order_payment
+            await db.query(
+                `INSERT INTO order_payment 
+                    (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable) 
+                VALUES 
+                    (?, ?, ?, NOW(), ?, ?, ?, ?)`,
+                [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable]
+            );
+
+            // Handle Payment Types
+            const insertPayType = async () => {
+                const [result] = await db.query(
+                    `INSERT INTO ord_Pay_type (orID, type, subType) VALUES (?, ?, ?)`,
+                    [orID, payment, subPayment]
+                );
+                return result.insertId;
+            };
+
+            const updateOrderPayment = async (amount, otherCharges = 0) => {
+                await db.query(
+                    `UPDATE order_payment SET otherCharges = ?, fullPaidAmount = ? WHERE op_ID = ?`,
+                    [otherCharges, amount, op_ID]
+                );
+            };
+
+            if (payment === 'Cash') {
+                await insertPayType();
+                await updateOrderPayment(advance1);
+            }
+
+            if (payment === 'Card' && cardPayment) {
+                const optId = await insertPayType();
+                await db.query(
+                    `INSERT INTO ord_Card_Pay (optId, type, amount, intrestValue)
+                    VALUES (?, ?, ?, ?)`,
+                    [optId, cardPayment.type, advance1, cardPayment.interestValue || 0]
+                );
+                await updateOrderPayment(cardPayment.netAmount, cardPayment.interestValue || 0);
+                await db.query(`UPDATE cash_balance SET amount = ? WHERE Id = ?`, [cardPayment.netAmount, cashId]);
+            }
+
+            if (payment === 'Cheque' && chequePayment) {
+                const optId = await insertPayType();
+                for (const chq of chequePayment.cheques || []) {
+                    await db.query(
+                        `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            optId,
+                            chq.amount || 0,
+                            chq.bank || '',
+                            chq.branch || '',
+                            chq.accountNumber || '',
+                            chq.chequeNumber || '',
+                            chq.chequeDate || null
+                        ]
+                    );
+                }
+                await updateOrderPayment(advance1);
+            }
+
+            if (payment === 'Credit' && creditPayment) {
+                const optId = await insertPayType();
+                await db.query(
+                    `INSERT INTO ord_Credit_Pay (optId, amount, balance, c_ID, expectedDate)
+                    VALUES (?, ?, ?, ?, ?)`,
+                    [optId, creditPayment.amount || 0, creditPayment.balance || 0, Cust_id, creditPayment.expectdate || null]
+                );
+                await updateOrderPayment(advance1);
+            }
+
+            if (payment === 'Combined') {
+                if (subPayment === 'Cash & Card' && cashCardPayment) {
+                    const optId = await insertPayType();
+                    await db.query(
+                        `INSERT INTO ord_Card_Pay (optId, type, amount, intrestValue)
+                        VALUES (?, ?, ?, ?)`,
+                        [optId, cashCardPayment.type, cashCardPayment.cardBalance, cashCardPayment.interestValue || 0]
+                    );
+                    await updateOrderPayment(cashCardPayment.fullpaidAmount, cashCardPayment.interestValue || 0);
+                    await db.query(`UPDATE cash_balance SET amount = ? WHERE Id = ?`, [cashCardPayment.fullpaidAmount, cashId]);
+                }
+
+                if (subPayment === 'Cash & Cheque' && combinedChequePayment) {
+                    const optId = await insertPayType();
+                    for (const chq of combinedChequePayment.cheques || []) {
+                        await db.query(
+                            `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                            [
+                                optId,
+                                chq.amount || 0,
+                                chq.bank || '',
+                                chq.branch || '',
+                                chq.accountNumber || '',
+                                chq.chequeNumber || '',
+                                chq.chequeDate || null
+                            ]
+                        );
+                    }
+                    await updateOrderPayment(advance1);
+                }
+
+                if (subPayment === 'Cash & Credit' && combinedCreditPayment) {
+                    const optId = await insertPayType();
+                    await db.query(
+                        `INSERT INTO ord_Credit_Pay (optId, amount, balance, c_ID, expectedDate)
+                        VALUES (?, ?, ?, ?, ?)`,
+                        [
+                            optId,
+                            combinedCreditPayment.creditBalance || 0,
+                            combinedCreditPayment.cashBalance || 0,
+                            Cust_id,
+                            combinedCreditPayment.expectedDate || null
+                        ]
+                    );
+                    await updateOrderPayment(advance1);
+                }
+
+                if (subPayment === 'Cash & Transfer' && combinedTransferPayment) {
+                    const optId = await insertPayType();
+                    await db.query(
+                        `INSERT INTO ord_Transfer_Pay (optId, amount, bank)
+                        VALUES (?, ?, ?)`,
+                        [optId, combinedTransferPayment.transferAmount, combinedTransferPayment.bank]
+                    );
+                    await updateOrderPayment(advance1);
+                }
+            }
+
+            if (payment === 'Cash' && subPayment === 'Transfer' && tranferPayment) {
+                const optId = await insertPayType();
+                await db.query(
+                    `INSERT INTO ord_Transfer_Pay (optId, amount, bank)
+                    VALUES (?, ?, ?)`,
+                    [optId, advance1, tranferPayment.bank]
+                );
+                await updateOrderPayment(advance1);
+            }
+        }
+
 
         return res.status(201).json({
             success: true,
