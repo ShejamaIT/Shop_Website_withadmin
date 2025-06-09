@@ -568,3 +568,15 @@ ALTER TABLE driver
 ADD COLUMN lincense LONGBLOB NULL DEFAULT NULL;
 ALTER TABLE driver
 ADD COLUMN lincenseDate DATE NULL DEFAULT NULL;
+CREATE TABLE shop_Banks(
+    sbID INT AUTO_INCREMENT PRIMARY KEY,
+    Bank TEXT,
+    branch TEXT
+);
+CREATE TABLE accountNumbers(
+    acnID INT AUTO_INCREMENT PRIMARY KEY,
+    sbID INT,
+    number TEXT,
+        CONSTRAINT FOREIGN KEY (sbID) REFERENCES shop_Banks (sbID)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
+);
