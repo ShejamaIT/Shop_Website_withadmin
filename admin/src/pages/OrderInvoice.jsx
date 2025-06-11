@@ -8,6 +8,7 @@ import '../style/OrderManagement .css'
 import AddNewItem from "../pages/AddNewItem";
 import AddNewCoupone from "../pages/AddNewCoupone";
 import AddNewBank from "../pages/AddNewBank";
+import AddNewAccountNumber from "../pages/AddNewAccountNumber";
 import Helmet from "../components/Helmet/Helmet";
 import Swal from "sweetalert2";
 import FinalInvoice1 from "./FinalInvoice1";
@@ -72,6 +73,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [showModal2, setShowModal2] = useState(false);
     const [showModal3, setShowModal3] = useState(false);
     const [setShowBank , setSetShowBank] = useState(false);
+    const [setShowAccountnumber , setSetShowAccountNumber] = useState(false);
     const [discount, setDiscount] = useState("0");
     const [advance, setAdvance] = useState("0");
     const [balance, setBalance] = useState("0");
@@ -1036,6 +1038,11 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const handleAddNewBank = () => {
         setSetShowBank(true);
     };
+
+    const handleAddNewAccountNumber = () => {
+        setSetShowAccountNumber(true);
+    };
+
     const fetchPurchaseID = async () => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/newPurchasenoteID");
@@ -1190,6 +1197,32 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             alert("Failed to add coupon. Please try again.");
         }
     };
+    const handleAddAccountNumber = async (newAccountNumber) => {
+        const { sbID, number } = newAccountNumber;
+
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/account-numbers", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ sbID, number }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast.success("Account number added successfully!");
+                fetchBankDetails();  // Refresh bank & account data
+            } else {
+                alert(`Error: ${data.error || "Something went wrong"}`);
+            }
+        } catch (error) {
+            console.error("Error adding account number:", error);
+            alert("Failed to add account number. Please try again.");
+        }
+    };
+
    const handleStatusChange = (index, newStatus, item) => {
         const updatedItems = [...selectedItemsQty];
         const updatedItem = { ...updatedItems[index], status: newStatus };
@@ -2076,11 +2109,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
                         {formData.payment === "Cash" && formData.subPayment === "Transfer" && (
                             <>
+                                {/* Net Amount */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Net Amount</span>
                                     <span className="custom-info-value">Rs.{grossAmount}</span>
                                 </div>
 
+                                {/* Payment Amount */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Payment Amount</span>
                                     <span className="custom-info-value">
@@ -2100,7 +2135,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     </span>
                                 </div>
 
-                                {/* 🔽 BANK DROPDOWN + Add New Button */}
+                                {/* Bank Dropdown + Add */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Bank</span>
                                     <span className="custom-info-value flex items-center gap-2">
@@ -2128,10 +2163,9 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                             ))}
                                         </select>
 
-                                        {/* ➕ Add New Bank Button */}
                                         <button
                                             type="button"
-                                            onClick={handleAddNewBank} // ⬅️ This triggers your modal
+                                            onClick={handleAddNewBank}
                                             className="text-sm text-blue-500 hover:text-blue-700 flex items-center"
                                         >
                                             <span className="text-xl mr-1">➕</span>
@@ -2139,7 +2173,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     </span>
                                 </div>
 
-                                {/* 🔽 ACCOUNT NUMBER DROPDOWN + Add New Button */}
+                                {/* Account Number Dropdown + Add */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Account Number</span>
                                     <span className="custom-info-value flex items-center gap-2">
@@ -2157,24 +2191,24 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                             ))}
                                         </select>
 
-                                        {/* ➕ Add New Account Number Button */}
                                         <button
                                             type="button"
-                                            onClick={openAddAccountModal} // ⬅️ Triggers modal for new account
+                                            onClick={handleAddNewAccountNumber}
                                             className="text-sm text-blue-500 hover:text-blue-700 flex items-center"
                                         >
-                                            <span className="text-xl mr-1">➕</span> 
+                                            <span className="text-xl mr-1">➕</span>
                                         </button>
                                     </span>
                                 </div>
 
-
+                                {/* Balance */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
                                     <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
                             </>
                         )}
+
 
                         {formData.payment === "Card" && (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card") && (
                             <>
@@ -2591,8 +2625,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                             </>
                         )}
 
-
-
                         {formData.payment === "Combined" && formData.subPayment === "Cash & Credit" && (
                             <>
                                 <div className="custom-info-row">
@@ -2713,6 +2745,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                     <AddNewBank
                         setShowBank={setSetShowBank}
                         handleSubmitBank={handleAddBank}
+                    />
+                )}
+
+                {setShowAccountnumber && (
+                    <AddNewAccountNumber
+                        setShowAccountNumber = {setSetShowAccountNumber}
+                        handleSubmitAccountNumber= {handleAddAccountNumber}
                     />
                 )}
 
