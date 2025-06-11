@@ -77,6 +77,11 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [discount, setDiscount] = useState("0");
     const [advance, setAdvance] = useState("0");
     const [balance, setBalance] = useState("0");
+    const [callBackAction , setCallBackAction] = useState("");
+    const [paymentAmount , setPaymentAmount] = useState(0);
+    const [cashReturn , setCashReturn] = useState(0);
+    const [grossBillTotal , setGrossBillTotal] = useState(0);
+    const [previousbalance , setPreviousBalance] = useState(0);
     const [grossAmount, setGrossAmount] = useState(0);
     const [balance1, setBalance1] = useState(0);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -200,166 +205,166 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
     useEffect(() => {
         calculateTotalPrice();
-    }, [selectedItems, deliveryPrice, discountAmount,advance,balance]); // Recalculate when dependencies change
+    }, [selectedItems, deliveryPrice, discountAmount,advance,balance,previousbalance]); 
     useEffect(() => {
-    const fixedRate = 2.5;
-    const numericBill = parseFloat(totalBillPrice) || 0;
-    const cashAmount = parseFloat(formData.cashAmount || 0);
-    const cardCash = parseFloat(combinedCardBalance) || 0;
-    const chequeCash = parseFloat(combinedChequeBalance) || 0;
-    const creditAdvance = parseFloat(creditAmount) || 0;
-    const transferAdvance = parseFloat(combinedTransferBalance) || 0;
-    const chequeManualPay = parseFloat(ChequeBalance) || 0;
-    const totalChequeAmount = cheques.reduce((sum, chq) => sum + (parseFloat(chq.amount) || 0), 0);
+        const fixedRate = 2.5;
+        const numericBill = parseFloat(totalBillPrice) || 0;
+        const cashAmount = parseFloat(formData.cashAmount || 0);
+        const cardCash = parseFloat(combinedCardBalance) || 0;
+        const chequeCash = parseFloat(combinedChequeBalance) || 0;
+        const creditAdvance = parseFloat(creditAmount) || 0;
+        const transferAdvance = parseFloat(combinedTransferBalance) || 0;
+        const chequeManualPay = parseFloat(ChequeBalance) || 0;
+        const totalChequeAmount = cheques.reduce((sum, chq) => sum + (parseFloat(chq.amount) || 0), 0);
 
-    const isCardPayment = formData.payment === "Card" &&
-        (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card");
+        const isCardPayment = formData.payment === "Card" &&
+            (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card");
 
-    const isCombinedCashCard = formData.payment === "Combined" &&
-        formData.subPayment === "Cash & Card";
+        const isCombinedCashCard = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Card";
 
-    const isCombinedCashCheque = formData.payment === "Combined" &&
-        formData.subPayment === "Cash & Cheque";
+        const isCombinedCashCheque = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Cheque";
 
-    const isCombinedCashCredit = formData.payment === "Combined" &&
-        formData.subPayment === "Cash & Credit";
+        const isCombinedCashCredit = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Credit";
 
-    const isCombinedCashTransfer = formData.payment === "Combined" &&
-        formData.subPayment === "Cash & Transfer";
+        const isCombinedCashTransfer = formData.payment === "Combined" &&
+            formData.subPayment === "Cash & Transfer";
 
-    const isCreditPayment = formData.payment === "Credit";
-    const isChequePayment = formData.payment === "Cheque";
+        const isCreditPayment = formData.payment === "Credit";
+        const isChequePayment = formData.payment === "Cheque";
 
-    if (isCardPayment) {
-        const interest = (numericBill * fixedRate) / 100;
-        const net = numericBill + interest;
+        if (isCardPayment) {
+            const interest = (numericBill * fixedRate) / 100;
+            const net = numericBill + interest;
 
-        setRate(fixedRate);
-        setInterestValue(interest);
-        setNetAmount(net);
-        setAdvance(numericBill);
-        setBalance((0).toFixed(2));
-        setCardPortion(numericBill);
-        setFullTotalPay(net);
-    }
+            setRate(fixedRate);
+            setInterestValue(interest);
+            setNetAmount(net);
+            setAdvance(numericBill);
+            setBalance((0).toFixed(2));
+            setCardPortion(numericBill);
+            setFullTotalPay(net);
+        }
 
-    else if (isChequePayment) {
-        const totalPaid = totalChequeAmount;
-        const newBalance = totalPaid - parseFloat(grossAmount);
+        else if (isChequePayment) {
+            const totalPaid = totalChequeAmount;
+            const newBalance = totalPaid - parseFloat(grossAmount);
 
-        setAdvance(totalPaid);
-        setBalance(newBalance.toFixed(2));
-        setBalance1(newBalance.toFixed(2));
-    }
+            setAdvance(totalPaid);
+            setBalance(newBalance.toFixed(2));
+            setBalance1(newBalance.toFixed(2));
+        }
 
-    else if (isCombinedCashCard) {
-        const cardAmount = numericBill - cardCash;
-        const interest = (cardAmount * fixedRate) / 100;
-        const cardTotal = cardAmount + interest;
-        const fullPaid = cardCash + cardAmount;
-        const fullTotal = cardCash + cardTotal;
+        else if (isCombinedCashCard) {
+            const cardAmount = numericBill - cardCash;
+            const interest = (cardAmount * fixedRate) / 100;
+            const cardTotal = cardAmount + interest;
+            const fullPaid = cardCash + cardAmount;
+            const fullTotal = cardCash + cardTotal;
 
-        setRate(fixedRate);
-        setInterestValue(interest);
-        setNetAmount(cardTotal);
-        setCardPortion(cardAmount);
-        setAdvance(fullPaid);
-        setBalance((0).toFixed(2));
-        setFullTotalPay(fullTotal);
-    }
+            setRate(fixedRate);
+            setInterestValue(interest);
+            setNetAmount(cardTotal);
+            setCardPortion(cardAmount);
+            setAdvance(fullPaid);
+            setBalance((0).toFixed(2));
+            setFullTotalPay(fullTotal);
+        }
 
-    else if (isCombinedCashCheque) {
-        const totalPaid = chequeCash + totalChequeAmount;
-        const balanceRemaining = totalPaid - numericBill;
+        else if (isCombinedCashCheque) {
+            const totalPaid = chequeCash + totalChequeAmount;
+            const balanceRemaining = totalPaid - numericBill;
 
-        setChequePortion(totalChequeAmount);
-        setAdvance(totalPaid);
-        setBalance(balanceRemaining.toFixed(2));
-        setBalance1(balanceRemaining.toFixed(2));
-        setFullTotalPay(numericBill);
-    }
+            setChequePortion(totalChequeAmount);
+            setAdvance(totalPaid);
+            setBalance(balanceRemaining.toFixed(2));
+            setBalance1(balanceRemaining.toFixed(2));
+            setFullTotalPay(numericBill);
+        }
 
-    else if (isCreditPayment) {
-        const balance = creditAdvance - numericBill;
-        setAdvance(creditAdvance);
-        setBalance(balance.toFixed(2));
-    }
+        else if (isCreditPayment) {
+            const balance = creditAdvance - numericBill;
+            setAdvance(creditAdvance);
+            setBalance(balance.toFixed(2));
+        }
 
-    else if (isCombinedCashCredit) {
-        const fullPaid = combinedCreditBalance;
-        const balance = fullPaid - numericBill;
+        else if (isCombinedCashCredit) {
+            const fullPaid = combinedCreditBalance;
+            const balance = fullPaid - numericBill;
 
-        setCreditPortion(numericBill - fullPaid);
-        setAdvance(fullPaid);
-        setBalance(balance.toFixed(2));
-        setFullTotalPay(numericBill);
-    }
+            setCreditPortion(numericBill - fullPaid);
+            setAdvance(fullPaid);
+            setBalance(balance.toFixed(2));
+            setFullTotalPay(numericBill);
+        }
 
-    else if (isCombinedCashTransfer) {
-        const cashPart = parseFloat(combinedTransferBalance) || 0;
-        const transferPart = parseFloat(transferPortion) || 0;
-        const fullPaid = cashPart + transferPart;
-        const bal = fullPaid - numericBill;
+        else if (isCombinedCashTransfer) {
+            const cashPart = parseFloat(combinedTransferBalance) || 0;
+            const transferPart = parseFloat(transferPortion) || 0;
+            const fullPaid = cashPart + transferPart;
+            const bal = fullPaid - numericBill;
 
-        setAdvance(fullPaid);
-        setBalance(bal.toFixed(2));
-        setFullTotalPay(numericBill);
-    }
+            setAdvance(fullPaid);
+            setBalance(bal.toFixed(2));
+            setFullTotalPay(numericBill);
+        }
 
-    else {
-        setRate(0);
-        setInterestValue(0);
-        setNetAmount(0);
-        setCardPortion(0);
-        setAdvance(0);
-        setBalance((0).toFixed(2));
-        setFullTotalPay(0);
-    }
-}, [
-    formData.payment,
-    formData.subPayment,
-    formData.cashAmount,
-    totalBillPrice,
-    cheques,
-    grossAmount,
-    combinedCardBalance,
-    combinedTransferBalance,
-    combinedChequeBalance,
-    creditAmount,
-    ChequeBalance,
-    transferPortion
-]);
+        else {
+            setRate(0);
+            setInterestValue(0);
+            setNetAmount(0);
+            setCardPortion(0);
+            setAdvance(0);
+            setBalance((0).toFixed(2));
+            setFullTotalPay(0);
+        }
+    }, [
+        formData.payment,
+        formData.subPayment,
+        formData.cashAmount,
+        totalBillPrice,
+        cheques,
+        grossAmount,
+        combinedCardBalance,
+        combinedTransferBalance,
+        combinedChequeBalance,
+        creditAmount,
+        ChequeBalance,
+        transferPortion
+    ]);
 
-const calculateTotalPrice = () => {
-    const totalSpecialDiscount = selectedItems.reduce((total, item) => {
-        const specialDiscount = item.discount || 0;
-        return total + specialDiscount * item.qty;
-    }, 0);
+    const calculateTotalPrice = () => {
+        const totalSpecialDiscount = selectedItems.reduce((total, item) => {
+            const specialDiscount = item.discount || 0;
+            return total + specialDiscount * item.qty;
+        }, 0);
 
-    setSpecialDiscountAmount(totalSpecialDiscount);
+        setSpecialDiscountAmount(totalSpecialDiscount);
 
-    const itemTotal = selectedItems.reduce((total, item) => {
-        const unitPrice = item.originalPrice ?? item.price;
-        const specialDiscount = item.discount || 0;
-        const discountedPrice = unitPrice - specialDiscount;
-        return total + discountedPrice * item.qty;
-    }, 0);
+        const itemTotal = selectedItems.reduce((total, item) => {
+            const unitPrice = item.originalPrice ?? item.price;
+            const specialDiscount = item.discount || 0;
+            const discountedPrice = unitPrice - specialDiscount;
+            return total + discountedPrice * item.qty;
+        }, 0);
 
-    setTotalItemPrice(itemTotal);
+        setTotalItemPrice(itemTotal);
 
-    const total = Number(itemTotal) - Number(discountAmount || 0) + Number(deliveryPrice || 0);
+        const total = Number(itemTotal) - Number(discountAmount || 0) + Number(deliveryPrice || 0) - Number(previousbalance);
+        const grostotal = Number(itemTotal) - Number(discountAmount || 0) + Number(deliveryPrice || 0);
 
-    setTotalBillPrice(total);
-    setGrossAmount(total);
+        setTotalBillPrice(total);
+        setGrossAmount(total);
+        setGrossBillTotal(grostotal);
 
-    const adv = parseFloat(advance) || 0;
-    const remaining = adv - total;  // Positive = overpaid, Negative = still to pay
+        const adv = parseFloat(advance) || 0;
+        const remaining = adv - total;  // Positive = overpaid, Negative = still to pay
 
-    setBalance(remaining.toFixed(2));
-    setBalance1(remaining.toFixed(2));
-};
-
-
+        setBalance(remaining.toFixed(2));
+        setBalance1(remaining.toFixed(2));
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -612,6 +617,86 @@ const calculateTotalPrice = () => {
             [name]: value
         }));
     };
+
+    const handleCustomerBalanceAction = (balanceValue, paymentAmt, billValue) => {
+    const remaining = parseFloat(balanceValue);
+    const grossvalue = parseFloat(paymentAmt);
+    const BillValue = parseFloat(billValue);
+
+    return new Promise((resolve) => {
+        if (remaining > 0) {
+            Swal.fire({
+                title: "<strong>Customer <u>Overpaid</u></strong>",
+                icon: "success",
+                html: `Customer has overpaid <b>Rs.${remaining.toFixed(2)}</b>. What would you like to do?`,
+                showCancelButton: true,
+                confirmButtonText: "💸 Handover to Customer",
+                cancelButtonText: "💼 Pass to Account"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    resolve({
+                        finalBalance: 0,
+                        action: "handover",
+                        paymentAmount: grossvalue,
+                        cashReturn: remaining,
+                        advance: BillValue,
+                        balance: 0,
+                    });
+                } else {
+                    resolve({
+                        finalBalance: remaining,
+                        action: "pass",
+                        paymentAmount: paymentAmt,
+                        cashReturn: 0,
+                        advance: BillValue,
+                        balance: 0,
+                    });
+                }
+            });
+        } else if (remaining < 0) {
+            Swal.fire({
+                title: "<strong>Customer <u>Owes</u> Balance</strong>",
+                icon: "warning",
+                html: `Customer still owes <b>Rs.${Math.abs(remaining).toFixed(2)}</b>. What would you like to do?`,
+                showCancelButton: true,
+                confirmButtonText: "📝 Pass to Account",
+                cancelButtonText: "❌ Ignore"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    resolve({
+                        finalBalance: remaining,
+                        action: "pass",
+                        paymentAmount: paymentAmt,
+                        cashReturn: 0,
+                        advance: paymentAmt,
+                        balance: remaining,
+                    });
+                } else {
+                    resolve({
+                        finalBalance: 0,
+                        action: "ignore",
+                        paymentAmount: paymentAmt,
+                        cashReturn: 0,
+                        advance: billValue,
+                        balance: 0,
+                    });
+                }
+            });
+        } else {
+            resolve({
+                finalBalance: 0,
+                action: "none",
+                paymentAmount: paymentAmt,
+                cashReturn: 0,
+                advance: paymentAmt,
+                balance: 0,
+            });
+        }
+    });
+};
+
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -626,6 +711,16 @@ const calculateTotalPrice = () => {
             toast.error("Please complete all delivery details.");
             return;
         }
+        // ✅ Handle customer balance adjustment first
+       const {
+        finalBalance,
+        action,
+        paymentAmount: updatedPaymentAmount,
+        cashReturn: updatedCashReturn,
+        advance: updatedAdvance,
+        balance: updatedBalance,
+    } = await handleCustomerBalanceAction(balance, advance, grossBillTotal);
+
 
         let cardPayment = null;
         let cashPayment = null;
@@ -718,14 +813,22 @@ const calculateTotalPrice = () => {
                 bank: transferBank || '',
             };
         }
+
+        
+        
         // ✅ Assemble and clean the final form data
-        const updatedFormData = {
+       const updatedFormData = {
             ...formData,
-            advance: parseFloat(advance || 0).toFixed(2),
-            balance: parseFloat(balance || 0).toFixed(2),
+            advance: parseFloat(updatedAdvance || 0).toFixed(2),
+            balance: parseFloat(updatedBalance || 0).toFixed(2),
             city: formData.address,
-           cashPayment, cardPayment, chequePayment,cashCardPayment,tranferPayment,creditPayment,combinedChequePayment,combinedCreditPayment,combinedTransferPayment,
+            cashPayment, cardPayment, chequePayment, cashCardPayment,
+            tranferPayment, creditPayment,
+            combinedChequePayment, combinedCreditPayment, combinedTransferPayment,
         };
+
+
+
 
         // ✅ Calculate totals correctly
         const itemList = selectedItems.map(item => {
@@ -765,100 +868,104 @@ const calculateTotalPrice = () => {
         const totalBillPrice = totalItemPrice + parseFloat(deliveryPrice || 0) - parseFloat(discountAmount || 0) - parseFloat(specialdiscountAmount || 0);
 
         const orderData = {
-            ...updatedFormData,
-            isNewCustomer,
-            orderType,
-            items: itemList,
-            deliveryPrice,
-            discountAmount,
-            totalItemPrice: totalItemPrice.toFixed(2),
-            totalBillPrice: totalBillPrice.toFixed(2),
-            specialdiscountAmount,
-        };
+        ...updatedFormData,
+        isNewCustomer,
+        orderType,
+        items: itemList,
+        deliveryPrice,
+        discountAmount,
+        totalItemPrice: totalItemPrice.toFixed(2),
+        totalBillPrice: totalBillPrice.toFixed(2),
+        specialdiscountAmount,
+        customerBalanceDecision: action,
+        finalCustomerBalance: finalBalance,
+        paymentAmount: parseFloat(updatedPaymentAmount),
+        cashReturn: parseFloat(updatedCashReturn),
+    };
         const fullOrderData = {
             ...orderData,
             processedItems,
         };
         console.log(fullOrderData);
 
-        try {
-            if (formData.issuable === 'Later') {
-                try {
-                    const fullOrderData = {
-                        ...orderData,
-                        processedItems,
-                    };
+        // try {
+        //     if (formData.issuable === 'Later') {
+        //         try {
+        //             const fullOrderData = {
+        //                 ...orderData,
+        //                 processedItems,
+        //             };
             
-                    console.log("📝 Sending Full Order Data:", fullOrderData);
+        //             console.log("📝 Sending Full Order Data:", fullOrderData);
             
-                    const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(fullOrderData),
-                    });
+        //             const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
+        //                 method: "POST",
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                 },
+        //                 body: JSON.stringify(fullOrderData),
+        //             });
             
-                    const result = await response.json();
+        //             const result = await response.json();
             
-                    if (response.ok && result.success) {
-                        const { orderId, orderDate, expectedDate } = result.data;
-                        toast.success(`Order placed successfully! Order ID: ${orderId}`);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        toast.error(result.message || "Failed to place the order.");
-                        console.error("❌ Order Error:", result.message || result);
-                    }
+        //             if (response.ok && result.success) {
+        //                 const { orderId, orderDate, expectedDate } = result.data;
+        //                 toast.success(`Order placed successfully! Order ID: ${orderId}`);
+        //                 setTimeout(() => {
+        //                     window.location.reload();
+        //                 }, 1000);
+        //             } else {
+        //                 toast.error(result.message || "Failed to place the order.");
+        //                 console.error("❌ Order Error:", result.message || result);
+        //             }
             
-                } catch (error) {
-                    toast.error("An error occurred while placing the order.");
-                    console.error("❌ Network/Server Error:", error);
-                }
-            } else if (formData.issuable === 'Now'){
-                const response = await fetch("http://localhost:5001/api/admin/main/orders", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(orderData),
-                });
+        //         } catch (error) {
+        //             toast.error("An error occurred while placing the order.");
+        //             console.error("❌ Network/Server Error:", error);
+        //         }
+        //     } else if (formData.issuable === 'Now'){
+        //         const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+        //             method: "POST",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //             },
+        //             body: JSON.stringify(orderData),
+        //         });
                 
-                const result = await response.json();
-                const { orderId } = result.data;
-                if (response.ok) {
-                    toast.success("Order placed successfully!");
-                    const newOrder = {
-                        orderId:orderId ,
-                        orderDate: new Date().toLocaleDateString(),
-                        phoneNumber: formData.phoneNumber,
-                        payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
-                        deliveryStatus: formData.dvStatus,
-                        deliveryCharge: deliveryPrice,
-                        discount: discountAmount,
-                        specialDiscount: specialdiscountAmount,
-                        advance: parseFloat(advance),
-                        items: items,
-                        balance:parseFloat(balance),
-                        totalPrice:totalBillPrice,
-                        customerName:formData.FtName+" "+formData.SrName,
+        //         const result = await response.json();
+        //         const { orderId } = result.data;
+        //         if (response.ok) {
+        //             toast.success("Order placed successfully!");
+        //             const newOrder = {
+        //                 orderId:orderId ,
+        //                 orderDate: new Date().toLocaleDateString(),
+        //                 phoneNumber: formData.phoneNumber,
+        //                 payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
+        //                 deliveryStatus: formData.dvStatus,
+        //                 deliveryCharge: deliveryPrice,
+        //                 discount: discountAmount,
+        //                 specialDiscount: specialdiscountAmount,
+        //                 advance: parseFloat(advance),
+        //                 items: items,
+        //                 balance:parseFloat(balance),
+        //                 totalPrice:totalBillPrice,
+        //                 customerName:formData.FtName+" "+formData.SrName,
             
-                    };
-                    setSelectedOrder(newOrder);
-                    // Optionally, open invoice modal here
-                    setShowModal2(true);
+        //             };
+        //             setSelectedOrder(newOrder);
+        //             // Optionally, open invoice modal here
+        //             setShowModal2(true);
                 
                 
-                } else {
-                    toast.error(result.message || "Something went wrong. Please try again.");
-                }
-            }
+        //         } else {
+        //             toast.error(result.message || "Something went wrong. Please try again.");
+        //         }
+        //     }
 
-        } catch (error) {
-            console.error("Error submitting order data:", error);
-            toast.error("Error submitting order data. Please try again.");
-        }
+        // } catch (error) {
+        //     console.error("Error submitting order data:", error);
+        //     toast.error("Error submitting order data. Please try again.");
+        // }
     };
     const handleSubmit3 = async (formData) => {
         const updatedData = {
@@ -1016,6 +1123,7 @@ const calculateTotalPrice = () => {
                 toast.info(`Customer already exists: ${data.customerName}`);
                 setCustomer("Previous");
                 handleSelectCustomer(data.data);
+                setPreviousBalance(data.data.balance);
             } else {
                 toast.success("Customer does not exist, continue creating order.");
                 setCustomer("New");
@@ -2010,10 +2118,11 @@ const calculateTotalPrice = () => {
                     <div className="order-details mt-4 border rounded-lg p-4 bg-white shadow-sm w-full max-w-md">
                         <div className="custom-line-items space-y-2">
                             {[
-                                { label: 'Total Item Price (➕)', value: totalItemPrice },
-                                { label: 'Delivery Fee     (➕)', value: deliveryPrice },
-                                { label: 'Special Discount (➖)', value: specialdiscountAmount },
-                                { label: 'Coupon Discount  (➖)', value: discountAmount },
+                                { label: 'Total Item Price  (➕)', value: totalItemPrice },
+                                { label: 'Delivery Fee      (➕)', value: deliveryPrice },
+                                { label: 'Special Discount  (➖)', value: specialdiscountAmount },
+                                { label: 'Coupon Discount   (➖)', value: discountAmount },
+                                { label: 'Previous Balance  (➖)', value: previousbalance },
                             ].map((item, index) => (
                                 <div key={index} className="custom-line-item flex justify-between border-b pb-1">
                                     <span className="custom-label">{item.label}</span>
@@ -2216,18 +2325,9 @@ const calculateTotalPrice = () => {
                                 {/* Balance */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
+                            
                             </>
                         )}
 
@@ -2255,17 +2355,11 @@ const calculateTotalPrice = () => {
                                 </div>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
+                                </div>
+                                    <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
                                 
                             </>
@@ -2368,17 +2462,11 @@ const calculateTotalPrice = () => {
                                 </div>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
+                                </div>
+                                    <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
                                 <Row className="align-items-center">
                                 <Col xs="4">
@@ -2463,17 +2551,11 @@ const calculateTotalPrice = () => {
                                 </div>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
+                                </div>
+                                <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
                             </>
                         )}
@@ -2521,17 +2603,7 @@ const calculateTotalPrice = () => {
                                 </div>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
                             </>
                         )}
@@ -2650,19 +2722,8 @@ const calculateTotalPrice = () => {
                                 </div>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
-
                                 <Row className="align-items-center">
                                     <Col xs="4">
                                         <Button color="info" onClick={handleCheque}>Add Cheque</Button>
@@ -2749,17 +2810,7 @@ const calculateTotalPrice = () => {
                                 </div>
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
                             </>
                         )}
@@ -2882,17 +2933,7 @@ const calculateTotalPrice = () => {
                                 {/* Balance */}
                                 <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
-                                    <span
-                                        className={`custom-info-value ${
-                                            parseFloat(balance) < 0
-                                                ? 'text-green-600 font-semibold'
-                                                : parseFloat(balance) > 0
-                                                ? 'text-red-600 font-semibold'
-                                                : ''
-                                        }`}
-                                    >
-                                        Rs.{Math.abs(balance)}
-                                    </span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
                                 </div>
 
                             </>
@@ -3143,4 +3184,3 @@ const calculateTotalPrice = () => {
     );
 };
 export default OrderInvoice;
-
