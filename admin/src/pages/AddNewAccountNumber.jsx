@@ -1,40 +1,69 @@
-import React, {useEffect, useState} from "react";
-import {  Form, FormGroup, Label, Input, Button, Row, Col} from "reactstrap";
+import React, { useEffect, useState } from "react";
+import { Form, FormGroup, Label, Input, Button, Row, Col } from "reactstrap";
 import "../style/invoice.css";
 
 const AddNewAccountNumber = ({ setShowAccountNumber, handleSubmitAccountNumber }) => {
-    const [accountNumer, setAccountNumber] = useState("");
-    const [branch, setBranch] = useState("");
+    const [accountNumber, setAccountNumber] = useState("");
+    const [selectedBankId, setSelectedBankId] = useState("");
+    const [Banks, setBanks] = useState([]);
+
+    useEffect(() => {
+        fetchBankDetails();
+    }, []);
+
+    const fetchBankDetails = async () => {
+        try {
+            const banksResponse = await fetch("http://localhost:5001/api/admin/main/shop-banks");
+            const banksData = await banksResponse.json();
+            setBanks(banksData || []);
+        } catch (error) {
+            console.error("Error fetching bank details:", error);
+            // Optionally toast or alert
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        handleSubmitBank({ bank, branch });
-        setShowBank(false);
+
+        if (!selectedBankId || !accountNumber) return;
+
+        handleSubmitAccountNumber({
+            sbID: parseInt(selectedBankId),
+            number: accountNumber,
+        });
+
+        setShowAccountNumber(false);
     };
 
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <h2 className="invoice-title">Add New Bank</h2>
+                <h2 className="invoice-title">Add New Account Number</h2>
                 <Form onSubmit={handleSubmit}>
                     <FormGroup>
-                        <Label>Bank</Label>
-                        <Input
-                            type="text"
-                            value={bank}
-                            onChange={(e) => setBank(e.target.value)}
-                            placeholder="Enter Bank"
+                        <Label>Select Bank</Label>
+                        <select
+                            className="form-control"
+                            value={selectedBankId}
+                            onChange={(e) => setSelectedBankId(e.target.value)}
                             required
-                        />
+                        >
+                            <option value="">-- Select Bank --</option>
+                            {Banks.map((bank) => (
+                                <option key={bank.sbID} value={bank.sbID}>
+                                    {bank.Bank} - {bank.branch}
+                                </option>
+                            ))}
+                        </select>
                     </FormGroup>
 
                     <FormGroup>
-                        <Label>Branch</Label>
+                        <Label>Account Number</Label>
                         <Input
                             type="text"
-                            value={branch}
-                            onChange={(e) => setBranch(e.target.value)}
-                            placeholder="Enter Branch"
+                            value={accountNumber}
+                            onChange={(e) => setAccountNumber(e.target.value)}
+                            placeholder="Enter Account Number"
                             required
                         />
                     </FormGroup>
@@ -42,7 +71,7 @@ const AddNewAccountNumber = ({ setShowAccountNumber, handleSubmitAccountNumber }
                     <Row>
                         <Col md="6">
                             <Button type="submit" color="primary" block>
-                                Add Bank
+                                Add Account
                             </Button>
                         </Col>
                         <Col md="6">
@@ -50,7 +79,7 @@ const AddNewAccountNumber = ({ setShowAccountNumber, handleSubmitAccountNumber }
                                 type="button"
                                 color="danger"
                                 block
-                                onClick={() => setShowBank(false)}
+                                onClick={() => setShowAccountNumber(false)}
                             >
                                 Cancel
                             </Button>
