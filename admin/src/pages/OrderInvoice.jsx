@@ -212,7 +212,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const chequeManualPay = parseFloat(ChequeBalance) || 0;
     const totalChequeAmount = cheques.reduce((sum, chq) => sum + (parseFloat(chq.amount) || 0), 0);
 
-    // Payment type checks
     const isCardPayment = formData.payment === "Card" &&
         (formData.subPayment === "Debit Card" || formData.subPayment === "Credit Card");
 
@@ -239,14 +238,14 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         setInterestValue(interest);
         setNetAmount(net);
         setAdvance(numericBill);
-        setBalance("0.00");
+        setBalance((0).toFixed(2));
         setCardPortion(numericBill);
         setFullTotalPay(net);
     }
 
     else if (isChequePayment) {
         const totalPaid = totalChequeAmount;
-        const newBalance = parseFloat(grossAmount) - totalPaid;
+        const newBalance = totalPaid - parseFloat(grossAmount);
 
         setAdvance(totalPaid);
         setBalance(newBalance.toFixed(2));
@@ -265,13 +264,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         setNetAmount(cardTotal);
         setCardPortion(cardAmount);
         setAdvance(fullPaid);
-        setBalance("0.00");
+        setBalance((0).toFixed(2));
         setFullTotalPay(fullTotal);
     }
 
     else if (isCombinedCashCheque) {
         const totalPaid = chequeCash + totalChequeAmount;
-        const balanceRemaining = numericBill - totalPaid;
+        const balanceRemaining = totalPaid - numericBill;
 
         setChequePortion(totalChequeAmount);
         setAdvance(totalPaid);
@@ -281,18 +280,18 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     }
 
     else if (isCreditPayment) {
-        const balance = numericBill - creditAdvance;
+        const balance = creditAdvance - numericBill;
         setAdvance(creditAdvance);
         setBalance(balance.toFixed(2));
     }
 
     else if (isCombinedCashCredit) {
-        const creditPart = numericBill - combinedCreditBalance;
         const fullPaid = combinedCreditBalance;
+        const balance = fullPaid - numericBill;
 
-        setCreditPortion(creditPart);
+        setCreditPortion(numericBill - fullPaid);
         setAdvance(fullPaid);
-        setBalance(creditPart.toFixed(2));
+        setBalance(balance.toFixed(2));
         setFullTotalPay(numericBill);
     }
 
@@ -300,7 +299,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         const cashPart = parseFloat(combinedTransferBalance) || 0;
         const transferPart = parseFloat(transferPortion) || 0;
         const fullPaid = cashPart + transferPart;
-        const bal = numericBill - fullPaid;
+        const bal = fullPaid - numericBill;
 
         setAdvance(fullPaid);
         setBalance(bal.toFixed(2));
@@ -313,7 +312,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         setNetAmount(0);
         setCardPortion(0);
         setAdvance(0);
-        setBalance("0.00");
+        setBalance((0).toFixed(2));
         setFullTotalPay(0);
     }
 }, [
@@ -331,8 +330,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     transferPortion
 ]);
 
-
-    const calculateTotalPrice = () => {
+const calculateTotalPrice = () => {
     const totalSpecialDiscount = selectedItems.reduce((total, item) => {
         const specialDiscount = item.discount || 0;
         return total + specialDiscount * item.qty;
@@ -355,10 +353,12 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     setGrossAmount(total);
 
     const adv = parseFloat(advance) || 0;
-    const remaining = total - adv;
+    const remaining = adv - total;  // Positive = overpaid, Negative = still to pay
+
     setBalance(remaining.toFixed(2));
     setBalance1(remaining.toFixed(2));
 };
+
 
 
     const handleChange = (e) => {
@@ -2097,7 +2097,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                         />
                                     </span>
                                 </div>
-                                <div className="custom-info-row">
+                                {/* <div className="custom-info-row">
                                     <span className="custom-info-label">Balance</span>
                                     <span
                                         className={`custom-info-value font-semibold ${
@@ -2110,8 +2110,12 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                     >
                                         Rs.{Math.abs(parseFloat(balance || 0)).toFixed(2)}
                                     </span>
-                                </div>
+                                </div>*/}
 
+                            <div className="custom-info-row">
+                                    <span className="custom-info-label">Balance</span>
+                                    <span className="custom-info-value">Rs.{balance}</span>
+                                </div>
                             </>
                         )}
 
@@ -3139,3 +3143,4 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     );
 };
 export default OrderInvoice;
+
