@@ -3851,6 +3851,92 @@ router.get("/employee-details", async (req, res) => {
     }
 });
 
+// Update employee detail
+router.put("/employees/:id", async (req, res) => {
+    const E_Id = req.params.id;
+    console.log(E_Id);
+    const {
+        name,address,nic,dob,contact,job, basic,type,driver, sales} = req.body;
+
+    try {
+        // 1. Update Employee table
+        const updateEmployeeQuery = `
+            UPDATE Employee
+            SET name = ?, address = ?, nic = ?, dob = ?, contact = ?, job = ?, basic = ?, type = ?
+            WHERE E_Id = ?
+        `;
+        await db.execute(updateEmployeeQuery, [
+            name,
+            address,
+            nic,
+            dob,
+            contact,
+            job,
+            basic,
+            type,
+            E_Id
+        ]);
+
+        // 2. Handle driver role
+        if (job.toLowerCase() === "driver" && driver) {
+            const { devID, balance, dailyTarget, monthlyTarget } = driver;
+
+            const [driverCheck] = await db.execute(`SELECT * FROM driver WHERE E_ID = ?`, [E_Id]);
+
+            if (driverCheck.length > 0) {
+                const updateDriver = `
+                    UPDATE driver
+                    SET  balance = ?, dailyTarget = ?, monthlyTarget = ?
+                    WHERE devID = ?
+                `;
+                await db.execute(updateDriver, [ balance, dailyTarget, monthlyTarget, devID]);
+            } else {
+                const insertDriver = `
+                    INSERT INTO driver (devID, E_ID, balance, dailyTarget, monthlyTarget)
+                    VALUES (?, ?, ?, ?, ?)
+                `;
+                await db.execute(insertDriver, [devID, E_Id, balance, dailyTarget, monthlyTarget]);
+            }
+        } else {
+            // Optional: Delete driver if not a driver anymore
+            await db.execute(`DELETE FROM driver WHERE E_ID = ?`, [E_Id]);
+        }
+
+        // 3. Handle sales role
+        if (job.toLowerCase() === "sales" && sales) {
+            const { stID, orderTarget, issuedTarget, totalOrder, totalIssued } = sales;
+
+            const [salesCheck] = await db.execute(`SELECT * FROM sales_team WHERE E_Id = ?`, [E_Id]);
+
+            if (salesCheck.length > 0) {
+                const updateSales = `
+                    UPDATE sales_team
+                    SET  orderTarget = ?, issuedTarget = ?
+                    WHERE stID = ?
+                `;
+                await db.execute(updateSales, [orderTarget, issuedTarget, stID]);
+            } else {
+                const insertSales = `
+                    INSERT INTO sales_team (stID, E_Id, orderTarget, issuedTarget, totalOrder, totalIssued)
+                    VALUES (?, ?, ?, ?, 0,0)
+                `;
+                await db.execute(insertSales, [stID, E_Id, orderTarget, issuedTarget]);
+            }
+        } else {
+            // Optional: Delete sales data if not in sales anymore
+            await db.execute(`DELETE FROM sales_team WHERE E_Id = ?`, [E_Id]);
+        }
+
+        return res.status(200).json({ success: true, message: "Employee updated successfully." });
+
+    } catch (error) {
+        console.error("Error updating employee:", error.message);
+        return res.status(500).json({ success: false, message: "Failed to update employee", error: error.message });
+    }
+});
+
+
+
 // get Permanent employees
 router.get("/Permanent-employees", async (req, res) => {
     try {
