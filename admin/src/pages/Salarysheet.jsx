@@ -22,6 +22,8 @@ const SalarySheet = () => {
     const [inOrderBonus , setInOrderBonus] = useState(0);
     const [outOrderBonus , setOutOderBonus] = useState(0);
     const [highestSaleBonus , setHighestSaleBonus] = useState(0);
+    const [manualOverrides, setManualOverrides] = useState({});
+
     const [formData, setFormData] = useState({
         id: "", name: "", job: "", informedLeave:"", uninformedLeave:"", basic: "", loan: "",advance:"", attendance:"",leaveDeduction:"", saving:"",otherpay:"",total :"",
     });
@@ -30,58 +32,96 @@ const SalarySheet = () => {
         fetchEmployees();
     }, []);
     useEffect(() => {
-        if (!formData.basic) return;
+    if (!formData.basic) return;
 
-        const basic = parseFloat(formData.basic) || 0;
-        const attendance = parseFloat(formData.attendance) || 0;
-        const deduction = parseFloat(formData.leaveDeduction) || 0;
-        const saving = parseFloat(formData.saving) || 0;
-        const other = parseFloat(formData.otherpay) || 0;
+    const basic = parseFloat(formData.basic) || 0;
+     const basic1 = parseFloat(formData.saving) || 0;
+    const saving = parseFloat(formData.saving) || 0;
+    const other = parseFloat(formData.otherpay) || 0;
+    const informedLeave = parseInt(formData.informedLeave || 0);
+    const uninformedLeave = parseInt(formData.uninformedLeave || 0);
+    const leaveCount = informedLeave + uninformedLeave;
 
-        const totalAdvance = advancePayments.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
-        const totalLoan = loanPayments ? parseFloat(loanPayments.installment || 0) : 0;
+    // Leave deduction logic
+    let leaveDeduction = 0;
+    if (leaveCount < 4) {
+        leaveDeduction = (informedLeave * 1000) + (uninformedLeave * 2000);
+    } else if (leaveCount === 4) {
+        leaveDeduction = 0; // no deduction but no bonus
+    } else {
+        leaveDeduction = (informedLeave * 1000) + (uninformedLeave * 2000);
+    }
 
-        let s_total = basic + attendance - totalAdvance - totalLoan - saving - other;
+    // Attendance bonus logic
+    let attendanceBonus = 0;
+    if (leaveCount < 4) {
+        attendanceBonus = 4000;
+    } else {
+        attendanceBonus = 0;
+    }
 
-        // Include extra driver-related bonuses/adjustments
-        if (formData.job === 'Driver') {
-            s_total += monthlyTargetBouns + dailyTargetBouns - monthlyDeptBalance;
-        }
-        // Include extra saleteam-related bonuses/adjustments
-        if (formData.job === 'Sales') {
-            s_total += inOrderBonus + outOrderBonus + highestSaleBonus;
-        }
+    // Advance and Loan
+    const totalAdvance = advancePayments.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
+    const totalLoan = loanPayments ? parseFloat(loanPayments.installment || 0) : 0;
 
-        // Construct updated form data
-        const updatedData = {
-            ...formData,
-            total: s_total.toFixed(2)
-        };
+    // Total salary calculation
+    let s_total = basic + attendanceBonus - totalAdvance - totalLoan - saving - other - leaveDeduction;
 
-        // Conditionally add loanDate if available
-        if (loanPayments && loanPayments.date) {
-            updatedData.loanDate = loanPayments.date;
-        }
+    if (formData.job === 'Driver') {
+        s_total += monthlyTargetBouns + dailyTargetBouns - monthlyDeptBalance;
+    }
 
-        // If job is Driver, include additional values
-        if (formData.job === 'Driver') {
-            updatedData.monthlyTargetBouns = monthlyTargetBouns;
-            updatedData.dailyTargetBouns = dailyTargetBouns;
-            updatedData.monthlyDeptBalance = monthlyDeptBalance;
-            updatedData.loan = totalLoan.toFixed(2); // Optional
-        }
-        // If job is Sales, include additional values
-        if (formData.job === 'Sales') {
-            updatedData.inOrderBonus = inOrderBonus;
-            updatedData.outOrderBonus = outOrderBonus;
-            updatedData.highestSaleBonus = highestSaleBonus;
-            updatedData.loan = totalLoan.toFixed(2); // Optional
-        }
+    if (formData.job === 'Sales') {
+        s_total += inOrderBonus + outOrderBonus + highestSaleBonus;
+    }
+
+    // Update form data
+    const updatedData = {
+        ...formData,
+        attendance: attendanceBonus.toFixed(2),
+        leaveDeduction: leaveDeduction.toFixed(2),
+        total: s_total.toFixed(2),
+        informedLeave,
+        uninformedLeave,
+        advance: totalAdvance.toFixed(2),
+        loan: totalLoan.toFixed(2),
+    };
+
+    if (loanPayments?.date) {
+        updatedData.loanDate = loanPayments.date;
+    }
+
+    if (formData.job === 'Driver') {
+        updatedData.monthlyTargetBouns = monthlyTargetBouns;
+        updatedData.dailyTargetBouns = dailyTargetBouns;
+        updatedData.monthlyDeptBalance = monthlyDeptBalance;
+    }
+
+    if (formData.job === 'Sales') {
+        updatedData.inOrderBonus = inOrderBonus;
+        updatedData.outOrderBonus = outOrderBonus;
+        updatedData.highestSaleBonus = highestSaleBonus;
+    }
+
+    setFormData(updatedData);
+}, [
+    formData.basic,
+    formData.informedLeave,
+    formData.uninformedLeave,
+    advancePayments,
+    loanPayments,
+    monthlyTargetBouns,
+    dailyTargetBouns,
+    monthlyDeptBalance,
+    inOrderBonus,
+    outOrderBonus,
+    highestSaleBonus,
+    manualOverrides.saving,
+    manualOverrides.otherpay,formData.saving,
+formData.otherpay,
+]);
 
 
-        setFormData(updatedData);
-    }, [formData.basic, formData.attendance, formData.leaveDeduction, formData.saving, formData.otherpay, advancePayments, loanPayments,
-        monthlyTargetBouns, dailyTargetBouns, monthlyDeptBalance,inOrderBonus,outOrderBonus,highestSaleBonus]);
 
     const fetchEmployees = async () => {
         try {
@@ -214,7 +254,11 @@ const SalarySheet = () => {
         e.preventDefault();
         console.log(formData);
     }
-
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        setManualOverrides((prev) => ({ ...prev, [name]: true }));
+    };
     return (
         <Helmet title={`Salary Sheet`}>
             <section>
@@ -257,9 +301,8 @@ const SalarySheet = () => {
                                     {isEditMode ? "Cancel Edit" : "Edit"}
                                     </Button>
                                 </Col>
-                                </Row>
+                            </Row>
 
-                                
                                 <div className="salesteam-details">
                                     <Table bordered className="member-table">
                                         <tbody>
@@ -273,10 +316,37 @@ const SalarySheet = () => {
                                         </tr>
                                         <tr>
                                             <td><strong>Informed Leave</strong></td>
-                                            <td>{formData.informedLeave}</td>
+                                            <td>
+                                                {isEditMode ? (
+                                                <Input
+                                                    type="text"
+                                                    name="informedLeave"
+                                                    value={formData.informedLeave}
+                                                    onChange={(e) =>
+                                                    setFormData({ ...formData, informedLeave: e.target.value })
+                                                    }
+                                                />
+                                                ) : (
+                                                formData.informedLeave
+                                                )}
+                                            </td>
                                             <td><strong>Uninformed Leave</strong></td>
-                                            <td>{formData.uninformedLeave}</td>
-                                        </tr>
+                                            <td>
+                                                {isEditMode ? (
+                                                <Input
+                                                    type="number"
+                                                    name="uninformedLeave"
+                                                    value={formData.uninformedLeave}
+                                                    onChange={(e) =>
+                                                    setFormData({ ...formData, uninformedLeave: e.target.value })
+                                                    }
+                                                />
+                                                ) : (
+                                                formData.uninformedLeave
+                                                )}
+                                            </td>
+                                            </tr>
+
                                         <tr>
                                             <td><strong>Attendance bonus</strong></td>
                                             <td colSpan={1}>Rs. {formData.attendance}</td>
@@ -489,6 +559,13 @@ const SalarySheet = () => {
 };
 
 export default SalarySheet;
+
+ {/* <tr>
+                                            <td><strong>Informed Leave</strong></td>
+                                            <td>{formData.informedLeave}</td>
+                                            <td><strong>Uninformed Leave</strong></td>
+                                            <td>{formData.uninformedLeave}</td>
+                                        </tr> */}
 
 
 // import React, { useState, useEffect } from "react";
