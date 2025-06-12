@@ -3,6 +3,7 @@ import {Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane, Button}
 import Helmet from "../components/Helmet/Helmet";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddEmployee from "./AddEmployee";
+import UpdateEmployee from "./UpdateEmployee";
 import SaleteamDetail from "./SaleteamDetail";
 import DriverDetail from "./DriverDetail";
 import AdancePayment from "./AdancePayment";
@@ -160,7 +161,7 @@ const AllEmployees = () => {
                                 className={mainTab === "addEmployee" ? "active" : ""}
                                 onClick={() => handleMainTabChange("addEmployee")}
                             >
-                                Add Employee
+                                Add & Update
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -246,6 +247,7 @@ const AllEmployees = () => {
                                 <TabPane tabId="update">
                                     <Row>
                                         <Col>
+                                            <UpdateEmployee/>
                                             {/* <UpdateEmployee onUpdate={handleUpdateEmployee} employees={employees} /> */}
                                         </Col>
                                     </Row>
