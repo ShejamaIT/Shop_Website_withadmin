@@ -198,7 +198,7 @@ router.post("/orders", async (req, res) => {
         couponCode, deliveryPrice, discountAmount, district, dvStatus,orderDate,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
         phoneNumber = "", specialNote, title, totalItemPrice,issuable,
-        dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
+        dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,previousbalance,
         advance, balance ,payment,subPayment,customerBalanceDecision,finalCustomerBalance,paymentAmount,cashReturn,
         cardPayment={},chequePayment={},cashCardPayment={},tranferPayment={},creditPayment={},combinedChequePayment={},
         combinedCreditPayment={},combinedTransferPayment={},
@@ -265,6 +265,8 @@ router.post("/orders", async (req, res) => {
         const balance1 = parseFloat(balance) || 0;
         const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
         const TotalOrder = parseFloat(totalItemPrice) + parseFloat(deliveryPrice);
+        const customerBalance = parseFloat(finalCustomerBalance);
+
 
         const orID = `ORD_${Date.now()}`;
 
@@ -363,15 +365,39 @@ router.post("/orders", async (req, res) => {
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
         // ✅ Insert cash balance if advance exists
         if (advance1 > 0) {
-            
+
             // Insert into cash_balance and get insert ID
             const [cashResult] = await db.query(
                 `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
                 VALUES (?, ?, 'order', NOW(), ?)`,
                 ['Order Advance', orID, advance1]
             );
-            
+
             const cashId = cashResult.insertId;
+            if (customerBalanceDecision === "pass") {
+                // Update customer balance by reducing it (payment made)
+                await db.query(
+                    `UPDATE Customer SET balance = ? WHERE c_ID = ?`,
+                    [customerBalance, Cust_id]
+                );
+            } else if (customerBalanceDecision === "handover") {
+                // Treat this like "pass" as well, unless logic differs
+                await db.query(
+                    `UPDATE Customer SET balance = ? WHERE c_ID = ?`,
+                    [customerBalance, Cust_id]
+                );
+            } else if (customerBalanceDecision === "ignore") {
+                await db.query(
+                    `UPDATE Customer SET balance = ? WHERE c_ID = ?`,
+                    [customerBalance, Cust_id]
+                );
+                // Insert a new row in cash_balance for the loss
+                await db.query(
+                    `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+                    VALUES (?, ?, 'order', NOW(), ?)`,
+                    ['Order Loss', orID, finalCustomerBalance]
+                );
+            }            
 
             // Insert into order_payment
             const [payTypeResult] =  await db.query(
@@ -637,7 +663,7 @@ router.post("/later-order", async (req, res) => {
         FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,couponCode, deliveryPrice, discountAmount, district, dvStatus, orderDate,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",phoneNumber = "", specialNote, title, totalItemPrice, type, workPlace, t_name, orderType, specialdiscountAmount,
         advance, balance, processedItems = [],payment,subPayment,cardPayment={},chequePayment={},cashCardPayment={},tranferPayment={},creditPayment={},combinedChequePayment={},
-        combinedCreditPayment={},combinedTransferPayment={},issuable
+        combinedCreditPayment={},combinedTransferPayment={},issuable,customerBalanceDecision,finalCustomerBalance,paymentAmount,cashReturn
     } = req.body;
 
     console.log("✅ Received Processed Items:", processedItems);
@@ -703,6 +729,8 @@ router.post("/later-order", async (req, res) => {
         const balance1 = parseFloat(balance) || 0;
         const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
         const TotalOrder = parseFloat(totalItemPrice) + parseFloat(deliveryPrice);
+        const customerBalance = parseFloat(finalCustomerBalance);
+
         const orID = `ORD_${Date.now()}`;
 
         if (couponCode) {
@@ -935,6 +963,31 @@ router.post("/later-order", async (req, res) => {
                 ['Order Advance', orID, advance1]
             );
             const cashId = cashResult.insertId;
+
+            if (customerBalanceDecision === "pass") {
+                // Update customer balance by reducing it (payment made)
+                await db.query(
+                    `UPDATE Customer SET balance = ? WHERE c_ID = ?`,
+                    [customerBalance, Cust_id]
+                );
+            } else if (customerBalanceDecision === "handover") {
+                // Treat this like "pass" as well, unless logic differs
+                await db.query(
+                    `UPDATE Customer SET balance = ? WHERE c_ID = ?`,
+                    [customerBalance, Cust_id]
+                );
+            } else if (customerBalanceDecision === "ignore") {
+                await db.query(
+                    `UPDATE Customer SET balance = ? WHERE c_ID = ?`,
+                    [customerBalance, Cust_id]
+                );
+                // Insert a new row in cash_balance for the loss
+                await db.query(
+                    `INSERT INTO cash_balance (reason, ref, ref_type, dateTime, amount)
+                    VALUES (?, ?, 'order', NOW(), ?)`,
+                    ['Order Loss', orID, finalCustomerBalance]
+                );
+            }            
 
             // Insert into order_payment
             await db.query(
