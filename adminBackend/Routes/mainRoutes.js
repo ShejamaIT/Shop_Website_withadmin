@@ -199,7 +199,7 @@ router.post("/orders", async (req, res) => {
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
         phoneNumber = "", specialNote, title, totalItemPrice,issuable,
         dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,
-        advance, balance ,payment,subPayment,
+        advance, balance ,payment,subPayment,customerBalanceDecision,finalCustomerBalance,paymentAmount,cashReturn,
         cardPayment={},chequePayment={},cashCardPayment={},tranferPayment={},creditPayment={},combinedChequePayment={},
         combinedCreditPayment={},combinedTransferPayment={},
     } = req.body;
@@ -6913,7 +6913,7 @@ router.post("/employees", upload.single("lincenseimg"), async (req, res) => {
     try {
         const {
             name, address, nic, dob, contact, job, basic,
-            type, orderTarget, issuedTarget, lincenseDate
+            type, orderTarget, issuedTarget, lincenseDate,monthlyTarget,dailyTarget
         } = req.body;
 
         const lincenseimg = req.file ? req.file.buffer : null;
@@ -6944,9 +6944,9 @@ router.post("/employees", upload.single("lincenseimg"), async (req, res) => {
         if (job === "Driver") {
             const devID = await generateNewId("driver", "devID", "DI");
 
-            const sqlDriver = `INSERT INTO driver (devID, E_ID, balance, lincenseDate, lincense)
+            const sqlDriver = `INSERT INTO driver (devID, E_ID, balance, lincenseDate, lincense,dailyTarget,monthlyTarget)
                                VALUES (?, ?, '0', ?, ?)`;
-            await db.query(sqlDriver, [devID, E_Id, lincenseDate, lincenseimg]);
+            await db.query(sqlDriver, [devID, E_Id, lincenseDate, lincenseimg,dailyTarget,monthlyTarget]);
 
             Data = { devID, E_Id };
         }
@@ -8411,8 +8411,11 @@ router.get("/hire-summary", async (req, res) => {
 
         const { devID, balance } = driverResult[0];
 
-        const startOfLastMonth = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
-        const endOfLastMonth = moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
+        // const startOfLastMonth = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
+        // const endOfLastMonth = moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
+        const startOfLastMonth = moment().startOf('month').format('YYYY-MM-DD');
+        const endOfLastMonth = moment().endOf('month').format('YYYY-MM-DD');
+
 
         const [hireRows] = await db.query(
             `SELECT date, SUM(hire) AS total
@@ -8517,9 +8520,13 @@ router.get("/sales-summary", async (req, res) => {
         const { stID, orderTarget, issuedTarget } = teamRows[0];
 
         // 2. Get last month year + name
+        // const now = moment();
+        // const lastMonthYear = now.subtract(1, 'month').year();
+        // const lastMonthName = now.format("MMMM");
         const now = moment();
-        const lastMonthYear = now.subtract(1, 'month').year();
-        const lastMonthName = now.format("MMMM");
+        const lastMonthYear = now.year(); // e.g., 2025
+        const lastMonthName = now.format("MMMM"); // e.g., "June"
+
 
         // 3. Get order review data
         const [reviewRows] = await db.query(
