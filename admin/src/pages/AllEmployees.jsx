@@ -22,6 +22,7 @@ const AllEmployees = () => {
     const [hr, setHr] = useState([]);
     const [admin, setAdmin] = useState([]);
     const [other, setOther] = useState([]);
+    const [addEmployeeSubTab, setAddEmployeeSubTab] = useState("add");
     const [paymentSubTab, setPaymentSubTab] = useState("advance");
     const [userSubTab, setUserSubTab] = useState("AddNewUser");
     const location = useLocation();
@@ -206,13 +207,52 @@ const AllEmployees = () => {
 
                     <TabContent activeTab={mainTab}>
                         {/* === ADD EMPLOYEE TAB === */}
-                        <TabPane tabId="addEmployee">
+                        {/* <TabPane tabId="addEmployee">
                             <Row>
                                 <Col>
                                     <AddEmployee onAddEmployee={handleAddEmployee} />
                                 </Col>
                             </Row>
+                        </TabPane> */}
+
+                        <TabPane tabId="addEmployee">
+                            <Nav tabs className="mt-3">
+                                <NavItem>
+                                    <NavLink
+                                        className={addEmployeeSubTab === "add" ? "active" : ""}
+                                         onClick={() => setAddEmployeeSubTab("add")}
+                                    >
+                                        Add
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        className={addEmployeeSubTab === "update" ? "active" : ""}
+                                         onClick={() => setAddEmployeeSubTab("update")}
+                                    >
+                                        Update
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+
+                            <TabContent activeTab={addEmployeeSubTab} className="mt-3">
+                                <TabPane tabId="add">
+                                    <Row>
+                                        <Col>
+                                            <AddEmployee onAddEmployee={handleAddEmployee} />
+                                        </Col>
+                                    </Row>
+                                </TabPane>
+                                <TabPane tabId="update">
+                                    <Row>
+                                        <Col>
+                                            {/* <UpdateEmployee onUpdate={handleUpdateEmployee} employees={employees} /> */}
+                                        </Col>
+                                    </Row>
+                                </TabPane>
+                            </TabContent>
                         </TabPane>
+
                         {/* === SALES TEAM TAB === */}
                         <TabPane tabId="salesTeam">
                             {salesteamMembers.length > 0 ? (
