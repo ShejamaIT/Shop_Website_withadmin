@@ -31,33 +31,43 @@ const SalarySheet = () => {
     useEffect(() => {
         fetchEmployees();
     }, []);
-    useEffect(() => {
+useEffect(() => {
     if (!formData.basic) return;
 
     const basic = parseFloat(formData.basic) || 0;
-     const basic1 = parseFloat(formData.saving) || 0;
     const saving = parseFloat(formData.saving) || 0;
     const other = parseFloat(formData.otherpay) || 0;
+
     const informedLeave = parseInt(formData.informedLeave || 0);
     const uninformedLeave = parseInt(formData.uninformedLeave || 0);
     const leaveCount = informedLeave + uninformedLeave;
 
-    // Leave deduction logic
+    const legalLeave = formData.job === 'Driver' ? 2 : 4;
+
     let leaveDeduction = 0;
-    if (leaveCount < 4) {
-        leaveDeduction = (informedLeave * 1000) + (uninformedLeave * 2000);
-    } else if (leaveCount === 4) {
-        leaveDeduction = 0; // no deduction but no bonus
-    } else {
-        leaveDeduction = (informedLeave * 1000) + (uninformedLeave * 2000);
+
+    if (leaveCount > legalLeave) {
+        const extraLeaves = leaveCount - legalLeave;
+
+        if (extraLeaves === 1) {
+            // Deduct 1 leave only
+            if (uninformedLeave > 0) {
+                leaveDeduction = 2000;
+            } else if (informedLeave > 0) {
+                leaveDeduction = 1000;
+            }
+        } else {
+            // More than one extra leave
+            const extraInformed = Math.max(0, informedLeave - (legalLeave - uninformedLeave));
+            const extraUninformed = Math.max(0, uninformedLeave - (legalLeave - informedLeave));
+            leaveDeduction = (extraInformed * 1000) + (extraUninformed * 2000);
+        }
     }
 
-    // Attendance bonus logic
+    // Attendance bonus
     let attendanceBonus = 0;
-    if (leaveCount < 4) {
+    if (leaveCount < legalLeave) {
         attendanceBonus = 4000;
-    } else {
-        attendanceBonus = 0;
     }
 
     // Advance and Loan
@@ -75,7 +85,6 @@ const SalarySheet = () => {
         s_total += inOrderBonus + outOrderBonus + highestSaleBonus;
     }
 
-    // Update form data
     const updatedData = {
         ...formData,
         attendance: attendanceBonus.toFixed(2),
@@ -117,11 +126,10 @@ const SalarySheet = () => {
     outOrderBonus,
     highestSaleBonus,
     manualOverrides.saving,
-    manualOverrides.otherpay,formData.saving,
-formData.otherpay,
+    manualOverrides.otherpay,
+    formData.saving,
+    formData.otherpay,
 ]);
-
-
 
     const fetchEmployees = async () => {
         try {
@@ -530,10 +538,66 @@ formData.otherpay,
                                     <h5 className="fw-bold mb-4">Total salary</h5>
                                     <Table bordered className="member-table">
                                         <tbody>
-                                        <tr>
-                                            <td><strong>Total salary in hand</strong></td>
-                                            <td>{formData.total}</td>
-                                        </tr>
+                                            <tr>
+                                                <td><strong>Basic Salary (➕)</strong></td>
+                                                <td>{formData.basic}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Attendance bonus (➕)</strong></td>
+                                                <td>{formData.attendance}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Leave Deduction (➖)</strong></td>
+                                                <td>{formData.leaveDeduction}</td>
+                                            </tr>
+                                            {formData.job === "Driver" && (
+                                                <>
+                                                    <tr>
+                                                        <td><strong>Daily Target Bouns (➕)</strong></td>
+                                                        <td>{(dailyTargetBouns).toFixed(2)}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Monthly Target Bouns (➕)</strong></td>
+                                                        <td>{(dailyTargetBouns).toFixed(2)}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Monthly Dept Balance (➖)</strong></td>
+                                                        <td>{(dailyTargetBouns).toFixed(2)}</td>
+                                                    </tr>
+                                                </>
+                                            )}
+                                            {formData.job === "Sales" && (
+                                                <>
+                                                    <tr>
+                                                        <td><strong>InOrders Target Bouns (➕)</strong></td>
+                                                        <td>{(inOrderBonus).toFixed(2)}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>OutOrders Target Bouns (➕)</strong></td>
+                                                        <td>{(outOrderBonus).toFixed(2)}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Highest Sale Target (➕)</strong></td>
+                                                        <td>{(highestSaleBonus).toFixed(2)}</td>
+                                                    </tr>
+                                                </>
+                                            )}
+                                            <tr>
+                                                <td><strong>Advance (➖)</strong></td>
+                                                <td>             
+                                                        {advancePayments.reduce((total, p) => total + Number(p.amount), 0).toFixed(2)}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Loan (➖)</strong></td>
+                                                <td>                                                        
+                                                    {Number(loanPayments.installment).toFixed(2)}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Total salary in hand</strong></td>
+                                                <td>{formData.total}</td>
+                                            </tr>
                                         </tbody>
                                     </Table>
                                 </div>
