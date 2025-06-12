@@ -3935,8 +3935,6 @@ router.put("/employees/:id", async (req, res) => {
     }
 });
 
-
-
 // get Permanent employees
 router.get("/Permanent-employees", async (req, res) => {
     try {
