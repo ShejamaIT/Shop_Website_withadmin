@@ -77,9 +77,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const [discount, setDiscount] = useState("0");
     const [advance, setAdvance] = useState("0");
     const [balance, setBalance] = useState("0");
-    const [callBackAction , setCallBackAction] = useState("");
-    const [paymentAmount , setPaymentAmount] = useState(0);
-    const [cashReturn , setCashReturn] = useState(0);
     const [grossBillTotal , setGrossBillTotal] = useState(0);
     const [previousbalance , setPreviousBalance] = useState(0);
     const [grossAmount, setGrossAmount] = useState(0);
@@ -619,90 +616,92 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     };
 
     const handleCustomerBalanceAction = (balanceValue, paymentAmt, billValue) => {
-    const remaining = parseFloat(balanceValue);
-    const grossvalue = parseFloat(paymentAmt);
-    const BillValue = parseFloat(billValue);
+        const remaining = parseFloat(balanceValue);
+        const grossvalue = parseFloat(paymentAmt);
+        const BillValue = parseFloat(billValue);
 
-    return new Promise((resolve) => {
-        if (remaining > 0) {
-            Swal.fire({
-                title: "<strong>Customer <u>Overpaid</u></strong>",
-                icon: "success",
-                html: `Customer has overpaid <b>Rs.${remaining.toFixed(2)}</b>. What would you like to do?`,
-                showCancelButton: true,
-                confirmButtonText: "💸 Handover to Customer",
-                cancelButtonText: "💼 Pass to Account"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    resolve({
-                        finalBalance: 0,
-                        action: "handover",
-                        paymentAmount: grossvalue,
-                        cashReturn: remaining,
-                        advance: BillValue,
-                        balance: 0,
-                    });
-                } else {
-                    resolve({
-                        finalBalance: remaining,
-                        action: "pass",
-                        paymentAmount: paymentAmt,
-                        cashReturn: 0,
-                        advance: BillValue,
-                        balance: 0,
-                    });
-                }
-            });
-        } else if (remaining < 0) {
-            Swal.fire({
-                title: "<strong>Customer <u>Owes</u> Balance</strong>",
-                icon: "warning",
-                html: `Customer still owes <b>Rs.${Math.abs(remaining).toFixed(2)}</b>. What would you like to do?`,
-                showCancelButton: true,
-                confirmButtonText: "📝 Pass to Account",
-                cancelButtonText: "❌ Ignore"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    resolve({
-                        finalBalance: remaining,
-                        action: "pass",
-                        paymentAmount: paymentAmt,
-                        cashReturn: 0,
-                        advance: paymentAmt,
-                        balance: remaining,
-                    });
-                } else {
-                    resolve({
-                        finalBalance: 0,
-                        action: "ignore",
-                        paymentAmount: paymentAmt,
-                        cashReturn: 0,
-                        advance: billValue,
-                        balance: 0,
-                    });
-                }
-            });
-        } else {
-            resolve({
-                finalBalance: 0,
-                action: "none",
-                paymentAmount: paymentAmt,
-                cashReturn: 0,
-                advance: paymentAmt,
-                balance: 0,
-            });
-        }
-    });
-};
-
-
+        return new Promise((resolve) => {
+            if (remaining > 0) {
+                Swal.fire({
+                    title: "<strong>Customer <u>Overpaid</u></strong>",
+                    icon: "success",
+                    html: `Customer has overpaid <b>Rs.${remaining.toFixed(2)}</b>. What would you like to do?`,
+                    showCancelButton: true,
+                    confirmButtonText: "💸 Handover to Customer",
+                    cancelButtonText: "💼 Pass to Account"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        resolve({
+                            finalBalance: 0,
+                            action: "handover",
+                            paymentAmount: grossvalue,
+                            cashReturn: remaining,
+                            advance: BillValue,
+                            balance: 0,
+                        });
+                    } else {
+                        resolve({
+                            finalBalance: remaining,
+                            action: "pass",
+                            paymentAmount: paymentAmt,
+                            cashReturn: 0,
+                            advance: BillValue,
+                            balance: 0,
+                        });
+                    }
+                });
+            } else if (remaining < 0) {
+                Swal.fire({
+                    title: "<strong>Customer <u>Owes</u> Balance</strong>",
+                    icon: "warning",
+                    html: `Customer still owes <b>Rs.${Math.abs(remaining).toFixed(2)}</b>. What would you like to do?`,
+                    showCancelButton: true,
+                    confirmButtonText: "📝 Pass to Account",
+                    cancelButtonText: "❌ Ignore"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        resolve({
+                            finalBalance: remaining,
+                            action: "pass",
+                            paymentAmount: paymentAmt,
+                            cashReturn: 0,
+                            advance: paymentAmt,
+                            balance: remaining,
+                        });
+                    } else {
+                        resolve({
+                            finalBalance: remaining,
+                            action: "ignore",
+                            paymentAmount: paymentAmt,
+                            cashReturn: 0,
+                            advance: billValue,
+                            balance: 0,
+                        });
+                    }
+                });
+            } else {
+                resolve({
+                    finalBalance: 0,
+                    action: "none",
+                    paymentAmount: paymentAmt,
+                    cashReturn: 0,
+                    advance: paymentAmt,
+                    balance: 0,
+                });
+            }
+        });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Basic validation
-        if (!formData.FtName || !formData.phoneNumber || selectedItems.length === 0) {
-            toast.error("Please fill all details and add at least one item.");
+        if (!formData.FtName || !formData.phoneNumber || !formData.orderDate) {
+            toast.error("Please fill all details.");
+            return;
+        }
+        if (! selectedItems.length === 0) {
+            toast.error("Please add at least one item.");
             return;
         }
 
@@ -814,8 +813,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             };
         }
 
-        
-        
         // ✅ Assemble and clean the final form data
        const updatedFormData = {
             ...formData,
@@ -826,9 +823,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             tranferPayment, creditPayment,
             combinedChequePayment, combinedCreditPayment, combinedTransferPayment,
         };
-
-
-
 
         // ✅ Calculate totals correctly
         const itemList = selectedItems.map(item => {
@@ -877,6 +871,8 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         totalItemPrice: totalItemPrice.toFixed(2),
         totalBillPrice: totalBillPrice.toFixed(2),
         specialdiscountAmount,
+        previousbalance: previousbalance,
+        grossAmount: grossAmount,
         customerBalanceDecision: action,
         finalCustomerBalance: finalBalance,
         paymentAmount: parseFloat(updatedPaymentAmount),
@@ -888,84 +884,84 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         };
         console.log(fullOrderData);
 
-        // try {
-        //     if (formData.issuable === 'Later') {
-        //         try {
-        //             const fullOrderData = {
-        //                 ...orderData,
-        //                 processedItems,
-        //             };
+        try {
+            if (formData.issuable === 'Later') {
+                try {
+                    const fullOrderData = {
+                        ...orderData,
+                        processedItems,
+                    };
             
-        //             console.log("📝 Sending Full Order Data:", fullOrderData);
+                    console.log("📝 Sending Full Order Data:", fullOrderData);
             
-        //             const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
-        //                 method: "POST",
-        //                 headers: {
-        //                     "Content-Type": "application/json",
-        //                 },
-        //                 body: JSON.stringify(fullOrderData),
-        //             });
+                    const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(fullOrderData),
+                    });
             
-        //             const result = await response.json();
+                    const result = await response.json();
             
-        //             if (response.ok && result.success) {
-        //                 const { orderId, orderDate, expectedDate } = result.data;
-        //                 toast.success(`Order placed successfully! Order ID: ${orderId}`);
-        //                 setTimeout(() => {
-        //                     window.location.reload();
-        //                 }, 1000);
-        //             } else {
-        //                 toast.error(result.message || "Failed to place the order.");
-        //                 console.error("❌ Order Error:", result.message || result);
-        //             }
+                    if (response.ok && result.success) {
+                        const { orderId, orderDate, expectedDate } = result.data;
+                        toast.success(`Order placed successfully! Order ID: ${orderId}`);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        toast.error(result.message || "Failed to place the order.");
+                        console.error("❌ Order Error:", result.message || result);
+                    }
             
-        //         } catch (error) {
-        //             toast.error("An error occurred while placing the order.");
-        //             console.error("❌ Network/Server Error:", error);
-        //         }
-        //     } else if (formData.issuable === 'Now'){
-        //         const response = await fetch("http://localhost:5001/api/admin/main/orders", {
-        //             method: "POST",
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //             },
-        //             body: JSON.stringify(orderData),
-        //         });
+                } catch (error) {
+                    toast.error("An error occurred while placing the order.");
+                    console.error("❌ Network/Server Error:", error);
+                }
+            } else if (formData.issuable === 'Now'){
+                const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(orderData),
+                });
                 
-        //         const result = await response.json();
-        //         const { orderId } = result.data;
-        //         if (response.ok) {
-        //             toast.success("Order placed successfully!");
-        //             const newOrder = {
-        //                 orderId:orderId ,
-        //                 orderDate: new Date().toLocaleDateString(),
-        //                 phoneNumber: formData.phoneNumber,
-        //                 payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
-        //                 deliveryStatus: formData.dvStatus,
-        //                 deliveryCharge: deliveryPrice,
-        //                 discount: discountAmount,
-        //                 specialDiscount: specialdiscountAmount,
-        //                 advance: parseFloat(advance),
-        //                 items: items,
-        //                 balance:parseFloat(balance),
-        //                 totalPrice:totalBillPrice,
-        //                 customerName:formData.FtName+" "+formData.SrName,
+                const result = await response.json();
+                const { orderId } = result.data;
+                if (response.ok) {
+                    toast.success("Order placed successfully!");
+                    const newOrder = {
+                        orderId:orderId ,
+                        orderDate: new Date().toLocaleDateString(),
+                        phoneNumber: formData.phoneNumber,
+                        payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
+                        deliveryStatus: formData.dvStatus,
+                        deliveryCharge: deliveryPrice,
+                        discount: discountAmount,
+                        specialDiscount: specialdiscountAmount,
+                        advance: parseFloat(advance),
+                        items: items,
+                        balance:parseFloat(balance),
+                        totalPrice:totalBillPrice,
+                        customerName:formData.FtName+" "+formData.SrName,
             
-        //             };
-        //             setSelectedOrder(newOrder);
-        //             // Optionally, open invoice modal here
-        //             setShowModal2(true);
+                    };
+                    setSelectedOrder(newOrder);
+                    // Optionally, open invoice modal here
+                    setShowModal2(true);
                 
                 
-        //         } else {
-        //             toast.error(result.message || "Something went wrong. Please try again.");
-        //         }
-        //     }
+                } else {
+                    toast.error(result.message || "Something went wrong. Please try again.");
+                }
+            }
 
-        // } catch (error) {
-        //     console.error("Error submitting order data:", error);
-        //     toast.error("Error submitting order data. Please try again.");
-        // }
+        } catch (error) {
+            console.error("Error submitting order data:", error);
+            toast.error("Error submitting order data. Please try again.");
+        }
     };
     const handleSubmit3 = async (formData) => {
         const updatedData = {
