@@ -71,7 +71,7 @@ const AddEmployee = ({ onAddEmployee }) => {
     const handleClear = () => {
         setFormData({
             E_Id: "",name: "",address: "",nic: "",dob: "",contact: "",job: "", basic: "", target: "",type: "",
-            orderTarget: "",issuedTarget: "",lincenseimg:"",lincenseDate:"",
+            orderTarget: "",issuedTarget: "",lincenseimg:"",lincenseDate:"",monthlyTarget:"",dailyTarget:""
         });
     };
 
@@ -140,6 +140,14 @@ const AddEmployee = ({ onAddEmployee }) => {
                             )}
                             {formData.job === "Driver" && (
                                 <>
+                                    <FormGroup>
+                                        <Label for="target">Daily Target</Label>
+                                        <Input type="number" name="dailyTarget" id="dailyTarget" value={formData.dailyTarget} onChange={handleChange} required />
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Label for="target">Monthly Target</Label>
+                                        <Input type="number" name="monthlyTarget" id="monthlyTarget" value={formData.monthlyTarget} onChange={handleChange} required />
+                                    </FormGroup>
                                     <FormGroup>
                                         <Label for="lincenseDate">Lincense Date</Label>
                                         <Input type="date" name="lincenseDate" id="lincenseDate" value={formData.lincenseDate} onChange={handleChange} required />
