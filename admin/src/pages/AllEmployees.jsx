@@ -13,6 +13,7 @@ import Leaveform from "./Leaveform";
 import AddOrderTargets from "./AddorderTargets";
 import TableLeave from "../components/tables/TableLeave";
 import AddNewUser from "./AddNewUser";
+import UserManagement from "./UserManagement";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -416,7 +417,7 @@ const AllEmployees = () => {
                                     <AddNewUser />
                                 </TabPane>
                                 <TabPane tabId="AllUsers">
-                                    {/*<LoanPayment />*/}
+                                    <UserManagement />
                                 </TabPane>
                             </TabContent>
                         </TabPane>
