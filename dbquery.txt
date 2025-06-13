@@ -580,3 +580,11 @@ CREATE TABLE accountNumbers(
         CONSTRAINT FOREIGN KEY (sbID) REFERENCES shop_Banks (sbID)
                                  ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+ALTER TABLE order_payment
+ADD COLUMN c_ID VARCHAR(15),
+ADD COLUMN balance DOUBLE;
+ALTER TABLE order_payment
+ADD CONSTRAINT fk_order_customer
+FOREIGN KEY (c_ID) REFERENCES Customer(c_ID)
+ON DELETE CASCADE ON UPDATE CASCADE;
