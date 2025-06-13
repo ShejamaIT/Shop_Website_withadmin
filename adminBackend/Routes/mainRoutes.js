@@ -284,10 +284,15 @@ router.post("/orders", async (req, res) => {
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
 
-        // ✅ Set order status for Walking to 'Accepted'
-        const orderStatus = dvStatus === "Delivery" ?  "Delivered" : "Issued";
-        console.log(dvStatus,orderStatus);
-        // const orderStatus = orderType === "Walking" ? "Accepted" : "Pending";
+        let orderStatus = null;
+
+        if (type === 'On-site') {
+            orderStatus = "Pending";
+        } else {
+            // ✅ Set order status for Walking to 'Delivered' 0r 'Issued'
+             orderStatus = dvStatus === "Delivery" ?  "Delivered" : "Issued";
+        }
+        
         const orderQuery = `
             INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')`;
@@ -400,12 +405,26 @@ router.post("/orders", async (req, res) => {
             }            
 
             // Insert into order_payment
-            const [payTypeResult] =  await db.query(
+            // const [payTypeResult] =  await db.query(
+            //     `INSERT INTO order_payment 
+            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
+            //     VALUES 
+            //         (?, ?, ?, NOW(), ?, ?, ?, ?)`,
+            //     [op_ID,orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
+            // );
+
+            if (!op_ID || !orID || isNaN(advance1) || !stID || !issuable) {
+                return res.status(400).json({ message: "Missing or invalid order payment fields" });
+            }
+
+            await db.query(
                 `INSERT INTO order_payment 
-                    (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
+                    (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable, c_ID, balance, otherCharges, fullPaidAmount) 
                 VALUES 
-                    (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-                [op_ID,orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
+                    (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    op_ID,orID,advance1,orderStatus,parseFloat(totalItemPrice) || 0, stID,issuable,Cust_id,balance1, 0, advance1
+                ]
             );
 
              // Additional insert for Cash - Transfer payment
@@ -744,10 +763,17 @@ router.post("/later-order", async (req, res) => {
             const updateSalesTeamQuery = `UPDATE sales_team SET totalOrder = totalOrder + ? WHERE stID = ?`;
             await db.query(updateSalesTeamQuery, [newTotalOrder, stID]);
         }
+        let orderStatus = null;
+
+        if (type === 'On-site') {
+            orderStatus = "Pending";
+        } else {
+            // ✅ Determine order status based on items
+            const hasProduction = processedItems.some(item => item.status === "Production");
+            orderStatus = hasProduction ? "Processing" : "Accepted";
+        }
+
         
-        // ✅ Determine order status based on items
-        const hasProduction = processedItems.some(item => item.status === "Production");
-        const orderStatus = hasProduction ? "Processing" : "Accepted";
 
         const orderQuery = `
             INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
@@ -1001,11 +1027,14 @@ router.post("/later-order", async (req, res) => {
             // Insert into order_payment
             // await db.query(
             //     `INSERT INTO order_payment 
-            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
+            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable) 
             //     VALUES 
             //         (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-            //     [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
+            //     [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable]
             // );
+            if (!op_ID || !orID || isNaN(advance1) || !stID || !issuable) {
+                return res.status(400).json({ message: "Missing or invalid order payment fields" });
+            }
 
             await db.query(
                 `INSERT INTO order_payment 
@@ -1022,10 +1051,39 @@ router.post("/later-order", async (req, res) => {
                     issuable,
                     Cust_id,
                     balance1,
-                    0,  // otherCharges
-                    advance1 // fullPaidAmount - assuming it's same as advance1 here
+                    0,
+                    advance1
                 ]
             );
+
+
+            // await db.query(
+            //     `INSERT INTO order_payment 
+            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
+            //     VALUES 
+            //         (?, ?, ?, NOW(), ?, ?, ?, ?)`,
+            //     [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
+            // );
+
+            // await db.query(
+            //     `INSERT INTO order_payment 
+            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable, c_ID, balance, otherCharges, fullPaidAmount) 
+            //     VALUES 
+            //         (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)`,
+            //     [
+            //         op_ID,
+            //         orID,
+            //         advance1,
+            //         orderStatus,
+            //         parseFloat(totalItemPrice) || 0,
+            //         stID,
+            //         issuable,
+            //         Cust_id,
+            //         balance1,
+            //         0,  // otherCharges
+            //         advance1 // fullPaidAmount - assuming it's same as advance1 here
+            //     ]
+            // );
 
             // Handle Payment Types
             const insertPayType = async () => {
