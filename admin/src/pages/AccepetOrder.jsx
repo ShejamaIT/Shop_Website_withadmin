@@ -52,37 +52,49 @@ const OrderDetails = () => {
     }, []);
 
     const fetchOrder = async () => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`);
-            const response1 = await fetch(`http://localhost:5001/api/admin/main/special-reserved-details?orID=${id}`);
-            if (!response.ok) throw new Error("Failed to fetch order details.");
-            if (!response1.ok) throw new Error("Failed to fetch order details.");
+    try {
+        const response = await fetch(`http://localhost:5001/api/admin/main/accept-order-details?orID=${id}`);
+        const response1 = await fetch(`http://localhost:5001/api/admin/main/special-reserved-details?orID=${id}`);
 
-            const data = await response.json();
-            const data1 = await response1.json();
-            setSpecialReservedItems(data1.data);
-            // Check order status, if not "Accepted", redirect to another page
-            if (data.order.orderStatus !== "Accepted") {
-                navigate("/dashboard"); // Redirect to another page
-                return;
-            }
-            // Ensure `isBooked` updates correctly
-            const bookedItems = data.order.bookedItems.map((booked) => booked.itemId);
-            const updatedItems = data.order.items.map((item) => ({
+        if (!response.ok) throw new Error("Failed to fetch order details.");
+
+        const data = await response.json();
+        console.log(data);
+        const data1 = response1.ok ? await response1.json() : { data: [] }; // fallback if request fails
+
+        // Set special reserved items safely
+        setSpecialReservedItems(Array.isArray(data1.data) ? data1.data : []);
+
+        // Redirect if not accepted
+        if (data.order.orderStatus !== "Accepted") {
+            navigate("/dashboard");
+            return;
+        }
+
+        // Handle booked items
+        const bookedItems = Array.isArray(data.order.bookedItems)
+            ? data.order.bookedItems.map((booked) => booked.itemId)
+            : [];
+
+        const updatedItems = Array.isArray(data.order.items)
+            ? data.order.items.map((item) => ({
                 ...item,
                 booked: bookedItems.includes(item.itemId),
-            }));
+            }))
+            : [];
 
-            setOrder({ ...data.order, items: updatedItems });
-            setFormData({ ...data.order, items: updatedItems });
+        // Update state
+        setOrder({ ...data.order, items: updatedItems });
+        setFormData({ ...data.order, items: updatedItems });
 
-            setLoading(false);
-        } catch (err) {
-            console.error("Error fetching order details:", err);
-            setError(err.message);
-            setLoading(false);
-        }
-    };
+        setLoading(false);
+    } catch (err) {
+        console.error("Error fetching order details:", err);
+        setError(err.message);
+        setLoading(false);
+    }
+};
+
 
     const calculateTotal = () => {
         const items = formData.items || [];
