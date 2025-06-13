@@ -10072,6 +10072,79 @@ router.put("/other-hire/payment", async (req, res) => {
     }
 });
 
+// Get all users
+router.get("/users", async (req, res) => {
+    try {
+        const [users] = await db.query("SELECT id, contact, type FROM user");
+        res.json({ data: users });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch users" });
+    }
+});
+
+//Get full detail of a user 
+router.get("/users/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [[user]] = await db.query("SELECT * FROM user WHERE id = ?", [id]);
+        const [sessions] = await db.query("SELECT * FROM sessionlogs WHERE user = ?", [id]);
+
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        res.json({ user, sessions });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to get user details" });
+    }
+});
+
+// Delete one unwanted user
+router.delete("/users/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.query("DELETE FROM user WHERE id = ?", [id]);
+        res.json({ message: "User deleted" });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to delete user" });
+    }
+});
+
+//Update user details
+router.put("/users/:id", async (req, res) => {
+    const { id } = req.params;
+    const { contact, password, role } = req.body;
+
+    try {
+        const updates = [];
+        const values = [];
+
+        if (contact) {
+            updates.push("contact = ?");
+            values.push(contact);
+        }
+
+        if (password) {
+            updates.push("password = ?");
+            values.push(password); // You should hash it in real usage
+        }
+
+        if (role) {
+            updates.push("type = ?");
+            values.push(role);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ message: "No valid fields to update." });
+        }
+
+        values.push(id);
+        await db.query(`UPDATE user SET ${updates.join(", ")} WHERE id = ?`, values);
+
+        res.json({ message: "User updated successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to update user" });
+    }
+});
+
 // pass sale team value to review in month end
 
 // Function to generate new ida
