@@ -402,10 +402,10 @@ router.post("/orders", async (req, res) => {
             // Insert into order_payment
             const [payTypeResult] =  await db.query(
                 `INSERT INTO order_payment 
-                    (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable) 
+                    (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
                 VALUES 
                     (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-                [op_ID,orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable]
+                [op_ID,orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
             );
 
              // Additional insert for Cash - Transfer payment
@@ -660,13 +660,11 @@ router.post("/orders", async (req, res) => {
 
 router.post("/later-order", async (req, res) => {
     const {
-        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,couponCode, deliveryPrice, discountAmount, district, dvStatus, orderDate,
+        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,couponCode, deliveryPrice, discountAmount, district, dvStatus, orderDate,dvtype,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",phoneNumber = "", specialNote, title, totalItemPrice, type, workPlace, t_name, orderType, specialdiscountAmount,
         advance, balance, processedItems = [],payment,subPayment,cardPayment={},chequePayment={},cashCardPayment={},tranferPayment={},creditPayment={},combinedChequePayment={},
         combinedCreditPayment={},combinedTransferPayment={},issuable,customerBalanceDecision,finalCustomerBalance,paymentAmount,cashReturn
     } = req.body;
-
-    console.log("✅ Received Processed Items:", processedItems);
 
     if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ success: false, message: "Invalid or missing items." });
@@ -953,6 +951,17 @@ router.post("/later-order", async (req, res) => {
             await db.query(couponQuery, [ocID, orID, couponCode]);
         }
 
+        if (dvStatus === "Delivery") {
+            const dvID = `DLV_${Date.now()}`;
+            const deliveryQuery = `
+                INSERT INTO delivery (dv_id, orID, address, district, c_ID, status, schedule_Date, type, driverBalance)
+                VALUES (?, ?, ?, ?, ?, 'Pending', ?, ?, 0)`;
+
+            const addressToUse = isAddressChanged ? newAddress : address;
+            await db.query(deliveryQuery, [dvID, orID, addressToUse, district, Cust_id, expectedDate, dvtype]);
+        }
+
+
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
         if (advance1 > 0) {
@@ -990,12 +999,32 @@ router.post("/later-order", async (req, res) => {
             }            
 
             // Insert into order_payment
+            // await db.query(
+            //     `INSERT INTO order_payment 
+            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
+            //     VALUES 
+            //         (?, ?, ?, NOW(), ?, ?, ?, ?)`,
+            //     [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
+            // );
+
             await db.query(
                 `INSERT INTO order_payment 
-                    (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable) 
+                    (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable, c_ID, balance, otherCharges, fullPaidAmount) 
                 VALUES 
-                    (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-                [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable]
+                    (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    op_ID,
+                    orID,
+                    advance1,
+                    orderStatus,
+                    parseFloat(totalItemPrice) || 0,
+                    stID,
+                    issuable,
+                    Cust_id,
+                    balance1,
+                    0,  // otherCharges
+                    advance1 // fullPaidAmount - assuming it's same as advance1 here
+                ]
             );
 
             // Handle Payment Types
@@ -1494,7 +1523,6 @@ router.post("/customer", async (req, res) => {
     }
 });
 
-
 // Get Customer Details 
 router.get("/customer-details&orders", async (req, res) => {
     const { c_ID } = req.query;
@@ -1612,18 +1640,17 @@ router.get("/accept-order-details", async (req, res) => {
             return res.status(400).json({ success: false, message: "Order ID is required" });
         }
 
-        // 1️⃣ Fetch Order Info with Customer and Sales Team Details
+        // 1️⃣ Fetch Order Info
         const orderQuery = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, c.title, c.FtName, c.SrName, c.address, c.contact1, c.contact2,o.netTotal,
                 o.advance, o.balance, o.payStatus, o.orStatus, o.delStatus, o.delPrice, o.discount, o.total,o.specialdic,
                 o.ordertype, o.expectedDate, o.specialNote, s.stID, e.name AS salesEmployeeName
             FROM Orders o
-                     LEFT JOIN Customer c ON o.c_ID = c.c_ID
-                     LEFT JOIN sales_team s ON o.stID = s.stID
-                     LEFT JOIN Employee e ON s.E_Id = e.E_Id
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID
+            LEFT JOIN sales_team s ON o.stID = s.stID
+            LEFT JOIN Employee e ON s.E_Id = e.E_Id
             WHERE o.OrID = ?`;
-
         const [orderResult] = await db.query(orderQuery, [orID]);
         if (orderResult.length === 0) {
             return res.status(404).json({ success: false, message: "Order not found" });
@@ -1638,37 +1665,33 @@ router.get("/accept-order-details", async (req, res) => {
                 i.price AS unitPrice,
                 i.bookedQty, i.availableQty, i.stockQty
             FROM Order_Detail od
-                     JOIN Item i ON od.I_Id = i.I_Id
+            JOIN Item i ON od.I_Id = i.I_Id
             WHERE od.orID = ?`;
-
         const [itemsResult] = await db.query(itemsQuery, [orID]);
 
         // 3️⃣ Fetch Booked Items
         const bookedItemsQuery = `
             SELECT bi.I_Id, i.I_name, bi.qty
             FROM booked_item bi
-                     JOIN Item i ON bi.I_Id = i.I_Id
+            JOIN Item i ON bi.I_Id = i.I_Id
             WHERE bi.orID = ?`;
-
         const [bookedItemsResult] = await db.query(bookedItemsQuery, [orID]);
-        console.log(bookedItemsResult);
 
         // 4️⃣ Fetch Accepted Orders
         const acceptedOrdersQuery = `
             SELECT ao.I_Id, i.I_name, ao.itemReceived, ao.status
             FROM accept_orders ao
-                     JOIN Item i ON ao.I_Id = i.I_Id
+            JOIN Item i ON ao.I_Id = i.I_Id
             WHERE ao.orID = ?`;
-
         const [acceptedOrdersResult] = await db.query(acceptedOrdersQuery, [orID]);
 
-        // 5️⃣ Format Customer Name with Title
+        // 5️⃣ Format Customer Name
         const customerName = [orderData.title, orderData.FtName, orderData.SrName].filter(Boolean).join(" ");
 
-        // 6️⃣ Initialize Response Object
+        // 6️⃣ Base Order Object
         const orderResponse = {
             orderId: orderData.OrID,
-            orderDate:formatDate(orderData.orDate),
+            orderDate: formatDate(orderData.orDate),
             customerId: orderData.c_ID,
             customerName: customerName,
             address: orderData.address,
@@ -1688,28 +1711,22 @@ router.get("/accept-order-details", async (req, res) => {
             expectedDeliveryDate: formatDate(orderData.expectedDate),
             specialNote: orderData.specialNote,
             salesTeam: orderData.salesEmployeeName ? { employeeName: orderData.salesEmployeeName } : null,
-            items: itemsResult.map(item => {
-                const { qty, unitPrice, unitDiscount } = item;
-                const amountBeforeDiscount = unitPrice * qty;
-                const totalDiscountAmount = unitDiscount * qty;
-                const finalAmount = item.tprice;
-                return {
-                    id: item.id, // <-- Include the ID here
-                    itemId: item.I_Id,
-                    itemName: item.I_name,
-                    color: item.color,
-                    quantity: qty,
-                    unitPrice: unitPrice,
-                    discount: unitDiscount,
-                    amountBeforeDiscount: amountBeforeDiscount,
-                    totalDiscountAmount: totalDiscountAmount,
-                    amount: finalAmount,
-                    booked: item.bookedQty > 0,
-                    bookedQuantity: item.bookedQty,
-                    availableQuantity: item.availableQty,
-                    stockQuantity: item.stockQty
-                };
-            }),
+            items: itemsResult.map(item => ({
+                id: item.id,
+                itemId: item.I_Id,
+                itemName: item.I_name,
+                color: item.color,
+                quantity: item.qty,
+                unitPrice: item.unitPrice,
+                discount: item.unitDiscount,
+                amountBeforeDiscount: item.unitPrice * item.qty,
+                totalDiscountAmount: item.unitDiscount * item.qty,
+                amount: item.tprice,
+                booked: item.bookedQty > 0,
+                bookedQuantity: item.bookedQty,
+                availableQuantity: item.availableQty,
+                stockQuantity: item.stockQty
+            })),
             bookedItems: bookedItemsResult.map(item => ({
                 itemId: item.I_Id,
                 itemName: item.I_name,
@@ -1723,15 +1740,13 @@ router.get("/accept-order-details", async (req, res) => {
             }))
         };
 
-        // 7️⃣ Fetch Delivery Info If Order is for Delivery
+        // 7️⃣ If Delivery, Fetch Delivery Info
         if (orderData.delStatus === "Delivery") {
             const deliveryQuery = `
                 SELECT dv_id, address, district, status, schedule_Date, delivery_Date
                 FROM delivery
                 WHERE orID = ?`;
-
             const [deliveryResult] = await db.query(deliveryQuery, [orID]);
-
             if (deliveryResult.length > 0) {
                 const deliveryData = deliveryResult[0];
                 orderResponse.deliveryInfo = {
@@ -1744,6 +1759,29 @@ router.get("/accept-order-details", async (req, res) => {
                 };
             }
         }
+
+        // 8️⃣ Fetch Payment History
+        const paymentQuery = `
+            SELECT op_ID, amount, netTotal, or_status, stID, dateTime, otherCharges,
+                   fullPaidAmount, issuable, c_ID, balance
+            FROM order_payment
+            WHERE orID = ?
+            ORDER BY dateTime ASC`;
+        const [paymentResult] = await db.query(paymentQuery, [orID]);
+
+        orderResponse.paymentHistory = paymentResult.map(p => ({
+            paymentId: p.op_ID,
+            amount: p.amount,
+            netTotal: p.netTotal,
+            orderStatus: p.or_status,
+            salesTeamId: p.stID,
+            dateTime: formatDateTime(p.dateTime),
+            otherCharges: p.otherCharges,
+            fullPaidAmount: p.fullPaidAmount,
+            issuable: p.issuable,
+            customerId: p.c_ID,
+            balance: p.balance
+        }));
 
         return res.status(200).json({
             success: true,
@@ -1760,6 +1798,7 @@ router.get("/accept-order-details", async (req, res) => {
         });
     }
 });
+
 
 // Get Details of isssued order
 router.get("/issued-order-details", async (req, res) => {
@@ -2661,7 +2700,6 @@ router.get("/orders-Processing", async (req, res) => {
         return res.status(500).json({ message: "Error fetching Processing orders", error: error.message });
     }
 });
-
 
 // Get all orders by status= completed & specific sale team
 router.get("/orders-Processing-stid", async (req, res) => {
@@ -4314,7 +4352,7 @@ router.put("/update-invoice", async (req, res) => {
 
         // 🔍 Fetch order details
         const [orderResult] = await db.query(
-            `SELECT OrID, orStatus, stID FROM Orders WHERE OrID = ?`,
+            `SELECT OrID, orStatus, stID, c_ID FROM Orders WHERE OrID = ?`,
             [orID]
         );
 
@@ -4325,7 +4363,7 @@ router.put("/update-invoice", async (req, res) => {
             });
         }
 
-        const { orStatus, stID } = orderResult[0] || {};
+        const { orStatus, stID, c_ID } = orderResult[0];
 
         // 🔄 Determine Payment Status
         let payStatus = "Pending";
@@ -4347,19 +4385,33 @@ router.put("/update-invoice", async (req, res) => {
             orID,
         ]);
 
-        // 🛑 If pickup, delete from delivery
+        // 🛑 If pickup, remove delivery record
         if (isPickup) {
             await db.query(`DELETE FROM delivery WHERE orID = ?`, [orID]);
         }
 
-        // 💰 Add advance payment (if any)
+        // 💰 Insert order payment + cash record
         if (addedAdvance > 0) {
-            const netAdvance = totalAdvance - updatedDeliveryCharge;
+            const fullPaid = parseFloat(previousAdvance || 0) + parseFloat(addedAdvance || 0);
 
             await db.query(
-                `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID)
-                 VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
-                [op_ID, orID, addedAdvance, orStatus, netAdvance, stID]
+                `INSERT INTO order_payment (
+                    op_ID, orID, amount, dateTime, or_status, netTotal, stID,
+                    fullPaidAmount, balance, c_ID, issuable
+                )
+                VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    op_ID,
+                    orID,
+                    addedAdvance,
+                    orStatus,
+                    netTotal,
+                    stID,
+                    fullPaid,
+                    balance,
+                    c_ID,
+                    'Now' // or another value depending on logic
+                ]
             );
 
             await db.query(
@@ -4383,6 +4435,7 @@ router.put("/update-invoice", async (req, res) => {
         });
     }
 });
+
 
 // Fetch Accept orders in booked-unbooked
 router.get("/orders-accept", async (req, res) => {
@@ -9995,5 +10048,16 @@ const parseDate = (dateStr) => {
 const formatDate = (date) => {
     return date ? new Date(date).toLocaleDateString("en-GB") : null;
 };
+const formatDateTime = (datetime) => {
+    return new Date(datetime).toLocaleString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+};
+
 
 export default router;
