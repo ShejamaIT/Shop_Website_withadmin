@@ -60,13 +60,15 @@ const TableCanceled = ({ refreshKey }) => {
             const contact1 = order.contact1 ? order.contact1.toString() : "";
             const contact2 = order.contact2 ? order.contact2.toString() : "";
             const stId = order.stID ? order.stID.toString() : "";
+            const employeeName = order.employeeName ? order.employeeName.toLowerCase() : ""; // Get employee name and convert to lowercase
 
-            // Match the search query with Order ID, Contact1, Contact2, or Staff ID (if ADMIN)
+            // Match the search query with Order ID, Contact1, Contact2, Staff ID (if ADMIN), or Employee Name (if ADMIN)
             const matchesSearch =
                 order.OrID.toString().toLowerCase().includes(query) ||
                 contact1.toLowerCase().includes(query) ||
                 contact2.toLowerCase().includes(query) ||
-                (localStorage.getItem("type") === "ADMIN" && stId.toLowerCase().includes(query));
+                (localStorage.getItem("type") === "ADMIN" && stId.toLowerCase().includes(query)) ||
+                (localStorage.getItem("type") === "ADMIN" && employeeName.includes(query)); // Add condition for employeeName
 
             // Match the selected order type
             const matchesType = order.ordertype === selectedType;
@@ -76,6 +78,7 @@ const TableCanceled = ({ refreshKey }) => {
 
         setFilteredOrders(filtered);
     };
+
 
     return (
         <div className="table-container">
