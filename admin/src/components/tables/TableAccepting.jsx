@@ -55,19 +55,20 @@ const TableAccepting = ({ refreshKey }) => {
             const contact1 = order.contact1 ? order.contact1.toString() : "";
             const contact2 = order.contact2 ? order.contact2.toString() : "";
             const stId = order.sT_ID ? order.sT_ID.toString() : "";
+            const employeeName = order.employeeName ? order.employeeName.toLowerCase() : ""; // Get employee name and convert to lowercase
 
             const matchesSearch =
                 order.OrID.toString().toLowerCase().includes(searchLower) ||
                 contact1.toLowerCase().includes(searchLower) ||
                 contact2.toLowerCase().includes(searchLower) ||
-                (type === "ADMIN" && stId.toLowerCase().includes(searchLower)); // 🔍 Only Admins search by stID
+                (type === "ADMIN" && stId.toLowerCase().includes(searchLower)) || // 🔍 Only Admins search by stID
+                (type === "ADMIN" && employeeName.includes(searchLower)); // 🔍 Admin can also search by employee name
 
             return matchesType && matchesSearch;
         });
 
         setFilteredOrders(filtered);
     };
-
 
     const handleViewOrder = (orderId) => {
         navigate(`/accept-order-detail/${orderId}`);
