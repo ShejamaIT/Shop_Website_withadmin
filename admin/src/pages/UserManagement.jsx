@@ -174,7 +174,7 @@ const UserManagement = () => {
                         {!editMode ? (
                             <Row>
                                 <Col md="6">
-                                    <Button color="warning" block onClick={() => setEditMode(true)}>Edit</Button>
+                                    <Button color="primary" block onClick={() => setEditMode(true)}>Edit</Button>
                                 </Col>
                                 <Col md="6">
                                     <Button color="danger" block onClick={handleDelete}>Delete</Button>
@@ -183,7 +183,7 @@ const UserManagement = () => {
                         ) : (
                             <Row>
                                 <Col md="6">
-                                    <Button color="success" block onClick={handleUpdate}>Save</Button>
+                                    <Button color="primary" block onClick={handleUpdate}>Save</Button>
                                 </Col>
                                 <Col md="6">
                                     <Button color="secondary" block onClick={() => setEditMode(false)}>Cancel</Button>
