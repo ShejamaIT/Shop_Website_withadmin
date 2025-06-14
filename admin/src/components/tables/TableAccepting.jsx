@@ -46,20 +46,28 @@ const TableAccepting = ({ refreshKey }) => {
     };
 
     const filterOrders = () => {
+        const type = localStorage.getItem("type"); // Check user type
+
         const filtered = orders.filter((order) => {
             const matchesType = order.ordertype === orderType;
+            const searchLower = searchQuery.toLowerCase();
+
             const contact1 = order.contact1 ? order.contact1.toString() : "";
             const contact2 = order.contact2 ? order.contact2.toString() : "";
+            const stId = order.sT_ID ? order.sT_ID.toString() : "";
+
             const matchesSearch =
-                order.OrID.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-                contact1.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                contact2.toLowerCase().includes(searchQuery.toLowerCase());
+                order.OrID.toString().toLowerCase().includes(searchLower) ||
+                contact1.toLowerCase().includes(searchLower) ||
+                contact2.toLowerCase().includes(searchLower) ||
+                (type === "ADMIN" && stId.toLowerCase().includes(searchLower)); // 🔍 Only Admins search by stID
 
             return matchesType && matchesSearch;
         });
 
         setFilteredOrders(filtered);
     };
+
 
     const handleViewOrder = (orderId) => {
         navigate(`/accept-order-detail/${orderId}`);
