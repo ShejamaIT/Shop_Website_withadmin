@@ -77,15 +77,15 @@ const TablePending = ({ refreshKey }) => {
             <h4 className="table-title">Pending Orders</h4>
 
             {/* Order Type Radio */}
-            <div className="radio-group">
-                <label>
+            <div style={{ marginBottom: "15px" }}>
+                <label style={{ marginRight: "20px" }}>
                     <input
                         type="radio"
                         value="Walking"
                         checked={selectedType === "Walking"}
                         onChange={(e) => setSelectedType(e.target.value)}
                     />
-                    Walking
+                    Walking Orders
                 </label>
                 <label>
                     <input
@@ -94,9 +94,32 @@ const TablePending = ({ refreshKey }) => {
                         checked={selectedType === "On-site"}
                         onChange={(e) => setSelectedType(e.target.value)}
                     />
-                    On-site
+                    On-site Orders 
                 </label>
             </div>
+            
+             {/* <div style={{ marginBottom: "15px" }}>
+                <label style={{ marginRight: "20px" }}>
+                    <input
+                        type="radio"
+                        name="orderType"
+                        value="Walking"
+                        checked={orderType === "Walking"}
+                        onChange={() => setOrderType("Walking")}
+                    />{" "}
+                    Walking Orders
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="orderType"
+                        value="On-site"
+                        checked={orderType === "On-site"}
+                        onChange={() => setOrderType("On-site")}
+                    />{" "}
+                    On-site Orders
+                </label>
+            </div> */}
 
             {/* Search Box */}
             <input
