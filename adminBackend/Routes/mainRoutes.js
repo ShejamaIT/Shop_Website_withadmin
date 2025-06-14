@@ -212,7 +212,7 @@ router.post("/orders", async (req, res) => {
         let Cust_id = c_ID;
         let Occupation = "-", WorkPlace = "-", tType = "-";
         let stID = null;
-        if (type === 'Walking' || type === 'On-site') {
+        if (type === 'Walking' || type === 'On site') {
             Occupation = occupation;
             WorkPlace = workPlace;
         } else {
@@ -286,7 +286,7 @@ router.post("/orders", async (req, res) => {
 
         let orderStatus = null;
 
-        if (type === 'On-site') {
+        if (type === 'On site') {
             orderStatus = "Pending";
         } else {
             // ✅ Set order status for Walking to 'Delivered' 0r 'Issued'
@@ -403,15 +403,6 @@ router.post("/orders", async (req, res) => {
                     ['Order Loss', orID, finalCustomerBalance]
                 );
             }            
-
-            // Insert into order_payment
-            // const [payTypeResult] =  await db.query(
-            //     `INSERT INTO order_payment 
-            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
-            //     VALUES 
-            //         (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-            //     [op_ID,orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
-            // );
 
             if (!op_ID || !orID || isNaN(advance1) || !stID || !issuable) {
                 return res.status(400).json({ message: "Missing or invalid order payment fields" });
@@ -694,7 +685,7 @@ router.post("/later-order", async (req, res) => {
         let Occupation = "-", WorkPlace = "-", tType = "-";
         let stID = null;
 
-        if (type === 'Walking' || type === 'On-site') {
+        if (type === 'Walking' || type === 'On site') {
             Occupation = occupation;
             WorkPlace = workPlace;
         } else {
@@ -765,10 +756,11 @@ router.post("/later-order", async (req, res) => {
         }
         let orderStatus = null;
 
-        if (type === 'On-site') {
+        if (type === 'On site') {
+            // ✅ Always set On-site orders as Pending
             orderStatus = "Pending";
         } else {
-            // ✅ Determine order status based on items
+            // 🛠 For other types, determine dynamically
             const hasProduction = processedItems.some(item => item.status === "Production");
             orderStatus = hasProduction ? "Processing" : "Accepted";
         }
