@@ -160,6 +160,24 @@ const UpdateEmployee = () => {
             toast.error(err.message);
         }
     };
+    const handleDelete = async () => {
+        console.log(selectedId);
+            if (!selectedId) return;
+            if (!window.confirm("Are you sure you want to delete this user?")) return;
+    
+            try {
+                const res = await fetch(`http://localhost:5001/api/admin/main/employees/${selectedId}`, {
+                    method: "DELETE",
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                toast.success("Employee deleted");
+                fetchEmployees();
+            } catch (err) {
+                toast.error("Error deleting user");
+            }
+        };
+    
 
     return (
         <Container>
@@ -401,9 +419,14 @@ const UpdateEmployee = () => {
                     </>
                 )}
 
-                <Button color="primary" type="submit" disabled={!selectedId}>
-                    Update Employee
-                </Button>
+                <Row>
+                    <Col md="6">
+                        <Button color="primary" type="submit" disabled={!selectedId}>Update Employee</Button>
+                    </Col>
+                    <Col md="6">
+                        <Button color="danger" block onClick={handleDelete}>Delete Employee</Button>
+                    </Col>
+                </Row>
             </Form>
         </Container>
     );
