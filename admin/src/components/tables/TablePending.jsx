@@ -8,16 +8,21 @@ const TablePending = ({ refreshKey }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedType, setSelectedType] = useState("Walking"); // Radio state
+    const [selectedType, setSelectedType] = useState("Walking");
     const navigate = useNavigate();
+    const userType = localStorage.getItem("type");
 
     useEffect(() => {
         fetchOrders();
     }, [refreshKey]);
 
+    useEffect(() => {
+        applyFilters();
+    }, [searchQuery, selectedType, orders]);
+
     const fetchOrders = async () => {
         setLoading(true);
-        const type = localStorage.getItem("type");
+        const type = userType;
         const Eid = localStorage.getItem("EID");
 
         try {
@@ -30,8 +35,7 @@ const TablePending = ({ refreshKey }) => {
             if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch`);
 
             const data = await response.json();
-            setOrders(data.data);
-            setFilteredOrders(data.data);
+            setOrders(data.data || []);
         } catch (err) {
             setError(err.message || "Unexpected error occurred.");
         } finally {
@@ -46,32 +50,33 @@ const TablePending = ({ refreshKey }) => {
         navigate(`/order-detail/${orderId}`);
     };
 
-    const handleSearch = (event) => {
-        const query = event.target.value.toLowerCase();
-        setSearchQuery(query);
+    const applyFilters = () => {
+        const query = searchQuery.toLowerCase();
 
-        const filteredData = orders.filter((order) => {
+        const filtered = orders.filter((order) => {
+            const matchesType = order.ordertype === selectedType;
+
             const contact1 = order.contact1 ? order.contact1.toString() : "";
             const contact2 = order.contact2 ? order.contact2.toString() : "";
+            const stId = order.stID ? order.stID.toString() : "";
 
-            return (
+            const matchesSearch =
                 order.OrID.toString().toLowerCase().includes(query) ||
                 contact1.toLowerCase().includes(query) ||
-                contact2.toLowerCase().includes(query)
-            );
-        });
-        setFilteredOrders(filteredData);
-    };
+                contact2.toLowerCase().includes(query) ||
+                (userType === "ADMIN" && stId.toLowerCase().includes(query));
 
-    const filteredByType = filteredOrders.filter(
-        (order) => order.ordertype === selectedType
-    );
+            return matchesType && matchesSearch;
+        });
+
+        setFilteredOrders(filtered);
+    };
 
     return (
         <div className="table-container">
             <h4 className="table-title">Pending Orders</h4>
 
-            {/* Radio Buttons */}
+            {/* Order Type Radio */}
             <div className="radio-group">
                 <label>
                     <input
@@ -89,16 +94,16 @@ const TablePending = ({ refreshKey }) => {
                         checked={selectedType === "On-site"}
                         onChange={(e) => setSelectedType(e.target.value)}
                     />
-                    Online
+                    On-site
                 </label>
             </div>
 
             {/* Search Box */}
             <input
                 type="text"
-                placeholder="Search by Order ID or Contact..."
+                placeholder={`Search by Order ID, Contact${userType === "ADMIN" ? ", or Staff ID" : ""}...`}
                 value={searchQuery}
-                onChange={handleSearch}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="search-input"
             />
 
@@ -118,22 +123,22 @@ const TablePending = ({ refreshKey }) => {
                                 <th>Order Status</th>
                                 <th>Delivery Status</th>
                                 <th>Total Price</th>
+                                {userType === "ADMIN" && <th>Staff ID</th>}
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredByType.length === 0 ? (
+                            {filteredOrders.length === 0 ? (
                                 <tr>
                                     <td colSpan="9" className="no-data">
                                         No {selectedType.toLowerCase()} orders found.
                                     </td>
                                 </tr>
                             ) : (
-                                filteredByType.map((order) => (
+                                filteredOrders.map((order) => (
                                     <tr key={order.OrID}>
                                         <td>{order.OrID}</td>
                                         <td>{formatDate(order.orDate)}</td>
-
                                         <td>{formatDate(order.expectedDeliveryDate)}</td>
                                         <td>{order.customer}</td>
                                         <td>
@@ -143,6 +148,7 @@ const TablePending = ({ refreshKey }) => {
                                         </td>
                                         <td>{order.dvStatus}</td>
                                         <td>Rs.{order.totPrice.toFixed(2)}</td>
+                                        {userType === "ADMIN" && <td>{order.stID || "N/A"}</td>}
                                         <td>
                                             <button
                                                 className="view-btn"
