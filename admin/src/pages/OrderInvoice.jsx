@@ -1155,16 +1155,18 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     };
     const handleAddItem = async (newItem) => {
         try {
-            // Resolve actual material value
-            const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
-
             // Validate required fields
+            if (!newItem.I_Id || !newItem.I_name || !newItem.Ca_Id || !newItem.price || !newItem.cost || !newItem.s_Id || !newItem.minQty || !newItem.startStock) {
+                toast.error("⚠️ Please fill all required fields.");
+                return;
+            }
             if (!newItem.img) {
-                toast.error("Main image is required.");
+                toast.error("⚠️ Main image is required.");
                 return;
             }
 
-            // Prepare FormData for item upload
+            const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
+
             const formDataToSend = new FormData();
             formDataToSend.append("I_Id", newItem.I_Id);
             formDataToSend.append("I_name", newItem.I_name);
@@ -1186,12 +1188,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             if (newItem.img2) formDataToSend.append("img2", newItem.img2);
             if (newItem.img3) formDataToSend.append("img3", newItem.img3);
 
-            // Calculate total cost for initial stock
             const cost = Number(newItem.cost);
             const quantity = Number(newItem.startStock);
             const ItemTotal = cost * quantity;
 
-            // Prepare order data for stock entry
             const orderData = {
                 purchase_id: PurchaseId,
                 supplier_id: newItem.s_Id,
@@ -1206,11 +1206,10 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                     color: newItem.color || "N/A",
                     unit_price: newItem.price,
                     price: cost,
-                    quantity: quantity,
+                    quantity,
                     total_price: ItemTotal.toFixed(2),
                 },
             };
-            console.log(orderData);
 
             // Submit item creation
             const submitResponse = await fetch("http://localhost:5001/api/admin/main/add-item", {
@@ -1219,7 +1218,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             });
 
             const submitData = await submitResponse.json();
-
             if (!submitResponse.ok) {
                 toast.error(submitData.message || "❌ Failed to add item.");
                 return;
@@ -1235,15 +1233,13 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             });
 
             const stockResult = await stockResponse.json();
-
             if (!stockResponse.ok) {
                 toast.error(stockResult.message || "❌ Failed to save purchase.");
                 return;
             }
 
             toast.success("✅ Purchase saved successfully!");
-            fetchItems(); // Optional chaining if fetchItems is passed from props/context
-
+            fetchItems?.(); // Optional chaining in case it's undefined
         } catch (error) {
             console.error("❌ Error submitting form:", error);
             toast.error("❌ An error occurred while adding the item.");
@@ -1515,8 +1511,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         // Logic to open modal to add a new account number
         // Example: setShowAccountModal(true);
     };
-
-
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
