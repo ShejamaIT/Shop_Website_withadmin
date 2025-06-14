@@ -59,12 +59,14 @@ const TablePending = ({ refreshKey }) => {
             const contact1 = order.contact1 ? order.contact1.toString() : "";
             const contact2 = order.contact2 ? order.contact2.toString() : "";
             const stId = order.stID ? order.stID.toString() : "";
+            const employeeName = order.employeeName ? order.employeeName.toLowerCase() : ""; // Added employeeName check
 
             const matchesSearch =
                 order.OrID.toString().toLowerCase().includes(query) ||
                 contact1.toLowerCase().includes(query) ||
                 contact2.toLowerCase().includes(query) ||
-                (userType === "ADMIN" && stId.toLowerCase().includes(query));
+                (userType === "ADMIN" && stId.toLowerCase().includes(query)) ||
+                (userType === "ADMIN" && employeeName.includes(query)); // Added employee name search for ADMIN
 
             return matchesType && matchesSearch;
         });
@@ -97,29 +99,6 @@ const TablePending = ({ refreshKey }) => {
                     On-site Orders 
                 </label>
             </div>
-            
-             {/* <div style={{ marginBottom: "15px" }}>
-                <label style={{ marginRight: "20px" }}>
-                    <input
-                        type="radio"
-                        name="orderType"
-                        value="Walking"
-                        checked={orderType === "Walking"}
-                        onChange={() => setOrderType("Walking")}
-                    />{" "}
-                    Walking Orders
-                </label>
-                <label>
-                    <input
-                        type="radio"
-                        name="orderType"
-                        value="On-site"
-                        checked={orderType === "On-site"}
-                        onChange={() => setOrderType("On-site")}
-                    />{" "}
-                    On-site Orders
-                </label>
-            </div> */}
 
             {/* Search Box */}
             <input
