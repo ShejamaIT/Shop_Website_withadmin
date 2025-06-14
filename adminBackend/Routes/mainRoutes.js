@@ -1849,7 +1849,6 @@ router.get("/accept-order-details", async (req, res) => {
     }
 });
 
-
 // Get Details of isssued order
 router.get("/issued-order-details", async (req, res) => {
     try {
@@ -2437,15 +2436,18 @@ router.get("/item-details", async (req, res) => {
 // Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
     try {
-        // Join Orders with Customer to get contact numbers
+        // Join Orders with Customer and Sales Team to get employee name
         const query = `
             SELECT 
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, 
                 o.delPrice, o.discount, o.total, o.advance, o.balance, o.payStatus,
                 o.stID, o.expectedDate,
-                c.contact1, c.contact2
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Getting employee name from the Employee table
             FROM Orders o
             JOIN Customer c ON o.c_ID = c.c_ID
+            JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
+            JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
             WHERE o.orStatus = 'pending'
         `;
 
@@ -2471,7 +2473,8 @@ router.get("/orders-pending", async (req, res) => {
             stID: order.stID,
             expectedDeliveryDate: order.expectedDate,
             contact1: order.contact1,
-            contact2: order.contact2
+            contact2: order.contact2,
+            employeeName: order.employeeName,  // Adding employee name to the response
         }));
 
         return res.status(200).json({
@@ -2601,16 +2604,20 @@ function categorizeOrders(orders) {
 
 router.get("/orders-accepting", async (req, res) => {
     try {
+        // Query to fetch accepted orders and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus,
                 o.delPrice, o.discount, o.advance, o.balance, o.payStatus,
                 o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
-                c.contact1, c.contact2
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Join with Employee table to get the employee's name
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
+            JOIN sales_team st ON o.stID = st.stID  // Join with sales_team to get the stID
+            JOIN Employee e ON st.E_Id = e.E_Id  // Join with Employee to get the employee's name
             WHERE o.orStatus = 'Accepted'
         `;
 
@@ -2622,6 +2629,12 @@ router.get("/orders-accepting", async (req, res) => {
 
         const { bookedOrders, unbookedOrders } = categorizeOrders(orders);
 
+        // Add employee name to each order data
+        const formattedOrders = [...bookedOrders, ...unbookedOrders].map(order => ({
+            ...order,
+            employeeName: order.employeeName  // Include employee name in the final response
+        }));
+
         return res.status(200).json({
             message: "Accepted orders found.",
             data: { bookedOrders, unbookedOrders }
@@ -2632,6 +2645,7 @@ router.get("/orders-accepting", async (req, res) => {
         return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
     }
 });
+
 
 //Get all orders by status= accepting & specific sale team
 router.get("/orders-accepting-stid", async (req, res) => {
@@ -2683,17 +2697,20 @@ router.get("/orders-accepting-stid", async (req, res) => {
 // Get all orders by status= Processing
 router.get("/orders-Processing", async (req, res) => {
     try {
-        // Query to fetch processing orders with customer contacts
+        // Query to fetch processing orders with customer contacts and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Getting the employee name from the Employee table
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
+            JOIN sales_team st ON o.stID = st.stID  // Join with sales_team to get stID
+            JOIN Employee e ON st.E_Id = e.E_Id  // Join with Employee to get employee name
             WHERE o.orStatus = 'Processing'
         `;
 
@@ -2727,7 +2744,8 @@ router.get("/orders-Processing", async (req, res) => {
                     contact1: order.contact1,
                     contact2: order.contact2,
                     acceptanceStatus: "Complete", // default
-                    acceptanceStatuses: []
+                    acceptanceStatuses: [],
+                    employeeName: order.employeeName,  // Adding employee name to each order
                 };
             }
 
@@ -2840,17 +2858,20 @@ router.get("/orders-Processing-stid", async (req, res) => {
 // Get all orders by status= completed
 router.get("/orders-completed", async (req, res) => {
     try {
-        // Query to fetch completed orders with customer contact information
+        // Query to fetch completed orders with customer contact information and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Getting the employee name from the Employee table
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
+            JOIN sales_team st ON o.stID = st.stID  // Join with sales_team to get stID
+            JOIN Employee e ON st.E_Id = e.E_Id  // Join with Employee to get employee name
             WHERE o.orStatus = 'Completed'
         `;
 
@@ -2883,8 +2904,9 @@ router.get("/orders-completed", async (req, res) => {
                     itemReceived: order.itemReceived,
                     contact1: order.contact1,
                     contact2: order.contact2,
-                    acceptanceStatus: "Complete",
-                    acceptanceStatuses: []
+                    acceptanceStatus: "Complete", // default
+                    acceptanceStatuses: [],
+                    employeeName: order.employeeName,  // Adding employee name to each order
                 };
             }
 
@@ -3000,17 +3022,20 @@ router.get("/orders-completed-stid", async (req, res) => {
 // Get all orders by status= issued
 router.get("/orders-issued", async (req, res) => {
     try {
-        // Query to fetch issued orders with their acceptance status from accept_orders table
+        // Query to fetch issued orders with their acceptance status from accept_orders table and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Adding employee name
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
+            JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
+            JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
             WHERE o.orStatus = 'Issued'
         `;
 
@@ -3045,7 +3070,8 @@ router.get("/orders-issued", async (req, res) => {
                     contact1: order.contact1,
                     contact2: order.contact2,
                     acceptanceStatus: "Complete", // Default status is Complete
-                    acceptanceStatuses: [] // Track individual item statuses
+                    acceptanceStatuses: [], // Track individual item statuses
+                    employeeName: order.employeeName  // Include employee name
                 };
             }
 
@@ -3061,7 +3087,7 @@ router.get("/orders-issued", async (req, res) => {
         // Convert the grouped orders into an array
         const formattedOrders = Object.values(groupedOrders);
 
-        // Send the formatted orders with their acceptance status as a JSON response
+        // Send the formatted orders with their acceptance status and employee name as a JSON response
         return res.status(200).json({
             message: "Issued orders found.",
             data: formattedOrders,
@@ -3164,17 +3190,20 @@ router.get("/orders-issued-stid", async (req, res) => {
 // Get all orders by status= delivered
 router.get("/orders-delivered", async (req, res) => {
     try {
-        // Fetch delivered orders with acceptance statuses and customer contacts
+        // Query to fetch delivered orders with acceptance statuses, customer contacts, and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2 
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Adding employee name
             FROM Orders o
-                LEFT JOIN accept_orders ao ON o.OrID = ao.orID
-                LEFT JOIN Customer c ON o.c_ID = c.c_ID  
+            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID
+            LEFT JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
+            LEFT JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
             WHERE o.orStatus = 'Delivered'
         `;
 
@@ -3190,7 +3219,7 @@ router.get("/orders-delivered", async (req, res) => {
             const {
                 OrID, orDate, c_ID, ordertype, orStatus, delStatus, delPrice,
                 discount, advance, balance, payStatus, total, stID, expectedDeliveryDate,
-                itemReceived, acceptanceStatus, contact1, contact2
+                itemReceived, acceptanceStatus, contact1, contact2, employeeName
             } = order;
 
             if (!groupedOrders[OrID]) {
@@ -3212,7 +3241,8 @@ router.get("/orders-delivered", async (req, res) => {
                     contact1,
                     contact2,
                     acceptanceStatuses: [],
-                    acceptanceStatus: "Complete"
+                    acceptanceStatus: "Complete",
+                    employeeName  // Include employee name
                 };
             }
 
@@ -3332,18 +3362,21 @@ router.get("/orders-delivered-stid", async (req, res) => {
 // Get all orders by status= delivered & specific sale team
 router.get("/orders-returned", async (req, res) => {
     try {
-        // Query to fetch returned orders with their acceptance status, return reason, and customer contact numbers
+        // Query to fetch returned orders with their acceptance status, return reason, customer contact numbers, and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
                 ro.detail AS returnReason,
-                c.contact1, c.contact2  -- Add customer contact numbers
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Adding employee name
             FROM Orders o
-                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
-                     LEFT JOIN return_orders ro ON o.OrID = ro.OrID
-                     LEFT JOIN customers c ON o.c_ID = c.c_ID  -- Join customers table to fetch contact numbers
+            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            LEFT JOIN return_orders ro ON o.OrID = ro.OrID
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID  // Join customers table to fetch contact numbers
+            LEFT JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
+            LEFT JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
             WHERE o.orStatus = 'Returned'
         `;
 
@@ -3379,7 +3412,8 @@ router.get("/orders-returned", async (req, res) => {
                     acceptanceStatus: "Complete", // Default status is Complete
                     contact1: order.contact1,  // Add contact1 to the response
                     contact2: order.contact2,  // Add contact2 to the response
-                    acceptanceStatuses: [] // Track individual item statuses
+                    acceptanceStatuses: [], // Track individual item statuses
+                    employeeName: order.employeeName // Include employee name
                 };
             }
 
@@ -3501,18 +3535,21 @@ router.get("/orders-returned-stid", async (req, res) => {
 // Get all orders by status= canceled
 router.get("/orders-canceled", async (req, res) => {
     try {
-        // Query to fetch canceled orders with their acceptance status, return reason, and customer contact numbers
+        // Query to fetch canceled orders with their acceptance status, return reason, customer contact numbers, and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
                 ro.detail AS returnReason,
-                c.contact1, c.contact2  -- Add customer contact numbers
+                c.contact1, c.contact2,
+                e.name AS employeeName  // Adding employee name
             FROM Orders o
-                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
-                     LEFT JOIN return_orders ro ON o.OrID = ro.OrID
-                     LEFT JOIN customers c ON o.c_ID = c.c_ID  -- Join customers table to fetch contact numbers
+            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+            LEFT JOIN return_orders ro ON o.OrID = ro.OrID
+            LEFT JOIN Customer c ON o.c_ID = c.c_ID  // Join customers table to fetch contact numbers
+            LEFT JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
+            LEFT JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
             WHERE o.orStatus = 'Cancelled'
         `;
 
@@ -3548,7 +3585,8 @@ router.get("/orders-canceled", async (req, res) => {
                     contact1: order.contact1,  // Add contact1 to the response
                     contact2: order.contact2,  // Add contact2 to the response
                     acceptanceStatus: "Complete", // Default status is Complete
-                    acceptanceStatuses: [] // Track individual item statuses
+                    acceptanceStatuses: [], // Track individual item statuses
+                    employeeName: order.employeeName // Include employee name
                 };
             }
 
