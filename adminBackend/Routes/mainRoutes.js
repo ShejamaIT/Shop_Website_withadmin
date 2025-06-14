@@ -7165,7 +7165,8 @@ router.post("/employees", upload.single("lincenseimg"), async (req, res) => {
     try {
         const {
             name, address, nic, dob, contact, job, basic,
-            type, orderTarget, issuedTarget, lincenseDate,monthlyTarget,dailyTarget
+            type, orderTarget, issuedTarget, lincenseDate,
+            monthlyTarget, dailyTarget
         } = req.body;
 
         const lincenseimg = req.file ? req.file.buffer : null;
@@ -7173,33 +7174,44 @@ router.post("/employees", upload.single("lincenseimg"), async (req, res) => {
         if (!name || !address || !nic || !dob || !contact || !job || !basic) {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required except targets/license (Sales or Driver)."
+                message: "Required fields missing",
             });
         }
 
         const E_Id = await generateNewId("Employee", "E_Id", "E");
 
-        const sql = `INSERT INTO Employee (E_Id, name, address, nic, dob, contact, job, basic, type)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        await db.query(sql, [E_Id, name, address, nic, dob, contact, job, basic, type]);
+        await db.query(
+            `INSERT INTO Employee (E_Id, name, address, nic, dob, contact, job, basic, type)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [E_Id, name, address, nic, dob, contact, job, parseFloat(basic), type]
+        );
 
         let Data = null;
 
         if (job === "Sales" && orderTarget && issuedTarget) {
             const stID = await generateNewId("sales_team", "stID", "ST");
-            const sqlSales = `INSERT INTO sales_team (stID, E_Id, orderTarget, issuedTarget, totalOrder, totalIssued)
-                              VALUES (?, ?, ?, ?, '0', '0')`;
-            await db.query(sqlSales, [stID, E_Id, orderTarget, issuedTarget]);
+            await db.query(
+                `INSERT INTO sales_team (stID, E_Id, orderTarget, issuedTarget, totalOrder, totalIssued)
+                 VALUES (?, ?, ?, ?, 0, 0)`,
+                [stID, E_Id, parseFloat(orderTarget), parseFloat(issuedTarget)]
+            );
             Data = { stID, orderTarget, issuedTarget };
         }
 
         if (job === "Driver") {
             const devID = await generateNewId("driver", "devID", "DI");
-
-            const sqlDriver = `INSERT INTO driver (devID, E_ID, balance, lincenseDate, lincense,dailyTarget,monthlyTarget)
-                               VALUES (?, ?, '0', ?, ?)`;
-            await db.query(sqlDriver, [devID, E_Id, lincenseDate, lincenseimg,dailyTarget,monthlyTarget]);
-
+            await db.query(
+                `INSERT INTO driver (devID, E_ID, balance, lincenseDate, lincense, dailyTarget, monthlyTarget)
+                 VALUES (?, ?, 0, ?, ?, ?, ?)`,
+                [
+                    devID,
+                    E_Id,
+                    lincenseDate || null,
+                    lincenseimg || null,
+                    parseFloat(dailyTarget) || 0,
+                    parseFloat(monthlyTarget) || 0,
+                ]
+            );
             Data = { devID, E_Id };
         }
 
@@ -7214,7 +7226,7 @@ router.post("/employees", upload.single("lincenseimg"), async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Error adding employee",
-            details: err.message
+            details: err.message,
         });
     }
 });
@@ -10144,6 +10156,28 @@ router.put("/users/:id", async (req, res) => {
         res.status(500).json({ message: "Failed to update user" });
     }
 });
+
+// Delete emploee
+router.delete("/employees/:id", async (req, res) => {
+    const employeeId = req.params.id;
+
+    try {
+        const [existing] = await db.query("SELECT * FROM Employee WHERE E_Id = ?", [employeeId]);
+
+        if (existing.length === 0) {
+            return res.status(404).json({ message: "Employee not found" });
+        }
+
+        // Foreign key constraints with ON DELETE CASCADE will handle related deletions
+        await db.query("DELETE FROM Employee WHERE E_Id = ?", [employeeId]);
+
+        res.json({ message: "Employee and related records deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting employee:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
 
 // pass sale team value to review in month end
 
