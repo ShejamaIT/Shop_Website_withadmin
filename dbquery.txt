@@ -588,3 +588,13 @@ ALTER TABLE order_payment
 ADD CONSTRAINT fk_order_customer
 FOREIGN KEY (c_ID) REFERENCES Customer(c_ID)
 ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `ord_cheque_pay` CHANGE `status` `status` ENUM('Pass','Return','InHand','') 
+CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'InHand';
+CREATE TABLE ord_Cash_Pay(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    optId INT,
+    amount DOUBLE,
+    CONSTRAINT FOREIGN KEY (optId) REFERENCES ord_Pay_type (optId)
+                                 ON DELETE CASCADE ON UPDATE CASCADE
+);
