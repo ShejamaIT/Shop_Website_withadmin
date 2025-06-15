@@ -197,7 +197,7 @@ router.post("/orders", async (req, res) => {
         FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,
         couponCode, deliveryPrice, discountAmount, district, dvStatus,orderDate,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",
-        phoneNumber = "", specialNote, title, totalItemPrice,issuable,
+        phoneNumber = "", specialNote, title, totalItemPrice,issuable,totalBillPrice,
         dvtype, type, workPlace, t_name, orderType, specialdiscountAmount,previousbalance,
         advance, balance ,payment,subPayment,customerBalanceDecision,finalCustomerBalance,paymentAmount,cashReturn,
         cardPayment={},chequePayment={},cashCardPayment={},tranferPayment={},creditPayment={},combinedChequePayment={},
@@ -266,7 +266,15 @@ router.post("/orders", async (req, res) => {
         const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
         const TotalOrder = parseFloat(totalItemPrice) + parseFloat(deliveryPrice);
         const customerBalance = parseFloat(finalCustomerBalance);
+        const billPrice = parseFloat(totalBillPrice) || 0;
+        const payAmount = parseFloat(paymentAmount);
+        let billBalance = 0;
 
+        if (billPrice === payAmount || billPrice < payAmount) {
+            billBalance = 0;
+        } else if (billPrice > payAmount) {
+            billBalance = billPrice - payAmount;
+        }
 
         const orID = `ORD_${Date.now()}`;
 
@@ -304,7 +312,7 @@ router.post("/orders", async (req, res) => {
             parseFloat(specialdiscountAmount) || 0,
             parseFloat(totalItemPrice) || 0,
             parseFloat(TotalOrder) || 0,
-            stID, expectedDate, specialNote, orderType, advance1, balance1
+            stID, expectedDate, specialNote, orderType, advance1, billBalance
         ];
 
         await db.query(orderQuery, orderParams);
@@ -446,6 +454,12 @@ router.post("/orders", async (req, res) => {
                     `INSERT INTO ord_Pay_type (orID, type, subType) VALUES (?, ?, ?)`,
                     [orID, payment, subPayment]
                 );
+                // Insert into ord_Cash_Pay
+                await db.query(
+                    `INSERT INTO ord_Cash_Pay (optId, amount) VALUES (?, ?)`,
+                    [optId, advance1]
+                );
+
                 // Update the correct order_payment row using op_ID or orID
                 await db.query(
                     `UPDATE order_payment SET otherCharges = 0, fullPaidAmount = ? WHERE op_ID = ?`,
@@ -670,7 +684,7 @@ router.post("/orders", async (req, res) => {
 
 router.post("/later-order", async (req, res) => {
     const {
-        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,couponCode, deliveryPrice, discountAmount, district, dvStatus, orderDate,dvtype,
+        FtName, SrName, address, c_ID, category, newAddress, isAddressChanged,couponCode, deliveryPrice, discountAmount, district, dvStatus, orderDate,dvtype,totalBillPrice,
         expectedDate, id, isNewCustomer, items, occupation, otherNumber = "",phoneNumber = "", specialNote, title, totalItemPrice, type, workPlace, t_name, orderType, specialdiscountAmount,
         advance, balance, processedItems = [],payment,subPayment,cardPayment={},chequePayment={},cashCardPayment={},tranferPayment={},creditPayment={},combinedChequePayment={},
         combinedCreditPayment={},combinedTransferPayment={},issuable,customerBalanceDecision,finalCustomerBalance,paymentAmount,cashReturn
@@ -738,6 +752,15 @@ router.post("/later-order", async (req, res) => {
         const newTotalOrder = parseFloat(totalItemPrice) - parseFloat(discountAmount);
         const TotalOrder = parseFloat(totalItemPrice) + parseFloat(deliveryPrice);
         const customerBalance = parseFloat(finalCustomerBalance);
+        const billPrice = parseFloat(totalBillPrice) || 0;
+        const payAmount = parseFloat(paymentAmount);
+        let billBalance = 0;
+
+        if (billPrice === payAmount || billPrice < payAmount) {
+            billBalance = 0;
+        } else if (billPrice > payAmount) {
+            billBalance = billPrice - payAmount;
+        }
 
         const orID = `ORD_${Date.now()}`;
 
@@ -765,8 +788,7 @@ router.post("/later-order", async (req, res) => {
             orderStatus = hasProduction ? "Processing" : "Accepted";
         }
 
-        
-
+    
         const orderQuery = `
             INSERT INTO Orders (OrID, orDate, c_ID, orStatus, delStatus, delPrice, discount, specialdic, netTotal, total, stID, expectedDate, specialNote, ordertype, advance, balance, payStatus)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')
@@ -779,7 +801,7 @@ router.post("/later-order", async (req, res) => {
             parseFloat(specialdiscountAmount) || 0,
             parseFloat(totalItemPrice) || 0,
             parseFloat(TotalOrder) || 0,
-            stID, expectedDate, specialNote, orderType, advance1, balance1
+            stID, expectedDate, specialNote, orderType, advance1, billBalance
         ];
 
         await db.query(orderQuery, orderParams);
@@ -1016,14 +1038,6 @@ router.post("/later-order", async (req, res) => {
                 );
             }            
 
-            // Insert into order_payment
-            // await db.query(
-            //     `INSERT INTO order_payment 
-            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable) 
-            //     VALUES 
-            //         (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-            //     [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable]
-            // );
             if (!op_ID || !orID || isNaN(advance1) || !stID || !issuable) {
                 return res.status(400).json({ message: "Missing or invalid order payment fields" });
             }
@@ -1048,35 +1062,6 @@ router.post("/later-order", async (req, res) => {
                 ]
             );
 
-
-            // await db.query(
-            //     `INSERT INTO order_payment 
-            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable,c_ID, balance) 
-            //     VALUES 
-            //         (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-            //     [op_ID, orID, advance1, orderStatus, parseFloat(totalItemPrice) || 0, stID, issuable,Cust_id,balance1]
-            // );
-
-            // await db.query(
-            //     `INSERT INTO order_payment 
-            //         (op_ID, orID, amount, dateTime, or_status, netTotal, stID, issuable, c_ID, balance, otherCharges, fullPaidAmount) 
-            //     VALUES 
-            //         (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)`,
-            //     [
-            //         op_ID,
-            //         orID,
-            //         advance1,
-            //         orderStatus,
-            //         parseFloat(totalItemPrice) || 0,
-            //         stID,
-            //         issuable,
-            //         Cust_id,
-            //         balance1,
-            //         0,  // otherCharges
-            //         advance1 // fullPaidAmount - assuming it's same as advance1 here
-            //     ]
-            // );
-
             // Handle Payment Types
             const insertPayType = async () => {
                 const [result] = await db.query(
@@ -1094,8 +1079,13 @@ router.post("/later-order", async (req, res) => {
             };
 
             if (payment === 'Cash') {
-                await insertPayType();
+                const optId = await insertPayType();
                 await updateOrderPayment(advance1);
+                // Insert into ord_Cash_Pay
+                await db.query(
+                    `INSERT INTO ord_Cash_Pay (optId, amount) VALUES (?, ?)`,
+                    [optId, advance1]
+                );
             }
 
             if (payment === 'Card' && cardPayment) {
@@ -1208,8 +1198,6 @@ router.post("/later-order", async (req, res) => {
                 await updateOrderPayment(advance1);
             }
         }
-
-
         return res.status(201).json({
             success: true,
             message: "Order placed successfully",
@@ -1641,6 +1629,94 @@ router.get("/customer-details&orders", async (req, res) => {
     }
 });
 
+// Get customer payments and balance summary
+router.get("/customer-ledger", async (req, res) => {
+    try {
+        const { c_ID, startDate, endDate } = req.query;
+        console.log("🔍 Received:", { c_ID, startDate, endDate });
+
+        if (!c_ID || !startDate || !endDate) {
+            console.warn("⚠️ Missing required query params");
+            return res.status(400).json({
+                success: false,
+                message: "Customer ID (c_ID), startDate, and endDate are required",
+            });
+        }
+
+        // Format dates
+        const formattedStartDate = parseDate1(startDate);
+        const formattedEndDate = parseDate1(endDate);
+        console.log("📅 Formatted dates:", formattedStartDate, formattedEndDate);
+
+        // 🧾 Get detailed ledger records
+        const [ledgerDetails] = await db.query(
+            `SELECT 
+                op.op_ID,
+                op.orID,
+                o.orDate AS orderDate,
+                op.dateTime AS paymentDate,
+                op.netTotal,
+                op.amount AS paidAmount,
+                op.fullPaidAmount,
+                op.balance,
+                op.or_status,
+                op.issuable,
+                op.stID,
+                o.payStatus
+            FROM order_payment op
+            INNER JOIN Orders o ON o.orID = op.orID
+            WHERE op.c_ID = ? AND op.dateTime BETWEEN ? AND ?
+            ORDER BY op.dateTime ASC`,
+            [c_ID, formattedStartDate, formattedEndDate]
+        );
+
+        console.log("📊 Ledger entries found:", ledgerDetails.length);
+
+        if (ledgerDetails.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No payment records found for the given customer and date range"
+            });
+        }
+
+        // Add breakdown for payment methods
+        for (const record of ledgerDetails) {
+            const [payTypeRows] = await db.query(
+                `SELECT 
+                    opt.type,
+                    opt.subType,
+                    COALESCE(oc.amount, occ.amount, ocr.amount, ot.amount, 0) AS amount,
+                    occ.bank AS chequeBank,
+                    occ.chequeNumber,
+                    ocr.expectedDate AS creditExpectedDate,
+                    ot.bank AS transferBank
+                FROM ord_Pay_type opt
+                LEFT JOIN ord_Card_Pay oc ON opt.optId = oc.optId
+                LEFT JOIN ord_Cheque_Pay occ ON opt.optId = occ.optId
+                LEFT JOIN ord_Credit_Pay ocr ON opt.optId = ocr.optId
+                LEFT JOIN ord_Transfer_Pay ot ON opt.optId = ot.optId
+                WHERE opt.orID = ?`,
+                [record.orID]
+            );
+            record.paymentMethods = payTypeRows;
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Customer ledger retrieved successfully",
+            data: ledgerDetails
+        });
+
+    } catch (err) {
+        console.error("❌ Error fetching customer ledger:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Error retrieving ledger data",
+            details: err.message
+        });
+    }
+});
+
 // Check if customer exists by phone number
 router.get("/customer/check-customer", async (req, res) => {
     const { phone } = req.query;
@@ -1848,6 +1924,7 @@ router.get("/accept-order-details", async (req, res) => {
         });
     }
 });
+
 
 // Get Details of isssued order
 router.get("/issued-order-details", async (req, res) => {
@@ -2436,18 +2513,15 @@ router.get("/item-details", async (req, res) => {
 // Get all orders by status= pending
 router.get("/orders-pending", async (req, res) => {
     try {
-        // Join Orders with Customer and Sales Team to get employee name
+        // Join Orders with Customer to get contact numbers
         const query = `
             SELECT 
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, 
                 o.delPrice, o.discount, o.total, o.advance, o.balance, o.payStatus,
                 o.stID, o.expectedDate,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Getting employee name from the Employee table
+                c.contact1, c.contact2
             FROM Orders o
             JOIN Customer c ON o.c_ID = c.c_ID
-            JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
-            JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
             WHERE o.orStatus = 'pending'
         `;
 
@@ -2473,8 +2547,7 @@ router.get("/orders-pending", async (req, res) => {
             stID: order.stID,
             expectedDeliveryDate: order.expectedDate,
             contact1: order.contact1,
-            contact2: order.contact2,
-            employeeName: order.employeeName,  // Adding employee name to the response
+            contact2: order.contact2
         }));
 
         return res.status(200).json({
@@ -2604,20 +2677,16 @@ function categorizeOrders(orders) {
 
 router.get("/orders-accepting", async (req, res) => {
     try {
-        // Query to fetch accepted orders and employee name
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus,
                 o.delPrice, o.discount, o.advance, o.balance, o.payStatus,
                 o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Join with Employee table to get the employee's name
+                c.contact1, c.contact2
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
-            JOIN sales_team st ON o.stID = st.stID  // Join with sales_team to get the stID
-            JOIN Employee e ON st.E_Id = e.E_Id  // Join with Employee to get the employee's name
             WHERE o.orStatus = 'Accepted'
         `;
 
@@ -2629,12 +2698,6 @@ router.get("/orders-accepting", async (req, res) => {
 
         const { bookedOrders, unbookedOrders } = categorizeOrders(orders);
 
-        // Add employee name to each order data
-        const formattedOrders = [...bookedOrders, ...unbookedOrders].map(order => ({
-            ...order,
-            employeeName: order.employeeName  // Include employee name in the final response
-        }));
-
         return res.status(200).json({
             message: "Accepted orders found.",
             data: { bookedOrders, unbookedOrders }
@@ -2645,7 +2708,6 @@ router.get("/orders-accepting", async (req, res) => {
         return res.status(500).json({ message: "Error fetching accepted orders", error: error.message });
     }
 });
-
 
 //Get all orders by status= accepting & specific sale team
 router.get("/orders-accepting-stid", async (req, res) => {
@@ -2697,20 +2759,17 @@ router.get("/orders-accepting-stid", async (req, res) => {
 // Get all orders by status= Processing
 router.get("/orders-Processing", async (req, res) => {
     try {
-        // Query to fetch processing orders with customer contacts and employee name
+        // Query to fetch processing orders with customer contacts
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Getting the employee name from the Employee table
+                c.contact1, c.contact2
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
-            JOIN sales_team st ON o.stID = st.stID  // Join with sales_team to get stID
-            JOIN Employee e ON st.E_Id = e.E_Id  // Join with Employee to get employee name
             WHERE o.orStatus = 'Processing'
         `;
 
@@ -2744,8 +2803,7 @@ router.get("/orders-Processing", async (req, res) => {
                     contact1: order.contact1,
                     contact2: order.contact2,
                     acceptanceStatus: "Complete", // default
-                    acceptanceStatuses: [],
-                    employeeName: order.employeeName,  // Adding employee name to each order
+                    acceptanceStatuses: []
                 };
             }
 
@@ -2858,20 +2916,17 @@ router.get("/orders-Processing-stid", async (req, res) => {
 // Get all orders by status= completed
 router.get("/orders-completed", async (req, res) => {
     try {
-        // Query to fetch completed orders with customer contact information and employee name
+        // Query to fetch completed orders with customer contact information
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Getting the employee name from the Employee table
+                c.contact1, c.contact2
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
-            JOIN sales_team st ON o.stID = st.stID  // Join with sales_team to get stID
-            JOIN Employee e ON st.E_Id = e.E_Id  // Join with Employee to get employee name
             WHERE o.orStatus = 'Completed'
         `;
 
@@ -2904,9 +2959,8 @@ router.get("/orders-completed", async (req, res) => {
                     itemReceived: order.itemReceived,
                     contact1: order.contact1,
                     contact2: order.contact2,
-                    acceptanceStatus: "Complete", // default
-                    acceptanceStatuses: [],
-                    employeeName: order.employeeName,  // Adding employee name to each order
+                    acceptanceStatus: "Complete",
+                    acceptanceStatuses: []
                 };
             }
 
@@ -3022,20 +3076,17 @@ router.get("/orders-completed-stid", async (req, res) => {
 // Get all orders by status= issued
 router.get("/orders-issued", async (req, res) => {
     try {
-        // Query to fetch issued orders with their acceptance status from accept_orders table and employee name
+        // Query to fetch issued orders with their acceptance status from accept_orders table
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Adding employee name
+                c.contact1, c.contact2
             FROM Orders o
             LEFT JOIN accept_orders ao ON o.OrID = ao.orID
             JOIN Customer c ON o.c_ID = c.c_ID
-            JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
-            JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
             WHERE o.orStatus = 'Issued'
         `;
 
@@ -3070,8 +3121,7 @@ router.get("/orders-issued", async (req, res) => {
                     contact1: order.contact1,
                     contact2: order.contact2,
                     acceptanceStatus: "Complete", // Default status is Complete
-                    acceptanceStatuses: [], // Track individual item statuses
-                    employeeName: order.employeeName  // Include employee name
+                    acceptanceStatuses: [] // Track individual item statuses
                 };
             }
 
@@ -3087,7 +3137,7 @@ router.get("/orders-issued", async (req, res) => {
         // Convert the grouped orders into an array
         const formattedOrders = Object.values(groupedOrders);
 
-        // Send the formatted orders with their acceptance status and employee name as a JSON response
+        // Send the formatted orders with their acceptance status as a JSON response
         return res.status(200).json({
             message: "Issued orders found.",
             data: formattedOrders,
@@ -3190,20 +3240,17 @@ router.get("/orders-issued-stid", async (req, res) => {
 // Get all orders by status= delivered
 router.get("/orders-delivered", async (req, res) => {
     try {
-        // Query to fetch delivered orders with acceptance statuses, customer contacts, and employee name
+        // Fetch delivered orders with acceptance statuses and customer contacts
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived,
                 ao.status AS acceptanceStatus,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Adding employee name
+                c.contact1, c.contact2 
             FROM Orders o
-            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
-            LEFT JOIN Customer c ON o.c_ID = c.c_ID
-            LEFT JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
-            LEFT JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
+                LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                LEFT JOIN Customer c ON o.c_ID = c.c_ID  
             WHERE o.orStatus = 'Delivered'
         `;
 
@@ -3219,7 +3266,7 @@ router.get("/orders-delivered", async (req, res) => {
             const {
                 OrID, orDate, c_ID, ordertype, orStatus, delStatus, delPrice,
                 discount, advance, balance, payStatus, total, stID, expectedDeliveryDate,
-                itemReceived, acceptanceStatus, contact1, contact2, employeeName
+                itemReceived, acceptanceStatus, contact1, contact2
             } = order;
 
             if (!groupedOrders[OrID]) {
@@ -3241,8 +3288,7 @@ router.get("/orders-delivered", async (req, res) => {
                     contact1,
                     contact2,
                     acceptanceStatuses: [],
-                    acceptanceStatus: "Complete",
-                    employeeName  // Include employee name
+                    acceptanceStatus: "Complete"
                 };
             }
 
@@ -3362,21 +3408,18 @@ router.get("/orders-delivered-stid", async (req, res) => {
 // Get all orders by status= delivered & specific sale team
 router.get("/orders-returned", async (req, res) => {
     try {
-        // Query to fetch returned orders with their acceptance status, return reason, customer contact numbers, and employee name
+        // Query to fetch returned orders with their acceptance status, return reason, and customer contact numbers
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
                 ro.detail AS returnReason,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Adding employee name
+                c.contact1, c.contact2  -- Add customer contact numbers
             FROM Orders o
-            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
-            LEFT JOIN return_orders ro ON o.OrID = ro.OrID
-            LEFT JOIN Customer c ON o.c_ID = c.c_ID  // Join customers table to fetch contact numbers
-            LEFT JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
-            LEFT JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN return_orders ro ON o.OrID = ro.OrID
+                     LEFT JOIN customers c ON o.c_ID = c.c_ID  -- Join customers table to fetch contact numbers
             WHERE o.orStatus = 'Returned'
         `;
 
@@ -3412,8 +3455,7 @@ router.get("/orders-returned", async (req, res) => {
                     acceptanceStatus: "Complete", // Default status is Complete
                     contact1: order.contact1,  // Add contact1 to the response
                     contact2: order.contact2,  // Add contact2 to the response
-                    acceptanceStatuses: [], // Track individual item statuses
-                    employeeName: order.employeeName // Include employee name
+                    acceptanceStatuses: [] // Track individual item statuses
                 };
             }
 
@@ -3535,21 +3577,18 @@ router.get("/orders-returned-stid", async (req, res) => {
 // Get all orders by status= canceled
 router.get("/orders-canceled", async (req, res) => {
     try {
-        // Query to fetch canceled orders with their acceptance status, return reason, customer contact numbers, and employee name
+        // Query to fetch canceled orders with their acceptance status, return reason, and customer contact numbers
         const query = `
             SELECT
                 o.OrID, o.orDate, o.c_ID, o.ordertype, o.orStatus, o.delStatus, o.delPrice,
                 o.discount, o.advance, o.balance, o.payStatus, o.total, o.stID, o.expectedDate AS expectedDeliveryDate,
                 ao.itemReceived, ao.status AS acceptanceStatus,
                 ro.detail AS returnReason,
-                c.contact1, c.contact2,
-                e.name AS employeeName  // Adding employee name
+                c.contact1, c.contact2  -- Add customer contact numbers
             FROM Orders o
-            LEFT JOIN accept_orders ao ON o.OrID = ao.orID
-            LEFT JOIN return_orders ro ON o.OrID = ro.OrID
-            LEFT JOIN Customer c ON o.c_ID = c.c_ID  // Join customers table to fetch contact numbers
-            LEFT JOIN sales_team st ON o.stID = st.stID  // Join sales_team to get stID
-            LEFT JOIN Employee e ON st.E_Id = e.E_Id  // Join Employee to get employee name
+                     LEFT JOIN accept_orders ao ON o.OrID = ao.orID
+                     LEFT JOIN return_orders ro ON o.OrID = ro.OrID
+                     LEFT JOIN customers c ON o.c_ID = c.c_ID  -- Join customers table to fetch contact numbers
             WHERE o.orStatus = 'Cancelled'
         `;
 
@@ -3585,8 +3624,7 @@ router.get("/orders-canceled", async (req, res) => {
                     contact1: order.contact1,  // Add contact1 to the response
                     contact2: order.contact2,  // Add contact2 to the response
                     acceptanceStatus: "Complete", // Default status is Complete
-                    acceptanceStatuses: [], // Track individual item statuses
-                    employeeName: order.employeeName // Include employee name
+                    acceptanceStatuses: [] // Track individual item statuses
                 };
             }
 
@@ -4422,16 +4460,7 @@ router.post("/update-stock", upload.single("image"), async (req, res) => {
 router.put("/update-invoice", async (req, res) => {
     try {
         const {
-            orID,
-            isPickup,
-            netTotal,
-            totalAdvance,
-            previousAdvance,
-            balance,
-            addedAdvance,
-            updatedDeliveryCharge,
-            updatedDiscount,
-        } = req.body;
+            orID,isPickup,netTotal,totalAdvance,previousAdvance,balance,addedAdvance, updatedDeliveryCharge,updatedDiscount,} = req.body;
 
         if (!orID) {
             return res.status(400).json({
@@ -4444,8 +4473,11 @@ router.put("/update-invoice", async (req, res) => {
 
         // 🔍 Fetch order details
         const [orderResult] = await db.query(
-            `SELECT OrID, orStatus, stID, c_ID FROM Orders WHERE OrID = ?`,
-            [orID]
+            `SELECT OrID, orStatus, stID, c_ID FROM Orders WHERE OrID = ?`, [orID]
+        );
+
+        const[issuableResult] = await db.query(
+            `SELECT issuable FROM order_payment WHERE OrID = ?`,[orID]
         );
 
         if (orderResult.length === 0) {
@@ -4456,6 +4488,7 @@ router.put("/update-invoice", async (req, res) => {
         }
 
         const { orStatus, stID, c_ID } = orderResult[0];
+        const { issuable }= issuableResult[0];
 
         // 🔄 Determine Payment Status
         let payStatus = "Pending";
@@ -4465,16 +4498,9 @@ router.put("/update-invoice", async (req, res) => {
         // 🔄 Update Orders table
         const orderUpdateQuery = `
             UPDATE Orders
-            SET total = ?, discount = ?, delPrice = ?, advance = ?, balance = ?, payStatus = ?
-            WHERE OrID = ?`;
+            SET total = ?, discount = ?, delPrice = ?, advance = ?, balance = ?, payStatus = ? WHERE OrID = ?`;
         await db.query(orderUpdateQuery, [
-            netTotal,
-            updatedDiscount,
-            updatedDeliveryCharge,
-            totalAdvance,
-            balance,
-            payStatus,
-            orID,
+            netTotal,updatedDiscount,updatedDeliveryCharge, totalAdvance, balance,payStatus,orID,
         ]);
 
         // 🛑 If pickup, remove delivery record
@@ -4487,22 +4513,10 @@ router.put("/update-invoice", async (req, res) => {
             const fullPaid = parseFloat(previousAdvance || 0) + parseFloat(addedAdvance || 0);
 
             await db.query(
-                `INSERT INTO order_payment (
-                    op_ID, orID, amount, dateTime, or_status, netTotal, stID,
-                    fullPaidAmount, balance, c_ID, issuable
-                )
+                `INSERT INTO order_payment (op_ID, orID, amount, dateTime, or_status, netTotal, stID,fullPaidAmount, balance, c_ID, issuable)
                 VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    op_ID,
-                    orID,
-                    addedAdvance,
-                    orStatus,
-                    netTotal,
-                    stID,
-                    fullPaid,
-                    balance,
-                    c_ID,
-                    'Now' // or another value depending on logic
+                    op_ID, orID,addedAdvance,orStatus,netTotal,stID,fullPaid,balance,c_ID,issuable
                 ]
             );
 
@@ -10244,6 +10258,20 @@ const parseDate = (dateStr) => {
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 };
 
+const parseDate1 = (dateStr) => {
+    if (!dateStr) return null;
+    let year, month, day;
+
+    if (dateStr.includes("-")) {
+        [year, month, day] = dateStr.split("-");
+    } else if (dateStr.includes("/")) {
+        [day, month, year] = dateStr.split("/");
+    } else {
+        return null;
+    }
+
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+};
 const formatDate = (date) => {
     return date ? new Date(date).toLocaleDateString("en-GB") : null;
 };
