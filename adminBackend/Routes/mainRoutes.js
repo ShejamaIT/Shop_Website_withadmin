@@ -1000,8 +1000,6 @@ router.post("/later-order", async (req, res) => {
             const addressToUse = isAddressChanged ? newAddress : address;
             await db.query(deliveryQuery, [dvID, orID, addressToUse, district, Cust_id, expectedDate, dvtype]);
         }
-
-
         const op_ID = await generateNewId("order_payment", "op_ID", "OP");
 
         if (advance1 > 0) {
@@ -1093,16 +1091,10 @@ router.post("/later-order", async (req, res) => {
                 const optId = await insertPayType();
                 for (const chq of chequePayment.cheques || []) {
                     await db.query(
-                        `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
+                        `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date,status)
                         VALUES (?, ?, ?, ?, ?, ?, ?)`,
                         [
-                            optId,
-                            chq.amount || 0,
-                            chq.bank || '',
-                            chq.branch || '',
-                            chq.accountNumber || '',
-                            chq.chequeNumber || '',
-                            chq.chequeDate || null
+                            optId,chq.amount || 0,chq.bank || '',chq.branch || '',chq.accountNumber || '',chq.chequeNumber || '', chq.chequeDate || null, 'InHand'
                         ]
                     );
                 }
@@ -1135,16 +1127,10 @@ router.post("/later-order", async (req, res) => {
                     const optId = await insertPayType();
                     for (const chq of combinedChequePayment.cheques || []) {
                         await db.query(
-                            `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date)
+                            `INSERT INTO ord_Cheque_Pay (optId, amount, bank, branch, accountNumber, chequeNumber, date,status)
                             VALUES (?, ?, ?, ?, ?, ?, ?)`,
                             [
-                                optId,
-                                chq.amount || 0,
-                                chq.bank || '',
-                                chq.branch || '',
-                                chq.accountNumber || '',
-                                chq.chequeNumber || '',
-                                chq.chequeDate || null
+                                optId, chq.amount || 0,chq.bank || '', chq.branch || '', chq.accountNumber || '',chq.chequeNumber || '',chq.chequeDate || null ,'InHand'
                             ]
                         );
                     }
@@ -1620,64 +1606,51 @@ router.get("/customer-details&orders", async (req, res) => {
 });
 
 // Get customer payments and balance summary
+const groupByDate = (records, dateField) => {
+    const map = {};
+    for (const record of records) {
+        const date = new Date(record[dateField]).toISOString().split("T")[0];
+        if (!map[date]) map[date] = [];
+        map[date].push(record);
+    }
+    return map;
+};
+
 router.get("/customer-ledger", async (req, res) => {
     try {
         const { c_ID, startDate, endDate } = req.query;
-        console.log("🔍 Received:", { c_ID, startDate, endDate });
-
         if (!c_ID || !startDate || !endDate) {
-            console.warn("⚠️ Missing required query params");
             return res.status(400).json({
                 success: false,
                 message: "Customer ID (c_ID), startDate, and endDate are required",
             });
         }
 
-        // Format dates
         const formattedStartDate = parseDate1(startDate);
         const formattedEndDate = parseDate1(endDate);
-        console.log("📅 Formatted dates:", formattedStartDate, formattedEndDate);
 
-        // 🧾 Get detailed ledger records
-        const [ledgerDetails] = await db.query(
+        // Fetch payments
+        const [paymentRecords] = await db.query(
             `SELECT 
-                op.op_ID,
-                op.orID,
-                o.orDate AS orderDate,
-                op.dateTime AS paymentDate,
-                op.netTotal,
-                op.amount AS paidAmount,
-                op.fullPaidAmount,
-                op.balance,
-                op.or_status,
-                op.issuable,
-                op.stID,
-                o.payStatus
+                op.op_ID, op.orID, op.dateTime AS paymentDate,
+                op.amount AS paidAmount, op.balance,
+                op.netTotal
             FROM order_payment op
-            INNER JOIN Orders o ON o.orID = op.orID
             WHERE op.c_ID = ? AND op.dateTime BETWEEN ? AND ?
             ORDER BY op.dateTime ASC`,
             [c_ID, formattedStartDate, formattedEndDate]
         );
 
-        console.log("📊 Ledger entries found:", ledgerDetails.length);
-
-        if (ledgerDetails.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "No payment records found for the given customer and date range"
-            });
-        }
-
-        // Add breakdown for payment methods
-        for (const record of ledgerDetails) {
-            const [payTypeRows] = await db.query(
-                `SELECT 
+        // Attach payment type info
+        for (const record of paymentRecords) {
+            const [types] = await db.query(`
+                SELECT 
                     opt.type,
                     opt.subType,
                     COALESCE(oc.amount, occ.amount, ocr.amount, ot.amount, 0) AS amount,
                     occ.bank AS chequeBank,
                     occ.chequeNumber,
+                    occ.status AS chequeStatus,
                     ocr.expectedDate AS creditExpectedDate,
                     ot.bank AS transferBank
                 FROM ord_Pay_type opt
@@ -1685,23 +1658,47 @@ router.get("/customer-ledger", async (req, res) => {
                 LEFT JOIN ord_Cheque_Pay occ ON opt.optId = occ.optId
                 LEFT JOIN ord_Credit_Pay ocr ON opt.optId = ocr.optId
                 LEFT JOIN ord_Transfer_Pay ot ON opt.optId = ot.optId
-                WHERE opt.orID = ?`,
-                [record.orID]
-            );
-            record.paymentMethods = payTypeRows;
+                WHERE opt.orID = ?
+            `, [record.orID]);
+
+            record.paymentTypes = types;
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Customer ledger retrieved successfully",
-            data: ledgerDetails
-        });
+        // Fetch bills
+        const [billRecords] = await db.query(
+            `SELECT 
+                orID, orDate AS billDate, netTotal, balance
+            FROM Orders
+            WHERE c_ID = ? AND orDate BETWEEN ? AND ?
+            ORDER BY orDate ASC`,
+            [c_ID, formattedStartDate, formattedEndDate]
+        );
 
+        // Grouping
+        const groupedPayments = groupByDate(paymentRecords, "paymentDate");
+        const groupedBills = groupByDate(billRecords, "billDate");
+
+        const allDates = Array.from(new Set([
+            ...Object.keys(groupedBills),
+            ...Object.keys(groupedPayments)
+        ])).sort();
+
+        const datewiseLedger = allDates.map(date => ({
+            date,
+            bills: groupedBills[date] || [],
+            payments: groupedPayments[date] || []
+        }));
+
+        res.status(200).json({
+            success: true,
+            message: "Grouped ledger retrieved successfully",
+            data: datewiseLedger
+        });
     } catch (err) {
-        console.error("❌ Error fetching customer ledger:", err);
-        return res.status(500).json({
+        console.error("❌ Ledger Error:", err);
+        res.status(500).json({
             success: false,
-            message: "Error retrieving ledger data",
+            message: "Server error",
             details: err.message
         });
     }
