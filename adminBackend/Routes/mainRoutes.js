@@ -422,7 +422,7 @@ router.post("/orders", async (req, res) => {
                 VALUES 
                     (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    op_ID,orID,advance1,orderStatus,parseFloat(totalItemPrice) || 0, stID,issuable,Cust_id,balance1, 0, advance1
+                    op_ID,orID,advance1,orderStatus,billPrice, stID,issuable,Cust_id,billBalance, 0, advance1
                 ]
             );
 
@@ -1048,17 +1048,7 @@ router.post("/later-order", async (req, res) => {
                 VALUES 
                     (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    op_ID,
-                    orID,
-                    advance1,
-                    orderStatus,
-                    parseFloat(totalItemPrice) || 0,
-                    stID,
-                    issuable,
-                    Cust_id,
-                    balance1,
-                    0,
-                    advance1
+                    op_ID,orID, advance1, orderStatus,billPrice, stID,issuable, Cust_id,billBalance, 0,advance1
                 ]
             );
 
