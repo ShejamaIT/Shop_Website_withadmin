@@ -157,7 +157,7 @@ const CustomerDetailsView = () => {
                                                             <thead>
                                                                 <tr>
                                                                     <th>Order ID</th>
-                                                                    <th>Net Total</th>
+                                                                    {/* <th>Net Total</th> */}
                                                                     <th>Balance</th>
                                                                 </tr>
                                                             </thead>
@@ -165,7 +165,7 @@ const CustomerDetailsView = () => {
                                                                 {entry.bills.map((bill, i) => (
                                                                     <tr key={i}>
                                                                         <td>{bill.orID}</td>
-                                                                        <td>Rs. {bill.netTotal.toFixed(2)}</td>
+                                                                        {/* <td>Rs. {bill.netTotal.toFixed(2)}</td> */}
                                                                         <td>Rs. {bill.balance.toFixed(2)}</td>
                                                                     </tr>
                                                                 ))}
@@ -199,13 +199,19 @@ const CustomerDetailsView = () => {
                                                                                         <>
                                                                                             <br />
                                                                                             <small className="text-muted">
-                                                                                                No: {ptype.chequeNumber} | Bank: {ptype.chequeBank}<br />
-                                                                                                Status: <strong>{ptype.chequeStatus}</strong>
+                                                                                                No: {ptype.chequeNumber || "N/A"} | Bank: {ptype.chequeBank || "N/A"}
+                                                                                                <br />
+                                                                                                Status: <strong>{ptype.chequeStatus || "N/A"}</strong>
                                                                                             </small>
                                                                                         </>
                                                                                     )}
                                                                                 </td>
-                                                                                <td>Rs. {Number(ptype.amount || 0).toFixed(2)}</td>
+                                                                                <td>
+                                                                                    Rs.{" "}
+                                                                                    {Number(ptype.amount && ptype.amount > 0 ? ptype.amount : pay.paidAmount || 0).toFixed(2)}
+                                                                                    </td>
+
+                                                                                {/* <td>Rs. {Number(ptype.amount || 0).toFixed(2)}</td> */}
                                                                             </tr>
                                                                         ))
                                                                     ) : (
@@ -215,6 +221,7 @@ const CustomerDetailsView = () => {
                                                                         </tr>
                                                                     )
                                                                 )}
+
                                                             </tbody>
                                                         </table>
                                                     ) : (
