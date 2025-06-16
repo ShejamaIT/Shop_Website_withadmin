@@ -119,7 +119,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     const currentTime = new Date().toLocaleTimeString();
 
     useEffect(() => {
-        fetchItems();fetchCoupons();fetchCustomers();fetchBankDetails();
+        fetchItems();fetchCoupons();fetchCustomers();fetchBankDetails();fetchPurchaseID(); fetchDeliveryRates();
     }, []);
     const fetchItems = async () => {
         try {
@@ -362,7 +362,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         setBalance(remaining.toFixed(2));
         setBalance1(remaining.toFixed(2));
     };
-
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
@@ -461,28 +460,24 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             setDeliveryDates([]);
         }
     };
-    useEffect(() => {
-        const fetchDeliveryRates = async () => {
-            try {
-                const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates");
-                const data = await response.json();
+    const fetchDeliveryRates = async () => {
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/main/delivery-rates");
+            const data = await response.json();
 
-                if (data.success) {
-                    const districtList = data.data.map((rate) => rate.district);
-                    const rateMap = {};
-                    data.data.forEach((rate) => {
-                        rateMap[rate.district] = rate.amount; // Store delivery price for each district
-                    });
-                    setDistricts(districtList);
-                    setDeliveryRates(rateMap);
-                }
-            } catch (error) {
-                toast.error("Error fetching delivery rates.");
+            if (data.success) {
+                const districtList = data.data.map((rate) => rate.district);
+                const rateMap = {};
+                data.data.forEach((rate) => {
+                    rateMap[rate.district] = rate.amount; // Store delivery price for each district
+                });
+                setDistricts(districtList);
+                setDeliveryRates(rateMap);
             }
-        };
-        fetchDeliveryRates();
-        fetchPurchaseID();
-    }, []);
+        } catch (error) {
+            toast.error("Error fetching delivery rates.");
+        }
+    };
     const handleSearchChange = (e) => {
         fetchItems();
         const value = e.target.value;
@@ -1148,6 +1143,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         try {
             const response = await fetch("http://localhost:5001/api/admin/main/newPurchasenoteID");
             const data = await response.json();
+            console.log(data);
             setPurchaseId(data.PurchaseID);
         } catch (err) {
             toast.error("Failed to load Purchase ID.");
@@ -1155,11 +1151,28 @@ const OrderInvoice = ({ onPlaceOrder }) => {
     };
     const handleAddItem = async (newItem) => {
         try {
-            // Validate required fields
-            if (!newItem.I_Id || !newItem.I_name || !newItem.Ca_Id || !newItem.price || !newItem.cost || !newItem.s_Id || !newItem.minQty || !newItem.startStock) {
-                toast.error("⚠️ Please fill all required fields.");
-                return;
+            // Step 1: Validate Required Fields
+            const requiredFields = [
+                "I_Id", "I_name", "Ca_Id", "price", "cost",
+                "s_Id", "minQty", "startStock"
+            ];
+            for (const field of requiredFields) {
+                if (!newItem[field]) {
+                    toast.error(`⚠️ ${field} is required.`);
+                    return;
+                }
             }
+
+            // Step 2: Validate Numeric Fields
+            const numericFields = ["price", "cost", "minQty", "startStock"];
+            for (const field of numericFields) {
+                if (isNaN(Number(newItem[field]))) {
+                    toast.error(`⚠️ ${field} must be a valid number.`);
+                    return;
+                }
+            }
+
+            // Step 3: Validate Image
             if (!newItem.img) {
                 toast.error("⚠️ Main image is required.");
                 return;
@@ -1167,6 +1180,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
             const materialToSend = newItem.material === "Other" ? newItem.otherMaterial : newItem.material;
 
+            // Step 4: Build FormData for item creation
             const formDataToSend = new FormData();
             formDataToSend.append("I_Id", newItem.I_Id);
             formDataToSend.append("I_name", newItem.I_name);
@@ -1182,39 +1196,46 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             formDataToSend.append("s_Id", newItem.s_Id);
             formDataToSend.append("minQty", newItem.minQty);
 
-            // Append images
+            // Add images
             formDataToSend.append("img", newItem.img);
             if (newItem.img1) formDataToSend.append("img1", newItem.img1);
             if (newItem.img2) formDataToSend.append("img2", newItem.img2);
             if (newItem.img3) formDataToSend.append("img3", newItem.img3);
 
+            // Step 5: Calculate Totals
             const cost = Number(newItem.cost);
             const quantity = Number(newItem.startStock);
-            const ItemTotal = cost * quantity;
+            const itemTotal = cost * quantity;
 
+            // Step 6: Prepare Order Data
             const orderData = {
-                purchase_id: PurchaseId,
+                purchase_id: PurchaseId,         // assuming these come from state/context
                 supplier_id: newItem.s_Id,
                 date: currentDate,
                 time: currentTime,
-                itemTotal: ItemTotal,
+                itemTotal: itemTotal,
                 delivery: 0,
                 invoice: "-",
-                items: {
-                    I_Id: newItem.I_Id,
-                    material: materialToSend,
-                    color: newItem.color || "N/A",
-                    unit_price: newItem.price,
-                    price: cost,
-                    quantity,
-                    total_price: ItemTotal.toFixed(2),
-                },
+                items: [
+                    {
+                        I_Id: newItem.I_Id,
+                        material: materialToSend,
+                        color: newItem.color || "N/A",
+                        unit_price: Number(newItem.price),
+                        price: cost,
+                        quantity: quantity,
+                        total_price: itemTotal.toFixed(2)
+                    }
+                ]
             };
 
-            // Submit item creation
+            console.log("🧾 Sending Item FormData:", formDataToSend);
+            console.log("📦 Sending Stock Order Data:", JSON.stringify(orderData, null, 2));
+
+            // Step 7: Submit Item Creation
             const submitResponse = await fetch("http://localhost:5001/api/admin/main/add-item", {
                 method: "POST",
-                body: formDataToSend,
+                body: formDataToSend
             });
 
             const submitData = await submitResponse.json();
@@ -1225,11 +1246,11 @@ const OrderInvoice = ({ onPlaceOrder }) => {
 
             toast.success("✅ Item added successfully!");
 
-            // Submit stock addition
+            // Step 8: Submit Stock Addition
             const stockResponse = await fetch("http://localhost:5001/api/admin/main/addStock", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(orderData),
+                body: JSON.stringify(orderData)
             });
 
             const stockResult = await stockResponse.json();
@@ -1239,10 +1260,11 @@ const OrderInvoice = ({ onPlaceOrder }) => {
             }
 
             toast.success("✅ Purchase saved successfully!");
-            fetchItems?.(); // Optional chaining in case it's undefined
+            fetchItems?.(); // Refresh the item list if applicable
+
         } catch (error) {
             console.error("❌ Error submitting form:", error);
-            toast.error("❌ An error occurred while adding the item.");
+            toast.error("❌ An unexpected error occurred.");
         }
     };
 
@@ -2112,7 +2134,7 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 { label: 'Delivery Fee      (➕)', value: deliveryPrice },
                                 { label: 'Special Discount  (➖)', value: specialdiscountAmount },
                                 { label: 'Coupon Discount   (➖)', value: discountAmount },
-                                { label: 'Previous Balance  (➖)', value: previousbalance },
+                                // { label: 'Previous Balance  (➖)', value: previousbalance },
                             ].map((item, index) => (
                                 <div key={index} className="custom-line-item flex justify-between border-b pb-1">
                                     <span className="custom-label">{item.label}</span>
@@ -2120,6 +2142,19 @@ const OrderInvoice = ({ onPlaceOrder }) => {
                                 </div>
                             ))}
 
+                            <div className="custom-total flex justify-between font-semibold border-t pt-3 mt-3">
+                                <span className="custom-label">Bill Amount</span>
+                                <span className="custom-value">Rs.{grossBillTotal}</span>
+                            </div>
+
+                            {[
+                                { label: 'Previous Balance  (➕/➖)', value: previousbalance },
+                            ].map((item, index) => (
+                                <div key={index} className="custom-line-item flex justify-between border-b pb-1">
+                                    <span className="custom-label">{item.label}</span>
+                                    <span className="custom-value">Rs.{item.value}</span>
+                                </div>
+                            ))}
                             <div className="custom-total flex justify-between font-semibold border-t pt-3 mt-3">
                                 <span className="custom-label">Gross Amount</span>
                                 <span className="custom-value">Rs.{totalBillPrice}</span>
