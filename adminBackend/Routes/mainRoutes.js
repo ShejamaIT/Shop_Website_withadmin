@@ -10209,6 +10209,56 @@ router.delete("/employees/:id", async (req, res) => {
     }
 });
 
+//Route: Get Applied Leaves, Pending Requests, and Onsite Pending Orders Count
+router.get('/applied_leaves-and-requests-and-ordercounts', async (req, res) => {
+  try {
+    // Fetch Applied Leaves
+    const [appliedLeaves] = await db.query(`
+      SELECT el.id, el.E_Id, e.name, el.date, el.leave_type, el.duration_type, el.reason, el.status
+      FROM Emp_leaves el
+      JOIN Employee e ON el.E_Id = e.E_Id
+      WHERE el.status = 'Applied'
+      ORDER BY el.date DESC
+    `);
+
+    // Fetch Pending Requests
+    const [pendingRequests] = await db.query(`
+      SELECT r.id, r.E_Id, e.name, r.reason, r.status
+      FROM Request r
+      JOIN Employee e ON r.E_Id = e.E_Id
+      WHERE r.status = 'Pending'
+      ORDER BY r.id DESC
+    `);
+
+    // Fetch Pending On-site Orders by Sales Team
+    const [pendingOnsiteOrders] = await db.query(`
+      SELECT st.stID, e.name AS sales_team_name, COUNT(*) AS pendingOrderCount
+      FROM Orders o
+      JOIN sales_team st ON o.stID = st.stID
+      JOIN Employee e ON st.E_Id = e.E_Id
+      WHERE o.orStatus = 'Pending' AND o.ordertype = 'On-site'
+      GROUP BY st.stID
+    `);
+
+    // Return the results in the response
+    res.json({
+      success: true,
+      data: {
+        appliedLeaves,
+        pendingRequests,
+        pendingOnsiteOrders,
+      },
+    });
+  } catch (err) {
+    console.error('❌ Error in notification fetch:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      detail: err.message,
+    });
+  }
+});
+
 
 // pass sale team value to review in month end
 
