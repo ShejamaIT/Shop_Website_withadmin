@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../style/TableThree.css";
+import { toast } from "react-toastify";
 
 const TableLeave = ({ refreshKey }) => {
     const [leaves, setLeaves] = useState([]);
@@ -45,7 +46,7 @@ const TableLeave = ({ refreshKey }) => {
             const result = await response.json();
             if (!response.ok) throw new Error(result.message || "Failed to approve leave");
 
-            alert("Leave approved successfully");
+            toast.success("Leave approved successfully");
             fetchLeaves();
             setTimeout(() => {
                 window.location.reload();
@@ -54,6 +55,29 @@ const TableLeave = ({ refreshKey }) => {
             alert("Error approving leave: " + err.message);
         }
     };
+
+    const handleRejected = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:5001/api/admin/main/reject-leave/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || "Failed to approve leave");
+
+            toast.warning("Leave Rejected successfully");
+            fetchLeaves();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } catch (err) {
+            alert("Error approving leave: " + err.message);
+        }
+    };
+
 
     return (
         <div className="table-container">
@@ -98,7 +122,7 @@ const TableLeave = ({ refreshKey }) => {
                                     </button>
                                     <button
                                         className="delete-btn"
-                                        onClick={() => handleApprove(leave.id)}
+                                        onClick={() => handleRejected(leave.id)}
                                     >
                                         Rejected
                                     </button>
