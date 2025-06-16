@@ -602,3 +602,4 @@ CREATE TABLE ord_Cash_Pay(
 ALTER TABLE `item` CHANGE `img1` `img1` LONGBLOB NULL;
 ALTER TABLE `item` CHANGE `img2` `img2` LONGBLOB NULL;
 ALTER TABLE `item` CHANGE `img3` `img3` LONGBLOB NULL;
+ALTER TABLE `emp_leaves` ADD `present` ENUM('In ','Out','','') NOT NULL DEFAULT 'Out' AFTER `status`;
