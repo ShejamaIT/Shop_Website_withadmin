@@ -10308,6 +10308,46 @@ router.get('/applied_leaves-and-requests-and-ordercounts', async (req, res) => {
   }
 });
 
+// Fetch all leaves for a user in a given month and year
+router.get("/leaves/:eid/:month/:year", async (req, res) => {
+    const { eid, month, year } = req.params;
+    try {
+        const [rows] = await db.execute(`
+            SELECT id, E_Id, date, leave_type, duration_type, reason, status, present
+            FROM emp_leaves
+            WHERE E_Id = ? AND MONTH(date) = ? AND YEAR(date) = ?
+            ORDER BY date DESC
+        `, [eid, month, year]);
+
+        res.json({ success: true, leaves: rows });
+    } catch (err) {
+        console.error("Error fetching leaves:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// Update a leave record, including the 'present' column
+router.put("/update-leave/:id", async (req, res) => {
+    const { id } = req.params;
+    const { date, duration_type, reason, present } = req.body;
+
+    try {
+        const [result] = await db.execute(`
+            UPDATE emp_leaves
+            SET date = ?, duration_type = ?, reason = ?, present = ?
+            WHERE id = ?
+        `, [date, duration_type, reason, present, id]);
+
+        if (result.affectedRows > 0) {
+            res.json({ success: true, message: "Leave updated" });
+        } else {
+            res.status(404).json({ success: false, message: "Leave not found" });
+        }
+    } catch (err) {
+        console.error("Error updating leave:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
 
 // pass sale team value to review in month end
 
