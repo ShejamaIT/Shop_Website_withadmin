@@ -8577,8 +8577,8 @@ router.get("/advance&loan", async (req, res) => {
             return res.status(400).json({ success: false, message: "Employee ID (eid) is required" });
         }
 
-        const startOfMonth = moment().startOf("month").format("YYYY-MM-DD HH:mm:ss");
-        const endOfMonth = moment().endOf("month").format("YYYY-MM-DD HH:mm:ss");
+        const startOfMonth = moment().startOf("month").format("YYYY-MM-DD");
+        const endOfMonth = moment().endOf("month").format("YYYY-MM-DD");
         const startOfLastMonth = moment().subtract(1, "months").startOf("month").format("YYYY-MM-DD");
         const endOfLastMonth = moment().subtract(1, "months").endOf("month").format("YYYY-MM-DD");
 
@@ -8602,13 +8602,11 @@ router.get("/advance&loan", async (req, res) => {
             [eid, startOfLastMonth, endOfLastMonth]
         );
 
-        // Format Advances
         const advancePayments = advances.map(adv => ({
             ...adv,
             dateTime: moment(adv.dateTime).format("YYYY-MM-DD")
         }));
 
-        // Format Last Month Installment
         const lastMonthUnpaidInstallment = lastMonthLoan.length > 0
             ? {
                 id: lastMonthLoan[0].Id,
@@ -8618,7 +8616,14 @@ router.get("/advance&loan", async (req, res) => {
                 skip: lastMonthLoan[0].skip,
                 E_Id: lastMonthLoan[0].E_Id
             }
-            : null;
+            : {
+                id: 0,
+                date: null,
+                installment: 0,
+                sl_ID: null,
+                skip: 0,
+                E_Id: eid
+            };
 
         return res.status(200).json({
             success: true,
@@ -8645,24 +8650,27 @@ router.get("/leave-count", async (req, res) => {
             return res.status(400).json({ success: false, message: "Employee ID (eid) is required" });
         }
 
-        // Define last month's start and end dates
+        // Last month's start and end dates
         const startOfLastMonth = moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
         const endOfLastMonth = moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
 
-        // Query leave counts grouped by leave_type
-        const [leaveCounts] = await db.query(
-            `SELECT leave_type, COUNT(*) AS count
-             FROM emp_leaves
-             WHERE E_Id = ? AND date BETWEEN ? AND ?
-             GROUP BY leave_type`,
-            [eid, startOfLastMonth, endOfLastMonth]
-        );
+        // Get informed and uninformed leaves where present is not 'In'
+        const [leaveCounts] = await db.query(`
+            SELECT leave_type, COUNT(*) AS count
+            FROM emp_leaves
+            WHERE 
+                E_Id = ? 
+                AND date BETWEEN ? AND ? 
+                AND present != 'In'
+                AND leave_type IN ('Informed', 'Uninformed')
+            GROUP BY leave_type
+        `, [eid, startOfLastMonth, endOfLastMonth]);
 
         let informedCount = 0;
         let uninformedCount = 0;
 
         leaveCounts.forEach(leave => {
-            if (leave.leave_type === "Informed" ) {
+            if (leave.leave_type === "Informed") {
                 informedCount = leave.count;
             } else if (leave.leave_type === "Uninformed") {
                 uninformedCount = leave.count;
@@ -8815,13 +8823,9 @@ router.get("/sales-summary", async (req, res) => {
         const { stID, orderTarget, issuedTarget } = teamRows[0];
 
         // 2. Get last month year + name
-        // const now = moment();
-        // const lastMonthYear = now.subtract(1, 'month').year();
-        // const lastMonthName = now.format("MMMM");
         const now = moment();
         const lastMonthYear = now.year(); // e.g., 2025
         const lastMonthName = now.format("MMMM"); // e.g., "June"
-
 
         // 3. Get order review data
         const [reviewRows] = await db.query(
@@ -8862,9 +8866,22 @@ router.get("/sales-summary", async (req, res) => {
             [lastMonthYear, lastMonthName]
         );
 
-        const maxIssued = Math.max(...allIssuedRows.map(row => row.totalIssued));
         let highestBonus = 0;
-        if (totalIssued === maxIssued) {
+        if (allIssuedRows.length > 0) {
+            // There are other sales team members, find the highest issued value
+            const maxIssued = Math.max(...allIssuedRows.map(row => row.totalIssued));
+
+            if (totalIssued === maxIssued) {
+                // If this user has the highest issued, get the bonus
+                const [highBonusRows] = await db.query(
+                    `SELECT bonus FROM sale_target WHERE targetType = 'Highest Target' LIMIT 1`
+                );
+                if (highBonusRows.length > 0) {
+                    highestBonus = highBonusRows[0].bonus;
+                }
+            }
+        } else {
+            // If no other sales team members, assign the highest bonus to this user
             const [highBonusRows] = await db.query(
                 `SELECT bonus FROM sale_target WHERE targetType = 'Highest Target' LIMIT 1`
             );
@@ -8900,6 +8917,7 @@ router.get("/sales-summary", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error", error: err.message });
     }
 });
+
 
 //  Get Sales Team Targets
 router.get("/sales-team-targets", async (req, res) => {
