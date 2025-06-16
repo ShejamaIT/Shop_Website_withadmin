@@ -598,3 +598,7 @@ CREATE TABLE ord_Cash_Pay(
     CONSTRAINT FOREIGN KEY (optId) REFERENCES ord_Pay_type (optId)
                                  ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+ALTER TABLE `item` CHANGE `img1` `img1` LONGBLOB NULL;
+ALTER TABLE `item` CHANGE `img2` `img2` LONGBLOB NULL;
+ALTER TABLE `item` CHANGE `img3` `img3` LONGBLOB NULL;
