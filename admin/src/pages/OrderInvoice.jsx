@@ -880,83 +880,84 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         console.log(fullOrderData);
 
         try {
-            if (formData.issuable === 'Later') {
-                try {
-                    const fullOrderData = {
-                        ...orderData,
-                        processedItems,
-                    };
-            
-                    console.log("📝 Sending Full Order Data:", fullOrderData);
-            
-                    const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(fullOrderData),
-                    });
-            
-                    const result = await response.json();
-            
-                    if (response.ok && result.success) {
-                        const { orderId, orderDate, expectedDate } = result.data;
-                        toast.success(`Order placed successfully! Order ID: ${orderId}`);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        toast.error(result.message || "Failed to place the order.");
-                        console.error("❌ Order Error:", result.message || result);
-                    }
-            
-                } catch (error) {
-                    toast.error("An error occurred while placing the order.");
-                    console.error("❌ Network/Server Error:", error);
-                }
-            } else if (formData.issuable === 'Now'){
-                const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+        if (formData.issuable === 'Later') {
+            try {
+                const fullOrderData = {
+                    ...orderData,
+                    processedItems,
+                };
+
+                console.log("📝 Sending Full Order Data:", fullOrderData);
+
+                const response = await fetch("http://localhost:5001/api/admin/main/later-order", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(orderData),
+                    body: JSON.stringify(fullOrderData),
                 });
-                
-                const result = await response.json();
-                const { orderId } = result.data;
-                if (response.ok) {
-                    toast.success("Order placed successfully!");
-                    const newOrder = {
-                        orderId:orderId ,
-                        orderDate: new Date().toLocaleDateString(),
-                        phoneNumber: formData.phoneNumber,
-                        payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
-                        deliveryStatus: formData.dvStatus,
-                        deliveryCharge: deliveryPrice,
-                        discount: discountAmount,
-                        specialDiscount: specialdiscountAmount,
-                        advance: parseFloat(advance),
-                        items: items,
-                        balance:parseFloat(balance),
-                        totalPrice:totalBillPrice,
-                        customerName:formData.FtName+" "+formData.SrName,
-            
-                    };
-                    setSelectedOrder(newOrder);
-                    // Optionally, open invoice modal here
-                    setShowModal2(true);
-                
-                
-                } else {
-                    toast.error(result.message || "Something went wrong. Please try again.");
-                }
-            }
 
-        } catch (error) {
-            console.error("Error submitting order data:", error);
-            toast.error("Error submitting order data. Please try again.");
+                const result = await response.json();
+                console.log("📝 API Response:", result); // Log the response to check its structure
+
+                if (response.ok && result.success && result.data) {
+                    const { orderId, orderDate, expectedDate } = result.data;
+                    toast.success(`Order placed successfully! Order ID: ${orderId}`);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    toast.error(result.message || "Failed to place the order.");
+                    console.error("❌ Order Error:", result.message || result);
+                }
+
+            } catch (error) {
+                toast.error("An error occurred while placing the order.");
+                console.error("❌ Network/Server Error:", error);
+            }
+        } else if (formData.issuable === 'Now') {
+            const response = await fetch("http://localhost:5001/api/admin/main/orders", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(orderData),
+            });
+
+            const result = await response.json();
+            console.log("📝 API Response:", result); // Log the response to check its structure
+
+            if (response.ok && result.success && result.data) {
+                const { orderId } = result.data;
+                toast.success("Order placed successfully!");
+                const newOrder = {
+                    orderId: orderId,
+                    orderDate: new Date().toLocaleDateString(),
+                    phoneNumber: formData.phoneNumber,
+                    payStatus: formData.advance > 0 ? 'Advanced' : 'Pending',
+                    deliveryStatus: formData.dvStatus,
+                    deliveryCharge: deliveryPrice,
+                    discount: discountAmount,
+                    specialDiscount: specialdiscountAmount,
+                    advance: parseFloat(advance),
+                    items: items,
+                    balance: parseFloat(balance),
+                    totalPrice: totalBillPrice,
+                    customerName: formData.FtName + " " + formData.SrName,
+                };
+                setSelectedOrder(newOrder);
+                // Optionally, open invoice modal here
+                setShowModal2(true);
+            } else {
+                toast.error(result.message || "Something went wrong. Please try again.");
+            }
         }
+
+    } catch (error) {
+        console.error("Error submitting order data:", error);
+        toast.error("Error submitting order data. Please try again.");
+    }
+
     };
     const handleSubmit3 = async (formData) => {
         const updatedData = {
@@ -1522,16 +1523,6 @@ const OrderInvoice = ({ onPlaceOrder }) => {
         const updatedCheques = [...cheques];
         updatedCheques.splice(index, 1);
         setCheques(updatedCheques);
-    };
-
-    const openAddBankModal = () => {
-        // Logic to open modal to add a new bank
-        // Example: setShowBankModal(true);
-    };
-
-    const openAddAccountModal = () => {
-        // Logic to open modal to add a new account number
-        // Example: setShowAccountModal(true);
     };
 
     if (loading) return <p>Loading...</p>;
