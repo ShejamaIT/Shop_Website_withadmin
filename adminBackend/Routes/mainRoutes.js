@@ -8662,7 +8662,7 @@ router.get("/leave-count", async (req, res) => {
         let uninformedCount = 0;
 
         leaveCounts.forEach(leave => {
-            if (leave.leave_type === "Informed") {
+            if (leave.leave_type === "Informed" ) {
                 informedCount = leave.count;
             } else if (leave.leave_type === "Uninformed") {
                 uninformedCount = leave.count;
@@ -9093,6 +9093,37 @@ router.put("/approve-leave/:id", async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Leave approved successfully",
+        });
+    } catch (error) {
+        console.error("Error approving leave:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+});
+
+// Rejected a leave by id
+router.put("/reject-leave/:id", async (req, res) => {
+    try {
+        const leaveId = req.params.id;
+
+        const [result] = await db.query(
+            "UPDATE Emp_leaves SET leave_type = 'Uninformed', status = 'Rejected' WHERE id = ?",
+            [leaveId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Leave not found or already Rejected",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Leave Rejected successfully",
         });
     } catch (error) {
         console.error("Error approving leave:", error.message);
