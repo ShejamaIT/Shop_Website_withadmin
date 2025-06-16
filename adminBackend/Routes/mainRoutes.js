@@ -8982,7 +8982,7 @@ router.post("/add-leave", async (req, res) => {
 
         // Insert into Emp_leaves
         await db.query(
-            "INSERT INTO Emp_leaves (E_Id, date, leave_type,duration_type, reason,status) VALUES (?, ?, 'Uninformed', ?,?,'Applied')",
+            "INSERT INTO Emp_leaves (E_Id, date, leave_type,duration_type, reason,status,present) VALUES (?, ?, 'Uninformed', ?,?,'Applied','Out')",
             [id, formattedDate, type, reason]
         );
 
