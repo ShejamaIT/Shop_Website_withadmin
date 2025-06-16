@@ -34,6 +34,7 @@ const Navbar = () => {
             try {
                 const response = await fetch('http://localhost:5001/api/admin/main/applied_leaves-and-requests-and-ordercounts');
                 const data = await response.json();
+                console.log(data);
                 if (data.success) {
                     setAppliedLeaves(data.data.appliedLeaves || []);
                     setPendingRequests(data.data.pendingRequests || []);
@@ -101,7 +102,7 @@ const Navbar = () => {
                             {pendingOrders.length > 0 ? (
                                 pendingOrders.map((order, idx) => (
                                     <div key={idx} className="notification-item">
-                                        <p><strong>{order.name}</strong>: {order.pendingOrderCount} pending</p>
+                                        <p><strong>{order.sales_team_name}</strong>({order.stID}): {order.pendingOrderCount}</p>
                                     </div>
                                 ))
                             ) : (
