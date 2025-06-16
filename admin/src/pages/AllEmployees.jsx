@@ -14,6 +14,7 @@ import AddOrderTargets from "./AddorderTargets";
 import TableLeave from "../components/tables/TableLeave";
 import AddNewUser from "./AddNewUser";
 import UserManagement from "./UserManagement";
+import UpdateLeaveform from "./upateLeaveForm";
 
 const AllEmployees = () => {
     const [mainTab, setMainTab] = useState("addEmployee"); // Tracks main tab selection
@@ -285,11 +286,10 @@ const AllEmployees = () => {
                                     <TabContent activeTab={leaveSubTab} className="mt-3">
                                         <TabPane tabId="give"><TableLeave /></TabPane>
                                         <TabPane tabId="add">
-                                            {/* <AddLeave /> */}
                                              <Leaveform />
                                         </TabPane>
                                         <TabPane tabId="update">
-                                            {/* <UpdateLeave /> */}
+                                            <UpdateLeaveform />
                                             </TabPane>
                                     </TabContent>
                                 </TabPane>
