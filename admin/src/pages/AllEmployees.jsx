@@ -27,6 +27,7 @@ const AllEmployees = () => {
     const [addEmployeeSubTab, setAddEmployeeSubTab] = useState("add");
     const [paymentSubTab, setPaymentSubTab] = useState("advance");
     const [userSubTab, setUserSubTab] = useState("AddNewUser");
+    const [leaveSubTab, setLeaveSubTab] = useState("give");
     const location = useLocation();
     const navigate = useNavigate();
     // Update both main tab and sub-tab from URL query parameters
@@ -152,107 +153,30 @@ const AllEmployees = () => {
     };
 
     return (
-        <Helmet title="All-Employee">
+       <Helmet title="All-Employee">
             <section>
                 <Container className="dashboard">
                     {/* === MAIN NAVIGATION TABS === */}
                     <Nav tabs>
-                        <NavItem>
-                            <NavLink
-                                className={mainTab === "addEmployee" ? "active" : ""}
-                                onClick={() => handleMainTabChange("addEmployee")}
-                            >
-                                Add & Update
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={mainTab === "salesTeam" ? "active" : ""}
-                                onClick={() => handleMainTabChange("salesTeam")}
-                            >
-                                Sales Team
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={mainTab === "drivers" ? "active" : ""}
-                                onClick={() => handleMainTabChange("drivers")}
-                            >
-                                Drivers
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={mainTab === "other" ? "active" : ""}
-                                onClick={() => handleMainTabChange("other")}
-                            >
-                                Other
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={mainTab === "payment" ? "active" : ""}
-                                onClick={() => handleMainTabChange("payment")}
-                            >
-                                Payments
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink
-                                className={mainTab === "userAccounts" ? "active" : ""}
-                                onClick={() => handleMainTabChange("userAccounts")}
-                            >
-                                User Accounts
-                            </NavLink>
-                        </NavItem>
+                        <NavItem><NavLink className={mainTab === "addEmployee" ? "active" : ""} onClick={() => handleMainTabChange("addEmployee")}>Add & Update</NavLink></NavItem>
+                        <NavItem><NavLink className={mainTab === "salesTeam" ? "active" : ""} onClick={() => handleMainTabChange("salesTeam")}>Sales Team</NavLink></NavItem>
+                        <NavItem><NavLink className={mainTab === "drivers" ? "active" : ""} onClick={() => handleMainTabChange("drivers")}>Drivers</NavLink></NavItem>
+                        <NavItem><NavLink className={mainTab === "other" ? "active" : ""} onClick={() => handleMainTabChange("other")}>Other</NavLink></NavItem>
+                        <NavItem><NavLink className={mainTab === "payment" ? "active" : ""} onClick={() => handleMainTabChange("payment")}>Payments</NavLink></NavItem>
+                        <NavItem><NavLink className={mainTab === "userAccounts" ? "active" : ""} onClick={() => handleMainTabChange("userAccounts")}>User Accounts</NavLink></NavItem>
                     </Nav>
 
                     <TabContent activeTab={mainTab}>
-                        {/* === ADD EMPLOYEE TAB === */}
-                        {/* <TabPane tabId="addEmployee">
-                            <Row>
-                                <Col>
-                                    <AddEmployee onAddEmployee={handleAddEmployee} />
-                                </Col>
-                            </Row>
-                        </TabPane> */}
-
+                        {/* === ADD & UPDATE EMPLOYEE TAB === */}
                         <TabPane tabId="addEmployee">
                             <Nav tabs className="mt-3">
-                                <NavItem>
-                                    <NavLink
-                                        className={addEmployeeSubTab === "add" ? "active" : ""}
-                                         onClick={() => setAddEmployeeSubTab("add")}
-                                    >
-                                        Add
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink
-                                        className={addEmployeeSubTab === "update" ? "active" : ""}
-                                         onClick={() => setAddEmployeeSubTab("update")}
-                                    >
-                                        Update
-                                    </NavLink>
-                                </NavItem>
+                                <NavItem><NavLink className={addEmployeeSubTab === "add" ? "active" : ""} onClick={() => setAddEmployeeSubTab("add")}>Add</NavLink></NavItem>
+                                <NavItem><NavLink className={addEmployeeSubTab === "update" ? "active" : ""} onClick={() => setAddEmployeeSubTab("update")}>Update</NavLink></NavItem>
                             </Nav>
 
                             <TabContent activeTab={addEmployeeSubTab} className="mt-3">
-                                <TabPane tabId="add">
-                                    <Row>
-                                        <Col>
-                                            <AddEmployee onAddEmployee={handleAddEmployee} />
-                                        </Col>
-                                    </Row>
-                                </TabPane>
-                                <TabPane tabId="update">
-                                    <Row>
-                                        <Col>
-                                            <UpdateEmployee/>
-                                            {/* <UpdateEmployee onUpdate={handleUpdateEmployee} employees={employees} /> */}
-                                        </Col>
-                                    </Row>
-                                </TabPane>
+                                <TabPane tabId="add"><Row><Col><AddEmployee onAddEmployee={handleAddEmployee} /></Col></Row></TabPane>
+                                <TabPane tabId="update"><Row><Col><UpdateEmployee /></Col></Row></TabPane>
                             </TabContent>
                         </TabPane>
 
@@ -263,16 +187,12 @@ const AllEmployees = () => {
                                     <Nav tabs className="mt-3">
                                         {salesteamMembers.map((member) => (
                                             <NavItem key={member.stID}>
-                                                <NavLink
-                                                    className={activeSubTab === member.stID ? "active" : ""}
-                                                    onClick={() => handleSubTabChange(member.stID)}
-                                                >
+                                                <NavLink className={activeSubTab === member.stID ? "active" : ""} onClick={() => handleSubTabChange(member.stID)}>
                                                     {member.employeeName}
                                                 </NavLink>
                                             </NavItem>
                                         ))}
                                     </Nav>
-
                                     <TabContent activeTab={activeSubTab} className="mt-3">
                                         {salesteamMembers.map((member) => (
                                             <TabPane tabId={member.stID} key={member.stID}>
@@ -281,10 +201,9 @@ const AllEmployees = () => {
                                         ))}
                                     </TabContent>
                                 </>
-                            ) : (
-                                <p className="text-muted mt-3">No Sales Team members found.</p>
-                            )}
+                            ) : <p className="text-muted mt-3">No Sales Team members found.</p>}
                         </TabPane>
+
                         {/* === DRIVERS TAB === */}
                         <TabPane tabId="drivers">
                             {drivers.length > 0 ? (
@@ -292,16 +211,12 @@ const AllEmployees = () => {
                                     <Nav tabs className="mt-3">
                                         {drivers.map((member) => (
                                             <NavItem key={member.devID}>
-                                                <NavLink
-                                                    className={activeSubTab === member.devID ? "active" : ""}
-                                                    onClick={() => handleSubTabChange(member.devID)}
-                                                >
+                                                <NavLink className={activeSubTab === member.devID ? "active" : ""} onClick={() => handleSubTabChange(member.devID)}>
                                                     {member.employeeName}
                                                 </NavLink>
                                             </NavItem>
                                         ))}
                                     </Nav>
-
                                     <TabContent activeTab={activeSubTab} className="mt-3">
                                         {drivers.map((member) => (
                                             <TabPane tabId={member.devID} key={member.devID}>
@@ -310,29 +225,23 @@ const AllEmployees = () => {
                                         ))}
                                     </TabContent>
                                 </>
-                            ) : (
-                                <p className="text-muted mt-3">No Drivers found.</p>
-                            )}
+                            ) : <p className="text-muted mt-3">No Drivers found.</p>}
                         </TabPane>
+
+                        {/* === OTHER STAFF TAB === */}
                         <TabPane tabId="other">
-                            {/* Job Role Tabs (IT, HR, Admin) */}
                             <Nav tabs className="mt-3">
                                 {["It", "HR", "Admin"].map((jobKey) => {
                                     const employeesByJob = other.filter(emp => emp.job === jobKey);
                                     return employeesByJob.map((emp) => (
                                         <NavItem key={emp.E_Id}>
-                                            <NavLink
-                                                className={activeSubTab === emp.E_Id ? "active" : ""}
-                                                onClick={() => handleSubTabChange(emp.E_Id)}
-                                            >
+                                            <NavLink className={activeSubTab === emp.E_Id ? "active" : ""} onClick={() => handleSubTabChange(emp.E_Id)}>
                                                 {emp.name}
                                             </NavLink>
                                         </NavItem>
                                     ));
                                 })}
                             </Nav>
-
-                            {/* Tab Content for Selected Employee */}
                             <TabContent activeTab={activeSubTab} className="mt-3">
                                 {other.map((emp) => (
                                     <TabPane tabId={emp.E_Id} key={emp.E_Id}>
@@ -351,80 +260,62 @@ const AllEmployees = () => {
                             </TabContent>
                         </TabPane>
 
+                        {/* === PAYMENTS TAB === */}
                         <TabPane tabId="payment">
                             <Nav tabs className="mt-3">
-                                <NavItem>
-                                    <NavLink className={paymentSubTab === "advance" ? "active" : ""} onClick={() => handlePaymentSubTabChange("advance")}>
-                                        Advance
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className={paymentSubTab === "loan" ? "active" : ""} onClick={() => handlePaymentSubTabChange("loan")}>
-                                        Loan
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className={paymentSubTab === "leave" ? "active" : ""} onClick={() => handlePaymentSubTabChange("leave")}>
-                                        Leaves
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className={paymentSubTab === "target" ? "active" : ""} onClick={() => handlePaymentSubTabChange("target")}>
-                                        Set Targets
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className={paymentSubTab === "salary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("salary")}>
-                                        Monthly Salary
-                                    </NavLink>
-                                </NavItem>
+                                <NavItem><NavLink className={paymentSubTab === "advance" ? "active" : ""} onClick={() => handlePaymentSubTabChange("advance")}>Advance</NavLink></NavItem>
+                                <NavItem><NavLink className={paymentSubTab === "loan" ? "active" : ""} onClick={() => handlePaymentSubTabChange("loan")}>Loan</NavLink></NavItem>
+                                <NavItem><NavLink className={paymentSubTab === "leave" ? "active" : ""} onClick={() => handlePaymentSubTabChange("leave")}>Leaves</NavLink></NavItem>
+                                <NavItem><NavLink className={paymentSubTab === "target" ? "active" : ""} onClick={() => handlePaymentSubTabChange("target")}>Set Targets</NavLink></NavItem>
+                                <NavItem><NavLink className={paymentSubTab === "salary" ? "active" : ""} onClick={() => handlePaymentSubTabChange("salary")}>Monthly Salary</NavLink></NavItem>
                             </Nav>
+
                             <TabContent activeTab={paymentSubTab} className="mt-3">
-                                <TabPane tabId="advance">
-                                    <AdancePayment />
-                                </TabPane>
-                                <TabPane tabId="loan">
-                                    <LoanPayment />
-                                </TabPane>
+                                <TabPane tabId="advance"><AdancePayment /></TabPane>
+                                <TabPane tabId="loan"><LoanPayment /></TabPane>
+
+                                {/* === LEAVES TAB WITH SUB-TABS === */}
                                 <TabPane tabId="leave">
-                                    <TableLeave />
+                                    <Nav tabs className="mt-3">
+                                        <NavItem><NavLink className={leaveSubTab === "give" ? "active" : ""} onClick={() => setLeaveSubTab("give")}>Give Leave</NavLink></NavItem>
+                                        <NavItem><NavLink className={leaveSubTab === "add" ? "active" : ""} onClick={() => setLeaveSubTab("add")}>Add Leave</NavLink></NavItem>
+                                        <NavItem><NavLink className={leaveSubTab === "update" ? "active" : ""} onClick={() => setLeaveSubTab("update")}>Update Leave</NavLink></NavItem>
+                                    </Nav>
+
+                                    <TabContent activeTab={leaveSubTab} className="mt-3">
+                                        <TabPane tabId="give"><TableLeave /></TabPane>
+                                        <TabPane tabId="add">
+                                            {/* <AddLeave /> */}
+                                             <Leaveform />
+                                        </TabPane>
+                                        <TabPane tabId="update">
+                                            {/* <UpdateLeave /> */}
+                                            </TabPane>
+                                    </TabContent>
                                 </TabPane>
-                                <TabPane tabId="target">
-                                    <AddOrderTargets />
-                                </TabPane>
-                                <TabPane tabId="salary">
-                                    <Salarysheet />
-                                </TabPane>
+
+                                <TabPane tabId="target"><AddOrderTargets /></TabPane>
+                                <TabPane tabId="salary"><Salarysheet /></TabPane>
                             </TabContent>
                         </TabPane>
 
+                        {/* === USER ACCOUNTS TAB === */}
                         <TabPane tabId="userAccounts">
                             <Nav tabs className="mt-3">
-                                <NavItem>
-                                    <NavLink className={userSubTab === "AddNewUser" ? "active" : ""} onClick={() => handleUserSubTabChange("AddNewUser")}>
-                                        Add New user
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className={userSubTab === "AllUsers" ? "active" : ""} onClick={() => handleUserSubTabChange("AllUsers")}>
-                                        All Users
-                                    </NavLink>
-                                </NavItem>
-
+                                <NavItem><NavLink className={userSubTab === "AddNewUser" ? "active" : ""} onClick={() => handleUserSubTabChange("AddNewUser")}>Add New user</NavLink></NavItem>
+                                <NavItem><NavLink className={userSubTab === "AllUsers" ? "active" : ""} onClick={() => handleUserSubTabChange("AllUsers")}>All Users</NavLink></NavItem>
                             </Nav>
+
                             <TabContent activeTab={userSubTab} className="mt-3">
-                                <TabPane tabId="AddNewUser">
-                                    <AddNewUser />
-                                </TabPane>
-                                <TabPane tabId="AllUsers">
-                                    <UserManagement />
-                                </TabPane>
+                                <TabPane tabId="AddNewUser"><AddNewUser /></TabPane>
+                                <TabPane tabId="AllUsers"><UserManagement /></TabPane>
                             </TabContent>
                         </TabPane>
                     </TabContent>
                 </Container>
             </section>
         </Helmet>
+
     );
 };
 
