@@ -1368,6 +1368,7 @@ router.get("/alldeliverynotes", async (req, res) => {
         return res.status(500).json({ message: "Error fetching deliveries" });
     }
 });
+
 // Get all delivery notes for spefic driver
 router.get("/alldeliverynotes-stid", async (req, res) => {
     try {
@@ -1482,29 +1483,14 @@ router.post("/supplier", async (req, res) => {
 
 //add a new customer
 router.post("/customer", async (req, res) => {
-    const {
-        title,
-        FtName,
-        SrName,
-        id,
-        email,
-        contact,
-        contact2,
-        address,
-        type,
-        category,
-        t_name,
-        occupation,
-        workPlace
-    } = req.body;
+    const {title,FtName,SrName,id,email,contact,contact2, address, type, category, t_name,occupation, workPlace } = req.body;
 
     try {
         const c_ID = await generateNewId("Customer", "c_ID", "Cus");
 
         const sqlInsertCustomer = `
             INSERT INTO Customer (
-                c_ID, title, FtName, SrName, address, contact1, contact2,
-                email, id, balance, type, category, t_name, occupation, workPlace
+                c_ID, title, FtName, SrName, address, contact1, contact2, email, id, balance, type, category, t_name, occupation, workPlace
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
@@ -1519,11 +1505,7 @@ router.post("/customer", async (req, res) => {
             success: true,
             message: "Customer added successfully",
             data: {
-                c_ID,
-                FtName,
-                contact,
-                contact2,
-                id
+                c_ID, FtName,contact,contact2,id
             }
         });
 
@@ -1911,7 +1893,6 @@ router.get("/accept-order-details", async (req, res) => {
         });
     }
 });
-
 
 // Get Details of isssued order
 router.get("/issued-order-details", async (req, res) => {
@@ -4528,7 +4509,6 @@ router.put("/update-invoice", async (req, res) => {
         });
     }
 });
-
 
 // Fetch Accept orders in booked-unbooked
 router.get("/orders-accept", async (req, res) => {
@@ -10348,6 +10328,63 @@ router.put("/update-leave/:id", async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
+
+// Express Route// In your Express router
+router.get('/cheques/received', async (req, res) => {
+    try {
+        const [rows] = await db.execute(`
+            SELECT 
+                cp.*, 
+                pt.orID,
+                c.FtName, 
+                c.SrName
+            FROM ord_Cheque_Pay cp
+            JOIN ord_Pay_type pt ON cp.optId = pt.optId
+            JOIN Orders o ON pt.orID = o.orID
+            JOIN Customer c ON o.c_ID = c.c_ID
+            WHERE cp.status = 'received'
+        `);
+
+        // Append full name
+        const cheques = rows.map(row => ({
+            ...row,
+            customerName: `${row.FtName} ${row.SrName}`
+        }));
+
+        res.json({ success: true, cheques });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Database error" });
+    }
+});
+
+// Update check
+router.put('/cheques/update-status/:id', async (req, res) => {
+    const chequeId = req.params.id;
+    const { status } = req.body;
+
+    const validStatuses = ['received', 'cashed', 'returned'];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid status" });
+    }
+
+    try {
+        const [result] = await db.execute(
+            "UPDATE ord_Cheque_Pay SET status = ? WHERE id = ?",
+            [status, chequeId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Cheque not found" });
+        }
+
+        res.json({ success: true, message: "Status updated" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 
 // pass sale team value to review in month end
 
